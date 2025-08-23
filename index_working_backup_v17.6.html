@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>Jiggy Capital Asset Managment</title>
+    <link rel="stylesheet" href="styles.css?v=2.9">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <i class="fas fa-chart-line"></i>
+                <span>Jiggy Capital</span>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="#home" class="nav-link">Home</a></li>
+                <li><a href="#portfolio" class="nav-link">Portfolio</a></li>
+                <li><a href="#allocation" class="nav-link">Allocation</a></li>
+                <li><a href="#performance" class="nav-link">Performance</a></li>
+                <li><a href="#events" class="nav-link">Events</a></li>
+                <li><a href="#contact" class="nav-link">Contact</a></li>
+            </ul>
+            <div class="hamburger">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section id="home" class="hero">
+        <div class="hero-container">
+            <div class="hero-content">
+                <h1 class="hero-title">Jiggy Capital Portfolio</h1>
+                <p class="hero-subtitle">Sharing my investing journey since 2020</p>
+                <div class="hero-stats">
+                    <div class="stat-item">
+                        <span class="stat-number" id="totalValue">0%</span>
+                        <span class="stat-label">Daily Performance</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number" id="totalReturn">0%</span>
+                        <span class="stat-label">YTD Performance</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number" id="holdingsCount">0%</span>
+                        <span class="stat-label">Lifetime CAGR</span>
+                        <div class="stat-subtext" style="font-size: 0.7em; color: #aaa; margin-top: 2px;">Jan 29th, 2020 -</div>
+                    </div>
+                </div>
+                <a href="#portfolio" class="cta-button">View Portfolio</a>
+            </div>
+            <div class="hero-visual">
+                <div class="golf-photo-container">
+                    <img src="golf-photo.jpg" alt="Golf course profile photo" style="width: 100%; height: 300px; object-fit: cover; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.2);">
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+
+    <!-- Portfolio Section -->
+    <section id="portfolio" class="portfolio">
+        <div class="container">
+            <h2 class="section-title">Portfolio</h2>
+
+            <div class="portfolio-grid" id="portfolioGrid">
+                <!-- Portfolio items will be loaded here from Google Sheets -->
+                <div class="loading">
+                    <i class="fas fa-spinner fa-spin"></i>
+                    <p>Loading portfolio data...</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Portfolio Allocation Section -->
+    <section id="allocation" class="allocation">
+        <div class="container">
+            <h2 class="section-title">Portfolio Allocation</h2>
+            <div class="allocation-content">
+                <div class="allocation-chart">
+                    <canvas id="allocationPieChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Sector Allocation Section -->
+    <section id="sector-allocation" class="allocation">
+        <div class="container">
+            <h2 class="section-title">Sector Weight</h2>
+            <div class="allocation-content">
+                <div class="allocation-chart">
+                    <canvas id="sectorPieChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Performance Section -->
+    <section id="performance" class="performance">
+        <div class="container">
+            <h2 class="section-title">Performance Analytics</h2>
+            <div class="performance-grid">
+                <div class="performance-card">
+                    <h3>Benchmark Performance YTD</h3>
+                    <div id="benchmarkPerformance" class="benchmark-performance">
+                        <!-- Benchmark performance will be loaded here -->
+                    </div>
+                </div>
+                <div class="performance-card">
+                    <h3>Portfolio Multiples</h3>
+                    <div class="portfolio-multiples">
+                        <div class="multiple-stat">
+                            <span class="multiple-label">2026 FCF Multiple</span>
+                            <span class="multiple-value" id="fcfMultiple">-</span>
+                        </div>
+                        <div class="multiple-stat">
+                            <span class="multiple-label">2026 P/E Multiple</span>
+                            <span class="multiple-value" id="peMultiple">-</span>
+                        </div>
+                        <div class="multiple-stat">
+                            <span class="multiple-label">Coming Soon</span>
+                            <span class="multiple-value">-</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="performance-card">
+                    <h3>Top Performers</h3>
+                    <div id="topPerformers" class="top-performers">
+                        <!-- Top performers will be loaded here -->
+                    </div>
+                </div>
+                <div class="performance-card">
+                    <h3>Risk Metrics</h3>
+                    <div class="risk-metrics">
+                        <div class="metric">
+                            <span class="metric-label">Sharpe Ratio</span>
+                            <span class="metric-value" id="sharpeRatio">-</span>
+                        </div>
+                        <div class="metric">
+                            <span class="metric-label">Beta</span>
+                            <span class="metric-value" id="beta">-</span>
+                        </div>
+                        <div class="metric">
+                            <span class="metric-label">Max Drawdown</span>
+                            <span class="metric-value" id="maxDrawdown">-</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Events Section -->
+    <section id="events" class="events">
+        <div class="container">
+            <h2 class="section-title">Upcoming Events</h2>
+            <div class="events-content">
+                <div id="upcomingEvents" class="events-list">
+                    <div class="loading">
+                        <i class="fas fa-spinner fa-spin"></i>
+                        <p>Loading upcoming events...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contact" class="contact">
+        <div class="container">
+            <h2 class="section-title">Get In Touch</h2>
+            <div class="contact-content">
+                <div class="contact-info">
+                    <div class="contact-item">
+                        <i class="fas fa-envelope"></i>
+                        <div>
+                            <h3>Email</h3>
+                            <p>jiggycaptial@gmail.com</p>
+                        </div>
+                    </div>
+                    <div class="contact-item">
+                        <i class="fas fa-newspaper"></i>
+                        <div>
+                            <h3>Substack</h3>
+                            <p><a href="https://jiggy.substack.com" target="_blank">jiggy.substack.com</a></p>
+                        </div>
+                    </div>
+                    <div class="contact-item">
+                        <i class="fas fa-twitter"></i>
+                        <div>
+                            <h3>Twitter</h3>
+                            <p><a href="https://x.com/jiggycapital" target="_blank">@jiggycapital</a></p>
+                        </div>
+                    </div>
+                </div>
+                <form class="contact-form">
+                    <div class="form-group">
+                        <input type="text" placeholder="Your Name" required>
+                    </div>
+                    <div class="form-group">
+                        <input type="email" placeholder="Your Email" required>
+                    </div>
+                    <div class="form-group">
+                        <textarea placeholder="Your Message" rows="5" required></textarea>
+                    </div>
+                    <button type="submit" class="submit-btn">Send Message</button>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>Investment Portfolio</h3>
+                    <p>Professional investment tracking and analysis</p>
+                </div>
+                <div class="footer-section">
+                    <h3>Quick Links</h3>
+                    <ul>
+                        <li><a href="#home">Home</a></li>
+                        <li><a href="#portfolio">Portfolio</a></li>
+                        <li><a href="#performance">Performance</a></li>
+                        <li><a href="#contact">Contact</a></li>
+                    </ul>
+                </div>
+                                 <div class="footer-section">
+                     <h3>Connect</h3>
+                     <div class="social-links">
+                         <a href="https://jiggy.substack.com" target="_blank"><i class="fas fa-newspaper"></i></a>
+                         <a href="https://x.com/jiggycapital" target="_blank"><i class="fab fa-twitter"></i></a>
+                     </div>
+                 </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 Investment Portfolio. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+                            <script src="script.js?v=17.6"></script>
+</body>
+</html>

@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Script Debug Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .debug-info { margin: 10px 0; padding: 10px; background: #f0f0f0; border-radius: 5px; }
+        .error { background: #ffebee; color: #c62828; }
+        .success { background: #e8f5e8; color: #2e7d32; }
+    </style>
+</head>
+<body>
+    <h1>Script Debug Test</h1>
+    <div id="debug-output"></div>
+
+    <script>
+        // Override fetch to monitor API calls
+        const originalFetch = window.fetch;
+        const apiCalls = [];
+        
+        window.fetch = function(...args) {
+            const url = args[0];
+            if (typeof url === 'string' && url.includes('yahoo.com')) {
+                apiCalls.push(url);
+                console.warn('Yahoo Finance API call detected:', url);
+            }
+            return originalFetch.apply(this, args);
+        };
+
+        // Load the script
+        const script = document.createElement('script');
+        script.src = 'script.js?v=19.5';
+        script.onload = function() {
+            document.getElementById('debug-output').innerHTML += 
+                '<div class="debug-info success">✅ Script loaded successfully</div>';
+            
+            // Check if Yahoo Finance calls were made
+            setTimeout(() => {
+                if (apiCalls.length > 0) {
+                    document.getElementById('debug-output').innerHTML += 
+                        `<div class="debug-info error">❌ ${apiCalls.length} Yahoo Finance API calls detected</div>`;
+                    apiCalls.forEach(call => {
+                        document.getElementById('debug-output').innerHTML += 
+                            `<div class="debug-info error">   - ${call}</div>`;
+                    });
+                } else {
+                    document.getElementById('debug-output').innerHTML += 
+                        '<div class="debug-info success">✅ No Yahoo Finance API calls detected</div>';
+                }
+            }, 2000);
+        };
+        script.onerror = function() {
+            document.getElementById('debug-output').innerHTML += 
+                '<div class="debug-info error">❌ Failed to load script</div>';
+        };
+        document.head.appendChild(script);
+    </script>
+</body>
+</html>
