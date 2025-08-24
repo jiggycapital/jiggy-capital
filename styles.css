@@ -1269,7 +1269,7 @@ body {
 .footer-content {
     display: flex;
     justify-content: center;
-    align-items: center;
+    align-items: flex-start;
     gap: 4rem;
     margin-bottom: 2rem;
     flex-wrap: wrap;
@@ -1278,10 +1278,20 @@ body {
 .footer-section h3 {
     margin-bottom: 1rem;
     color: #fbbf24;
+    text-align: center;
+    min-height: 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .footer-section ul {
     list-style: none;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
 }
 
 .footer-section ul li {
@@ -1301,6 +1311,9 @@ body {
 .social-links {
     display: flex;
     gap: 1rem;
+    justify-content: center;
+    flex: 1;
+    align-items: center;
 }
 
 .social-links a {
@@ -1318,6 +1331,21 @@ body {
 .social-links a:hover {
     background: #fbbf24;
     color: #1f2937;
+}
+
+.substack-embed {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 0.5rem;
+    text-align: center;
+}
+
+.substack-embed iframe {
+    max-width: 100%;
+    height: auto;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .footer-bottom {
@@ -1813,6 +1841,38 @@ body {
         font-size: 0.65rem;
         min-width: 60px;
         max-width: 70px;
+    }
+
+    /* Mobile footer optimizations */
+    .footer-content {
+        flex-direction: column;
+        gap: 2rem;
+        text-align: center;
+    }
+
+    .footer-section {
+    width: 100%;
+    max-width: 400px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 200px;
+}
+
+    .substack-embed {
+    margin-top: 1rem;
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+    .substack-embed iframe {
+        width: 100% !important;
+        max-width: 320px !important;
+        height: 220px !important;
+        margin: 0 auto;
     }
 
     /* Extra small screen chart optimizations */
