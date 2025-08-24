@@ -1906,19 +1906,19 @@ function updatePortfolioDisplay() {
             <div class="portfolio-item cash-summary">
                 <div class="portfolio-logo">${cashLogoHtml}</div>
                 <div>
-                    <div class="portfolio-symbol">CASH</div>
+                    <div class="portfolio-symbol">Cash</div>
                     <div class="portfolio-name">Cash Balance</div>
                 </div>
-                <div class="portfolio-price">-</div>
-                <div class="portfolio-sector">Cash</div>
-                <div class="portfolio-first-buy">-</div>
-                <div class="portfolio-last-buy">-</div>
-                <div class="portfolio-shares">-</div>
-                <div class="portfolio-cost">-</div>
+                <div class="portfolio-price"></div>
+                <div class="portfolio-return"></div>
+                <div class="portfolio-sector"></div>
+                <div class="portfolio-first-buy"></div>
+                <div class="portfolio-last-buy"></div>
+                <div class="portfolio-shares"></div>
+                <div class="portfolio-cost"></div>
                 <div class="portfolio-value">$${cashBalance.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</div>
-                <div class="portfolio-return">-</div>
-                <div class="portfolio-pe2026">-</div>
-                <div class="portfolio-pfcf2026">-</div>
+                <div class="portfolio-pe2026"></div>
+                <div class="portfolio-pfcf2026"></div>
                 <div class="portfolio-weight">${cashWeight.toFixed(1)}%</div>
             </div>`;
     }
@@ -2200,9 +2200,9 @@ function updateConsolidatedChart(view = 'company') {
             const cashWeight = (cashBalance / totalPortfolioValue) * 100;
             
             chartData.push({
-                symbol: 'CASH',
-                weight: cashWeight,
-                name: 'Cash Balance'
+                            symbol: 'Cash',
+            weight: cashWeight,
+            name: 'Cash Balance'
             });
         }
         
@@ -2218,9 +2218,9 @@ function updateConsolidatedChart(view = 'company') {
 
         // Create custom colors array with green for cash
         customColors = chartData.map((item, index) => {
-            if (item.symbol === 'CASH') {
-                return '#22C55E'; // Green for cash
-            }
+                    if (item.symbol === 'Cash') {
+            return '#22C55E'; // Green for cash
+        }
             return modernColors[index % modernColors.length];
         });
     } else {
@@ -2245,7 +2245,7 @@ function updateConsolidatedChart(view = 'company') {
             }, 0) + cashBalance;
             
             const cashWeight = (cashBalance / totalPortfolioValue) * 100;
-            sectorData['CASH'] = cashWeight;
+            sectorData['Cash'] = cashWeight;
         }
         
         // Convert to array format
@@ -2273,7 +2273,7 @@ function updateConsolidatedChart(view = 'company') {
             'Materials': '#14B8A6', // Teal
             'Utilities': '#F43F5E', // Rose
             'Other': '#F43F5E', // Rose - Other
-            'CASH': '#22C55E'  // Green - Cash
+            'Cash': '#22C55E'  // Green - Cash
         };
 
         // Create custom colors array with proper sector mapping
@@ -2334,7 +2334,7 @@ function updateConsolidatedChart(view = 'company') {
                     formatter: (v, ctx) => {
                         const percent = `${Number(v).toFixed(1)}%`;
                         if (view === 'sector') {
-                            const label = (ctx.chart.data.labels[ctx.dataIndex] || '').replace('Consumer Discretionary','Cons Disc').replace('Communication Services','Internet').replace('Semiconductors','Semis').replace('CASH','Cash');
+                            const label = (ctx.chart.data.labels[ctx.dataIndex] || '').replace('Consumer Discretionary','Cons Disc').replace('Communication Services','Internet').replace('Semiconductors','Semis');
                             return `${label}\n${percent}`;
                         }
                         // Company view: ticker on first line, percent on second
@@ -2578,7 +2578,7 @@ function createSectorCallouts(chartData, colors) {
         const sectorText = document.createElement('span');
         // Shorten long sector names for better callout display
         let displayText = item.symbol;
-        if (item.symbol === 'CASH') {
+        if (item.symbol === 'Cash') {
             displayText = 'Cash';
         } else if (item.symbol === 'Consumer Discretionary') {
             displayText = 'Cons Disc';
