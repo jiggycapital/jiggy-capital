@@ -602,7 +602,7 @@ body {
 /* News Section */
 .news {
     padding: 80px 0;
-    background: white;
+    background: #f8fafc;
 }
 
 .news-content {
@@ -913,10 +913,23 @@ body {
     color: #1f2937;
 }
 
-.top-performers {
+.top-performers,
+.top-laggards {
     display: flex;
     flex-direction: column;
     gap: 1rem;
+}
+
+/* Ensure laggards items have the same spacing as performers */
+.top-laggards .performer-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    background: white;
+    border-radius: 10px;
+    border: 1px solid #e5e7eb;
+    margin-bottom: 0;
 }
 
 .performer-item {
@@ -1153,10 +1166,12 @@ body {
 }
 
 .footer-content {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 2rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 4rem;
     margin-bottom: 2rem;
+    flex-wrap: wrap;
 }
 
 .footer-section h3 {
@@ -1260,9 +1275,52 @@ body {
         gap: 2rem;
     }
 
-    .allocation-chart {
+    /* Mobile Pie Chart Optimizations */
+    .allocation-chart,
+    .sector-allocation-chart {
         max-width: 100%;
         height: 350px;
+        overflow: visible;
+        margin: 0 auto;
+        position: relative;
+    }
+
+    /* Mobile chart callout optimizations */
+    .chart-callout {
+        font-size: 11px !important;
+        padding: 6px 10px !important;
+        min-width: 70px !important;
+        max-width: 90px !important;
+        border-radius: 8px !important;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15) !important;
+        backdrop-filter: blur(8px) !important;
+    }
+
+    .chart-callout img {
+        width: 18px !important;
+        height: 18px !important;
+        border-radius: 3px !important;
+    }
+
+    /* Optimize branch lines for mobile */
+    .chart-branch {
+        height: 1px !important;
+        opacity: 0.7 !important;
+    }
+
+    .chart-branch svg path {
+        stroke-width: 1.5 !important;
+        opacity: 0.8 !important;
+    }
+
+    /* Ensure chart containers are properly sized */
+    .chart-container {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
     }
 
     .performance-grid {
@@ -1282,25 +1340,65 @@ body {
         gap: 0.5rem;
     }
 
+    .portfolio-grid {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
     .portfolio-item {
-        grid-template-columns: 1fr;
-        gap: 0.5rem;
-        padding: 1rem;
-        font-size: 0.85rem;
-        text-align: center;
+        min-width: 800px; /* Ensure minimum width for readability */
+        grid-template-columns: 50px minmax(100px, 1.5fr) minmax(60px, 1fr) minmax(60px, 1fr) minmax(120px, 1.2fr) minmax(70px, 1fr) minmax(70px, 1fr) minmax(60px, 1fr) minmax(60px, 1fr) minmax(60px, 1fr);
+        gap: 0.25rem;
+        padding: 0.75rem 1rem;
+        font-size: 0.8rem;
     }
 
     .portfolio-item:first-child {
-        display: none; /* Hide header on mobile */
+        display: grid; /* Show header on mobile but make it scrollable */
+        font-size: 0.75rem;
+        padding: 0.5rem 1rem;
     }
 
-    .portfolio-item > * {
-        padding: 0.5rem;
-        border-bottom: 1px solid #e5e7eb;
+    .portfolio-logo {
+        width: 30px;
+        height: 30px;
+        font-size: 0.7rem;
     }
 
-    .portfolio-item > *:last-child {
-        border-bottom: none;
+    .portfolio-symbol {
+        font-size: 0.9rem;
+    }
+
+    .portfolio-name {
+        font-size: 0.75rem;
+    }
+
+    .portfolio-sector {
+        font-size: 0.75rem;
+        min-width: 100px;
+        max-width: 120px;
+    }
+
+    .portfolio-shares,
+    .portfolio-price,
+    .portfolio-cost,
+    .portfolio-value,
+    .portfolio-weight,
+    .portfolio-return,
+    .portfolio-pe2026,
+    .portfolio-pfcf2026 {
+        font-size: 0.75rem;
+        min-width: 50px;
+        max-width: 60px;
+    }
+
+    .portfolio-first-buy,
+    .portfolio-last-buy {
+        font-size: 0.7rem;
+        min-width: 70px;
+        max-width: 80px;
     }
 
     /* Events and News Mobile Styles */
@@ -1357,13 +1455,83 @@ body {
     }
 
     .portfolio-item {
-        grid-template-columns: 1fr;
-        gap: 0.5rem;
-        padding: 0.5rem;
+        min-width: 700px; /* Slightly smaller for very small screens */
+        grid-template-columns: 40px minmax(80px, 1.2fr) minmax(50px, 1fr) minmax(50px, 1fr) minmax(100px, 1fr) minmax(60px, 1fr) minmax(60px, 1fr) minmax(50px, 1fr) minmax(50px, 1fr) minmax(50px, 1fr);
+        gap: 0.2rem;
+        padding: 0.5rem 0.75rem;
+        font-size: 0.75rem;
     }
 
-    .portfolio-item:first-child {
-        display: none; /* Hide header on mobile */
+    .portfolio-logo {
+        width: 25px;
+        height: 25px;
+        font-size: 0.6rem;
+    }
+
+    .portfolio-symbol {
+        font-size: 0.8rem;
+    }
+
+    .portfolio-name {
+        font-size: 0.7rem;
+    }
+
+    .portfolio-sector {
+        font-size: 0.7rem;
+        min-width: 80px;
+        max-width: 100px;
+    }
+
+    .portfolio-shares,
+    .portfolio-price,
+    .portfolio-cost,
+    .portfolio-value,
+    .portfolio-weight,
+    .portfolio-return,
+    .portfolio-pe2026,
+    .portfolio-pfcf2026 {
+        font-size: 0.7rem;
+        min-width: 45px;
+        max-width: 55px;
+    }
+
+    .portfolio-first-buy,
+    .portfolio-last-buy {
+        font-size: 0.65rem;
+        min-width: 60px;
+        max-width: 70px;
+    }
+
+    /* Extra small screen chart optimizations */
+    .allocation-chart,
+    .sector-allocation-chart {
+        height: 280px;
+        margin: 0 auto;
+    }
+
+    .chart-callout {
+        font-size: 10px !important;
+        padding: 5px 8px !important;
+        min-width: 60px !important;
+        max-width: 80px !important;
+        border-radius: 6px !important;
+    }
+
+    .chart-callout img {
+        width: 14px !important;
+        height: 14px !important;
+        border-radius: 2px !important;
+    }
+
+    /* Further optimize branch lines for very small screens */
+    .chart-branch {
+        height: 1px !important;
+        opacity: 0.6 !important;
+    }
+
+    .chart-branch svg path {
+        stroke-width: 1 !important;
+        opacity: 0.7 !important;
     }
 }
 

@@ -18,7 +18,7 @@
       gtag('config', 'G-EH291BHWTE');
     </script>
     
-    <link rel="stylesheet" href="styles.css?v=30.0">
+    <link rel="stylesheet" href="styles.css?v=32.0">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
@@ -79,21 +79,6 @@
 
 
 
-    <!-- Portfolio Section -->
-    <section id="portfolio" class="portfolio">
-        <div class="container">
-            <h2 class="section-title">Portfolio</h2>
-
-            <div class="portfolio-grid" id="portfolioGrid">
-                <!-- Portfolio items will be loaded here from Google Sheets -->
-                <div class="loading">
-                    <i class="fas fa-spinner fa-spin"></i>
-                    <p>Loading portfolio data...</p>
-                </div>
-            </div>
-        </div>
-    </section>
-
     <!-- Portfolio Allocation Section -->
     <section id="allocation" class="allocation">
         <div class="container">
@@ -118,7 +103,7 @@
         </div>
     </section>
 
-    <!-- Performance Section -->
+    <!-- Performance Section (moved before Portfolio) -->
     <section id="performance" class="performance">
         <div class="container">
             <h2 class="section-title">Performance Analytics</h2>
@@ -147,27 +132,31 @@
                     </div>
                 </div>
                 <div class="performance-card">
-                    <h3>Top Performers</h3>
+                    <h3>YTD Top Performers</h3>
                     <div id="topPerformers" class="top-performers">
                         <!-- Top performers will be loaded here -->
                     </div>
                 </div>
                 <div class="performance-card">
-                    <h3>Risk Metrics</h3>
-                    <div class="risk-metrics">
-                        <div class="metric">
-                            <span class="metric-label">Sharpe Ratio</span>
-                            <span class="metric-value" id="sharpeRatio">-</span>
-                        </div>
-                        <div class="metric">
-                            <span class="metric-label">Beta</span>
-                            <span class="metric-value" id="beta">-</span>
-                        </div>
-                        <div class="metric">
-                            <span class="metric-label">Max Drawdown</span>
-                            <span class="metric-value" id="maxDrawdown">-</span>
-                        </div>
+                    <h3>YTD Top Laggards</h3>
+                    <div id="topLaggards" class="top-laggards">
+                        <!-- Top laggards will be loaded here -->
                     </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Portfolio Section (now after Performance Analytics) -->
+    <section id="portfolio" class="portfolio">
+        <div class="container">
+            <h2 class="section-title">Portfolio</h2>
+
+            <div class="portfolio-grid" id="portfolioGrid">
+                <!-- Portfolio items will be loaded here from Google Sheets -->
+                <div class="loading">
+                    <i class="fas fa-spinner fa-spin"></i>
+                    <p>Loading portfolio data...</p>
                 </div>
             </div>
         </div>
@@ -210,10 +199,6 @@
         <div class="container">
             <div class="footer-content">
                 <div class="footer-section">
-                    <h3>Investment Portfolio</h3>
-                    <p>Professional investment tracking and analysis</p>
-                </div>
-                <div class="footer-section">
                     <h3>Quick Links</h3>
                     <ul>
                         <li><a href="#home">Home</a></li>
@@ -238,6 +223,6 @@
 
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-                            <script src="script.js?v=30.0"></script>
+                            <script src="script.js?v=32.0"></script>
 </body>
 </html>

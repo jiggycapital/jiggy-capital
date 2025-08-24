@@ -3,12 +3,12 @@
 // ============================================================================
 
     // Google Sheets Integration Configuration - Direct URLs for testing
-    const GOOGLE_SHEETS_CONFIG = {
-        portfolioSheetUrl: 'https://docs.google.com/spreadsheets/d/1xmD_h2_1I-kJkh-MsNUhxXMV7WDHrAlClj1Uq5jLcFE/export?format=csv&gid=1871140253',
-        logosSheetUrl: 'https://docs.google.com/spreadsheets/d/1xmD_h2_1I-kJkh-MsNUhxXMV7WDHrAlClj1Uq5jLcFE/export?format=csv&gid=1789448141',
-        performanceSheetUrl: 'https://docs.google.com/spreadsheets/d/1xmD_h2_1I-kJkh-MsNUhxXMV7WDHrAlClj1Uq5jLcFE/export?format=csv&gid=721839254',
-        eventsSheetUrl: 'https://docs.google.com/spreadsheets/d/1xmD_h2_1I-kJkh-MsNUhxXMV7WDHrAlClj1Uq5jLcFE/export?format=csv&gid=1789448141'
-    };
+const GOOGLE_SHEETS_CONFIG = {
+    portfolioSheetUrl: 'https://docs.google.com/spreadsheets/d/1xmD_h2_1I-kJkh-MsNUhxXMV7WDHrAlClj1Uq5jLcFE/export?format=csv&gid=1871140253',
+    logosSheetUrl: 'https://docs.google.com/spreadsheets/d/1xmD_h2_1I-kJkh-MsNUhxXMV7WDHrAlClj1Uq5jLcFE/export?format=csv&gid=1789448141',
+    performanceSheetUrl: 'https://docs.google.com/spreadsheets/d/1xmD_h2_1I-kJkh-MsNUhxXMV7WDHrAlClj1Uq5jLcFE/export?format=csv&gid=721839254',
+    eventsSheetUrl: 'https://docs.google.com/spreadsheets/d/1xmD_h2_1I-kJkh-MsNUhxXMV7WDHrAlClj1Uq5jLcFE/export?format=csv&gid=1789448141'
+};
     
     // Debug: Log the decoded URLs to verify they're correct
     console.log('=== GOOGLE SHEETS URL DEBUG ===');
@@ -149,6 +149,23 @@ async function loadPortfolioData() {
         await fetchUpcomingEvents();
         updateEventsDisplay();
         
+        console.log('Fetching YTD performance data...');
+        const ytdData = await fetchYTDPerformance();
+        
+        // Merge YTD data into portfolio items
+        portfolioData = portfolioData.map(item => ({
+            ...item,
+            ytdChange: ytdData[item.symbol]?.ytdChange || null,
+            dayChange: ytdData[item.symbol]?.dayChange || null,
+            weekHigh52: ytdData[item.symbol]?.weekHigh52 || null,
+            weekLow52: ytdData[item.symbol]?.weekLow52 || null,
+            marketCap: ytdData[item.symbol]?.marketCap || null
+        }));
+        
+        // Update displays to include new YTD data
+        updatePortfolioDisplay();
+        updatePerformanceDisplay();
+        
         console.log('Fetching company news...');
         await fetchCompanyNews();
         
@@ -170,7 +187,7 @@ function getPriceFromSheetData(symbol, portfolioData) {
         return toNumber(item.price);
     }
     console.warn(`No price found for ${symbol} in sheet data`);
-    return 0;
+        return 0;
 }
 
 // Update portfolio with prices from Google Sheet and compute returns/weights
@@ -467,8 +484,8 @@ async function fetchUpcomingEvents() {
             console.log(`Loaded ${cachedData.events.length} events from cache (updated: ${cachedData.lastUpdated})`);
             
             // Process cached events
-            const today = new Date();
-            today.setHours(0, 0, 0, 0);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
             
             // Group events by ticker
             const eventsByTicker = {};
@@ -510,6 +527,86 @@ async function fetchUpcomingEvents() {
 
 
 
+// Fetch YTD performance data from Yahoo Finance API
+async function fetchYTDPerformance() {
+    try {
+        const ytdData = {};
+        
+        // Get all unique tickers from portfolio
+        const tickers = [...new Set(portfolioData.map(item => item.symbol).filter(symbol => symbol && symbol !== 'Cash'))];
+        
+        for (const ticker of tickers) {
+            try {
+                // Use Yahoo Finance API to get YTD performance (with CORS proxy)
+                const currentYear = new Date().getFullYear();
+                const previousYear = currentYear - 1;
+                const yearStart = Math.floor(new Date(`${previousYear}-12-31`).getTime() / 1000);
+                const today = Math.floor(new Date().getTime() / 1000);
+                
+                const yahooUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${ticker}?period1=${yearStart}&period2=${today}&interval=1d`;
+                
+                // Try multiple proxies with retry logic
+                const proxies = [
+                    `https://thingproxy.freeboard.io/fetch/${encodeURIComponent(yahooUrl)}`,
+                    `https://api.allorigins.win/raw?url=${encodeURIComponent(yahooUrl)}`,
+                    `https://cors.bridged.cc/${encodeURIComponent(yahooUrl)}`
+                ];
+                
+                let response = null;
+                
+                for (const proxyUrl of proxies) {
+                    try {
+                        response = await fetch(proxyUrl);
+                        if (response.ok) {
+                            break; // Success, exit retry loop
+                        }
+                    } catch (error) {
+                        continue;
+                    }
+                }
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    
+                    if (data.chart && data.chart.result && data.chart.result[0]) {
+                        const result = data.chart.result[0];
+                        const closes = result.indicators.quote[0].close;
+                        
+                        if (closes && closes.length > 0) {
+                            // Get first and last valid prices
+                            const firstPrice = closes.find(price => price !== null);
+                            const lastPrice = closes[closes.length - 1];
+                            
+                            if (firstPrice && lastPrice && firstPrice > 0) {
+                                const ytdChange = ((lastPrice - firstPrice) / firstPrice) * 100;
+                                
+                                ytdData[ticker] = {
+                                    currentPrice: lastPrice,
+                                    dayChange: '0.00', // We'll get this from Finnhub quote
+                                    ytdChange: ytdChange.toFixed(2),
+                                    weekHigh52: Math.max(...closes.filter(price => price !== null)),
+                                    weekLow52: Math.min(...closes.filter(price => price !== null))
+                                };
+                            }
+                        }
+                    }
+                }
+                
+                // Add longer delay to avoid rate limiting
+                await new Promise(resolve => setTimeout(resolve, 500));
+                
+            } catch (error) {
+                // Silent fail for production
+            }
+        }
+        
+        return ytdData;
+        
+    } catch (error) {
+        return {};
+    }
+}
+
 // Fetch company news from Finnhub API
 async function fetchCompanyNews() {
     console.log('Fetching company news...');
@@ -527,7 +624,7 @@ async function fetchCompanyNews() {
         const allNews = [];
         
         // Fetch news for each company in portfolio
-        for (const event of eventsData) {
+    for (const event of eventsData) {
             if (!event.ticker) continue;
             
             try {
@@ -958,8 +1055,8 @@ function extractEventsFromHTML(html, eventInfo) {
                     eventName = m[0];
                     eventLineIndex = dateInfo.lineIndex;
                     console.log(`[${eventInfo.ticker}] Found event pattern at date line: "${eventName}"`);
-                    break;
-                }
+                break;
+            }
             }
         }
         
@@ -967,7 +1064,7 @@ function extractEventsFromHTML(html, eventInfo) {
             console.log(`[${eventInfo.ticker}] No event title found for date: ${dateInfo.dateStr}`);
             continue;
         }
-        
+
         console.log(`[${eventInfo.ticker}] Adding future event: "${eventName}" on ${dateInfo.dateStr} (${d.toDateString()} >= ${today.toDateString()})`);
         events.push({
             name: cleanEventTitle(eventName),
@@ -1039,10 +1136,10 @@ function extractEventsFromScripts(html, eventInfo) {
 
     for (const pattern of patterns) {
         console.log(`[${eventInfo.ticker}] Trying pattern: ${pattern.description}`);
-        
-        for (const sc of scriptContents) {
-            const titles = [];
-            let t;
+
+    for (const sc of scriptContents) {
+        const titles = [];
+        let t;
             while ((t = pattern.titleRe.exec(sc)) !== null) {
                 const title = t[2] || t[1]; // Handle different group structures
                 if (title && title.length > 10 && !title.includes('function')) {
@@ -1050,12 +1147,12 @@ function extractEventsFromScripts(html, eventInfo) {
                 }
             }
             
-            if (titles.length === 0) continue;
+        if (titles.length === 0) continue;
             console.log(`[${eventInfo.ticker}] Found ${titles.length} potential titles`);
 
-            // Find dates
-            const dates = [];
-            let d;
+        // Find dates
+        const dates = [];
+        let d;
             while ((d = pattern.dateRe.exec(sc)) !== null) {
                 const dateStr = d[2] || d[1]; // Handle different group structures
                 const pd = parseDate(dateStr);
@@ -1065,33 +1162,33 @@ function extractEventsFromScripts(html, eventInfo) {
                 }
             }
             
-            if (dates.length === 0) continue;
+        if (dates.length === 0) continue;
             console.log(`[${eventInfo.ticker}] Found ${dates.length} dates`);
 
-            // Pair each title with nearest date
-            for (const title of titles) {
+        // Pair each title with nearest date
+        for (const title of titles) {
                 let best = null; 
                 let bestDist = Infinity;
                 
-                for (const dd of dates) {
-                    const dist = Math.abs(dd.index - title.index);
+            for (const dd of dates) {
+                const dist = Math.abs(dd.index - title.index);
                     if (dist < bestDist) { 
                         bestDist = dist; 
                         best = dd; 
-                    }
+            }
                 }
                 
                 if (!best || bestDist > 1000) continue; // Skip if too far apart
                 
-                const pd = best.date;
-                if (pd >= today) {
+            const pd = best.date;
+            if (pd >= today) {
                     console.log(`[${eventInfo.ticker}] Found future event: "${title.value}" on ${best.value}`);
-                    events.push({
-                        name: title.value,
-                        date: best.value,
-                        companyName: eventInfo.companyName,
-                        ticker: eventInfo.ticker
-                    });
+                events.push({
+                    name: title.value,
+                    date: best.value,
+                    companyName: eventInfo.companyName,
+                    ticker: eventInfo.ticker
+                });
                 }
             }
         }
@@ -1140,7 +1237,7 @@ function extractEventsFromScripts(html, eventInfo) {
             return dedupeEvents(embeddedEvents);
         }
     }
-    
+
     return dedupeEvents(events);
 }
 
@@ -2048,24 +2145,79 @@ function updatePerformanceDisplay() {
         }
     }
     
-    // Update top performers
-    const topPerformersContainer = document.getElementById('topPerformers');
-    if (topPerformersContainer && portfolioData.length > 0) {
-        const topPerformers = portfolioData
-            .sort((a, b) => b.return - a.return)
-            .slice(0, 3);
+            // Update top performers - Show top 3 YTD performers
+        const topPerformersContainer = document.getElementById('topPerformers');
+        if (topPerformersContainer && portfolioData.length > 0) {
+            // Filter stocks with YTD data and sort by YTD performance
+            const stocksWithYTD = portfolioData
+                .filter(item => item.ytdChange !== null && item.ytdChange !== undefined && item.symbol !== 'CASH')
+                .sort((a, b) => parseFloat(b.ytdChange) - parseFloat(a.ytdChange))
+                .slice(0, 3);
+            
+            let html = '';
+            if (stocksWithYTD.length > 0) {
+                stocksWithYTD.forEach(item => {
+                    const ytdValue = parseFloat(item.ytdChange);
+                    html += `
+                        <div class="performer-item">
+                            <span class="performer-symbol">${item.symbol}</span>
+                            <span class="performer-return ${ytdValue >= 0 ? 'positive' : 'negative'}">${ytdValue >= 0 ? '+' : ''}${ytdValue.toFixed(1)}%</span>
+                        </div>`;
+                });
+            } else {
+                // Fallback to total return if no YTD data available
+                const topPerformers = portfolioData
+                    .filter(item => item.symbol !== 'CASH')
+                    .sort((a, b) => b.return - a.return)
+                    .slice(0, 3);
+                
+                topPerformers.forEach(item => {
+                    html += `
+                        <div class="performer-item">
+                            <span class="performer-symbol">${item.symbol}</span>
+                            <span class="performer-return ${item.return >= 0 ? 'positive' : 'negative'}">${item.return >= 0 ? '+' : ''}${item.return.toFixed(1)}%</span>
+                        </div>`;
+                });
+            }
+            topPerformersContainer.innerHTML = html;
+        }
         
-        let html = '';
-        topPerformers.forEach(item => {
-            html += `
-                <div class="performer-item">
-                    <span class="performer-symbol">${item.symbol}</span>
-                    <span class="performer-return ${item.return >= 0 ? 'positive' : 'negative'}">${item.return >= 0 ? '+' : ''}${item.return.toFixed(1)}%</span>
-        </div>
-    `;
-        });
-        topPerformersContainer.innerHTML = html;
-    }
+        // Update top laggards - Show bottom 3 YTD performers
+        const topLaggardsContainer = document.getElementById('topLaggards');
+        if (topLaggardsContainer && portfolioData.length > 0) {
+            // Filter stocks with YTD data and sort by YTD performance (worst first)
+            const stocksWithYTD = portfolioData
+                .filter(item => item.ytdChange !== null && item.ytdChange !== undefined && item.symbol !== 'CASH')
+                .sort((a, b) => parseFloat(a.ytdChange) - parseFloat(b.ytdChange))
+                .slice(0, 3);
+            
+            let html = '';
+            if (stocksWithYTD.length > 0) {
+                stocksWithYTD.forEach(item => {
+                    const ytdValue = parseFloat(item.ytdChange);
+                    html += `
+                        <div class="performer-item">
+                            <span class="performer-symbol">${item.symbol}</span>
+                            <span class="performer-return ${ytdValue >= 0 ? 'positive' : 'negative'}">${ytdValue >= 0 ? '+' : ''}${ytdValue.toFixed(1)}%</span>
+                        </div>`;
+                });
+            } else {
+                // Fallback to total return if no YTD data available
+                const topLaggards = portfolioData
+                    .filter(item => item.symbol !== 'CASH')
+                    .sort((a, b) => a.return - b.return)
+                    .slice(0, 3);
+                
+                topLaggards.forEach(item => {
+                    html += `
+                        <div class="performer-item">
+                            <span class="performer-symbol">${item.symbol}</span>
+                            <span class="performer-return ${item.return >= 0 ? 'positive' : 'negative'}">${item.return >= 0 ? '+' : ''}${item.return.toFixed(1)}%</span>
+                        </div>`;
+                });
+            }
+            topLaggardsContainer.innerHTML = html;
+        }
 }
 
 // Update portfolio multiples
@@ -2116,10 +2268,11 @@ function updateAllocationChart() {
         return;
     }
 
-    // Filter out items with no weight and sort by weight (descending)
-    let chartData = portfolioData
-        .filter(item => item.weight > 0)
-        .sort((a, b) => b.weight - a.weight);
+    // Prepare chart data including cash
+    let chartData = [];
+    
+    // Add portfolio items
+    chartData.push(...portfolioData.filter(item => item.weight > 0));
     
     // Add cash to the chart data if it exists
     if (cashBalance > 0) {
@@ -2144,12 +2297,15 @@ function updateAllocationChart() {
             }))
         });
         
-        chartData.unshift({
+        chartData.push({
             symbol: 'CASH',
             weight: cashWeight,
             name: 'Cash Balance'
         });
     }
+    
+    // Sort all data by weight (descending) - now including cash
+    chartData.sort((a, b) => b.weight - a.weight);
 
     if (chartData.length === 0) {
         console.log('No data available for allocation chart');
@@ -2271,37 +2427,41 @@ function updateSectorChart() {
             weight: (value / totalPortfolioValue) * 100,
             name: sector
         }))
-        .filter(item => item.weight > 0)
-        .sort((a, b) => b.weight - a.weight);
+        .filter(item => item.weight > 0);
 
     // Add cash as a separate sector if it exists
     if (cashBalance > 0) {
         const cashWeight = (cashBalance / totalPortfolioValue) * 100;
-        chartData.unshift({
+        chartData.push({
             symbol: 'CASH',
             weight: cashWeight,
             name: 'Cash'
         });
     }
+    
+    // Sort all data by weight (descending) - now including cash
+    chartData.sort((a, b) => b.weight - a.weight);
 
     if (chartData.length === 0) {
         console.log('No data available for sector chart');
         return;
     }
 
-    // Clean, distinct color palette for sectors
+    // Vibrant color palette for sectors - matching Portfolio Allocation chart
     const sectorColorMap = {
-        'Software': '#3B82F6', // Blue - Software
-        'Healthcare': '#10B981', // Green - Healthcare
-        'Consumer Discretionary': '#F59E0B', // Amber - Consumer
-        'Financial Services': '#8B5CF6', // Purple - Financial
-        'Energy': '#EF4444', // Red - Energy
-        'Communication Services': '#06B6D4', // Cyan - Communication
-        'Industrials': '#84CC16', // Lime - Industrials
-        'Materials': '#F97316', // Orange - Materials
+        'Software': '#6366F1', // Indigo - Software
+        'Communication Services': '#EF4444', // Red - Communication Services
+        'Semiconductors': '#F97316', // Orange - Semiconductors
+        'Industrials': '#EAB308', // Yellow - Industrials
+        'Financial Services': '#8B5CF6', // Purple - Financial Services
+        'Financials': '#8B5CF6', // Purple - Financials (alternative name)
+        'Consumer Discretionary': '#06B6D4', // Turquoise - Consumer Discretionary
+        'Healthcare': '#10B981', // Emerald - Healthcare
+        'Energy': '#F59E0B', // Amber - Energy
+        'Materials': '#84CC16', // Lime - Materials
         'Real Estate': '#EC4899', // Pink - Real Estate
-        'Utilities': '#6366F1', // Indigo - Utilities
-        'Other': '#14B8A6', // Teal - Other
+        'Utilities': '#14B8A6', // Teal - Utilities
+        'Other': '#F43F5E', // Rose - Other
         'CASH': '#22C55E'  // Green - Cash
     };
 
@@ -2390,8 +2550,8 @@ function createSectorCallouts(chartData, colors) {
         return;
     }
     
-    // Filter items that should have callouts (weight > 2.8%)
-    const calloutItems = chartData.filter(item => item.weight > 2.8);
+    // Filter items that should have callouts (weight > 2.95%)
+    const calloutItems = chartData.filter(item => item.weight > 2.95);
     
     console.log('Sector callout creation debug:', {
         chartDataLength: chartData.length,
@@ -2447,34 +2607,66 @@ function createSectorCallouts(chartData, colors) {
 
     // Create callouts with adjusted positions
     adjustedPositions.forEach((position, index) => {
-        const { item, angle, angleRad, x, y, adjustedRadius } = position;
+        const { item, angle, angleRad, x, y, adjustedRadius, needsBentBranch, finalX, finalY } = position;
         
         // Calculate branch start position (on chart edge)
         const branchStartX = chartCenterX + Math.cos(angleRad) * baseRadius;
         const branchStartY = chartCenterY + Math.sin(angleRad) * baseRadius;
 
-        // Create connecting branch
+        // Create connecting branch (straight or bent)
         const branch = document.createElement('div');
         branch.className = 'chart-branch';
-        branch.style.cssText = `
-            position: absolute;
-            left: ${branchStartX}px;
-            top: ${branchStartY}px;
-            width: ${adjustedRadius - baseRadius}px;
-            height: 2px;
-            background: linear-gradient(90deg, ${colors[chartData.indexOf(item)]}, ${colors[chartData.indexOf(item)]}80);
-            transform-origin: left center;
-            transform: rotate(${angle}deg);
-            z-index: 5;
-        `;
+        
+        if (needsBentBranch) {
+            // Create bent branch using SVG
+            const branchSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+            branchSvg.style.cssText = `
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                height: 100%;
+                z-index: 5;
+                pointer-events: none;
+            `;
+            
+            // Calculate control points for curved branch
+            const branchEndX = finalX;
+            const branchEndY = finalY;
+            const controlX = (branchStartX + branchEndX) / 2;
+            const controlY = (branchStartY + branchEndY) / 2;
+            
+            const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+            path.setAttribute('d', `M ${branchStartX} ${branchStartY} Q ${controlX} ${controlY} ${branchEndX} ${branchEndY}`);
+            path.setAttribute('stroke', colors[chartData.indexOf(item)]);
+            path.setAttribute('stroke-width', '2');
+            path.setAttribute('fill', 'none');
+            path.setAttribute('opacity', '0.8');
+            
+            branchSvg.appendChild(path);
+            branch.appendChild(branchSvg);
+        } else {
+            // Create straight branch
+            branch.style.cssText = `
+                position: absolute;
+                left: ${branchStartX}px;
+                top: ${branchStartY}px;
+                width: ${adjustedRadius - baseRadius}px;
+                height: 2px;
+                background: linear-gradient(90deg, ${colors[chartData.indexOf(item)]}, ${colors[chartData.indexOf(item)]}80);
+                transform-origin: left center;
+                transform: rotate(${angle}deg);
+                z-index: 5;
+            `;
+        }
 
         // Create callout element
         const callout = document.createElement('div');
         callout.className = 'chart-callout';
         callout.style.cssText = `
             position: absolute;
-            left: ${x}px;
-            top: ${y}px;
+            left: ${finalX}px;
+            top: ${finalY}px;
             transform: translate(-50%, -50%);
             background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(10px);
@@ -2489,6 +2681,7 @@ function createSectorCallouts(chartData, colors) {
             min-width: 100px;
             justify-content: center;
             transition: all 0.3s ease;
+            font-size: 14px;
         `;
 
         // Add hover effect
@@ -2551,66 +2744,119 @@ function createSectorCallouts(chartData, colors) {
     });
 }
 
-// Function to adjust callout positions to prevent overlaps
+// Simple callout positioning - back to basics
 function adjustCalloutPositions(positions, chartCenterX, chartCenterY, baseRadius) {
     const adjustedPositions = [...positions];
-    const calloutSize = 120; // Approximate callout size (width + padding)
-    const minDistance = calloutSize * 1.2; // Minimum distance between callout centers
-    const maxRadius = Math.min(chartCenterX, chartCenterY) * 2.0; // Maximum distance from center
+    const calloutRadius = baseRadius * 1.8; // Simple fixed radius
     
-    // Sort positions by angle to process them in order
-    adjustedPositions.sort((a, b) => a.angle - b.angle);
-    
-    // Check for overlaps and adjust positions
     for (let i = 0; i < adjustedPositions.length; i++) {
         const current = adjustedPositions[i];
-        let adjustedRadius = current.originalRadius;
         
-        // Check distance from previous callout
-        if (i > 0) {
-            const prev = adjustedPositions[i - 1];
-            const distance = Math.sqrt(
-                Math.pow(current.x - prev.x, 2) + Math.pow(current.y - prev.y, 2)
-            );
-            
-            if (distance < minDistance) {
-                // Calculate how much to increase the radius
-                const angleDiff = Math.abs(current.angle - prev.angle);
-                if (angleDiff < 30) { // Only adjust if angles are close
-                    const neededDistance = minDistance - distance;
-                    const radiusIncrease = neededDistance / Math.sin(angleDiff * Math.PI / 180);
-                    adjustedRadius = Math.min(adjustedRadius + radiusIncrease, maxRadius);
-                    
-                    // Recalculate position with new radius
-                    current.x = chartCenterX + Math.cos(current.angleRad) * adjustedRadius;
-                    current.y = chartCenterY + Math.sin(current.angleRad) * adjustedRadius;
-                }
-            }
-        }
+        // Calculate position on perfect circle
+        const x = chartCenterX + Math.cos(current.angleRad) * calloutRadius;
+        const y = chartCenterY + Math.sin(current.angleRad) * calloutRadius;
         
-        // Check distance from next callout (wrap around)
-        const next = adjustedPositions[(i + 1) % adjustedPositions.length];
-        const distanceToNext = Math.sqrt(
-            Math.pow(current.x - next.x, 2) + Math.pow(current.y - next.y, 2)
-        );
-        
-        if (distanceToNext < minDistance) {
-            const angleDiff = Math.abs(current.angle - next.angle);
-            if (angleDiff < 30) { // Only adjust if angles are close
-                const neededDistance = minDistance - distanceToNext;
-                const radiusIncrease = neededDistance / Math.sin(angleDiff * Math.PI / 180);
-                adjustedRadius = Math.min(adjustedRadius + radiusIncrease, maxRadius);
-                
-                // Recalculate position with new radius
-                current.x = chartCenterX + Math.cos(current.angleRad) * adjustedRadius;
-                current.y = chartCenterY + Math.sin(current.angleRad) * adjustedRadius;
-            }
-        }
-        
-        current.adjustedRadius = adjustedRadius;
+        // Update position
+        current.finalX = x;
+        current.finalY = y;
+        current.adjustedRadius = calloutRadius;
+        current.needsBentBranch = false;
     }
     
     return adjustedPositions;
+}
+
+// No legend function - we're not using legends
+
+// Function to create a legend for smaller holdings
+function createChartLegend(container, chartData, colors, calloutItems) {
+    // Remove existing legend
+    const existingLegend = container.querySelector('.chart-legend');
+    if (existingLegend) {
+        existingLegend.remove();
+    }
+    
+    // Find items that don't have callouts
+    const calloutSymbols = calloutItems.map(item => item.symbol);
+    const legendItems = chartData.filter(item => !calloutSymbols.includes(item.symbol) && item.weight > 0.5);
+    
+    if (legendItems.length === 0) return;
+    
+    // Create legend container
+    const legend = document.createElement('div');
+    legend.className = 'chart-legend';
+    legend.style.cssText = `
+        position: absolute;
+        bottom: 20px;
+        right: 20px;
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        border: 1px solid #e5e7eb;
+        border-radius: 12px;
+        padding: 16px;
+        max-width: 300px;
+        max-height: 200px;
+        overflow-y: auto;
+        z-index: 15;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+    `;
+    
+    // Create legend title
+    const legendTitle = document.createElement('div');
+    legendTitle.textContent = 'Other Holdings';
+    legendTitle.style.cssText = `
+        font-weight: 600;
+        font-size: 14px;
+        color: #1f2937;
+        margin-bottom: 12px;
+        border-bottom: 1px solid #e5e7eb;
+        padding-bottom: 8px;
+    `;
+    legend.appendChild(legendTitle);
+    
+    // Create legend items
+    legendItems.forEach(item => {
+        const legendItem = document.createElement('div');
+        legendItem.style.cssText = `
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 6px;
+            font-size: 12px;
+        `;
+        
+        const colorDot = document.createElement('div');
+        colorDot.style.cssText = `
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: ${colors[chartData.indexOf(item)]};
+            margin-right: 8px;
+            flex-shrink: 0;
+        `;
+        
+        const symbol = document.createElement('span');
+        symbol.textContent = item.symbol;
+        symbol.style.cssText = `
+            font-weight: 600;
+            color: #1f2937;
+            flex: 1;
+        `;
+        
+        const weight = document.createElement('span');
+        weight.textContent = `${item.weight.toFixed(1)}%`;
+        weight.style.cssText = `
+            color: #6b7280;
+            font-weight: 500;
+        `;
+        
+        legendItem.appendChild(colorDot);
+        legendItem.appendChild(symbol);
+        legendItem.appendChild(weight);
+        legend.appendChild(legendItem);
+    });
+    
+    container.appendChild(legend);
 }
 
 // Function to create allocation callouts with logos and weights
@@ -2637,8 +2883,8 @@ function createAllocationCallouts(chartData, colors) {
         return;
     }
     
-    // Filter items that should have callouts (weight > 2.8%)
-    const calloutItems = chartData.filter(item => item.weight > 2.8);
+    // Filter items that should have callouts (weight > 2.95%)
+    const calloutItems = chartData.filter(item => item.weight > 2.95);
     
     console.log('Callout creation debug:', {
         chartDataLength: chartData.length,
@@ -2650,13 +2896,11 @@ function createAllocationCallouts(chartData, colors) {
     
     // Calculate positions based on actual pie slice angles
     const totalWeight = chartData.reduce((sum, item) => sum + item.weight, 0);
-    let currentAngle = -90; // Start from top
     const baseRadius = Math.min(chartCenterX, chartCenterY) * 0.8; // Chart radius
-    const calloutRadius = Math.min(chartCenterX, chartCenterY) * 1.4; // Uniform distance from chart edge
-    
-    // Adjust callout radius to avoid title overlap
-    const adjustedCalloutRadius = calloutRadius * 0.85; // Reduce radius to avoid title area
+    const baseCalloutRadius = Math.min(chartCenterX, chartCenterY) * 1.4; // Base distance from chart edge
 
+    // Calculate initial callout positions
+    const calloutPositions = [];
     calloutItems.forEach((item, index) => {
         // Find the item's position in the full chart data to get its slice angle
         const itemIndex = chartData.findIndex(chartItem => chartItem.symbol === item.symbol);
@@ -2677,48 +2921,85 @@ function createAllocationCallouts(chartData, colors) {
         // Convert angle to radians
         const angleRad = (midAngle * Math.PI) / 180;
         
-        // Calculate callout position with uniform distance from chart
-        const calloutX = chartCenterX + Math.cos(angleRad) * calloutRadius;
-        const calloutY = chartCenterY + Math.sin(angleRad) * calloutRadius;
+        // Calculate initial callout position
+        const calloutX = chartCenterX + Math.cos(angleRad) * baseCalloutRadius;
+        const calloutY = chartCenterY + Math.sin(angleRad) * baseCalloutRadius;
+        
+        calloutPositions.push({
+            item,
+            angle: midAngle,
+            angleRad,
+            x: calloutX,
+            y: calloutY,
+            originalRadius: baseCalloutRadius
+        });
+    });
+    
+    // Adjust positions to prevent overlaps
+    const adjustedPositions = adjustCalloutPositions(calloutPositions, chartCenterX, chartCenterY, baseRadius);
+
+    // Create callouts with adjusted positions
+    adjustedPositions.forEach((position, index) => {
+        const { item, angle, angleRad, x, y, adjustedRadius, needsBentBranch, finalX, finalY } = position;
         
         // Calculate branch start position (on chart edge)
         const branchStartX = chartCenterX + Math.cos(angleRad) * baseRadius;
         const branchStartY = chartCenterY + Math.sin(angleRad) * baseRadius;
 
-        console.log(`Creating callout for ${item.symbol}:`, {
-            itemIndex,
-            sliceStartAngle,
-            sliceWeight,
-            sliceAngle,
-            midAngle,
-            calloutX,
-            calloutY,
-            branchStartX,
-            branchStartY
-        });
-
-        // Create connecting branch
+        // Create connecting branch (straight or bent)
         const branch = document.createElement('div');
         branch.className = 'chart-branch';
-        branch.style.cssText = `
-            position: absolute;
-            left: ${branchStartX}px;
-            top: ${branchStartY}px;
-            width: ${calloutRadius - baseRadius}px;
-            height: 2px;
-            background: linear-gradient(90deg, ${colors[chartData.indexOf(item)]}, ${colors[chartData.indexOf(item)]}80);
-            transform-origin: left center;
-            transform: rotate(${midAngle}deg);
-            z-index: 5;
-        `;
+        
+        if (needsBentBranch) {
+            // Create bent branch using SVG
+            const branchSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+            branchSvg.style.cssText = `
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                height: 100%;
+                z-index: 5;
+                pointer-events: none;
+            `;
+            
+            // Calculate control points for curved branch
+            const branchEndX = finalX;
+            const branchEndY = finalY;
+            const controlX = (branchStartX + branchEndX) / 2;
+            const controlY = (branchStartY + branchEndY) / 2;
+            
+            const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+            path.setAttribute('d', `M ${branchStartX} ${branchStartY} Q ${controlX} ${controlY} ${branchEndX} ${branchEndY}`);
+            path.setAttribute('stroke', colors[chartData.indexOf(item)]);
+            path.setAttribute('stroke-width', '2');
+            path.setAttribute('fill', 'none');
+            path.setAttribute('opacity', '0.8');
+            
+            branchSvg.appendChild(path);
+            branch.appendChild(branchSvg);
+        } else {
+            // Create straight branch
+            branch.style.cssText = `
+                position: absolute;
+                left: ${branchStartX}px;
+                top: ${branchStartY}px;
+                width: ${adjustedRadius - baseRadius}px;
+                height: 2px;
+                background: linear-gradient(90deg, ${colors[chartData.indexOf(item)]}, ${colors[chartData.indexOf(item)]}80);
+                transform-origin: left center;
+                transform: rotate(${angle}deg);
+                z-index: 5;
+            `;
+        }
 
         // Create callout element
         const callout = document.createElement('div');
         callout.className = 'chart-callout';
         callout.style.cssText = `
             position: absolute;
-            left: ${calloutX}px;
-            top: ${calloutY}px;
+            left: ${finalX}px;
+            top: ${finalY}px;
             transform: translate(-50%, -50%);
             background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(10px);
@@ -2726,28 +3007,33 @@ function createAllocationCallouts(chartData, colors) {
             border-radius: 16px;
             padding: 12px 16px;
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12), 0 4px 16px rgba(0, 0, 0, 0.08);
-        display: flex;
-        align-items: center;
+            display: flex;
+            align-items: center;
             gap: 10px;
             z-index: 10;
             min-width: 100px;
             justify-content: center;
             transition: all 0.3s ease;
+            font-size: 14px;
         `;
 
         // Add hover effect
         callout.addEventListener('mouseenter', () => {
             callout.style.transform = 'translate(-50%, -50%) scale(1.1)';
             callout.style.boxShadow = `0 12px 40px rgba(0, 0, 0, 0.15), 0 6px 20px rgba(0, 0, 0, 0.1)`;
-            branch.style.background = colors[chartData.indexOf(item)];
-            branch.style.height = '3px';
+            if (!needsBentBranch) {
+                branch.style.background = colors[chartData.indexOf(item)];
+                branch.style.height = '3px';
+            }
         });
 
         callout.addEventListener('mouseleave', () => {
             callout.style.transform = 'translate(-50%, -50%) scale(1)';
             callout.style.boxShadow = `0 8px 32px rgba(0, 0, 0, 0.12), 0 4px 16px rgba(0, 0, 0, 0.08)`;
-            branch.style.background = `linear-gradient(90deg, ${colors[chartData.indexOf(item)]}, ${colors[chartData.indexOf(item)]}80)`;
-            branch.style.height = '2px';
+            if (!needsBentBranch) {
+                branch.style.background = `linear-gradient(90deg, ${colors[chartData.indexOf(item)]}, ${colors[chartData.indexOf(item)]}80)`;
+                branch.style.height = '2px';
+            }
         });
 
         // Get logo URL
