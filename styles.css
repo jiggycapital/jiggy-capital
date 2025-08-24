@@ -101,7 +101,7 @@ body {
 
 /* Hero Section */
 .hero {
-    padding: 40px 0 30px;
+    padding: 120px 0 30px; /* Increased top padding to account for fixed navbar */
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     color: white;
     min-height: 35vh;
@@ -1232,6 +1232,10 @@ body {
 
     .nav-menu.active {
         left: 0;
+    }
+
+    .hero {
+        padding: 100px 0 30px; /* Reduced top padding for mobile */
     }
 
     .hero-container {
