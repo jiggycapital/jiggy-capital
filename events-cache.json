@@ -2,19 +2,40 @@
   "events": [
     {
       "ticker": "NVDA",
-      "date": "2024-08-27",
+      "date": "2025-08-27",
       "name": "Earnings Report",
-      "companyName": "NVIDIA",
+      "companyName": "NVDA",
       "url": "https://finnhub.io/calendar/earnings?symbol=NVDA"
     },
     {
-      "ticker": "SEZL",
-      "date": "2024-09-10",
-      "name": "Investor Conference",
-      "companyName": "Sezzle",
-      "url": "https://investor.sezzle.com/events"
+      "ticker": "MRVL",
+      "date": "2025-08-28",
+      "name": "Earnings Report",
+      "companyName": "MRVL",
+      "url": "https://finnhub.io/calendar/earnings?symbol=MRVL"
+    },
+    {
+      "ticker": "CRM",
+      "date": "2025-09-03",
+      "name": "Earnings Report",
+      "companyName": "CRM",
+      "url": "https://finnhub.io/calendar/earnings?symbol=CRM"
+    },
+    {
+      "ticker": "GTLB",
+      "date": "2025-09-03",
+      "name": "Earnings Report",
+      "companyName": "GTLB",
+      "url": "https://finnhub.io/calendar/earnings?symbol=GTLB"
+    },
+    {
+      "ticker": "AVGO",
+      "date": "2025-09-04",
+      "name": "Earnings Report",
+      "companyName": "AVGO",
+      "url": "https://finnhub.io/calendar/earnings?symbol=AVGO"
     }
   ],
-  "lastUpdated": "2024-08-23T12:00:00.000Z",
-  "totalEvents": 2
+  "lastUpdated": "2025-08-24T01:14:24.357Z",
+  "totalEvents": 35
 }
