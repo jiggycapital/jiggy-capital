@@ -33,6 +33,28 @@ jobs:
             'GOOGL', 'TER', 'FIX'
           ];
           
+          // IR Page URLs for companies with working IR pages
+          const IR_PAGES = {
+            'HUBS': 'https://investors.hubspot.com/events-and-presentations',
+            'NVDA': 'https://investor.nvidia.com/events-and-presentations/',
+            'AVGO': 'https://investor.broadcom.com/events-and-presentations',
+            'MRVL': 'https://investor.marvell.com/events-and-presentations',
+            'TEAM': 'https://investors.atlassian.com/events-and-presentations',
+            'CRM': 'https://investor.salesforce.com/events-and-presentations',
+            'GTLB': 'https://ir.gitlab.com/events-and-presentations',
+            'AMZN': 'https://ir.aboutamazon.com/events-and-presentations',
+            'GOOGL': 'https://abc.xyz/investor/events-and-presentations/',
+            'DDOG': 'https://investors.datadoghq.com/events-and-presentations',
+            'NOW': 'https://investors.servicenow.com/events-and-presentations',
+            'AJG': 'https://investors.ajg.com/events-and-presentations',
+            'MNDY': 'https://investors.monday.com/events-and-presentations',
+            'RDDT': 'https://investors.redditinc.com/events-and-presentations',
+            'SEZL': 'https://investors.sezzle.com/events-and-presentations',
+            'TOST': 'https://investors.toasttab.com/events-and-presentations',
+            'TER': 'https://investors.teradyne.com/events-and-presentations',
+            'FIX': 'https://investors.comfortsystemsusa.com/events-and-presentations'
+          };
+          
           async function fetchFinnhubData(symbol) {
             return new Promise((resolve, reject) => {
               const url = `https://finnhub.io/api/v1/calendar/earnings?from=2024-01-01&to=2025-12-31&symbol=${symbol}&token=${FINNHUB_API_KEY}`;
@@ -56,12 +78,92 @@ jobs:
             });
           }
           
+          async function scrapeIRPage(symbol, irUrl) {
+            return new Promise((resolve) => {
+              console.log(`Scraping IR page for ${symbol}: ${irUrl}`);
+              
+              https.get(irUrl, (res) => {
+                let data = '';
+                res.on('data', (chunk) => data += chunk);
+                res.on('end', () => {
+                  try {
+                    // Look for common event patterns in IR pages
+                    const events = [];
+                    const html = data.toLowerCase();
+                    
+                    // Common event keywords to look for
+                    const eventKeywords = [
+                      'analyst day', 'investor day', 'earnings call', 'conference call',
+                      'annual meeting', 'shareholder meeting', 'presentation', 'webcast',
+                      'conference', 'summit', 'symposium'
+                    ];
+                    
+                    // Look for date patterns (MM/DD/YYYY, MM-DD-YYYY, etc.)
+                    const datePatterns = [
+                      /(\d{1,2})\/(\d{1,2})\/(\d{4})/g,  // MM/DD/YYYY
+                      /(\d{1,2})-(\d{1,2})-(\d{4})/g,   // MM-DD-YYYY
+                      /(\d{4})-(\d{1,2})-(\d{1,2})/g,   // YYYY-MM-DD
+                      /(\w+)\s+(\d{1,2}),?\s+(\d{4})/g  // Month DD, YYYY
+                    ];
+                    
+                    // Extract potential events
+                    eventKeywords.forEach(keyword => {
+                      if (html.includes(keyword)) {
+                        // Look for nearby dates
+                        const keywordIndex = html.indexOf(keyword);
+                        const surroundingText = html.substring(Math.max(0, keywordIndex - 200), keywordIndex + 200);
+                        
+                        datePatterns.forEach(pattern => {
+                          const matches = surroundingText.match(pattern);
+                          if (matches) {
+                            matches.forEach(match => {
+                              try {
+                                const eventDate = new Date(match);
+                                const today = new Date();
+                                const thirtyDaysFromNow = new Date();
+                                thirtyDaysFromNow.setDate(today.getDate() + 30);
+                                
+                                if (eventDate >= today && eventDate <= thirtyDaysFromNow) {
+                                  events.push({
+                                    ticker: symbol,
+                                    date: eventDate.toISOString().split('T')[0],
+                                    name: keyword.charAt(0).toUpperCase() + keyword.slice(1),
+                                    companyName: symbol,
+                                    url: irUrl,
+                                    source: 'IR Page'
+                                  });
+                                }
+                              } catch (e) {
+                                // Skip invalid dates
+                              }
+                            });
+                          }
+                        });
+                      }
+                    });
+                    
+                    console.log(`Found ${events.length} events from IR page for ${symbol}`);
+                    resolve(events);
+                  } catch (error) {
+                    console.log(`Error scraping IR page for ${symbol}:`, error.message);
+                    resolve([]);
+                  }
+                });
+              }).on('error', (err) => {
+                console.log(`Error fetching IR page for ${symbol}:`, err.message);
+                resolve([]);
+              });
+            });
+          }
+          
           async function fetchAllEvents() {
             console.log('Starting to fetch events data...');
             const allEvents = [];
             
             for (const ticker of PORTFOLIO_TICKERS) {
               console.log(`Fetching events for ${ticker}...`);
+              
+              // Fetch from Finnhub API
               const data = await fetchFinnhubData(ticker);
               
               if (data.earningsCalendar && Array.isArray(data.earningsCalendar)) {
@@ -71,34 +173,62 @@ jobs:
                     date: event.date,
                     name: 'Earnings Report',
                     companyName: event.symbol,
-                    url: `https://finnhub.io/calendar/earnings?symbol=${ticker}`
+                    url: `https://finnhub.io/calendar/earnings?symbol=${ticker}`,
+                    source: 'Finnhub API'
                   });
                 });
+              }
+              
+              // Scrape IR page if available
+              if (IR_PAGES[ticker]) {
+                console.log(`Scraping IR page for ${ticker}...`);
+                const irEvents = await scrapeIRPage(ticker, IR_PAGES[ticker]);
+                allEvents.push(...irEvents);
+                
+                // Add delay between IR page requests
+                await new Promise(resolve => setTimeout(resolve, 2000));
               }
               
               // Add delay to avoid rate limiting
               await new Promise(resolve => setTimeout(resolve, 1000));
             }
             
+            // Remove duplicates based on ticker, date, and name
+            const uniqueEvents = [];
+            const seen = new Set();
+            
+            allEvents.forEach(event => {
+              const key = `${event.ticker}-${event.date}-${event.name}`;
+              if (!seen.has(key)) {
+                seen.add(key);
+                uniqueEvents.push(event);
+              }
+            });
+            
             // Sort by date
-            allEvents.sort((a, b) => new Date(a.date) - new Date(b.date));
+            uniqueEvents.sort((a, b) => new Date(a.date) - new Date(b.date));
             
             // Filter to next 30 days
             const today = new Date();
             const thirtyDaysFromNow = new Date();
             thirtyDaysFromNow.setDate(today.getDate() + 30);
             
-            const filteredEvents = allEvents.filter(event => {
+            const filteredEvents = uniqueEvents.filter(event => {
               const eventDate = new Date(event.date);
               return eventDate >= today && eventDate <= thirtyDaysFromNow;
             });
             
-            console.log(`Found ${filteredEvents.length} events in next 30 days`);
+            console.log(`Found ${filteredEvents.length} unique events in next 30 days`);
+            console.log(`Events by source:`, filteredEvents.reduce((acc, event) => {
+              acc[event.source] = (acc[event.source] || 0) + 1;
+              return acc;
+            }, {}));
             
             return {
               events: filteredEvents,
               lastUpdated: new Date().toISOString(),
-              totalEvents: allEvents.length
+              totalEvents: allEvents.length,
+              uniqueEvents: uniqueEvents.length
             };
           }
           

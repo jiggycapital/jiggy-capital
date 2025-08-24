@@ -100,7 +100,8 @@ async function loadPortfolioData() {
         updateHeroStats();
         updatePortfolioDisplay();
         updatePerformanceDisplay();
-        updateConsolidatedChart('company'); // Start with company view
+        updateAllocationChart();
+        updateSectorChart();
         
         // Fetch upcoming events and company news
         await fetchUpcomingEvents();
@@ -253,14 +254,6 @@ function parsePortfolioCSV(csv) {
             }
             continue;
         }
-        
-
-
-        
-        // Try YTD Gain first (Column AR), fallback to One Year Change (Column AC), then FCF
-        let ytdGainValue = toPercentage(r[43]); // Column AR - YTD Gain
-        let fcfMultiple = toNumber(r[37]); // Column AL - P/2026 FCF
-        
         const item = {
             symbol: ticker,
             name: cleanCompanyName((r[1] || '').trim()),         // B
@@ -274,9 +267,7 @@ function parsePortfolioCSV(csv) {
             changePct: toNumber(r[21]),        // V
             pe2026: toNumber(r[36]) || null,   // AK
             pfcf2026: toNumber(r[37]) || null, // AL
-            peg: toNumber(r[41]) || null,      // AP - P/E/G Multiple
-            ytdGain: ytdGainValue,       // AR - YTD Gain (or null if #N/A)
-            fcfMultiple: fcfMultiple     // AL - P/2026 FCF for FCF multiples
+            ytdGain: toPercentage(r[43])       // AR - YTD Gain from Google Sheet (handles percentages)
         };
         // Calculate value and return based on sheet data
         item.value = item.shares * item.price;
@@ -1975,25 +1966,18 @@ function updatePerformanceDisplay() {
         }
     }
     
-            // Dynamic performance display - YTD if available, FCF if not
+            // Update top performers - Show top 3 YTD performers
         const topPerformersContainer = document.getElementById('topPerformers');
         if (topPerformersContainer && portfolioData.length > 0) {
-
-            // Check if YTD data is available (not all null)
-            const stocksWithYTD = portfolioData.filter(item => item.ytdGain !== null && item.ytdGain !== undefined && item.symbol !== 'CASH');
-            const hasYTDData = stocksWithYTD.length > 1; // Need more than just SEZL
+            // Filter stocks with YTD data and sort by YTD performance
+            const stocksWithYTD = portfolioData
+                .filter(item => item.ytdGain !== null && item.ytdGain !== undefined && item.symbol !== 'CASH')
+                .sort((a, b) => parseFloat(b.ytdGain) - parseFloat(a.ytdGain))
+                .slice(0, 3);
             
             let html = '';
-            let sectionTitle = '';
-            
-            if (hasYTDData) {
-                // Use YTD data
-                sectionTitle = 'YTD Top Performers';
-                const topYTD = stocksWithYTD
-                    .sort((a, b) => parseFloat(b.ytdGain) - parseFloat(a.ytdGain))
-                    .slice(0, 3);
-                
-                topYTD.forEach(item => {
+            if (stocksWithYTD.length > 0) {
+                stocksWithYTD.forEach(item => {
                     const ytdValue = parseFloat(item.ytdGain);
                     html += `
                         <div class="performer-item">
@@ -2002,67 +1986,35 @@ function updatePerformanceDisplay() {
                         </div>`;
                 });
             } else {
-                // Use FCF multiples
-                sectionTitle = 'Highest FCF Multiples';
-                const stocksWithFCF = portfolioData
-                    .filter(item => item.fcfMultiple !== null && item.fcfMultiple !== undefined && item.symbol !== 'CASH')
-                    .sort((a, b) => parseFloat(b.fcfMultiple) - parseFloat(a.fcfMultiple))
+                // Fallback to total return if no YTD data available
+                const topPerformers = portfolioData
+                    .filter(item => item.symbol !== 'CASH')
+                    .sort((a, b) => b.return - a.return)
                     .slice(0, 3);
                 
-                if (stocksWithFCF.length > 0) {
-                    stocksWithFCF.forEach(item => {
-                        const fcfValue = parseFloat(item.fcfMultiple);
-                        html += `
-                            <div class="performer-item">
-                                <span class="performer-symbol">${item.symbol}</span>
-                                <span class="performer-return">${fcfValue.toFixed(1)}x</span>
-                            </div>`;
-                    });
-                } else {
-                    // Fallback to total return
-                    sectionTitle = 'Top Performers';
-                    const topPerformers = portfolioData
-                        .filter(item => item.symbol !== 'CASH')
-                        .sort((a, b) => b.return - a.return)
-                        .slice(0, 3);
-                    
-                    topPerformers.forEach(item => {
-                        html += `
-                            <div class="performer-item">
-                                <span class="performer-symbol">${item.symbol}</span>
-                                <span class="performer-return ${item.return >= 0 ? 'positive' : 'negative'}">${item.return >= 0 ? '+' : ''}${item.return.toFixed(1)}%</span>
-                            </div>`;
-                    });
-                }
+                topPerformers.forEach(item => {
+                    html += `
+                        <div class="performer-item">
+                            <span class="performer-symbol">${item.symbol}</span>
+                            <span class="performer-return ${item.return >= 0 ? 'positive' : 'negative'}">${item.return >= 0 ? '+' : ''}${item.return.toFixed(1)}%</span>
+                        </div>`;
+                });
             }
-            
-            // Update title dynamically
-            const titleElement = topPerformersContainer.previousElementSibling;
-            if (titleElement && titleElement.tagName === 'H3') {
-                titleElement.textContent = sectionTitle;
-            }
-            
             topPerformersContainer.innerHTML = html;
         }
         
-        // Dynamic performance display - YTD if available, FCF if not
+        // Update top laggards - Show bottom 3 YTD performers
         const topLaggardsContainer = document.getElementById('topLaggards');
         if (topLaggardsContainer && portfolioData.length > 0) {
-            // Check if YTD data is available (not all null)
-            const stocksWithYTD = portfolioData.filter(item => item.ytdGain !== null && item.ytdGain !== undefined && item.symbol !== 'CASH');
-            const hasYTDData = stocksWithYTD.length > 1; // Need more than just SEZL
+            // Filter stocks with YTD data and sort by YTD performance (worst first)
+            const stocksWithYTD = portfolioData
+                .filter(item => item.ytdGain !== null && item.ytdGain !== undefined && item.symbol !== 'CASH')
+                .sort((a, b) => parseFloat(a.ytdGain) - parseFloat(b.ytdGain))
+                .slice(0, 3);
             
             let html = '';
-            let sectionTitle = '';
-            
-            if (hasYTDData) {
-                // Use YTD data
-                sectionTitle = 'YTD Top Laggards';
-                const bottomYTD = stocksWithYTD
-                    .sort((a, b) => parseFloat(a.ytdGain) - parseFloat(b.ytdGain))
-                    .slice(0, 3);
-                
-                bottomYTD.forEach(item => {
+            if (stocksWithYTD.length > 0) {
+                stocksWithYTD.forEach(item => {
                     const ytdValue = parseFloat(item.ytdGain);
                     html += `
                         <div class="performer-item">
@@ -2071,46 +2023,20 @@ function updatePerformanceDisplay() {
                         </div>`;
                 });
             } else {
-                // Use FCF multiples
-                sectionTitle = 'Lowest FCF Multiples';
-                const stocksWithFCF = portfolioData
-                    .filter(item => item.fcfMultiple !== null && item.fcfMultiple !== undefined && item.symbol !== 'CASH')
-                    .sort((a, b) => parseFloat(a.fcfMultiple) - parseFloat(b.fcfMultiple))
+                // Fallback to total return if no YTD data available
+                const topLaggards = portfolioData
+                    .filter(item => item.symbol !== 'CASH')
+                    .sort((a, b) => a.return - b.return)
                     .slice(0, 3);
                 
-                if (stocksWithFCF.length > 0) {
-                    stocksWithFCF.forEach(item => {
-                        const fcfValue = parseFloat(item.fcfMultiple);
-                        html += `
-                            <div class="performer-item">
-                                <span class="performer-symbol">${item.symbol}</span>
-                                <span class="performer-return">${fcfValue.toFixed(1)}x</span>
-                            </div>`;
-                    });
-                } else {
-                    // Fallback to total return
-                    sectionTitle = 'Top Laggards';
-                    const topLaggards = portfolioData
-                        .filter(item => item.symbol !== 'CASH')
-                        .sort((a, b) => a.return - b.return)
-                        .slice(0, 3);
-                    
-                    topLaggards.forEach(item => {
-                        html += `
-                            <div class="performer-item">
-                                <span class="performer-symbol">${item.symbol}</span>
-                                <span class="performer-return ${item.return >= 0 ? 'positive' : 'negative'}">${item.return >= 0 ? '+' : ''}${item.return.toFixed(1)}%</span>
-                            </div>`;
-                    });
-                }
+                topLaggards.forEach(item => {
+                    html += `
+                        <div class="performer-item">
+                            <span class="performer-symbol">${item.symbol}</span>
+                            <span class="performer-return ${item.return >= 0 ? 'positive' : 'negative'}">${item.return >= 0 ? '+' : ''}${item.return.toFixed(1)}%</span>
+                        </div>`;
+                });
             }
-            
-            // Update title dynamically
-            const titleElement = topLaggardsContainer.previousElementSibling;
-            if (titleElement && titleElement.tagName === 'H3') {
-                titleElement.textContent = sectionTitle;
-            }
-            
             topLaggardsContainer.innerHTML = html;
         }
 }
@@ -2119,9 +2045,8 @@ function updatePerformanceDisplay() {
 function updatePortfolioMultiples() {
     const fcfMultipleElement = document.getElementById('fcfMultiple');
     const peMultipleElement = document.getElementById('peMultiple');
-    const pegMultipleElement = document.getElementById('pegMultiple');
     
-    if (fcfMultipleElement && peMultipleElement && pegMultipleElement) {
+    if (fcfMultipleElement && peMultipleElement) {
         const portfolioItems = portfolioData.filter(item => item.value > 0 && item.symbol !== 'CASH');
         
         // Calculate weighted average P/E multiple using weight percentages
@@ -2148,143 +2073,79 @@ function updatePortfolioMultiples() {
             }
         });
         
-        // Calculate weighted average P/E/G multiple using weight percentages
-        let weightedPEG = 0;
-        let pegWeightSum = 0;
-        
-        portfolioItems.forEach(item => {
-            if (item.peg > 0 && item.weight > 0) {
-                const weightDecimal = item.weight / 100; // Convert percentage to decimal
-                weightedPEG += item.peg * weightDecimal;
-                pegWeightSum += weightDecimal;
-            }
-        });
-        
         fcfMultipleElement.textContent = fcfWeightSum > 0 ? `${weightedFCF.toFixed(1)}x` : '-';
         peMultipleElement.textContent = peWeightSum > 0 ? `${weightedPE.toFixed(1)}x` : '-';
-        pegMultipleElement.textContent = pegWeightSum > 0 ? `${weightedPEG.toFixed(2)}x` : '-';
     }
 }
 
-// Global variable for the consolidated chart
-let consolidatedChart = null;
-let currentView = 'company'; // Track current view
+// Global variable for the allocation chart
+let allocationChart = null;
 
-// Function to create the consolidated pie chart
-function updateConsolidatedChart(view = 'company') {
-    const ctx = document.getElementById('consolidatedPieChart');
+// Function to create the allocation pie chart
+function updateAllocationChart() {
+    const ctx = document.getElementById('allocationPieChart');
     if (!ctx) {
         return;
     }
 
-    // Update title based on view
-    const titleElement = document.getElementById('allocationTitle');
-    if (titleElement) {
-        titleElement.textContent = view === 'company' ? 'Portfolio Allocation' : 'Sector Allocation';
-    }
-
+    // Prepare chart data including cash
     let chartData = [];
-    let customColors = [];
+    
+    // Add portfolio items
+    chartData.push(...portfolioData.filter(item => item.weight > 0));
+    
+    // Add cash to the chart data if it exists
+    if (cashBalance > 0) {
+        // Calculate total portfolio value the same way as in updatePortfolioPrices
+        const totalPortfolioValue = portfolioData.reduce((sum, item) => {
+            const itemValue = item.shares * (item.price || 0);
+            return sum + itemValue;
+        }, 0) + cashBalance;
+        
+        const cashWeight = (cashBalance / totalPortfolioValue) * 100;
+        
 
-    if (view === 'company') {
-        // Company view - Portfolio Allocation
-        chartData.push(...portfolioData.filter(item => item.weight > 0));
         
-        // Add cash to the chart data if it exists
-        if (cashBalance > 0) {
-            const totalPortfolioValue = portfolioData.reduce((sum, item) => {
-                const itemValue = item.shares * (item.price || 0);
-                return sum + itemValue;
-            }, 0) + cashBalance;
-            
-            const cashWeight = (cashBalance / totalPortfolioValue) * 100;
-            
-            chartData.push({
-                symbol: 'CASH',
-                weight: cashWeight,
-                name: 'Cash Balance'
-            });
-        }
-        
-        // Sort by weight (descending)
-        chartData.sort((a, b) => b.weight - a.weight);
-
-        // Modern color palette for companies
-        const modernColors = [
-            '#6366F1', '#EC4899', '#10B981', '#F59E0B', '#8B5CF6',
-            '#06B6D4', '#84CC16', '#F97316', '#EF4444', '#14B8A6',
-            '#F43F5E', '#A855F7', '#0EA5E9', '#22C55E', '#EAB308'
-        ];
-
-        // Create custom colors array with green for cash
-        customColors = chartData.map((item, index) => {
-            if (item.symbol === 'CASH') {
-                return '#22C55E'; // Green for cash
-            }
-            return modernColors[index % modernColors.length];
-        });
-    } else {
-        // Sector view - Sector Allocation
-        const sectorData = {};
-        
-        // Group portfolio items by sector
-        portfolioData.forEach(item => {
-            if (item.weight > 0 && item.sector) {
-                if (!sectorData[item.sector]) {
-                    sectorData[item.sector] = 0;
-                }
-                sectorData[item.sector] += item.weight;
-            }
-        });
-        
-        // Add cash as a sector if it exists
-        if (cashBalance > 0) {
-            const totalPortfolioValue = portfolioData.reduce((sum, item) => {
-                const itemValue = item.shares * (item.price || 0);
-                return sum + itemValue;
-            }, 0) + cashBalance;
-            
-            const cashWeight = (cashBalance / totalPortfolioValue) * 100;
-            sectorData['CASH'] = cashWeight;
-        }
-        
-        // Convert to array format
-        chartData = Object.entries(sectorData).map(([sector, weight]) => ({
-            symbol: sector,
-            weight: weight
-        }));
-        
-        // Sort by weight (descending)
-        chartData.sort((a, b) => b.weight - a.weight);
-
-        // Sector color mapping
-        const sectorColorMap = {
-            'Technology': '#6366F1', // Indigo
-            'Software': '#EF4444', // Red
-            'Healthcare': '#EC4899', // Pink
-            'Financial Services': '#10B981', // Emerald
-            'Consumer Discretionary': '#F59E0B', // Amber
-            'Communication Services': '#8B5CF6', // Violet
-            'Semiconductors': '#EAB308', // Yellow
-            'Industrials': '#06B6D4', // Cyan
-            'Energy': '#84CC16', // Lime
-            'Consumer Staples': '#F97316', // Orange
-            'Real Estate': '#EF4444', // Red
-            'Materials': '#14B8A6', // Teal
-            'Utilities': '#F43F5E', // Rose
-            'Other': '#F43F5E', // Rose - Other
-            'CASH': '#22C55E'  // Green - Cash
-        };
-
-        // Create custom colors array with proper sector mapping
-        customColors = chartData.map((item) => {
-            return sectorColorMap[item.symbol] || '#6366F1'; // Default to indigo if sector not found
+        chartData.push({
+            symbol: 'CASH',
+            weight: cashWeight,
+            name: 'Cash Balance'
         });
     }
+    
+    // Sort all data by weight (descending) - now including cash
+    chartData.sort((a, b) => b.weight - a.weight);
 
     if (chartData.length === 0) {
         return;
     }
+
+    // Modern color palette
+    const modernColors = [
+        '#6366F1', // Indigo
+        '#EC4899', // Pink
+        '#10B981', // Emerald
+        '#F59E0B', // Amber
+        '#8B5CF6', // Violet
+        '#06B6D4', // Cyan
+        '#84CC16', // Lime
+        '#F97316', // Orange
+        '#EF4444', // Red
+        '#14B8A6', // Teal
+        '#F43F5E', // Rose
+        '#A855F7', // Purple
+        '#0EA5E9', // Sky
+        '#22C55E', // Green
+        '#EAB308'  // Yellow
+    ];
+
+    // Create custom colors array with green for cash
+    const customColors = chartData.map((item, index) => {
+        if (item.symbol === 'CASH') {
+            return '#22C55E'; // Green for cash
+        }
+        return modernColors[index % modernColors.length];
+    });
 
     const data = {
         labels: chartData.map(item => item.symbol),
@@ -2299,12 +2160,13 @@ function updateConsolidatedChart(view = 'company') {
     };
 
     const isMobile = window.innerWidth <= 768;
-    
-    // Register datalabels plugin
     if (typeof ChartDataLabels !== 'undefined' && !Chart.registry.plugins.get('datalabels')) {
         Chart.register(ChartDataLabels);
     }
-    
+    // Register datalabels plugin (CDN exposes ChartDataLabels)
+    if (typeof ChartDataLabels !== 'undefined' && !Chart.registry.plugins.get('datalabels')) {
+        Chart.register(ChartDataLabels);
+    }
     const config = {
         type: 'doughnut',
         data: data,
@@ -2314,8 +2176,8 @@ function updateConsolidatedChart(view = 'company') {
             cutout: '50%',
             layout: {
                 padding: {
-                    top: isMobile ? 110 : (view === 'company' ? 56 : 80),
-                    bottom: isMobile ? 34 : 80,
+                    top: isMobile ? 110 : 56,
+                    bottom: isMobile ? 34 : 80, // more room for bottom callouts on desktop
                     left: 20,
                     right: 20
                 }
@@ -2332,12 +2194,13 @@ function updateConsolidatedChart(view = 'company') {
                     },
                     color: '#111827',
                     formatter: (v, ctx) => {
+                        const isSector = ctx.chart.canvas.id === 'sectorPieChart';
                         const percent = `${Number(v).toFixed(1)}%`;
-                        if (view === 'sector') {
+                        if (isSector) {
                             const label = (ctx.chart.data.labels[ctx.dataIndex] || '').replace('Consumer Discretionary','Cons Disc').replace('Communication Services','Internet').replace('Semiconductors','Semis').replace('CASH','Cash');
                             return `${label}\n${percent}`;
                         }
-                        // Company view: ticker on first line, percent on second
+                        // Portfolio Allocation: ticker on first line, percent on second (compact)
                         const ticker = ctx.chart.data.labels[ctx.dataIndex] || '';
                         return `${ticker}\n${percent}`;
                     },
@@ -2358,7 +2221,7 @@ function updateConsolidatedChart(view = 'company') {
                     anchor: 'end',
                     offset: (ctx) => {
                         const mobile = window.innerWidth <= 768;
-                        return mobile ? 6 : 12;
+                        return mobile ? 6 : 12; // smaller offset on mobile to keep within canvas
                     },
                     clamp: true,
                     clip: false
@@ -2380,29 +2243,181 @@ function updateConsolidatedChart(view = 'company') {
     };
 
     // Destroy existing chart if it exists
-    if (consolidatedChart) {
-        consolidatedChart.destroy();
+    if (allocationChart) {
+        allocationChart.destroy();
     }
 
     // Create new chart
-    consolidatedChart = new Chart(ctx, config);
-    
-    // Set up toggle buttons after chart is created
-    setupToggleButtons();
+    allocationChart = new Chart(ctx, config);
+
+    // Plugin handles labels; no custom callouts
 }
 
-// Function to handle toggle button clicks
-function handleToggleClick(view) {
-    currentView = view;
-    
-    // Update active button state
-    document.querySelectorAll('.toggle-btn').forEach(btn => {
-        btn.classList.remove('active');
+// Global variable for the sector allocation chart
+let sectorChart = null;
+
+// Function to create the sector allocation pie chart
+function updateSectorChart() {
+    const ctx = document.getElementById('sectorPieChart');
+    if (!ctx) {
+        return;
+    }
+
+    // Group by sector and calculate total value for each sector
+    const sectorData = {};
+    portfolioData.forEach(item => {
+        const sector = item.sector || 'Other';
+        const itemValue = item.shares * (item.price || 0);
+        sectorData[sector] = (sectorData[sector] || 0) + itemValue;
     });
-    document.querySelector(`[data-view="${view}"]`).classList.add('active');
+
+    // Calculate total portfolio value
+    const totalPortfolioValue = portfolioData.reduce((sum, item) => {
+        const itemValue = item.shares * (item.price || 0);
+        return sum + itemValue;
+    }, 0) + cashBalance;
+
+    // Convert to chart data format with weights
+    let chartData = Object.entries(sectorData)
+        .map(([sector, value]) => ({
+            symbol: sector,
+            weight: (value / totalPortfolioValue) * 100,
+            name: sector
+        }))
+        .filter(item => item.weight > 0);
+
+    // Add cash as a separate sector if it exists
+    if (cashBalance > 0) {
+        const cashWeight = (cashBalance / totalPortfolioValue) * 100;
+        chartData.push({
+            symbol: 'CASH',
+            weight: cashWeight,
+            name: 'Cash'
+        });
+    }
     
-    // Update chart
-    updateConsolidatedChart(view);
+    // Sort all data by weight (descending) - now including cash
+    chartData.sort((a, b) => b.weight - a.weight);
+
+    if (chartData.length === 0) {
+        return;
+    }
+
+    // Vibrant color palette for sectors - matching Portfolio Allocation chart
+    const sectorColorMap = {
+        'Software': '#6366F1', // Indigo - Software
+        'Communication Services': '#EF4444', // Red - Communication Services
+        'Semiconductors': '#F97316', // Orange - Semiconductors
+        'Industrials': '#EAB308', // Yellow - Industrials
+        'Financial Services': '#8B5CF6', // Purple - Financial Services
+        'Financials': '#8B5CF6', // Purple - Financials (alternative name)
+        'Consumer Discretionary': '#06B6D4', // Turquoise - Consumer Discretionary
+        'Healthcare': '#10B981', // Emerald - Healthcare
+        'Energy': '#F59E0B', // Amber - Energy
+        'Materials': '#84CC16', // Lime - Materials
+        'Real Estate': '#EC4899', // Pink - Real Estate
+        'Utilities': '#14B8A6', // Teal - Utilities
+        'Other': '#F43F5E', // Rose - Other
+        'CASH': '#22C55E'  // Green - Cash
+    };
+
+    // Create custom colors array with proper sector mapping
+    const customColors = chartData.map((item) => {
+        return sectorColorMap[item.symbol] || '#6366F1'; // Default to indigo if sector not found
+    });
+
+    const data = {
+        labels: chartData.map(item => item.symbol),
+        datasets: [{
+            data: chartData.map(item => item.weight),
+            backgroundColor: customColors,
+            borderColor: '#ffffff',
+            borderWidth: 4,
+            hoverBorderWidth: 6,
+            hoverOffset: 15
+        }]
+    };
+
+    const isMobile = window.innerWidth <= 768;
+    const config = {
+        type: 'doughnut',
+        data: data,
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            cutout: '50%',
+            layout: {
+                padding: {
+                    top: isMobile ? 110 : 80,  // add desktop top space to reduce white gap above title area visually
+                    bottom: isMobile ? 34 : 80,
+                    left: 20,
+                    right: 20
+                }
+            },
+            plugins: {
+                legend: {
+                    display: false
+                },
+                tooltip: { enabled: false },
+                datalabels: {
+                    display: (ctx) => {
+                        const v = ctx.dataset.data[ctx.dataIndex];
+                        return v >= 2.9; // Show callouts only when weight >= 2.9% on all devices
+                    },
+                    color: '#111827',
+                    formatter: (v, ctx) => {
+                        const isSector = ctx.chart.canvas.id === 'sectorPieChart';
+                        const percent = `${Number(v).toFixed(1)}%`;
+                        if (isSector) {
+                            const label = (ctx.chart.data.labels[ctx.dataIndex] || '').replace('Consumer Discretionary','Cons Disc').replace('Communication Services','Internet').replace('Semiconductors','Semis').replace('CASH','Cash');
+                            return `${label}\n${percent}`;
+                        }
+                        return percent;
+                    },
+                    backgroundColor: 'rgba(255,255,255,0.95)',
+                    borderColor: (ctx) => {
+                        const bg = ctx.dataset.backgroundColor;
+                        return Array.isArray(bg) ? bg[ctx.dataIndex] : bg;
+                    },
+                    borderWidth: 2,
+                    borderRadius: 10,
+                    padding: isMobile ? {top:4,right:6,bottom:4,left:6} : {top:6,right:8,bottom:6,left:8},
+                    font: {
+                        family: 'Inter',
+                        size: isMobile ? 10 : 12,
+                        weight: '700'
+                    },
+                    align: 'end',
+                    anchor: 'end',
+                    offset: (ctx) => (window.innerWidth <= 768 ? 6 : 12),
+                    clamp: true,
+                    clip: false
+                }
+            },
+            animation: {
+                animateRotate: true,
+                animateScale: true,
+                duration: 1500,
+                easing: 'easeOutQuart'
+            },
+            elements: {
+                arc: {
+                    borderRadius: 8,
+                    borderSkipped: false
+                }
+            }
+        }
+    };
+
+    // Destroy existing chart if it exists
+    if (sectorChart) {
+        sectorChart.destroy();
+    }
+
+    // Create new chart
+    sectorChart = new Chart(ctx, config);
+
+    // Plugin handles labels; no custom callouts
 }
 
 // Function to create sector allocation callouts
@@ -3051,24 +3066,7 @@ function initializeEventListeners() {
         });
     }
     
-
-}
-
-// Function to set up toggle button event listeners
-function setupToggleButtons() {
-    const toggleButtons = document.querySelectorAll('.toggle-btn');
-    
-    // Remove existing event listeners to prevent duplicates
-    toggleButtons.forEach(button => {
-        button.removeEventListener('click', handleToggleButtonClick);
-        button.addEventListener('click', handleToggleButtonClick);
-    });
-}
-
-// Function to handle toggle button click events
-function handleToggleButtonClick() {
-    const view = this.getAttribute('data-view');
-    handleToggleClick(view);
+    console.log('Event listeners initialized');
 }
 
 // Sample data for fallback

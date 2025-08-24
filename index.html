@@ -18,7 +18,7 @@
       gtag('config', 'G-EH291BHWTE');
     </script>
     
-    <link rel="stylesheet" href="styles.css?v=33.0">
+    <link rel="stylesheet" href="styles.css?v=37.0">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
@@ -79,25 +79,17 @@
 
 
 
-    <!-- Portfolio Allocation Section -->
+    <!-- Consolidated Allocation Section -->
     <section id="allocation" class="allocation">
         <div class="container">
-            <h2 class="section-title">Portfolio Allocation</h2>
-            <div class="allocation-content">
-                <div class="allocation-chart">
-                    <canvas id="allocationPieChart"></canvas>
-                </div>
+            <h2 class="section-title" id="allocationTitle">Portfolio Allocation</h2>
+            <div class="allocation-toggle">
+                <button class="toggle-btn active" data-view="company">Company</button>
+                <button class="toggle-btn" data-view="sector">Sector</button>
             </div>
-        </div>
-    </section>
-
-    <!-- Sector Allocation Section -->
-    <section id="sector-allocation" class="allocation">
-        <div class="container">
-            <h2 class="section-title">Sector Weight</h2>
             <div class="allocation-content">
                 <div class="allocation-chart">
-                    <canvas id="sectorPieChart"></canvas>
+                    <canvas id="consolidatedPieChart"></canvas>
                 </div>
             </div>
         </div>
@@ -126,19 +118,19 @@
                             <span class="multiple-value" id="peMultiple">-</span>
                         </div>
                         <div class="multiple-stat">
-                            <span class="multiple-label">Coming Soon</span>
-                            <span class="multiple-value">-</span>
+                            <span class="multiple-label">PEG Multiple</span>
+                            <span class="multiple-value" id="pegMultiple">-</span>
                         </div>
                     </div>
                 </div>
                 <div class="performance-card">
-                    <h3>YTD Top Performers</h3>
+                    <h3>Top Performers</h3>
                     <div id="topPerformers" class="top-performers">
                         <!-- Top performers will be loaded here -->
                     </div>
                 </div>
                 <div class="performance-card">
-                    <h3>YTD Top Laggards</h3>
+                    <h3>Top Laggards</h3>
                     <div id="topLaggards" class="top-laggards">
                         <!-- Top laggards will be loaded here -->
                     </div>
@@ -223,6 +215,7 @@
 
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-                            <script src="script.js?v=33.0"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
+                            <script src="script.js?v=38.8"></script>
 </body>
 </html>
