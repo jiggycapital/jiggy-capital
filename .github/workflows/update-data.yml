@@ -1,0 +1,125 @@
+name: Update Portfolio Data Cache
+
+on:
+  schedule:
+    - cron: '0 0 */7 * *'  # Every 7 days at midnight UTC
+  workflow_dispatch:  # Allow manual trigger
+
+jobs:
+  update-events-cache:
+    runs-on: ubuntu-latest
+    name: Update Events Cache
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          
+      - name: Fetch Events Data
+        run: |
+          # Create the data fetching script
+          cat > fetch-events.js << 'EOF'
+          const https = require('https');
+          const fs = require('fs');
+          
+          const FINNHUB_API_KEY = 'd2l0fm1r01qqq9qsstfgd2l0fm1r01qqq9qsstg0';
+          const PORTFOLIO_TICKERS = [
+            'DDOG', 'NOW', 'HUBS', 'NVDA', 'AVGO', 'MRVL', 'TEAM', 'NTDOY', 
+            'AJG', 'MNDY', 'RDDT', 'SEZL', 'TOST', 'CRM', 'GTLB', 'AMZN', 
+            'GOOGL', 'TER', 'FIX'
+          ];
+          
+          async function fetchFinnhubData(symbol) {
+            return new Promise((resolve, reject) => {
+              const url = `https://finnhub.io/api/v1/calendar/earnings?from=2024-01-01&to=2025-12-31&symbol=${symbol}&token=${FINNHUB_API_KEY}`;
+              
+              https.get(url, (res) => {
+                let data = '';
+                res.on('data', (chunk) => data += chunk);
+                res.on('end', () => {
+                  try {
+                    const jsonData = JSON.parse(data);
+                    resolve(jsonData);
+                  } catch (error) {
+                    console.log(`Error parsing data for ${symbol}:`, error.message);
+                    resolve({ earningsCalendar: [] });
+                  }
+                });
+              }).on('error', (err) => {
+                console.log(`Error fetching data for ${symbol}:`, err.message);
+                resolve({ earningsCalendar: [] });
+              });
+            });
+          }
+          
+          async function fetchAllEvents() {
+            console.log('Starting to fetch events data...');
+            const allEvents = [];
+            
+            for (const ticker of PORTFOLIO_TICKERS) {
+              console.log(`Fetching events for ${ticker}...`);
+              const data = await fetchFinnhubData(ticker);
+              
+              if (data.earningsCalendar && Array.isArray(data.earningsCalendar)) {
+                data.earningsCalendar.forEach(event => {
+                  allEvents.push({
+                    ticker: ticker,
+                    date: event.date,
+                    name: 'Earnings Report',
+                    companyName: event.symbol,
+                    url: `https://finnhub.io/calendar/earnings?symbol=${ticker}`
+                  });
+                });
+              }
+              
+              // Add delay to avoid rate limiting
+              await new Promise(resolve => setTimeout(resolve, 1000));
+            }
+            
+            // Sort by date
+            allEvents.sort((a, b) => new Date(a.date) - new Date(b.date));
+            
+            // Filter to next 30 days
+            const today = new Date();
+            const thirtyDaysFromNow = new Date();
+            thirtyDaysFromNow.setDate(today.getDate() + 30);
+            
+            const filteredEvents = allEvents.filter(event => {
+              const eventDate = new Date(event.date);
+              return eventDate >= today && eventDate <= thirtyDaysFromNow;
+            });
+            
+            console.log(`Found ${filteredEvents.length} events in next 30 days`);
+            
+            return {
+              events: filteredEvents,
+              lastUpdated: new Date().toISOString(),
+              totalEvents: allEvents.length
+            };
+          }
+          
+          // Execute the fetch
+          fetchAllEvents().then(data => {
+            fs.writeFileSync('events-cache.json', JSON.stringify(data, null, 2));
+            console.log('Events cache updated successfully!');
+            console.log(`Cached ${data.events.length} events`);
+          }).catch(error => {
+            console.error('Error updating events cache:', error);
+            process.exit(1);
+          });
+          EOF
+          
+      - name: Run Events Fetch
+        run: node fetch-events.js
+        
+      - name: Commit and Push Changes
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add events-cache.json
+          git diff --quiet && git diff --staged --quiet || git commit -m "Update events cache - $(date)"
+          git push

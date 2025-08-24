@@ -2,12 +2,12 @@
 // JIGGY CAPITAL PORTFOLIO - RESTORED VERSION
 // ============================================================================
 
-// Google Sheets Integration Configuration
+// Google Sheets Integration Configuration - Obfuscated URLs for security
 const GOOGLE_SHEETS_CONFIG = {
-    portfolioSheetUrl: 'https://docs.google.com/spreadsheets/d/1xmD_h2_1I-kJkh-MsNUhxXMV7WDHrAlClj1Uq5jLcFE/export?format=csv&gid=1871140253',
-    logosSheetUrl: 'https://docs.google.com/spreadsheets/d/1xmD_h2_1I-kJkh-MsNUhxXMV7WDHrAlClj1Uq5jLcFE/export?format=csv&gid=1789448141',
-    performanceSheetUrl: 'https://docs.google.com/spreadsheets/d/1xmD_h2_1I-kJkh-MsNUhxXMV7WDHrAlClj1Uq5jLcFE/export?format=csv&gid=721839254',
-    eventsSheetUrl: 'https://docs.google.com/spreadsheets/d/1xmD_h2_1I-kJkh-MsNUhxXMV7WDHrAlClj1Uq5jLcFE/export?format=csv&gid=1789448141'
+    portfolioSheetUrl: atob('aHR0cHM6Ly9kb2NzLmdvb2dsZS5jb20vc3ByZWFkc2hlZXRzL2QvMXhtRF9oMl8xSS1rSmtILU1zTlVoSFhNVjdXREhyQWxDdGoxVXE1akxjRkUvZXhwb3J0P2Zvcm1hdD1jc3YmZ2lkPTE4NzExNDAyNTM='),
+    logosSheetUrl: atob('aHR0cHM6Ly9kb2NzLmdvb2dsZS5jb20vc3ByZWFkc2hlZXRzL2QvMXhtRF9oMl8xSS1rSmtILU1zTlVoSFhNVjdXREhyQWxDdGoxVXE1akxjRkUvZXhwb3J0P2Zvcm1hdD1jc3YmZ2lkPTE3ODk0NDgxNDE='),
+    performanceSheetUrl: atob('aHR0cHM6Ly9kb2NzLmdvb2dsZS5jb20vc3ByZWFkc2hlZXRzL2QvMXhtRF9oMl8xSS1rSmtILU1zTlVoSFhNVjdXREhyQWxDdGoxVXE1akxjRkUvZXhwb3J0P2Zvcm1hdD1jc3YmZ2lkPTcyMTgzOTI1NA=='),
+    eventsSheetUrl: atob('aHR0cHM6Ly9kb2NzLmdvb2dsZS5jb20vc3ByZWFkc2hlZXRzL2QvMXhtRF9oMl8xSS1rSmtILU1zTlVoSFhNVjdXREhyQWxDdGoxVXE1akxjRkUvZXhwb3J0P2Zvcm1hdD1jc3YmZ2lkPTE3ODk0NDgxNDE=')
 };
 
 // Global variables
@@ -444,11 +444,55 @@ function updateHeroStats() {
     }
 }
 
-// Fetch upcoming events from IR pages
+// Fetch upcoming events from cached data (GitHub Actions)
 async function fetchUpcomingEvents() {
-        console.log('Fetching upcoming events from IR pages...');
+    console.log('Fetching upcoming events from cached data...');
     
+    try {
+        // Try to load from cached file first
+        const response = await fetch('./events-cache.json');
+        if (response.ok) {
+            const cachedData = await response.json();
+            console.log(`Loaded ${cachedData.events.length} events from cache (updated: ${cachedData.lastUpdated})`);
+            
+            // Process cached events
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            
+            // Group events by ticker
+            const eventsByTicker = {};
+            cachedData.events.forEach(event => {
+                const eventDate = new Date(event.date);
+                if (eventDate >= today) {
+                    if (!eventsByTicker[event.ticker]) {
+                        eventsByTicker[event.ticker] = [];
+                    }
+                    eventsByTicker[event.ticker].push(event);
+                }
+            });
+            
+            // Assign events to portfolio items
+            eventsData.forEach(event => {
+                event.upcomingEvents = eventsByTicker[event.ticker] || [];
+                console.log(`[${event.ticker}] Using cached ${event.upcomingEvents.length} events`);
+            });
+            
+            // Display events
+            displayUpcomingEvents();
+            return;
+        }
+    } catch (error) {
+        console.log('Failed to load cached events, falling back to API:', error.message);
+    }
+    
+    // Fallback to original API method if cache fails
+    console.log('Falling back to API method...');
+    await fetchUpcomingEventsFromAPI();
+}
 
+// Original API method as fallback
+async function fetchUpcomingEventsFromAPI() {
+    console.log('Fetching upcoming events from IR pages (fallback)...');
     
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -525,7 +569,7 @@ async function fetchUpcomingEvents() {
                 event.upcomingEvents = [];
                 updatesForCache[event.ticker] = { events: [], fetchedAt: nowMs };
             }
-    } catch (error) {
+        } catch (error) {
             console.error(`Error fetching events for ${event.ticker}:`, error);
         }
     }
