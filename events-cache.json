@@ -5,37 +5,51 @@
       "date": "2025-08-27",
       "name": "Earnings Report",
       "companyName": "NVDA",
-      "url": "https://finnhub.io/calendar/earnings?symbol=NVDA"
+      "url": "https://finnhub.io/calendar/earnings?symbol=NVDA",
+      "source": "Finnhub API"
     },
     {
       "ticker": "MRVL",
       "date": "2025-08-28",
       "name": "Earnings Report",
       "companyName": "MRVL",
-      "url": "https://finnhub.io/calendar/earnings?symbol=MRVL"
+      "url": "https://finnhub.io/calendar/earnings?symbol=MRVL",
+      "source": "Finnhub API"
     },
     {
       "ticker": "CRM",
       "date": "2025-09-03",
       "name": "Earnings Report",
       "companyName": "CRM",
-      "url": "https://finnhub.io/calendar/earnings?symbol=CRM"
+      "url": "https://finnhub.io/calendar/earnings?symbol=CRM",
+      "source": "Finnhub API"
     },
     {
       "ticker": "GTLB",
       "date": "2025-09-03",
       "name": "Earnings Report",
       "companyName": "GTLB",
-      "url": "https://finnhub.io/calendar/earnings?symbol=GTLB"
+      "url": "https://finnhub.io/calendar/earnings?symbol=GTLB",
+      "source": "Finnhub API"
     },
     {
       "ticker": "AVGO",
       "date": "2025-09-04",
       "name": "Earnings Report",
       "companyName": "AVGO",
-      "url": "https://finnhub.io/calendar/earnings?symbol=AVGO"
+      "url": "https://finnhub.io/calendar/earnings?symbol=AVGO",
+      "source": "Finnhub API"
+    },
+    {
+      "ticker": "SEZL",
+      "date": "2025-09-10",
+      "name": "Conference",
+      "companyName": "SEZL",
+      "url": "https://investors.sezzle.com/events-and-presentations",
+      "source": "IR Page"
     }
   ],
-  "lastUpdated": "2025-08-24T01:14:24.357Z",
-  "totalEvents": 35
+  "lastUpdated": "2025-08-24T20:31:47.988Z",
+  "totalEvents": 36,
+  "uniqueEvents": 36
 }
