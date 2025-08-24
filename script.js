@@ -564,6 +564,59 @@ async function fetchCompanyNews() {
     }
 }
 
+// Display upcoming events
+function displayUpcomingEvents() {
+    const eventsContainer = document.getElementById('upcomingEvents');
+    if (!eventsContainer) return;
+    
+    // Collect all events from all companies
+    const allEvents = [];
+    eventsData.forEach(company => {
+        if (company.upcomingEvents && Array.isArray(company.upcomingEvents)) {
+            allEvents.push(...company.upcomingEvents);
+        }
+    });
+    
+    if (allEvents.length === 0) {
+        eventsContainer.innerHTML = '<div class="no-events"><i class="far fa-calendar"></i><p>No upcoming events found.</p><small>Events are updated every 7 days via GitHub Actions.</small></div>';
+        return;
+    }
+    
+    // Sort events by date
+    allEvents.sort((a, b) => new Date(a.date) - new Date(b.date));
+    
+    let html = '';
+    allEvents.forEach(event => {
+        const logoUrl = logosData[event.ticker] || '';
+        const logoHtml = logoUrl ? `<img src="${logoUrl}" alt="${event.ticker}" />` : event.ticker;
+        
+        const eventDate = new Date(event.date);
+        const formattedDate = eventDate.toLocaleDateString('en-US', { 
+            month: 'short', 
+            day: 'numeric', 
+            year: 'numeric'
+        });
+        
+        html += `
+            <div class="event-item">
+                <div class="event-logo">${logoHtml}</div>
+                <div class="event-info">
+                    <div class="event-company">${event.companyName || event.ticker}</div>
+                    <div class="event-name">${event.name}</div>
+                    <div class="event-date"><i class="far fa-calendar"></i>${formattedDate}</div>
+                </div>
+                <div class="event-actions">
+                    <a class="event-link" href="${event.url}" target="_blank">
+                        <i class="fas fa-external-link-alt"></i>View Details
+                    </a>
+                </div>
+            </div>
+        `;
+    });
+    
+    eventsContainer.innerHTML = html;
+}
+
 // Display company news
 function displayCompanyNews(newsData) {
     const newsContainer = document.getElementById('companyNews');
