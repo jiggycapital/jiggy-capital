@@ -122,4 +122,5 @@ jobs:
           git config --local user.name "GitHub Action"
           git add events-cache.json
           git diff --quiet && git diff --staged --quiet || git commit -m "Update events cache - $(date)"
-          git push
+          git pull origin master --rebase
+          git push origin master
