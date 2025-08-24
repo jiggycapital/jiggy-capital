@@ -91,31 +91,40 @@ jobs:
                     const events = [];
                     const html = data.toLowerCase();
                     
-                    // Common event keywords to look for
+                    console.log(`IR page for ${symbol} loaded, size: ${data.length} characters`);
+                    
+                    // Common event keywords to look for (expanded list)
                     const eventKeywords = [
                       'analyst day', 'investor day', 'earnings call', 'conference call',
                       'annual meeting', 'shareholder meeting', 'presentation', 'webcast',
-                      'conference', 'summit', 'symposium'
+                      'conference', 'summit', 'symposium', 'quarterly call', 'q&a',
+                      'earnings release', 'financial results', 'quarterly results',
+                      'annual results', 'investor conference', 'analyst conference'
                     ];
                     
-                    // Look for date patterns (MM/DD/YYYY, MM-DD-YYYY, etc.)
+                    // Look for date patterns (expanded list)
                     const datePatterns = [
                       /(\d{1,2})\/(\d{1,2})\/(\d{4})/g,  // MM/DD/YYYY
                       /(\d{1,2})-(\d{1,2})-(\d{4})/g,   // MM-DD-YYYY
                       /(\d{4})-(\d{1,2})-(\d{1,2})/g,   // YYYY-MM-DD
-                      /(\w+)\s+(\d{1,2}),?\s+(\d{4})/g  // Month DD, YYYY
+                      /(\w+)\s+(\d{1,2}),?\s+(\d{4})/g, // Month DD, YYYY
+                      /(\d{1,2})\s+(\w+)\s+(\d{4})/g,   // DD Month YYYY
+                      /(\w+)\s+(\d{1,2})\s+(\d{4})/g    // Month DD YYYY
                     ];
                     
-                    // Extract potential events
+                    // Extract potential events with more flexible matching
                     eventKeywords.forEach(keyword => {
                       if (html.includes(keyword)) {
-                        // Look for nearby dates
+                        console.log(`Found keyword "${keyword}" in ${symbol} IR page`);
+                        
+                        // Look for nearby dates in a larger window
                         const keywordIndex = html.indexOf(keyword);
-                        const surroundingText = html.substring(Math.max(0, keywordIndex - 200), keywordIndex + 200);
+                        const surroundingText = html.substring(Math.max(0, keywordIndex - 500), keywordIndex + 500);
                         
                         datePatterns.forEach(pattern => {
                           const matches = surroundingText.match(pattern);
                           if (matches) {
+                            console.log(`Found ${matches.length} date matches for "${keyword}" in ${symbol}`);
                             matches.forEach(match => {
                               try {
                                 const eventDate = new Date(match);
@@ -124,6 +133,7 @@ jobs:
                                 thirtyDaysFromNow.setDate(today.getDate() + 30);
                                 
                                 if (eventDate >= today && eventDate <= thirtyDaysFromNow) {
+                                  console.log(`Valid event found for ${symbol}: ${keyword} on ${eventDate.toISOString().split('T')[0]}`);
                                   events.push({
                                     ticker: symbol,
                                     date: eventDate.toISOString().split('T')[0],
@@ -134,9 +144,48 @@ jobs:
                                   });
                                 }
                               } catch (e) {
-                                // Skip invalid dates
+                                console.log(`Invalid date format for ${symbol}: ${match}`);
                               }
                             });
+                          }
+                        });
+                      }
+                    });
+                    
+                    // Also look for any future dates that might be events
+                    const today = new Date();
+                    const thirtyDaysFromNow = new Date();
+                    thirtyDaysFromNow.setDate(today.getDate() + 30);
+                    
+                    datePatterns.forEach(pattern => {
+                      const matches = html.match(pattern);
+                      if (matches) {
+                        matches.forEach(match => {
+                          try {
+                            const eventDate = new Date(match);
+                            if (eventDate >= today && eventDate <= thirtyDaysFromNow) {
+                              // Check if this date is near any event-related text
+                              const dateIndex = html.indexOf(match.toLowerCase());
+                              const surroundingText = html.substring(Math.max(0, dateIndex - 300), dateIndex + 300);
+                              
+                              const hasEventContext = eventKeywords.some(keyword => 
+                                surroundingText.includes(keyword)
+                              );
+                              
+                              if (hasEventContext) {
+                                console.log(`Found event context for date ${match} in ${symbol}`);
+                                events.push({
+                                  ticker: symbol,
+                                  date: eventDate.toISOString().split('T')[0],
+                                  name: 'Upcoming Event',
+                                  companyName: symbol,
+                                  url: irUrl,
+                                  source: 'IR Page'
+                                });
+                              }
+                            }
+                          } catch (e) {
+                            // Skip invalid dates
                           }
                         });
                       }
@@ -221,6 +270,12 @@ jobs:
             console.log(`Found ${filteredEvents.length} unique events in next 30 days`);
             console.log(`Events by source:`, filteredEvents.reduce((acc, event) => {
               acc[event.source] = (acc[event.source] || 0) + 1;
+              return acc;
+            }, {}));
+            
+            // Log events by ticker for debugging
+            console.log(`Events by ticker:`, filteredEvents.reduce((acc, event) => {
+              acc[event.ticker] = (acc[event.ticker] || 0) + 1;
               return acc;
             }, {}));
             
