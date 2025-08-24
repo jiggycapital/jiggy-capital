@@ -148,10 +148,15 @@ async function loadPortfolioData() {
         console.log('Fetching upcoming events...');
         await fetchUpcomingEvents();
         updateEventsDisplay();
-        
+
+        // Load Company News first so the page feels responsive
+        console.log('Fetching company news...');
+        await fetchCompanyNews();
+
+        // Defer YTD fetching until after news has loaded
         console.log('Fetching YTD performance data...');
         const ytdData = await fetchYTDPerformance();
-        
+
         // Merge YTD data into portfolio items
         portfolioData = portfolioData.map(item => ({
             ...item,
@@ -161,13 +166,10 @@ async function loadPortfolioData() {
             weekLow52: ytdData[item.symbol]?.weekLow52 || null,
             marketCap: ytdData[item.symbol]?.marketCap || null
         }));
-        
+
         // Update displays to include new YTD data
         updatePortfolioDisplay();
         updatePerformanceDisplay();
-        
-        console.log('Fetching company news...');
-        await fetchCompanyNews();
         
     } catch (error) {
         console.error('Error loading portfolio data:', error);
