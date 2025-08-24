@@ -444,12 +444,12 @@ function updateHeroStats() {
     }
 }
 
-// Fetch upcoming events from cached data (GitHub Actions)
+// Fetch upcoming events from cached data (GitHub Actions only)
 async function fetchUpcomingEvents() {
     console.log('Fetching upcoming events from cached data...');
     
     try {
-        // Try to load from cached file first
+        // Load from cached file only
         const response = await fetch('./events-cache.json');
         if (response.ok) {
             const cachedData = await response.json();
@@ -479,106 +479,25 @@ async function fetchUpcomingEvents() {
             
             // Display events
             displayUpcomingEvents();
-            return;
+        } else {
+            console.log('No events cache found - events will be empty until GitHub Actions runs');
+            // Set empty events for all companies
+            eventsData.forEach(event => {
+                event.upcomingEvents = [];
+            });
+            displayUpcomingEvents();
         }
     } catch (error) {
-        console.log('Failed to load cached events, falling back to API:', error.message);
-    }
-    
-    // Fallback to original API method if cache fails
-    console.log('Falling back to API method...');
-    await fetchUpcomingEventsFromAPI();
-}
-
-// Original API method as fallback
-async function fetchUpcomingEventsFromAPI() {
-    console.log('Fetching upcoming events from IR pages (fallback)...');
-    
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const cache = loadEventsCache();
-    const updatesForCache = {};
-    
-    for (const event of eventsData) {
-        if (!event.irUrl) continue;
-        
-        try {
-            // Serve from cache if fresh (7 days TTL)
-            const cached = cache[event.ticker];
-            const nowMs = Date.now();
-            const ttlMs = 7 * 24 * 60 * 60 * 1000; // 7 days
-            if (cached && Array.isArray(cached.events) && (nowMs - cached.fetchedAt) < ttlMs) {
-                event.upcomingEvents = cached.events.filter(ev => {
-                    const d = parseDate(ev.date);
-                    return d && d >= today;
-                });
-                console.log(`[${event.ticker}] Using cached ${event.upcomingEvents.length} events`);
-                continue;
-            }
-
-            console.log(`Fetching events for ${event.ticker} from ${event.irUrl}`);
-            const html = await getProxiedHTML(event.irUrl);
-            if (!html) {
-                console.log(`[${event.ticker}] Failed to fetch HTML from ${event.irUrl}`);
-                continue;
-            }
-            console.log(`[${event.ticker}] HTML length: ${html.length}`);
-            
-            // Check if we got an error page
-            if (html.includes('403 Forbidden') || html.includes('Access denied') || html.includes('HTTP ERROR')) {
-                console.log(`[${event.ticker}] Received error page, skipping...`);
-                continue;
-            }
-
-            // Try multiple extraction methods
-            let extractedEvents = [];
-            
-            // Method 1: Try Finnhub Earnings Calendar API (with caching)
-            console.log(`[${event.ticker}] Attempting Finnhub Earnings Calendar API...`);
-            const finnhubEvents = await tryFinnhubEarningsAPI(event.ticker, event);
-            if (finnhubEvents && finnhubEvents.length > 0) {
-                extractedEvents = finnhubEvents;
-                console.log(`[${event.ticker}] Finnhub API found ${finnhubEvents.length} events`);
-            }
-            
-            // Method 2: Script-based extraction
-            if (extractedEvents.length === 0) {
-                console.log(`[${event.ticker}] Trying script-based extraction...`);
-                extractedEvents = extractEventsFromScripts(html, event);
-            }
-            
-            // Method 3: HTML text fallback
-            if (extractedEvents.length === 0) {
-                console.log(`[${event.ticker}] Trying HTML text extraction...`);
-                extractedEvents = extractEventsFromHTML(html, event);
-            }
-
-            const futureEvents = (extractedEvents || []).filter(ev => {
-                if (!ev.date) return false;
-                const d = parseDate(ev.date);
-                return d && d >= today;
-            });
-
-            if (futureEvents.length > 0) {
-                console.log(`[${event.ticker}] Found ${futureEvents.length} future events`);
-                event.upcomingEvents = futureEvents;
-                updatesForCache[event.ticker] = { events: futureEvents, fetchedAt: nowMs };
-            } else {
-                // Cache "no events" result to avoid repeated API calls
-                console.log(`[${event.ticker}] No events found, caching empty result`);
-                event.upcomingEvents = [];
-                updatesForCache[event.ticker] = { events: [], fetchedAt: nowMs };
-            }
-        } catch (error) {
-            console.error(`Error fetching events for ${event.ticker}:`, error);
-        }
-    }
-
-    // Persist cache updates
-    if (Object.keys(updatesForCache).length > 0) {
-        saveEventsCache({ ...cache, ...updatesForCache });
+        console.log('Failed to load cached events:', error.message);
+        // Set empty events for all companies
+        eventsData.forEach(event => {
+            event.upcomingEvents = [];
+        });
+        displayUpcomingEvents();
     }
 }
+
+
 
 // Fetch company news from Finnhub API
 async function fetchCompanyNews() {
