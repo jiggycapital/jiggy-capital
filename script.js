@@ -2,13 +2,21 @@
 // JIGGY CAPITAL PORTFOLIO - RESTORED VERSION
 // ============================================================================
 
-// Google Sheets Integration Configuration - Obfuscated URLs for security
-const GOOGLE_SHEETS_CONFIG = {
-    portfolioSheetUrl: atob('aHR0cHM6Ly9kb2NzLmdvb2dsZS5jb20vc3ByZWFkc2hlZXRzL2QvMXhtRF9oMl8xSS1rSmtILU1zTlVoSFhNVjdXREhyQWxDdGoxVXE1akxjRkUvZXhwb3J0P2Zvcm1hdD1jc3YmZ2lkPTE4NzExNDAyNTM='),
-    logosSheetUrl: atob('aHR0cHM6Ly9kb2NzLmdvb2dsZS5jb20vc3ByZWFkc2hlZXRzL2QvMXhtRF9oMl8xSS1rSmtILU1zTlVoSFhNVjdXREhyQWxDdGoxVXE1akxjRkUvZXhwb3J0P2Zvcm1hdD1jc3YmZ2lkPTE3ODk0NDgxNDE='),
-    performanceSheetUrl: atob('aHR0cHM6Ly9kb2NzLmdvb2dsZS5jb20vc3ByZWFkc2hlZXRzL2QvMXhtRF9oMl8xSS1rSmtILU1zTlVoSFhNVjdXREhyQWxDdGoxVXE1akxjRkUvZXhwb3J0P2Zvcm1hdD1jc3YmZ2lkPTcyMTgzOTI1NA=='),
-    eventsSheetUrl: atob('aHR0cHM6Ly9kb2NzLmdvb2dsZS5jb20vc3ByZWFkc2hlZXRzL2QvMXhtRF9oMl8xSS1rSmtILU1zTlVoSFhNVjdXREhyQWxDdGoxVXE1akxjRkUvZXhwb3J0P2Zvcm1hdD1jc3YmZ2lkPTE3ODk0NDgxNDE=')
-};
+    // Google Sheets Integration Configuration - Obfuscated URLs for security
+    const GOOGLE_SHEETS_CONFIG = {
+        portfolioSheetUrl: atob('aHR0cHM6Ly9kb2NzLmdvb2dsZS5jb20vc3ByZWFkc2hlZXRzL2QvMXhtRF9oMl8xSS1rSmtILU1zTlVoSFhNVjdXREhyQWxDdGoxVXE1akxjRkUvZXhwb3J0P2Zvcm1hdD1jc3YmZ2lkPTE4NzExNDAyNTM='),
+        logosSheetUrl: atob('aHR0cHM6Ly9kb2NzLmdvb2dsZS5jb20vc3ByZWFkc2hlZXRzL2QvMXhtRF9oMl8xSS1rSmtILU1zTlVoSFhNVjdXREhyQWxDdGoxVXE1akxjRkUvZXhwb3J0P2Zvcm1hdD1jc3YmZ2lkPTE3ODk0NDgxNDE='),
+        performanceSheetUrl: atob('aHR0cHM6Ly9kb2NzLmdvb2dsZS5jb20vc3ByZWFkc2hlZXRzL2QvMXhtRF9oMl8xSS1rSmtILU1zTlVoSFhNVjdXREhyQWxDdGoxVXE1akxjRkUvZXhwb3J0P2Zvcm1hdD1jc3YmZ2lkPTcyMTgzOTI1NA=='),
+        eventsSheetUrl: atob('aHR0cHM6Ly9kb2NzLmdvb2dsZS5jb20vc3ByZWFkc2hlZXRzL2QvMXhtRF9oMl8xSS1rSmtILU1zTlVoSFhNVjdXREhyQWxDdGoxVXE1akxjRkUvZXhwb3J0P2Zvcm1hdD1jc3YmZ2lkPTE3ODk0NDgxNDE=')
+    };
+    
+    // Debug: Log the decoded URLs to verify they're correct
+    console.log('=== GOOGLE SHEETS URL DEBUG ===');
+    console.log('Portfolio URL:', GOOGLE_SHEETS_CONFIG.portfolioSheetUrl);
+    console.log('Logos URL:', GOOGLE_SHEETS_CONFIG.logosSheetUrl);
+    console.log('Performance URL:', GOOGLE_SHEETS_CONFIG.performanceSheetUrl);
+    console.log('Events URL:', GOOGLE_SHEETS_CONFIG.eventsSheetUrl);
+    console.log('=== END DEBUG ===');
 
 // Global variables
 let portfolioData = [];
