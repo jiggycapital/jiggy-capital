@@ -1,4 +1,4 @@
-name: Update Portfolio Data Cache
+name: Update Portfolio Data Cache (Events)
 
 on:
   schedule:
