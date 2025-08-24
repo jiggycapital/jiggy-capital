@@ -84,10 +84,13 @@ async function loadPortfolioData() {
         
         // Load portfolio data
         console.log('Fetching portfolio data...');
+        console.log('Portfolio URL:', GOOGLE_SHEETS_CONFIG.portfolioSheetUrl);
         const portfolioResponse = await fetch(GOOGLE_SHEETS_CONFIG.portfolioSheetUrl);
         console.log('Portfolio response status:', portfolioResponse.status);
+        console.log('Portfolio response headers:', portfolioResponse.headers);
         const portfolioCsv = await portfolioResponse.text();
         console.log('Portfolio CSV length:', portfolioCsv.length);
+        console.log('Portfolio CSV first 500 chars:', portfolioCsv.substring(0, 500));
         portfolioData = parsePortfolioCSV(portfolioCsv);
         console.log('Parsed portfolio data:', portfolioData.length, 'items');
         
