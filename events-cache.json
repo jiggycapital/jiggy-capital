@@ -1,0 +1,20 @@
+{
+  "events": [
+    {
+      "ticker": "NVDA",
+      "date": "2024-08-27",
+      "name": "Earnings Report",
+      "companyName": "NVIDIA",
+      "url": "https://finnhub.io/calendar/earnings?symbol=NVDA"
+    },
+    {
+      "ticker": "SEZL",
+      "date": "2024-09-10",
+      "name": "Investor Conference",
+      "companyName": "Sezzle",
+      "url": "https://investor.sezzle.com/events"
+    }
+  ],
+  "lastUpdated": "2024-08-23T12:00:00.000Z",
+  "totalEvents": 2
+}
