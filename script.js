@@ -131,7 +131,7 @@ function getPriceFromSheetData(symbol, portfolioData) {
     if (item && item.price) {
         return toNumber(item.price);
     }
-    console.warn(`No price found for ${symbol} in sheet data`);
+            // // // console.warn(`No price found for ${symbol} in sheet data`);
         return 0;
 }
 
@@ -669,7 +669,7 @@ function displayCompanyNews(newsData) {
                 </div>
                 <div class="news-actions">
                     <a class="news-link" href="${news.url}" target="_blank">
-                        <i class="fas fa-external-link-alt"></i>Read Article
+                        <i class="fas fa-external-link-alt"></i>${window.innerWidth <= 768 ? 'Read' : 'Read Article'}
                     </a>
                 </div>
             </div>`;
@@ -1081,13 +1081,13 @@ function extractQ4EventsEmbeddedData(html, eventInfo) {
     // Look for Q4 Events configuration and extract any embedded data
     const q4ConfigMatch = html.match(/\$tudio\([^)]+\)\.q4Events\(({[^}]+})/);
     if (q4ConfigMatch) {
-        console.log(`[${eventInfo.ticker}] Found Q4 Events configuration:`, q4ConfigMatch[1]);
+        // // console.log(`[${eventInfo.ticker}] Found Q4 Events configuration:`, q4ConfigMatch[1]);
         
         // Look for event data in the configuration
         const configText = q4ConfigMatch[1];
         
         // Look for Q4 Events data that might be embedded in the page
-        console.log(`[${eventInfo.ticker}] Searching for Q4 Events data in HTML...`);
+        // // console.log(`[${eventInfo.ticker}] Searching for Q4 Events data in HTML...`);
         
         // Q4 Events often embeds data in script tags or as JSON blobs
         const q4DataPatterns = [
@@ -1110,9 +1110,9 @@ function extractQ4EventsEmbeddedData(html, eventInfo) {
         for (const pattern of q4DataPatterns) {
             const matches = html.match(pattern);
             if (matches) {
-                console.log(`[${eventInfo.ticker}] Found Q4 Events data pattern:`, pattern);
+                // // console.log(`[${eventInfo.ticker}] Found Q4 Events data pattern:`, pattern);
                 for (const match of matches) {
-                    console.log(`[${eventInfo.ticker}] Q4 Events data match:`, match);
+                    // // console.log(`[${eventInfo.ticker}] Q4 Events data match:`, match);
                     
                     // Try to extract JSON from the match
                     try {
@@ -1126,7 +1126,7 @@ function extractQ4EventsEmbeddedData(html, eventInfo) {
                         }
                         
                         const jsonData = JSON.parse(jsonStr);
-                        console.log(`[${eventInfo.ticker}] Parsed Q4 Events JSON:`, jsonData);
+                        // console.log(`[${eventInfo.ticker}] Parsed Q4 Events JSON:`, jsonData);
                         
                         // Extract events from the JSON
                         if (Array.isArray(jsonData)) {
@@ -1137,7 +1137,7 @@ function extractQ4EventsEmbeddedData(html, eventInfo) {
                                     
                                     if (eventDate && eventDate >= today) {
                                         const title = event.title || event.name || event.eventTitle || event.headline || 'Upcoming Event';
-                                        console.log(`[${eventInfo.ticker}] Found Q4 Events event: "${title}" on ${dateStr}`);
+                                        // console.log(`[${eventInfo.ticker}] Found Q4 Events event: "${title}" on ${dateStr}`);
                                         events.push({
                                             name: cleanEventTitle(title),
                                             date: dateStr,
@@ -1149,7 +1149,7 @@ function extractQ4EventsEmbeddedData(html, eventInfo) {
                             }
                         }
                     } catch (parseError) {
-                        console.log(`[${eventInfo.ticker}] Failed to parse Q4 Events JSON:`, parseError.message);
+                        // console.log(`[${eventInfo.ticker}] Failed to parse Q4 Events JSON:`, parseError.message);
                     }
                 }
             }
@@ -1179,7 +1179,7 @@ function extractQ4EventsEmbeddedData(html, eventInfo) {
         for (const pattern of patterns) {
             let match;
             while ((match = pattern.exec(configText)) !== null) {
-                console.log(`[${eventInfo.ticker}] Found pattern match:`, match[0]);
+                // console.log(`[${eventInfo.ticker}] Found pattern match:`, match[0]);
                 
                 if (match[1] && match[2]) {
                     const title = match[1];
@@ -1188,7 +1188,7 @@ function extractQ4EventsEmbeddedData(html, eventInfo) {
                     if (title && dateStr && title.length > 10 && dateStr.length > 5) {
                         const eventDate = parseDate(dateStr);
                         if (eventDate && eventDate >= today) {
-                            console.log(`[${eventInfo.ticker}] Found embedded event: "${title}" on ${dateStr}`);
+                            // console.log(`[${eventInfo.ticker}] Found embedded event: "${title}" on ${dateStr}`);
                             events.push({
                                 name: cleanEventTitle(title),
                                 date: dateStr,
@@ -1202,7 +1202,7 @@ function extractQ4EventsEmbeddedData(html, eventInfo) {
         }
         
         // Also try to extract from the Q4 Events configuration object itself
-        console.log(`[${eventInfo.ticker}] Analyzing Q4 Events configuration for embedded data...`);
+        // console.log(`[${eventInfo.ticker}] Analyzing Q4 Events configuration for embedded data...`);
         
         // Look for event data that might be embedded in the configuration
         const configEventPatterns = [
@@ -1220,7 +1220,7 @@ function extractQ4EventsEmbeddedData(html, eventInfo) {
         for (const pattern of configEventPatterns) {
             const matches = configText.match(pattern);
             if (matches) {
-                console.log(`[${eventInfo.ticker}] Found event data in Q4 config:`, matches);
+                // console.log(`[${eventInfo.ticker}] Found event data in Q4 config:`, matches);
                 
                 for (const match of matches) {
                     try {
@@ -1232,7 +1232,7 @@ function extractQ4EventsEmbeddedData(html, eventInfo) {
                             
                             if (eventDate && eventDate >= today) {
                                 const title = eventData.title || eventData.name || eventData.eventTitle || 'Upcoming Event';
-                                console.log(`[${eventInfo.ticker}] Found Q4 config event: "${title}" on ${dateStr}`);
+                                // console.log(`[${eventInfo.ticker}] Found Q4 config event: "${title}" on ${dateStr}`);
                                 events.push({
                                     name: cleanEventTitle(title),
                                     date: dateStr,
@@ -1242,7 +1242,7 @@ function extractQ4EventsEmbeddedData(html, eventInfo) {
                             }
                         }
                     } catch (parseError) {
-                        console.log(`[${eventInfo.ticker}] Failed to parse Q4 config event:`, parseError.message);
+                        // console.log(`[${eventInfo.ticker}] Failed to parse Q4 config event:`, parseError.message);
                     }
                 }
             }
@@ -1267,7 +1267,7 @@ function extractQ4EventsEmbeddedData(html, eventInfo) {
         let match;
         while ((match = pattern.exec(html)) !== null) {
             const title = match[1];
-            console.log(`[${eventInfo.ticker}] Found potential event title: "${title}"`);
+            // console.log(`[${eventInfo.ticker}] Found potential event title: "${title}"`);
             
             // Look for a date near this title
             const titleIndex = match.index;
@@ -1290,7 +1290,7 @@ function extractQ4EventsEmbeddedData(html, eventInfo) {
                     const dateStr = beforeDates[beforeDates.length - 1]; // Get the closest date
                     const eventDate = parseDate(dateStr);
                     if (eventDate && eventDate >= today) {
-                        console.log(`[${eventInfo.ticker}] Found event with date before: "${title}" on ${dateStr}`);
+                        // console.log(`[${eventInfo.ticker}] Found event with date before: "${title}" on ${dateStr}`);
                         events.push({
                             name: cleanEventTitle(title),
                             date: dateStr,
@@ -1305,7 +1305,7 @@ function extractQ4EventsEmbeddedData(html, eventInfo) {
                     const dateStr = afterDates[0]; // Get the closest date
                     const eventDate = parseDate(dateStr);
                     if (eventDate && eventDate >= today) {
-                        console.log(`[${eventInfo.ticker}] Found event with date after: "${title}" on ${dateStr}`);
+                        // console.log(`[${eventInfo.ticker}] Found event with date after: "${title}" on ${dateStr}`);
                         events.push({
                             name: cleanEventTitle(title),
                             date: dateStr,
@@ -1319,11 +1319,11 @@ function extractQ4EventsEmbeddedData(html, eventInfo) {
         }
     }
     
-    console.log(`[${eventInfo.ticker}] Q4 Events embedded extraction found ${events.length} events`);
+    // console.log(`[${eventInfo.ticker}] Q4 Events embedded extraction found ${events.length} events`);
     
     // If still no events, try to find any JSON data in the entire HTML
     if (events.length === 0) {
-        console.log(`[${eventInfo.ticker}] No events found, searching for any JSON data in HTML...`);
+        // console.log(`[${eventInfo.ticker}] No events found, searching for any JSON data in HTML...`);
         
         // Look for any JSON-like structures in the HTML
         const jsonPatterns = [
@@ -1342,7 +1342,7 @@ function extractQ4EventsEmbeddedData(html, eventInfo) {
         for (const pattern of jsonPatterns) {
             const matches = html.match(pattern);
             if (matches) {
-                console.log(`[${eventInfo.ticker}] Found potential JSON data:`, matches[0]);
+                // console.log(`[${eventInfo.ticker}] Found potential JSON data:`, matches[0]);
                 
                 // Try to extract event data from the JSON
                 try {
@@ -1355,7 +1355,7 @@ function extractQ4EventsEmbeddedData(html, eventInfo) {
                     }
                     
                     const jsonData = JSON.parse(jsonStr);
-                    console.log(`[${eventInfo.ticker}] Parsed JSON data:`, jsonData);
+                    // console.log(`[${eventInfo.ticker}] Parsed JSON data:`, jsonData);
                     
                     // Extract events from the JSON
                     const jsonEvents = jsonData.events || jsonData.data || (Array.isArray(jsonData) ? jsonData : []);
@@ -1367,7 +1367,7 @@ function extractQ4EventsEmbeddedData(html, eventInfo) {
                             
                             if (eventDate && eventDate >= today) {
                                 const title = event.title || event.name || event.eventTitle || 'Upcoming Event';
-                                console.log(`[${eventInfo.ticker}] Found JSON event: "${title}" on ${dateStr}`);
+                                // console.log(`[${eventInfo.ticker}] Found JSON event: "${title}" on ${dateStr}`);
                                 events.push({
                                     name: cleanEventTitle(title),
                                     date: dateStr,
@@ -1378,7 +1378,7 @@ function extractQ4EventsEmbeddedData(html, eventInfo) {
                         }
                     }
                 } catch (parseError) {
-                    console.log(`[${eventInfo.ticker}] Failed to parse JSON:`, parseError.message);
+                    // console.log(`[${eventInfo.ticker}] Failed to parse JSON:`, parseError.message);
                 }
             }
         }
@@ -1386,7 +1386,7 @@ function extractQ4EventsEmbeddedData(html, eventInfo) {
     
     // If still no events, try a more aggressive search for any event-related data
     if (events.length === 0) {
-        console.log(`[${eventInfo.ticker}] No events found, trying aggressive search for event data...`);
+        // console.log(`[${eventInfo.ticker}] No events found, trying aggressive search for event data...`);
         
         // Look for any text that might contain event information
         const aggressivePatterns = [
@@ -1405,9 +1405,9 @@ function extractQ4EventsEmbeddedData(html, eventInfo) {
         for (const pattern of aggressivePatterns) {
             const matches = html.match(pattern);
             if (matches) {
-                console.log(`[${eventInfo.ticker}] Found potential event text with pattern:`, pattern);
+                // console.log(`[${eventInfo.ticker}] Found potential event text with pattern:`, pattern);
                 for (const match of matches) {
-                    console.log(`[${eventInfo.ticker}] Potential event text:`, match);
+                    // console.log(`[${eventInfo.ticker}] Potential event text:`, match);
                     
                     // Try to extract a date from this text
                     const datePatterns = [
@@ -1429,7 +1429,7 @@ function extractQ4EventsEmbeddedData(html, eventInfo) {
                                     title = title.substring(0, 100) + '...';
                                 }
                                 
-                                console.log(`[${eventInfo.ticker}] Found potential event: "${title}" on ${dateStr}`);
+                                // console.log(`[${eventInfo.ticker}] Found potential event: "${title}" on ${dateStr}`);
                                 events.push({
                                     name: cleanEventTitle(title),
                                     date: dateStr,
@@ -1450,27 +1450,27 @@ function extractQ4EventsEmbeddedData(html, eventInfo) {
 
 // Try Finnhub Earnings Calendar API
 async function tryFinnhubEarningsAPI(ticker, eventInfo) {
-    console.log(`[${ticker}] Attempting Finnhub Earnings Calendar API...`);
+    // console.log(`[${ticker}] Attempting Finnhub Earnings Calendar API...`);
     
     try {
         // Check cache first
         const cacheKey = `finnhub_events_${ticker}`;
         const cached = loadFinnhubEventsCache(cacheKey);
-        console.log(`[${ticker}] Cache check for key: ${cacheKey}, cached:`, cached ? 'found' : 'not found');
+        // console.log(`[${ticker}] Cache check for key: ${cacheKey}, cached:`, cached ? 'found' : 'not found');
         if (cached && cached.events && cached.events.length > 0) {
             const cacheAge = Date.now() - cached.timestamp;
             const cacheMaxAge = 7 * 24 * 60 * 60 * 1000; // 7 days
             
-            console.log(`[${ticker}] Cache age: ${Math.round(cacheAge / 1000 / 60)} minutes, max age: ${Math.round(cacheMaxAge / 1000 / 60)} minutes`);
+            // console.log(`[${ticker}] Cache age: ${Math.round(cacheAge / 1000 / 60)} minutes, max age: ${Math.round(cacheMaxAge / 1000 / 60)} minutes`);
             
             if (cacheAge < cacheMaxAge) {
-                console.log(`[${ticker}] Using cached Finnhub events (age: ${Math.round(cacheAge / 1000 / 60)} minutes)`);
+                // console.log(`[${ticker}] Using cached Finnhub events (age: ${Math.round(cacheAge / 1000 / 60)} minutes)`);
                 return cached.events;
             } else {
-                console.log(`[${ticker}] Cache expired, fetching fresh data`);
+                // console.log(`[${ticker}] Cache expired, fetching fresh data`);
             }
         } else {
-            console.log(`[${ticker}] No cache found, fetching fresh data`);
+            // console.log(`[${ticker}] No cache found, fetching fresh data`);
         }
         
         const API_KEY = 'd2l0fm1r01qqq9qsstfgd2l0fm1r01qqq9qsstg0';
@@ -1490,16 +1490,16 @@ async function tryFinnhubEarningsAPI(ticker, eventInfo) {
             });
             
             const url = `${API_URL}?${params.toString()}`;
-            console.log(`[${ticker}] Trying Finnhub API: ${url}`);
+            // console.log(`[${ticker}] Trying Finnhub API: ${url}`);
             
             const response = await fetch(url);
             if (!response.ok) {
-                console.log(`[${ticker}] Finnhub API error: ${response.status} ${response.statusText}`);
+                // console.log(`[${ticker}] Finnhub API error: ${response.status} ${response.statusText}`);
                 return [];
             }
             
             const data = await response.json();
-            console.log(`[${ticker}] Finnhub API response:`, data);
+            // console.log(`[${ticker}] Finnhub API response:`, data);
             
             if (data && data.earningsCalendar && Array.isArray(data.earningsCalendar)) {
                 const events = [];
@@ -1510,15 +1510,15 @@ async function tryFinnhubEarningsAPI(ticker, eventInfo) {
                     if (earning.date) {
                         // Handle Finnhub date format (YYYY-MM-DD) to avoid timezone issues
                         let eventDate;
-                        console.log(`[${ticker}] Processing Finnhub date: ${earning.date}`);
+                        // console.log(`[${ticker}] Processing Finnhub date: ${earning.date}`);
                         if (earning.date.match(/^\d{4}-\d{2}-\d{2}$/)) {
                             // Parse YYYY-MM-DD format in local timezone
                             const [year, month, day] = earning.date.split('-').map(Number);
                             eventDate = new Date(year, month - 1, day); // month is 0-indexed
-                            console.log(`[${ticker}] Parsed YYYY-MM-DD: ${year}-${month}-${day} -> ${eventDate.toDateString()}`);
+                            // console.log(`[${ticker}] Parsed YYYY-MM-DD: ${year}-${month}-${day} -> ${eventDate.toDateString()}`);
                         } else {
                             eventDate = parseDate(earning.date);
-                            console.log(`[${ticker}] Parsed with parseDate: ${earning.date} -> ${eventDate ? eventDate.toDateString() : 'null'}`);
+                            // console.log(`[${ticker}] Parsed with parseDate: ${earning.date} -> ${eventDate ? eventDate.toDateString() : 'null'}`);
                         }
                         
                         if (eventDate && eventDate >= todayStart) {
@@ -1526,7 +1526,7 @@ async function tryFinnhubEarningsAPI(ticker, eventInfo) {
                             const daysUntilEvent = Math.ceil((eventDate - todayStart) / (1000 * 60 * 60 * 24));
                             
                             // Only show events within 30 days
-                            console.log(`[${ticker}] Event: ${earning.date}, Parsed date: ${eventDate.toDateString()}, Days until: ${daysUntilEvent}, Show: ${daysUntilEvent <= 30}`);
+                            // console.log(`[${ticker}] Event: ${earning.date}, Parsed date: ${eventDate.toDateString()}, Days until: ${daysUntilEvent}, Show: ${daysUntilEvent <= 30}`);
                             if (daysUntilEvent <= 30) {
                                 events.push({
                                     name: cleanEventTitle(`Q${getQuarterFromDate(eventDate)} ${eventDate.getFullYear()} Earnings`),
@@ -1544,14 +1544,14 @@ async function tryFinnhubEarningsAPI(ticker, eventInfo) {
                 }
                 
                 if (events.length > 0) {
-                    console.log(`[${ticker}] Finnhub API found ${events.length} events`);
+                    // console.log(`[${ticker}] Finnhub API found ${events.length} events`);
                     
                     // Cache the results
                     saveFinnhubEventsCache(cacheKey, events);
                     
                     return events;
                 } else {
-                    console.log(`[${ticker}] No Finnhub earnings data found, caching empty result`);
+                    // console.log(`[${ticker}] No Finnhub earnings data found, caching empty result`);
                     
                     // Cache empty result to avoid repeated API calls
                     saveFinnhubEventsCache(cacheKey, []);
@@ -1560,11 +1560,11 @@ async function tryFinnhubEarningsAPI(ticker, eventInfo) {
                 }
             }
             
-            console.log(`[${ticker}] No Finnhub earnings data found`);
+            // console.log(`[${ticker}] No Finnhub earnings data found`);
             return [];
             
         } catch (error) {
-            console.log(`[${ticker}] Finnhub API error:`, error.message);
+            // console.log(`[${ticker}] Finnhub API error:`, error.message);
             return [];
         }
         
@@ -1587,7 +1587,7 @@ function getQuarterFromDate(date) {
 
 // Proxy fetch with fallbacks
 async function getProxiedHTML(url) {
-    console.log(`[PROXY] Attempting to fetch: ${url}`);
+    // console.log(`[PROXY] Attempting to fetch: ${url}`);
     
     const proxies = [
         (u) => `https://api.allorigins.win/raw?url=${encodeURIComponent(u)}`,
@@ -1603,7 +1603,7 @@ async function getProxiedHTML(url) {
         const proxy = proxies[i];
         try {
             const proxied = proxy(url);
-            console.log(`[PROXY] Trying proxy ${i + 1}: ${proxied}`);
+            // console.log(`[PROXY] Trying proxy ${i + 1}: ${proxied}`);
             
             const res = await fetch(proxied, { 
                 method: 'GET',
@@ -1617,21 +1617,21 @@ async function getProxiedHTML(url) {
                 if (txt && txt.length > 0) {
                     // Check if we got an error page instead of actual content
                     if (txt.includes('403 Forbidden') || txt.includes('Access denied') || txt.includes('HTTP ERROR')) {
-                        console.log(`[PROXY] Proxy ${i + 1} returned error page, trying next...`);
+                        // console.log(`[PROXY] Proxy ${i + 1} returned error page, trying next...`);
                         continue;
                     }
-                    console.log(`[PROXY] Success with proxy ${i + 1}, content length: ${txt.length}`);
+                    // console.log(`[PROXY] Success with proxy ${i + 1}, content length: ${txt.length}`);
                     return txt;
                 }
             } else {
-                console.log(`[PROXY] Proxy ${i + 1} failed with status: ${res?.status}`);
+                // console.log(`[PROXY] Proxy ${i + 1} failed with status: ${res?.status}`);
             }
         } catch (error) {
-            console.log(`[PROXY] Proxy ${i + 1} error: ${error.message}`);
+            // console.log(`[PROXY] Proxy ${i + 1} error: ${error.message}`);
         }
     }
     
-    console.log(`[PROXY] All proxies failed for: ${url}`);
+    // console.log(`[PROXY] All proxies failed for: ${url}`);
     return null;
 }
 
@@ -2409,7 +2409,7 @@ function handleToggleClick(view) {
 function createSectorCallouts(chartData, colors) {
     const chartContainer = document.querySelector('#sector-allocation .allocation-chart');
     if (!chartContainer) {
-        console.log('Sector chart container not found');
+        // console.log('Sector chart container not found');
         return;
     }
 
@@ -2424,7 +2424,7 @@ function createSectorCallouts(chartData, colors) {
     
     // Check if chart dimensions are valid
     if (chartRect.width === 0 || chartRect.height === 0) {
-        console.log('Sector chart container has zero dimensions, retrying in 500ms');
+        // console.log('Sector chart container has zero dimensions, retrying in 500ms');
         setTimeout(() => createSectorCallouts(chartData, colors), 500);
         return;
     }
@@ -2750,7 +2750,7 @@ function createChartLegend(container, chartData, colors, calloutItems) {
 function createAllocationCallouts(chartData, colors) {
     const chartContainer = document.querySelector('.allocation-chart');
     if (!chartContainer) {
-        console.log('Allocation chart container not found');
+        // console.log('Allocation chart container not found');
         return;
     }
 
@@ -2765,7 +2765,7 @@ function createAllocationCallouts(chartData, colors) {
     
     // Check if chart dimensions are valid
     if (chartRect.width === 0 || chartRect.height === 0) {
-        console.log('Chart container has zero dimensions, retrying in 500ms');
+        // console.log('Chart container has zero dimensions, retrying in 500ms');
         setTimeout(() => createAllocationCallouts(chartData, colors), 500);
         return;
     }
@@ -3047,7 +3047,7 @@ function initializeEventListeners() {
     if (contactForm) {
         contactForm.addEventListener('submit', function(e) {
     e.preventDefault();
-            console.log('Contact form submitted');
+            // console.log('Contact form submitted');
         });
     }
     

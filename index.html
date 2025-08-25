@@ -22,6 +22,74 @@
       gtag('config', 'G-EH291BHWTE');
     </script>
     
+                    <!-- Console Log Suppression for External Scripts -->
+                <script>
+                  // Suppress external console logs from iframes and external scripts
+                  const originalConsoleLog = console.log;
+                  const originalConsoleWarn = console.warn;
+                  const originalConsoleError = console.error;
+                  
+                  // Filter out external script logs
+                  console.log = function(...args) {
+                    const message = args.join(' ');
+                    // Allow our own logs but suppress external ones
+                    if (message.includes('Datadog') || message.includes('SUBSTACK') || message.includes('substack.com') || 
+                        message.includes('datadog') || message.includes('Browser SDK') || message.includes('No storage available')) {
+                      return; // Suppress external logs
+                    }
+                    originalConsoleLog.apply(console, args);
+                  };
+                  
+                  console.warn = function(...args) {
+                    const message = args.join(' ');
+                    if (message.includes('Datadog') || message.includes('SUBSTACK') || message.includes('substack.com') ||
+                        message.includes('datadog') || message.includes('Browser SDK') || message.includes('No storage available')) {
+                      return; // Suppress external warnings
+                    }
+                    originalConsoleWarn.apply(console, args);
+                  };
+                  
+                  console.error = function(...args) {
+                    const message = args.join(' ');
+                    if (message.includes('Datadog') || message.includes('SUBSTACK') || message.includes('substack.com') ||
+                        message.includes('datadog') || message.includes('Browser SDK') || message.includes('No storage available')) {
+                      return; // Suppress external errors
+                    }
+                    originalConsoleError.apply(console, args);
+                  };
+                  
+                  // Also suppress logs from iframe contexts
+                  window.addEventListener('load', function() {
+                    // Re-apply console override after page load to catch iframe logs
+                    console.log = function(...args) {
+                      const message = args.join(' ');
+                      if (message.includes('Datadog') || message.includes('SUBSTACK') || message.includes('substack.com') ||
+                          message.includes('datadog') || message.includes('Browser SDK') || message.includes('No storage available')) {
+                        return;
+                      }
+                      originalConsoleLog.apply(console, args);
+                    };
+                    
+                    console.warn = function(...args) {
+                      const message = args.join(' ');
+                      if (message.includes('Datadog') || message.includes('SUBSTACK') || message.includes('substack.com') ||
+                          message.includes('datadog') || message.includes('Browser SDK') || message.includes('No storage available')) {
+                        return;
+                      }
+                      originalConsoleWarn.apply(console, args);
+                    };
+                    
+                    console.error = function(...args) {
+                      const message = args.join(' ');
+                      if (message.includes('Datadog') || message.includes('SUBSTACK') || message.includes('substack.com') ||
+                          message.includes('datadog') || message.includes('Browser SDK') || message.includes('No storage available')) {
+                        return;
+                      }
+                      originalConsoleError.apply(console, args);
+                    };
+                  });
+                </script>
+    
     <link rel="stylesheet" href="styles.css?v=38.1">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
