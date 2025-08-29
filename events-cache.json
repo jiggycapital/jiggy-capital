@@ -1,22 +1,6 @@
 {
   "events": [
     {
-      "ticker": "NVDA",
-      "date": "2025-08-27",
-      "name": "Earnings Report",
-      "companyName": "NVDA",
-      "url": "https://finnhub.io/calendar/earnings?symbol=NVDA",
-      "source": "Finnhub API"
-    },
-    {
-      "ticker": "MRVL",
-      "date": "2025-08-28",
-      "name": "Earnings Report",
-      "companyName": "MRVL",
-      "url": "https://finnhub.io/calendar/earnings?symbol=MRVL",
-      "source": "Finnhub API"
-    },
-    {
       "ticker": "CRM",
       "date": "2025-09-03",
       "name": "Earnings Report",
@@ -47,9 +31,17 @@
       "companyName": "SEZL",
       "url": "https://investors.sezzle.com/events-and-presentations",
       "source": "IR Page"
+    },
+    {
+      "ticker": "SEZL",
+      "date": "2025-09-10",
+      "name": "Upcoming Event",
+      "companyName": "SEZL",
+      "url": "https://investors.sezzle.com/events-and-presentations",
+      "source": "IR Page"
     }
   ],
-  "lastUpdated": "2025-08-24T20:31:47.988Z",
+  "lastUpdated": "2025-08-29T03:22:54.421Z",
   "totalEvents": 36,
   "uniqueEvents": 36
 }
