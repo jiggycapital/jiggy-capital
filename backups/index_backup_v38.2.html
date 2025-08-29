@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>Jiggy Capital Asset Managment</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <link rel="icon" type="image/png" href="favicon.svg">
+    
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-EH291BHWTE"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-EH291BHWTE');
+    </script>
+    
+                    <!-- Console Log Suppression for External Scripts -->
+                <script>
+                  // Suppress external console logs from iframes and external scripts
+                  const originalConsoleLog = console.log;
+                  const originalConsoleWarn = console.warn;
+                  const originalConsoleError = console.error;
+                  
+                  // Filter out external script logs
+                  console.log = function(...args) {
+                    const message = args.join(' ');
+                    // Allow our own logs but suppress external ones
+                    if (message.includes('Datadog') || message.includes('SUBSTACK') || message.includes('substack.com') || 
+                        message.includes('datadog') || message.includes('Browser SDK') || message.includes('No storage available')) {
+                      return; // Suppress external logs
+                    }
+                    originalConsoleLog.apply(console, args);
+                  };
+                  
+                  console.warn = function(...args) {
+                    const message = args.join(' ');
+                    if (message.includes('Datadog') || message.includes('SUBSTACK') || message.includes('substack.com') ||
+                        message.includes('datadog') || message.includes('Browser SDK') || message.includes('No storage available')) {
+                      return; // Suppress external warnings
+                    }
+                    originalConsoleWarn.apply(console, args);
+                  };
+                  
+                  console.error = function(...args) {
+                    const message = args.join(' ');
+                    if (message.includes('Datadog') || message.includes('SUBSTACK') || message.includes('substack.com') ||
+                        message.includes('datadog') || message.includes('Browser SDK') || message.includes('No storage available')) {
+                      return; // Suppress external errors
+                    }
+                    originalConsoleError.apply(console, args);
+                  };
+                  
+                  // Also suppress logs from iframe contexts
+                  window.addEventListener('load', function() {
+                    // Re-apply console override after page load to catch iframe logs
+                    console.log = function(...args) {
+                      const message = args.join(' ');
+                      if (message.includes('Datadog') || message.includes('SUBSTACK') || message.includes('substack.com') ||
+                          message.includes('datadog') || message.includes('Browser SDK') || message.includes('No storage available')) {
+                        return;
+                      }
+                      originalConsoleLog.apply(console, args);
+                    };
+                    
+                    console.warn = function(...args) {
+                      const message = args.join(' ');
+                      if (message.includes('Datadog') || message.includes('SUBSTACK') || message.includes('substack.com') ||
+                          message.includes('datadog') || message.includes('Browser SDK') || message.includes('No storage available')) {
+                        return;
+                      }
+                      originalConsoleWarn.apply(console, args);
+                    };
+                    
+                    console.error = function(...args) {
+                      const message = args.join(' ');
+                      if (message.includes('Datadog') || message.includes('SUBSTACK') || message.includes('substack.com') ||
+                          message.includes('datadog') || message.includes('Browser SDK') || message.includes('No storage available')) {
+                        return;
+                      }
+                      originalConsoleError.apply(console, args);
+                    };
+                  });
+                </script>
+    
+    <link rel="stylesheet" href="styles.css?v=38.1">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <i class="fas fa-chart-line"></i>
+                <span>Jiggy Capital</span>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="#home" class="nav-link">Home</a></li>
+                <li><a href="#allocation" class="nav-link">Allocation</a></li>
+                <li><a href="#performance" class="nav-link">Performance</a></li>
+                <li><a href="#portfolio" class="nav-link">Portfolio</a></li>
+                <li><a href="#events" class="nav-link">Events</a></li>
+                <li><a href="#news" class="nav-link">News</a></li>
+            </ul>
+            <div class="hamburger">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section id="home" class="hero">
+        <div class="hero-container">
+            <div class="hero-content">
+                <h1 class="hero-title">Jiggy Capital Portfolio</h1>
+                <p class="hero-subtitle">Sharing my investing journey since 2020</p>
+                <div class="hero-stats">
+                    <div class="stat-item">
+                        <span class="stat-number" id="totalValue">0%</span>
+                        <span class="stat-label">Daily Performance</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number" id="totalReturn">0%</span>
+                        <span class="stat-label">YTD Performance</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number" id="holdingsCount">0%</span>
+                        <span class="stat-label">Lifetime CAGR</span>
+                        <div class="stat-subtext" style="font-size: 0.7em; color: #aaa; margin-top: 2px;">Jan 29th, 2020 -</div>
+                    </div>
+                </div>
+                <a href="#portfolio" class="cta-button">View Portfolio</a>
+            </div>
+            <div class="hero-visual">
+                <div class="golf-photo-container">
+                    <img src="golf-photo.jpg" alt="Golf course profile photo" style="width: 100%; height: 300px; object-fit: cover; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.2);">
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+
+    <!-- Consolidated Allocation Section -->
+    <section id="allocation" class="allocation">
+        <div class="container">
+            <h2 class="section-title" id="allocationTitle">Portfolio Allocation</h2>
+            <div class="allocation-toggle">
+                <button class="toggle-btn active" data-view="company">Company</button>
+                <button class="toggle-btn" data-view="sector">Sector</button>
+            </div>
+            <div class="allocation-content">
+                <div class="allocation-chart">
+                    <canvas id="consolidatedPieChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Performance Section (moved before Portfolio) -->
+    <section id="performance" class="performance">
+        <div class="container">
+            <h2 class="section-title">Performance Analytics</h2>
+            <div class="performance-grid">
+                <div class="performance-card">
+                    <h3>Benchmark Performance YTD</h3>
+                    <div id="benchmarkPerformance" class="benchmark-performance">
+                        <!-- Benchmark performance will be loaded here -->
+                    </div>
+                </div>
+                <div class="performance-card">
+                    <h3>Portfolio Multiples</h3>
+                    <div class="portfolio-multiples">
+                        <div class="multiple-stat">
+                            <span class="multiple-label">2026 FCF Multiple</span>
+                            <span class="multiple-value" id="fcfMultiple">-</span>
+                        </div>
+                        <div class="multiple-stat">
+                            <span class="multiple-label">2026 P/E Multiple</span>
+                            <span class="multiple-value" id="peMultiple">-</span>
+                        </div>
+                        <div class="multiple-stat">
+                            <span class="multiple-label">PEG Multiple</span>
+                            <span class="multiple-value" id="pegMultiple">-</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="performance-card">
+                    <h3>Top Performers</h3>
+                    <div id="topPerformers" class="top-performers">
+                        <!-- Top performers will be loaded here -->
+                    </div>
+                </div>
+                <div class="performance-card">
+                    <h3>Top Laggards</h3>
+                    <div id="topLaggards" class="top-laggards">
+                        <!-- Top laggards will be loaded here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Portfolio Section (now after Performance Analytics) -->
+    <section id="portfolio" class="portfolio">
+        <div class="container">
+            <h2 class="section-title">Portfolio</h2>
+
+            <div class="portfolio-grid" id="portfolioGrid">
+                <!-- Portfolio items will be loaded here from Google Sheets -->
+                <div class="loading">
+                    <i class="fas fa-spinner fa-spin"></i>
+                    <p>Loading portfolio data...</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Events Section -->
+    <section id="events" class="events">
+        <div class="container">
+            <h2 class="section-title">Upcoming Events</h2>
+            <div class="events-content">
+                <div id="upcomingEvents" class="events-list">
+                    <div class="loading">
+                        <i class="fas fa-spinner fa-spin"></i>
+                        <p>Loading upcoming events...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- News Section -->
+    <section id="news" class="news">
+        <div class="container">
+            <h2 class="section-title">Company News</h2>
+            <div class="news-content">
+                <div id="companyNews" class="news-list">
+                    <div class="loading">
+                        <i class="fas fa-spinner fa-spin"></i>
+                        <p>Loading company news...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>Quick Links</h3>
+                    <ul>
+                        <li><a href="#home">Home</a></li>
+                        <li><a href="#portfolio">Portfolio</a></li>
+                        <li><a href="#performance">Performance</a></li>
+
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h3>Subscribe</h3>
+                    <div class="substack-embed">
+                        <iframe src="https://jiggy.substack.com/embed" width="480" height="320" style="border:1px solid #EEE; background:white;" frameborder="0" scrolling="no"></iframe>
+                    </div>
+                </div>
+                <div class="footer-section">
+                     <h3>Connect</h3>
+                     <div class="social-links">
+                         <a href="https://jiggy.substack.com" target="_blank"><i class="fas fa-newspaper"></i></a>
+                         <a href="https://x.com/jiggycapital" target="_blank"><i class="fab fa-twitter"></i></a>
+                     </div>
+                 </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 Investment Portfolio. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
+                            <script src="script.js?v=39.0"></script>
+</body>
+</html>
