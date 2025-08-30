@@ -2489,7 +2489,12 @@ function createChartCallouts(chartData, colors, isSectorView = false) {
     const baseRadius = Math.min(chartCenterX, chartCenterY) * (isMobile ? 0.55 : 0.6);
     const baseCalloutRadius = Math.min(chartCenterX, chartCenterY) * (isMobile ? 0.7 : 1.03);
     
-
+    if (isMobile) {
+        console.log('Mobile callout positioning debug:');
+        console.log('chartCenterX:', chartCenterX, 'chartCenterY:', chartCenterY);
+        console.log('baseCalloutRadius:', baseCalloutRadius);
+        console.log('Math.min(chartCenterX, chartCenterY):', Math.min(chartCenterX, chartCenterY));
+    }
 
     // Calculate initial callout positions
     const calloutPositions = [];
@@ -2511,7 +2516,12 @@ function createChartCallouts(chartData, colors, isSectorView = false) {
         const calloutX = chartCenterX + Math.cos(angleRad) * baseCalloutRadius;
         const calloutY = chartCenterY + Math.sin(angleRad) * baseCalloutRadius;
         
-
+        if (isMobile && index < 3) { // Debug first 3 callouts
+            console.log(`Callout ${index} (${item.symbol}):`);
+            console.log('  angle:', midAngle, 'angleRad:', angleRad);
+            console.log('  baseCalloutRadius:', baseCalloutRadius);
+            console.log('  calloutX:', calloutX, 'calloutY:', calloutY);
+        }
         
         calloutPositions.push({
             item,
@@ -2530,7 +2540,12 @@ function createChartCallouts(chartData, colors, isSectorView = false) {
     adjustedPositions.forEach((position, index) => {
         const { item, angle, angleRad, x, y, adjustedRadius, needsBentBranch, finalX, finalY } = position;
         
-
+        if (isMobile && index < 3) { // Debug first 3 callouts
+            console.log(`Final positioning for callout ${index} (${item.symbol}):`);
+            console.log('  original x,y:', x, y);
+            console.log('  adjustedRadius:', adjustedRadius);
+            console.log('  finalX, finalY:', finalX, finalY);
+        }
         
         // Calculate branch start position
         const branchStartX = chartCenterX + Math.cos(angleRad) * baseRadius;
@@ -2713,7 +2728,10 @@ function adjustCalloutPositions(positions, chartCenterX, chartCenterY, baseRadiu
     // Use the passed baseCalloutRadius instead of recalculating
     const calloutRadius = baseCalloutRadius;
     
-
+    const isMobile = window.innerWidth <= 768;
+    if (isMobile) {
+        console.log('adjustCalloutPositions using calloutRadius:', calloutRadius);
+    }
     
     for (let i = 0; i < adjustedPositions.length; i++) {
         const current = adjustedPositions[i];

@@ -2487,9 +2487,7 @@ function createChartCallouts(chartData, colors, isSectorView = false) {
     // Calculate positions based on actual pie slice angles
     const totalWeight = chartData.reduce((sum, item) => sum + item.weight, 0);
     const baseRadius = Math.min(chartCenterX, chartCenterY) * (isMobile ? 0.55 : 0.6);
-    const baseCalloutRadius = Math.min(chartCenterX, chartCenterY) * (isMobile ? 0.7 : 1.03);
-    
-
+    const baseCalloutRadius = Math.min(chartCenterX, chartCenterY) * (isMobile ? 1.0 : 1.03);
 
     // Calculate initial callout positions
     const calloutPositions = [];
@@ -2511,8 +2509,6 @@ function createChartCallouts(chartData, colors, isSectorView = false) {
         const calloutX = chartCenterX + Math.cos(angleRad) * baseCalloutRadius;
         const calloutY = chartCenterY + Math.sin(angleRad) * baseCalloutRadius;
         
-
-        
         calloutPositions.push({
             item,
             angle: midAngle,
@@ -2524,64 +2520,58 @@ function createChartCallouts(chartData, colors, isSectorView = false) {
     });
     
     // Adjust positions to prevent overlaps
-    const adjustedPositions = adjustCalloutPositions(calloutPositions, chartCenterX, chartCenterY, baseRadius, baseCalloutRadius);
+    const adjustedPositions = adjustCalloutPositions(calloutPositions, chartCenterX, chartCenterY, baseRadius);
 
     // Create callouts with adjusted positions
     adjustedPositions.forEach((position, index) => {
         const { item, angle, angleRad, x, y, adjustedRadius, needsBentBranch, finalX, finalY } = position;
         
-
-        
         // Calculate branch start position
         const branchStartX = chartCenterX + Math.cos(angleRad) * baseRadius;
         const branchStartY = chartCenterY + Math.sin(angleRad) * baseRadius;
 
-        // Create connecting branch (hide on mobile)
-        if (!isMobile) {
-            const branch = document.createElement('div');
-            branch.className = 'chart-branch';
+        // Create connecting branch
+        const branch = document.createElement('div');
+        branch.className = 'chart-branch';
+        
+        if (needsBentBranch) {
+            const branchSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+            branchSvg.style.cssText = `
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                height: 100%;
+                pointer-events: none;
+                z-index: 5;
+            `;
             
-            if (needsBentBranch) {
-                const branchSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-                branchSvg.style.cssText = `
-                    position: absolute;
-                    left: 0;
-                    top: 0;
-                    width: 100%;
-                    height: 100%;
-                    pointer-events: none;
-                    z-index: 5;
-                `;
-                
-                const branchEndX = finalX;
-                const branchEndY = finalY;
-                const controlX = branchStartX + (branchEndX - branchStartX) * 0.5;
-                const controlY = branchStartY + (branchEndY - branchStartY) * 0.5;
-                
-                const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-                path.setAttribute('d', `M ${branchStartX} ${branchStartY} Q ${controlX} ${controlY} ${branchEndX} ${branchEndY}`);
-                path.setAttribute('stroke', colors[chartData.indexOf(item)]);
-                path.setAttribute('stroke-width', '2');
-                path.setAttribute('fill', 'none');
-                path.setAttribute('opacity', '0.8');
-                
-                branchSvg.appendChild(path);
-                branch.appendChild(branchSvg);
-            } else {
-                branch.style.cssText = `
-                    position: absolute;
-                    left: ${branchStartX}px;
-                    top: ${branchStartY}px;
-                    width: ${adjustedRadius - baseRadius}px;
-                    height: 2px;
-                    background: linear-gradient(90deg, ${colors[chartData.indexOf(item)]}, ${colors[chartData.indexOf(item)]}80);
-                    transform-origin: left center;
-                    transform: rotate(${angle}deg);
-                    z-index: 5;
-                `;
-            }
+            const branchEndX = finalX;
+            const branchEndY = finalY;
+            const controlX = branchStartX + (branchEndX - branchStartX) * 0.5;
+            const controlY = branchStartY + (branchEndY - branchStartY) * 0.5;
             
-            chartContainer.appendChild(branch);
+            const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+            path.setAttribute('d', `M ${branchStartX} ${branchStartY} Q ${controlX} ${controlY} ${branchEndX} ${branchEndY}`);
+            path.setAttribute('stroke', colors[chartData.indexOf(item)]);
+            path.setAttribute('stroke-width', '2');
+            path.setAttribute('fill', 'none');
+            path.setAttribute('opacity', '0.8');
+            
+            branchSvg.appendChild(path);
+            branch.appendChild(branchSvg);
+        } else {
+            branch.style.cssText = `
+                position: absolute;
+                left: ${branchStartX}px;
+                top: ${branchStartY}px;
+                width: ${adjustedRadius - baseRadius}px;
+                height: 2px;
+                background: linear-gradient(90deg, ${colors[chartData.indexOf(item)]}, ${colors[chartData.indexOf(item)]}80);
+                transform-origin: left center;
+                transform: rotate(${angle}deg);
+                z-index: 5;
+            `;
         }
 
         // Create callout element
@@ -2681,7 +2671,7 @@ function createChartCallouts(chartData, colors, isSectorView = false) {
         callout.addEventListener('mouseenter', () => {
             callout.style.transform = 'translate(-50%, -50%) scale(1.1)';
             callout.style.boxShadow = `0 12px 40px rgba(0, 0, 0, 0.15), 0 6px 20px rgba(0, 0, 0, 0.1)`;
-            if (!isMobile && !needsBentBranch) {
+            if (!needsBentBranch) {
                 branch.style.background = colors[chartData.indexOf(item)];
             }
         });
@@ -2689,12 +2679,13 @@ function createChartCallouts(chartData, colors, isSectorView = false) {
         callout.addEventListener('mouseleave', () => {
             callout.style.transform = 'translate(-50%, -50%) scale(1)';
             callout.style.boxShadow = `0 8px 32px rgba(0, 0, 0, 0.12), 0 4px 16px rgba(0, 0, 0, 0.08)`;
-            if (!isMobile && !needsBentBranch) {
+            if (!needsBentBranch) {
                 branch.style.background = `linear-gradient(90deg, ${colors[chartData.indexOf(item)]}, ${colors[chartData.indexOf(item)]}80)`;
             }
         });
 
         // Append to container
+        chartContainer.appendChild(branch);
         chartContainer.appendChild(callout);
     });
 }
@@ -2707,13 +2698,12 @@ function createSectorCallouts(chartData, colors) {
 // Old duplicate function removed - using unified createChartCallouts instead
 
 // Simple callout positioning - back to basics
-function adjustCalloutPositions(positions, chartCenterX, chartCenterY, baseRadius, baseCalloutRadius) {
+function adjustCalloutPositions(positions, chartCenterX, chartCenterY, baseRadius) {
     const adjustedPositions = [...positions];
     
-    // Use the passed baseCalloutRadius instead of recalculating
-    const calloutRadius = baseCalloutRadius;
-    
-
+    // Responsive callout radius based on screen size - consistent with base calculations
+    const isMobile = window.innerWidth <= 768;
+    const calloutRadius = Math.min(chartCenterX, chartCenterY) * (isMobile ? 1.0 : 1.03); // Use same calculation as baseCalloutRadius
     
     for (let i = 0; i < adjustedPositions.length; i++) {
         const current = adjustedPositions[i];
