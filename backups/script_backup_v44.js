@@ -244,12 +244,12 @@ function parsePortfolioCSV(csv) {
         if (!ticker) {
             // Found blank row, stop processing here
             lastRowIndex = i - 1;
-
+            console.log(`Dynamic portfolio parsing: Found blank row at index ${i}, processing rows 1-${lastRowIndex}`);
             break;
         }
     }
     
-
+    console.log(`Portfolio data: Processing ${lastRowIndex} rows (${lastRowIndex - 1} positions + header)`);
     
     // Process all valid rows up to the blank row
     for (let i = 1; i <= lastRowIndex; i++) {
