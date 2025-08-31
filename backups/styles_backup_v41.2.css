@@ -604,7 +604,7 @@ body {
 
 /* Standardize all header styles */
 .portfolio-item:first-child {
-    background: #f8fafc !important;
+    background: #f8fafc;
     font-weight: 600;
     color: #374151;
     border-bottom: 2px solid #d1d5db;
@@ -618,11 +618,6 @@ body {
     grid-template-columns: 50px minmax(120px, 1.5fr) minmax(80px, 1.1fr) minmax(80px, 1.1fr) minmax(70px, 0.9fr) minmax(80px, 1.1fr) minmax(80px, 1.1fr) minmax(80px, 1.1fr) minmax(80px, 1.1fr) minmax(80px, 1.1fr) minmax(80px, 1.1fr) !important;
     gap: 1rem !important;
     align-items: center !important;
-    /* Sticky header positioning with solid background */
-    position: sticky !important;
-    top: 0 !important;
-    z-index: 100 !important;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important; /* Add shadow for better separation */
 }
 
 .portfolio-item:first-child .portfolio-logo {
@@ -655,7 +650,9 @@ body {
     min-height: 2.4em !important; /* Ensure minimum height for wrapped text */
     word-wrap: break-word !important; /* Force word wrapping */
     overflow-wrap: break-word !important; /* Modern word wrapping */
-    max-width: none !important; /* Remove any max-width constraints */
+    background-color: lightblue !important; /* DEBUG: Make headers obvious */
+    border: 1px solid red !important; /* DEBUG: Add red border */
+    max-width: none !important; /* DEBUG: Remove any max-width constraints */
     hyphens: auto !important; /* Allow hyphenation */
     word-break: break-all !important; /* Force breaking at any character */
     line-height: 1.1 !important; /* Tighter line spacing for wrapped text */
@@ -666,8 +663,16 @@ body {
 
 /* Text wrapping is now handled directly in JavaScript with line breaks */
 
+/* HEADER DEBUGGING - Focus on table headers only */
+.portfolio-item:first-child {
+    border: 2px solid purple !important; /* DEBUG: Header row only */
+    background-color: rgba(128, 0, 128, 0.1) !important; /* DEBUG: Light purple background */
+}
 
-
+.portfolio-item:first-child > div {
+    border: 1px solid cyan !important; /* DEBUG: Header cells only */
+    background-color: rgba(0, 255, 255, 0.1) !important; /* DEBUG: Light cyan background */
+}
 
 .portfolio-sector {
     text-align: left;
@@ -1774,16 +1779,10 @@ body {
         padding: 0.5rem 1rem;
         height: auto; /* Allow header to expand for wrapped text */
         min-height: 2.5em; /* Ensure minimum height for wrapped headers */
-        background: #f8fafc !important; /* Solid background for sticky headers */
         /* CRITICAL: Ensure header uses same grid layout as data rows on tablet */
         grid-template-columns: 40px minmax(100px, 1.5fr) minmax(70px, 1.1fr) minmax(70px, 1.1fr) minmax(60px, 0.9fr) minmax(70px, 1.1fr) minmax(70px, 1.1fr) minmax(70px, 1.1fr) minmax(70px, 1.1fr) minmax(70px, 1.1fr) minmax(70px, 1.1fr) !important;
         gap: 0.75rem !important;
         align-items: center !important;
-        /* Sticky header positioning with solid background */
-        position: sticky !important;
-        top: 0 !important;
-        z-index: 100 !important;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important; /* Add shadow for better separation */
     }
 
     /* Ensure ALL header columns use the same font size and uniform formatting on mobile */
@@ -2130,12 +2129,6 @@ body {
         grid-template-columns: 35px minmax(90px, 1.5fr) minmax(60px, 1.1fr) minmax(60px, 1.1fr) minmax(50px, 0.9fr) minmax(60px, 1.1fr) minmax(60px, 1.1fr) minmax(60px, 1.1fr) minmax(60px, 1.1fr) minmax(60px, 1.1fr) minmax(60px, 1.1fr) !important;
         gap: 0.5rem !important;
         align-items: center !important;
-        background: #f8fafc !important; /* Solid background for sticky headers */
-        /* Sticky header positioning with solid background */
-        position: sticky !important;
-        top: 0 !important;
-        z-index: 100 !important;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important; /* Add shadow for better separation */
     }
 
     .portfolio-logo {

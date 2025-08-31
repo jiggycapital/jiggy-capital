@@ -91,12 +91,13 @@ async function loadPortfolioData() {
         portfolioData = parsePortfolioCSV(portfolioCsv);
         
         // Load watchlist data
-
+        console.log('📡 Fetching watchlist data from Google Sheets...');
         const watchlistResponse = await fetch(GOOGLE_SHEETS_CONFIG.watchlistSheetUrl);
         const watchlistCsv = await watchlistResponse.text();
-
+        console.log('📄 Watchlist CSV length:', watchlistCsv.length);
         watchlistData = parseWatchlistCSV(watchlistCsv);
-
+        console.log('📊 Parsed watchlist items:', watchlistData.length);
+        console.log('🔍 First few watchlist items:', watchlistData.slice(0, 3));
         
         // Load logos data
         const logosResponse = await fetch(GOOGLE_SHEETS_CONFIG.logosSheetUrl);
@@ -363,20 +364,18 @@ function parseWatchlistCSV(csv) {
         const originalName = (r[1] || '').trim();
         const cleanedName = cleanCompanyName(originalName);
         
-
-
         const item = {
             symbol: ticker,
             name: cleanedName,                                   // Column B
             logoUrl: (r[3] || '').trim(),                       // Column D
             price: toNumber(r[5]),                              // Column F
             marketCap: toNumber(r[6]),                          // Column G
-            changePct: toPercentage(r[7]),                      // Column H - Change %
-            oneMonthChange: toPercentage(r[9]),                 // Column J - 1M Change %
-            ytdChange: toPercentage(r[11]),                     // Column L - YTD Change %
+            changePct: toNumber(r[7]),                          // Column H
+            oneMonthChange: toNumber(r[9]),                     // Column J
+            ytdChange: toNumber(r[11]),                         // Column L
             pe2026: toNumber(r[13]) || null,                    // Column N
             pfcf2026: toNumber(r[14]) || null,                  // Column O
-            fwdRevCagr: toPercentage(r[15]) || null,            // Column P - Fwd Rev CAGR
+            fwdRevCagr: toNumber(r[15]) || null,                // Column P
             peg: toNumber(r[18]) || null                        // Column S
         };
         
@@ -1823,7 +1822,38 @@ function saveFinnhubEventsCache(key, events) {
     } catch {}
 }
 
-
+// Clean company names for display
+function cleanCompanyName(companyName) {
+    if (!companyName) return companyName;
+    
+    let cleaned = companyName.trim();
+    
+    // Simple and effective suffix removal
+    const suffixes = [
+        ' Inc', ' Corp', ' Corporation', ' Company', ' Co', ' LLC', ' Ltd', ' Limited',
+        ' Technology', ' Technologies', ' Solutions', ' Services',
+        ' ADR', ' Class A', ' Class B', ' Class C',
+        ' & Co', ' & Co.', '.com', ' USA'
+    ];
+    
+    // Remove suffixes in order (longest first to avoid partial matches)
+    suffixes.sort((a, b) => b.length - a.length);
+    
+    // Keep removing suffixes until no more changes
+    let changed = true;
+    while (changed) {
+        changed = false;
+        for (const suffix of suffixes) {
+            if (cleaned.endsWith(suffix)) {
+                cleaned = cleaned.slice(0, -suffix.length);
+                changed = true;
+                break; // Start over with the new cleaned string
+            }
+        }
+    }
+    
+    return cleaned.trim();
+}
 
 // Clean event titles for display
 function cleanEventTitle(eventTitle) {
@@ -1943,11 +1973,162 @@ function parseDate(dateStr) {
     }
 }
 
+// DEBUGGING FUNCTION - Focus on table headers only
+function debugTableHeaders() {
+    console.log('🔍 TABLE HEADER DEBUGGING - Header Formatting Analysis');
+    
+    // Only debug the header row (first child)
+    const headerRow = document.querySelector('.portfolio-item:first-child');
+    if (headerRow) {
+        const headerStyles = window.getComputedStyle(headerRow);
+        
+        console.log('🎯 HEADER ROW CSS PROPERTIES:');
+        console.log('  - display:', headerStyles.display);
+        console.log('  - height:', headerStyles.height);
+        console.log('  - min-height:', headerStyles.minHeight);
+        console.log('  - white-space:', headerStyles.whiteSpace);
+        console.log('  - text-align:', headerStyles.textAlign);
+        console.log('  - line-height:', headerStyles.lineHeight);
+        
+        // Debug each header cell
+        const headerCells = headerRow.querySelectorAll('div');
+        // Header cells debugging removed for cleaner console output
+    }
+}
 
+// Global function to trigger debugging from console
+window.debugHeaders = debugTableHeaders;
 
+// Debug function to check container and header heights
+function debugContainerHeights() {
+    const portfolioGrid = document.getElementById('portfolioGrid');
+    if (!portfolioGrid) {
+        console.log('❌ portfolioGrid not found');
+        return;
+    }
+    
+    const headerRow = portfolioGrid.querySelector('.portfolio-item:first-child');
+    if (!headerRow) {
+        console.log('❌ Header row not found');
+        return;
+    }
+    
+    // Get computed styles
+    const gridStyles = window.getComputedStyle(portfolioGrid);
+    const headerStyles = window.getComputedStyle(headerRow);
+    
+    console.log('🔍 Container Height Debug:');
+    console.log('  Portfolio Grid:');
+    console.log('    - max-height:', gridStyles.maxHeight);
+    console.log('    - height:', gridStyles.height);
+    console.log('    - overflow-y:', gridStyles.overflowY);
+    
+    console.log('  Header Row:');
+    console.log('    - height:', headerStyles.height);
+    console.log('    - min-height:', headerStyles.minHeight);
+    console.log('    - line-height:', headerStyles.lineHeight);
+    console.log('    - padding-top:', headerStyles.paddingTop);
+    console.log('    - padding-bottom:', headerStyles.paddingBottom);
+    
+    // Measure actual heights
+    const gridRect = portfolioGrid.getBoundingClientRect();
+    const headerRect = headerRow.getBoundingClientRect();
+    
+    console.log('  Actual Measurements:');
+    console.log('    - Grid height:', gridRect.height + 'px');
+    console.log('    - Header height:', headerRect.height + 'px');
+    console.log('    - Header top relative to grid:', (headerRect.top - gridRect.top) + 'px');
+    
+    // Check if header is clipped
+    const isHeaderClipped = headerRect.bottom > gridRect.bottom;
+    console.log('  Header clipped:', isHeaderClipped ? '❌ YES' : '✅ NO');
+    
+    if (isHeaderClipped) {
+        const clipAmount = headerRect.bottom - gridRect.bottom;
+        console.log('  Clip amount:', clipAmount + 'px');
+    }
+}
 
+// Global function to trigger container debugging
+window.debugContainer = debugContainerHeights;
 
+// Enhanced debugging function for header clipping issues
+function debugHeaderClipping() {
+    const portfolioGrid = document.getElementById('portfolioGrid');
+    if (!portfolioGrid) {
+        console.log('❌ portfolioGrid not found');
+        return;
+    }
+    
+    const headerRow = portfolioGrid.querySelector('.portfolio-item:first-child');
+    if (!headerRow) {
+        console.log('❌ Header row not found');
+        return;
+    }
+    
+    // Get all computed styles
+    const gridStyles = window.getComputedStyle(portfolioGrid);
+    const headerStyles = window.getComputedStyle(headerRow);
+    
+    console.log('🔍 DETAILED HEADER CLIPPING DEBUG:');
+    console.log('  Portfolio Grid Container:');
+    console.log('    - display:', gridStyles.display);
+    console.log('    - max-height:', gridStyles.maxHeight);
+    console.log('    - height:', gridStyles.height);
+    console.log('    - overflow-y:', gridStyles.overflowY);
+    console.log('    - box-sizing:', gridStyles.boxSizing);
+    console.log('    - padding:', gridStyles.padding);
+    console.log('    - border:', gridStyles.border);
+    
+    console.log('  Header Row:');
+    console.log('    - display:', headerStyles.display);
+    console.log('    - height:', headerStyles.height);
+    console.log('    - min-height:', headerStyles.minHeight);
+    console.log('    - max-height:', headerStyles.maxHeight);
+    console.log('    - line-height:', headerStyles.lineHeight);
+    console.log('    - padding:', headerStyles.padding);
+    console.log('    - margin:', headerStyles.margin);
+    console.log('    - box-sizing:', headerStyles.boxSizing);
+    
+    // Measure actual dimensions
+    const gridRect = portfolioGrid.getBoundingClientRect();
+    const headerRect = headerRow.getBoundingClientRect();
+    
+    console.log('  Actual Measurements:');
+    console.log('    - Grid container height:', gridRect.height + 'px');
+    console.log('    - Grid container top:', gridRect.top + 'px');
+    console.log('    - Grid container bottom:', gridRect.bottom + 'px');
+    console.log('    - Header row height:', headerRect.height + 'px');
+    console.log('    - Header row top:', headerRect.top + 'px');
+    console.log('    - Header row bottom:', headerRect.bottom + 'px');
+    console.log('    - Header top relative to grid:', (headerRect.top - gridRect.top) + 'px');
+    console.log('    - Header bottom relative to grid:', (headerRect.bottom - gridRect.top) + 'px');
+    
+    // Check clipping
+    const isHeaderClipped = headerRect.bottom > gridRect.bottom;
+    console.log('  Clipping Analysis:');
+    console.log('    - Header clipped:', isHeaderClipped ? '❌ YES' : '✅ NO');
+    
+    if (isHeaderClipped) {
+        const clipAmount = headerRect.bottom - gridRect.bottom;
+        console.log('    - Clip amount:', clipAmount + 'px');
+        console.log('    - Grid available height:', gridRect.height + 'px');
+        console.log('    - Header needs height:', headerRect.height + 'px');
+        console.log('    - Remaining space for data:', (gridRect.height - headerRect.height) + 'px');
+    }
+    
+    // Check if max-height is being applied
+    const maxHeightValue = gridStyles.maxHeight;
+    const maxHeightPx = parseFloat(maxHeightValue);
+    console.log('  Max-Height Analysis:');
+    console.log('    - CSS max-height:', maxHeightValue);
+    console.log('    - Parsed max-height:', maxHeightPx + 'px');
+    console.log('    - Actual height:', gridRect.height + 'px');
+    console.log('    - Max-height applied:', gridRect.height <= maxHeightPx ? '✅ YES' : '❌ NO');
+}
 
+// Global function for enhanced debugging
+window.debugHeaderClipping = debugHeaderClipping;
 
 // Update portfolio display
 function updatePortfolioDisplay() {
@@ -1957,7 +2138,20 @@ function updatePortfolioDisplay() {
         return;
     }
     
-
+    // COMPREHENSIVE DEBUGGING - Log all CSS properties affecting column spacing
+    console.log('🔍 DEBUGGING: Portfolio Display Update');
+    console.log('📊 Portfolio Grid Element:', portfolioGrid);
+    
+    // Log computed styles for the grid container
+    const gridStyles = window.getComputedStyle(portfolioGrid);
+    console.log('🎯 Grid Container Styles:');
+    console.log('  - display:', gridStyles.display);
+    console.log('  - grid-template-columns:', gridStyles.gridTemplateColumns);
+    console.log('  - gap:', gridStyles.gap);
+    console.log('  - width:', gridStyles.width);
+    console.log('  - max-width:', gridStyles.maxWidth);
+    console.log('  - padding:', gridStyles.padding);
+    console.log('  - margin:', gridStyles.margin);
     const filteredData = filterPortfolioData(portfolioData, currentFilter);
     
     const investedValue = filteredData.reduce((sum, item) => sum + item.value, 0);
@@ -2061,7 +2255,8 @@ function updatePortfolioDisplay() {
 
     portfolioGrid.innerHTML = html;
     
-
+    // Comprehensive debugging removed for cleaner console output
+    // Debug headers manually: window.debugHeaders()
 
     portfolioGrid.querySelectorAll('.sortable').forEach(el => {
         el.addEventListener('click', () => {
@@ -2123,21 +2318,20 @@ function displayWatchlist() {
     sortedData.forEach(item => {
         const logoHtml = item.logoUrl ? `<img src="${item.logoUrl}" alt="${item.symbol}" />` : item.symbol;
         const changeClass = item.changePct >= 0 ? 'positive' : 'negative';
-        const oneMonthClass = item.oneMonthChange !== null ? (item.oneMonthChange >= 0 ? 'positive' : 'negative') : '';
-        const ytdClass = item.ytdChange !== null ? (item.ytdChange >= 0 ? 'positive' : 'negative') : '';
+        const oneMonthClass = item.oneMonthChange >= 0 ? 'positive' : 'negative';
+        const ytdClass = item.ytdChange >= 0 ? 'positive' : 'negative';
         
         html += `
             <div class="portfolio-item">
                 <div class="portfolio-logo">${logoHtml}</div>
                 <div>
                     <div class="portfolio-symbol">${item.symbol}</div>
-                    <div class="portfolio-name">${item.name}</div>
                 </div>
                 <div class="portfolio-price">$${item.price ? item.price.toFixed(2) : '-'}</div>
                 <div class="portfolio-return ${changeClass}">${item.changePct ? item.changePct.toFixed(1) + '%' : '-'}</div>
                 <div class="portfolio-sector">${item.marketCap ? item.marketCap.toLocaleString() : '-'}</div>
-                <div class="portfolio-first-buy ${oneMonthClass}">${item.oneMonthChange !== null ? item.oneMonthChange.toFixed(1) + '%' : '-'}</div>
-                <div class="portfolio-last-buy ${ytdClass}">${item.ytdChange !== null ? item.ytdChange.toFixed(1) + '%' : '-'}</div>
+                <div class="portfolio-first-buy ${oneMonthClass}">${item.oneMonthChange !== 0 ? item.oneMonthChange.toFixed(1) + '%' : '-'}</div>
+                <div class="portfolio-last-buy ${ytdClass}">${item.ytdChange !== 0 ? item.ytdChange.toFixed(1) + '%' : '-'}</div>
                 <div class="portfolio-shares"></div>
                 <div class="portfolio-cost"></div>
                 <div class="portfolio-pe2026-watchlist">${item.pe2026 ? item.pe2026.toFixed(1) + 'x' : '-'}</div>
@@ -2149,7 +2343,8 @@ function displayWatchlist() {
     
     portfolioGrid.innerHTML = html;
     
-
+    // Comprehensive debugging removed for cleaner console output
+    // Debug headers manually: window.debugHeaders()
     
     // Add event listeners for sorting (same approach as Portfolio table)
     portfolioGrid.querySelectorAll('.sortable').forEach(el => {
@@ -2762,9 +2957,8 @@ function createChartCallouts(chartData, colors, isSectorView = false) {
         const branchStartY = chartCenterY + Math.sin(angleRad) * baseRadius;
 
         // Create connecting branch (hide on mobile)
-        let branch = null;
         if (!isMobile) {
-            branch = document.createElement('div');
+            const branch = document.createElement('div');
             branch.className = 'chart-branch';
             
             if (needsBentBranch) {
@@ -2907,7 +3101,7 @@ function createChartCallouts(chartData, colors, isSectorView = false) {
         callout.addEventListener('mouseenter', () => {
             callout.style.transform = 'translate(-50%, -50%) scale(1.1)';
             callout.style.boxShadow = `0 12px 40px rgba(0, 0, 0, 0.15), 0 6px 20px rgba(0, 0, 0, 0.1)`;
-            if (branch && !needsBentBranch) {
+            if (!isMobile && !needsBentBranch) {
                 branch.style.background = colors[chartData.indexOf(item)];
             }
         });
@@ -2915,7 +3109,7 @@ function createChartCallouts(chartData, colors, isSectorView = false) {
         callout.addEventListener('mouseleave', () => {
             callout.style.transform = 'translate(-50%, -50%) scale(1)';
             callout.style.boxShadow = `0 8px 32px rgba(0, 0, 0, 0.12), 0 4px 16px rgba(0, 0, 0, 0.08)`;
-            if (branch && !needsBentBranch) {
+            if (!isMobile && !needsBentBranch) {
                 branch.style.background = `linear-gradient(90deg, ${colors[chartData.indexOf(item)]}, ${colors[chartData.indexOf(item)]}80)`;
             }
         });
@@ -3170,7 +3364,19 @@ function initializeEventListeners() {
         });
     }
     
-
+    // Portfolio/Watchlist toggle
+    console.log('🔧 Setting up portfolio toggle buttons...');
+    const toggleButtons = document.querySelectorAll('.portfolio-toggle .toggle-btn');
+    console.log('Found toggle buttons:', toggleButtons.length);
+    
+    toggleButtons.forEach((btn, index) => {
+        console.log(`Button ${index}:`, btn.textContent, 'data-view:', btn.getAttribute('data-view'));
+        btn.addEventListener('click', () => {
+            const view = btn.getAttribute('data-view');
+            console.log('🎯 Toggle button clicked:', view);
+            switchView(view);
+        });
+    });
 
 
 
@@ -3224,14 +3430,7 @@ function setupToggleButtons() {
 // Function to handle toggle button click events
 function handleToggleButtonClick() {
     const view = this.getAttribute('data-view');
-    
-    // Check if this is a portfolio/watchlist toggle (not pie chart toggle)
-    if (this.closest('.portfolio-toggle')) {
-        switchView(view);
-    } else {
-        // This is a pie chart toggle button
-        handleToggleClick(view);
-    }
+    handleToggleClick(view);
 }
 
 // Sample data for fallback
