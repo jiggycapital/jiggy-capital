@@ -1978,7 +1978,7 @@ function updatePortfolioDisplay() {
         { cls: 'portfolio-symbol', key: 'symbol', label: 'Symbol' },
         { cls: 'portfolio-price', key: 'price', label: 'Price' },
         { cls: 'portfolio-return', key: 'changePct', label: 'Change %' },
-        { cls: 'portfolio-sector', key: 'marketCap', label: 'Market\nCap' }, // \n = line break
+        { cls: 'portfolio-sector', key: 'marketCap', label: 'Mkt\nCap' }, // \n = line break
         { cls: 'portfolio-first-buy', key: 'firstBuy', label: 'First\nBuy' }, // \n = line break
         { cls: 'portfolio-last-buy', key: 'lastBuy', label: 'Last\nBuy' }, // \n = line break
         { cls: 'portfolio-fwd-rev-cagr', key: 'fwdRevCagr', label: 'Fwd Rev\nCAGR' }, // \n = line break
@@ -2084,13 +2084,13 @@ function displayWatchlist() {
     // Watchlist display debugging removed for cleaner console output
     const portfolioGrid = document.getElementById('portfolioGrid');
     if (!portfolioGrid) {
-        console.log('❌ portfolioGrid element not found');
+
         return;
     }
     
-    console.log('📊 watchlistData length:', watchlistData ? watchlistData.length : 'undefined');
+
     if (!watchlistData || watchlistData.length === 0) {
-        console.log('⚠️ No watchlist data available');
+
         portfolioGrid.innerHTML = '<div class="loading"><i class="fas fa-spinner fa-spin"></i><p>Loading watchlist data...</p></div>';
         return;
     }
@@ -2109,8 +2109,8 @@ function displayWatchlist() {
             </div>
             <div class="portfolio-price sortable" data-column="price">Price ${getWatchlistSortIcon('price')}</div>
             <div class="portfolio-return sortable" data-column="changePct">Change % ${getWatchlistSortIcon('changePct')}</div>
-            <div class="portfolio-sector sortable" data-column="marketCap">Market\nCap ${getWatchlistSortIcon('marketCap')}</div>
-            <div class="portfolio-first-buy sortable" data-column="oneMonthChange">1M Change\n% ${getWatchlistSortIcon('oneMonthChange')}</div>
+            <div class="portfolio-sector sortable" data-column="marketCap">Mkt\nCap ${getWatchlistSortIcon('marketCap')}</div>
+            <div class="portfolio-first-buy sortable" data-column="oneMonthChange">1M\nChange % ${getWatchlistSortIcon('oneMonthChange')}</div>
             <div class="portfolio-last-buy sortable" data-column="ytdChange">YTD\nChange % ${getWatchlistSortIcon('ytdChange')}</div>
             <div class="portfolio-shares"></div>
             <div class="portfolio-cost"></div>
@@ -3178,7 +3178,7 @@ function initializeEventListeners() {
 
 // Switch between Portfolio and Watchlist views
 function switchView(view) {
-    console.log('🔄 Switching view to:', view);
+
     currentPortfolioView = view;
     
     // Update toggle button states
@@ -3194,10 +3194,10 @@ function switchView(view) {
     
     // Display the appropriate view
     if (view === 'watchlist') {
-        console.log('📊 Displaying watchlist...');
+
         displayWatchlist();
     } else {
-        console.log('💼 Displaying portfolio...');
+
         updatePortfolioDisplay();
     }
 }

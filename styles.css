@@ -452,7 +452,7 @@ body {
 
 /* Portfolio Grid Container - Scrollable after 10 rows */
 .portfolio-grid {
-    max-height: calc(4em + 9 * (1.25rem * 2 + 2rem + 1px)) !important; /* Reduced header height (4em) + 9 data rows */
+    max-height: calc(4.8em + 9 * (1.5rem * 2 + 2.4rem + 1.2px)) !important; /* Increased by 20% - header height (4.8em) + 9 data rows */
     overflow-y: auto !important;
     border: 1px solid #e5e7eb;
     border-radius: 8px;
@@ -485,10 +485,20 @@ body {
     display: grid;
     width: 100%;
     max-width: 100%;
-    grid-template-columns: 50px minmax(120px, 1.5fr) minmax(80px, 1.1fr) minmax(80px, 1.1fr) minmax(70px, 0.9fr) minmax(80px, 1.1fr) minmax(80px, 1.1fr) minmax(80px, 1.1fr) minmax(80px, 1.1fr) minmax(80px, 1.1fr) minmax(80px, 1.1fr);
+    grid-template-columns: 50px minmax(120px, 1.5fr) minmax(70px, 0.9fr) minmax(70px, 0.9fr) minmax(75px, 1fr) minmax(80px, 1.2fr) minmax(85px, 1.3fr) minmax(70px, 0.9fr) minmax(80px, 1.1fr) minmax(80px, 1.1fr) minmax(80px, 1.1fr);
     gap: 1rem;
     align-items: center;
     transition: background-color 0.3s ease;
+    text-align: center; /* Center all text in portfolio items */
+}
+
+/* Left-align only the Symbol column and company name for better readability */
+.portfolio-symbol {
+    text-align: left !important;
+}
+
+.portfolio-name {
+    text-align: left !important;
 }
 
 .portfolio-item:hover {
@@ -552,7 +562,7 @@ body {
 .portfolio-return,
 .portfolio-pe2026,
 .portfolio-pfcf2026 {
-    text-align: right;
+    text-align: center;
     font-weight: 600;
     min-width: 80px; /* Increased width for better icon fit */
     width: 80px; /* Fixed width for consistent alignment */
@@ -564,10 +574,10 @@ body {
 
 .portfolio-first-buy,
 .portfolio-last-buy {
-    text-align: right;
+    text-align: center;
     font-weight: 600;
-    min-width: 100px; /* Increased width for better icon fit */
-    max-width: 110px; /* Allow some expansion for dates */
+    min-width: 70px; /* Reduced width for better fit */
+    max-width: 90px; /* Reduced max width for dates */
     overflow: visible; /* Allow text to wrap */
     text-overflow: unset; /* Remove ellipsis */
     white-space: normal; /* Allow text wrapping */
@@ -577,10 +587,10 @@ body {
 }
 
 .portfolio-fwd-rev-cagr {
-    text-align: right;
+    text-align: center;
     font-weight: 600;
-    min-width: 100px;
-    max-width: 120px;
+    min-width: 70px;
+    max-width: 90px;
     overflow: visible;
     text-overflow: unset;
     white-space: normal;
@@ -590,7 +600,7 @@ body {
 }
 
 .portfolio-pe2026-watchlist {
-    text-align: right;
+    text-align: center;
     font-weight: 600;
     min-width: 80px;
     max-width: 100px;
@@ -615,7 +625,7 @@ body {
     min-height: 3em; /* Ensure minimum height for wrapped headers */
     /* CRITICAL: Ensure header uses same grid layout as data rows */
     display: grid !important;
-    grid-template-columns: 50px minmax(120px, 1.5fr) minmax(80px, 1.1fr) minmax(80px, 1.1fr) minmax(70px, 0.9fr) minmax(80px, 1.1fr) minmax(80px, 1.1fr) minmax(80px, 1.1fr) minmax(80px, 1.1fr) minmax(80px, 1.1fr) minmax(80px, 1.1fr) !important;
+    grid-template-columns: 50px minmax(120px, 1.5fr) minmax(70px, 0.9fr) minmax(70px, 0.9fr) minmax(75px, 1fr) minmax(80px, 1.2fr) minmax(85px, 1.3fr) minmax(70px, 0.9fr) minmax(80px, 1.1fr) minmax(80px, 1.1fr) minmax(80px, 1.1fr) !important;
     gap: 1rem !important;
     align-items: center !important;
     /* Sticky header positioning with solid background */
@@ -647,7 +657,7 @@ body {
 .portfolio-item:first-child .portfolio-value {
     font-size: 0.9rem !important; /* Force consistent font size for all headers */
     line-height: 1.2;
-    text-align: left !important; /* Left align all header text */
+    text-align: center !important; /* Center all header text */
     white-space: normal !important; /* Allow text wrapping for all headers */
     overflow: visible !important; /* Allow content to be visible */
     text-overflow: unset !important; /* Remove ellipsis */
@@ -662,6 +672,28 @@ body {
     white-space: pre-line !important; /* Respect \n line breaks */
 }
 
+/* Center all header text except Symbol */
+.portfolio-item:first-child .portfolio-return,
+.portfolio-item:first-child .portfolio-pe2026,
+.portfolio-item:first-child .portfolio-pfcf2026,
+.portfolio-item:first-child .portfolio-first-buy,
+.portfolio-item:first-child .portfolio-last-buy,
+.portfolio-item:first-child .portfolio-fwd-rev-cagr,
+.portfolio-item:first-child .portfolio-pe2026-watchlist,
+.portfolio-item:first-child .portfolio-price,
+.portfolio-item:first-child .portfolio-weight {
+    text-align: center !important; /* Center all headers */
+}
+
+/* Left-align Symbol and company name headers */
+.portfolio-item:first-child .portfolio-symbol {
+    text-align: left !important;
+}
+
+.portfolio-item:first-child .portfolio-name {
+    text-align: left !important;
+}
+
 /* All header formatting is now handled by the uniform rules above */
 
 /* Text wrapping is now handled directly in JavaScript with line breaks */
@@ -670,20 +702,22 @@ body {
 
 
 .portfolio-sector {
-    text-align: left;
+    text-align: center;
     font-weight: 600;
-    min-width: 120px;
-    max-width: 150px;
+    min-width: 75px;
+    max-width: 95px;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: normal;
     padding-right: 0px;
-    line-height: 1.2;
+    line-height: 1.1;
     font-size: 0.9rem; /* Consistent font size */
+    word-wrap: break-word;
+    overflow-wrap: break-word;
 }
 
 .portfolio-weight {
-    text-align: right;
+    text-align: center;
     font-weight: 600;
     min-width: 80px; /* Ensure consistent width for alignment */
     width: 80px; /* Fixed width for consistent alignment */
@@ -1484,6 +1518,43 @@ body {
 }
 
 /* Responsive Design */
+/* iPhone Pro Max and large mobile screens optimization */
+@media (max-width: 430px) {
+    .portfolio-item {
+        min-width: 600px; /* Further reduced for iPhone Pro Max */
+        grid-template-columns: 28px minmax(75px, 1.2fr) minmax(40px, 0.6fr) minmax(40px, 0.6fr) minmax(50px, 0.8fr) minmax(55px, 0.9fr) minmax(60px, 1fr) minmax(40px, 0.6fr) minmax(50px, 0.8fr) minmax(50px, 0.8fr) minmax(50px, 0.8fr);
+        gap: 0.3rem;
+        padding: 0.4rem 0.6rem;
+        font-size: 0.7rem;
+    }
+    
+    .portfolio-item:first-child {
+        grid-template-columns: 28px minmax(75px, 1.2fr) minmax(40px, 0.6fr) minmax(40px, 0.6fr) minmax(50px, 0.8fr) minmax(55px, 0.9fr) minmax(60px, 1fr) minmax(40px, 0.6fr) minmax(50px, 0.8fr) minmax(50px, 0.8fr) minmax(50px, 0.8fr) !important;
+        gap: 0.3rem !important;
+        font-size: 0.7rem;
+        padding: 0.4rem 0.6rem;
+    }
+    
+    .portfolio-logo {
+        width: 22px;
+        height: 22px;
+        font-size: 0.55rem;
+    }
+    
+    .portfolio-sector {
+        font-size: 0.65rem;
+        min-width: 60px;
+        max-width: 75px;
+    }
+    
+    .portfolio-first-buy,
+    .portfolio-last-buy {
+        font-size: 0.6rem;
+        min-width: 60px;
+        max-width: 75px;
+    }
+}
+
 @media (max-width: 768px), (max-width: 1024px) {
     .hamburger {
         display: flex;
@@ -1753,17 +1824,19 @@ body {
         border-radius: 8px;
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
         margin-top: 50px; /* Reduced mobile spacing */
+        width: 100%;
+        max-width: 100vw; /* Ensure it doesn't exceed viewport width */
     }
 
     /* Portfolio Grid Container - Tablet */
     .portfolio-grid {
-        max-height: calc(3em + 9 * (0.75rem * 2 + 1rem + 1px)) !important; /* Reduced header height (3em) + 9 data rows */
+        max-height: calc(3.6em + 9 * (0.9rem * 2 + 1.2rem + 1.2px)) !important; /* Increased by 20% - header height (3.6em) + 9 data rows */
     }
 
     .portfolio-item {
-        min-width: 800px; /* Ensure minimum width for readability */
-        grid-template-columns: 40px minmax(100px, 1.5fr) minmax(70px, 1.1fr) minmax(70px, 1.1fr) minmax(60px, 0.9fr) minmax(70px, 1.1fr) minmax(70px, 1.1fr) minmax(70px, 1.1fr) minmax(70px, 1.1fr) minmax(70px, 1.1fr) minmax(70px, 1.1fr);
-        gap: 0.75rem;
+        min-width: 750px; /* Reduced from 800px for better mobile fit */
+        grid-template-columns: 35px minmax(90px, 1.4fr) minmax(55px, 0.8fr) minmax(55px, 0.8fr) minmax(65px, 1fr) minmax(70px, 1.1fr) minmax(75px, 1.2fr) minmax(55px, 0.8fr) minmax(65px, 1fr) minmax(65px, 1fr) minmax(65px, 1fr);
+        gap: 0.6rem;
         padding: 0.75rem 1rem;
         font-size: 0.8rem;
     }
@@ -1776,7 +1849,7 @@ body {
         min-height: 2.5em; /* Ensure minimum height for wrapped headers */
         background: #f8fafc !important; /* Solid background for sticky headers */
         /* CRITICAL: Ensure header uses same grid layout as data rows on tablet */
-        grid-template-columns: 40px minmax(100px, 1.5fr) minmax(70px, 1.1fr) minmax(70px, 1.1fr) minmax(60px, 0.9fr) minmax(70px, 1.1fr) minmax(70px, 1.1fr) minmax(70px, 1.1fr) minmax(70px, 1.1fr) minmax(70px, 1.1fr) minmax(70px, 1.1fr) !important;
+        grid-template-columns: 35px minmax(90px, 1.4fr) minmax(55px, 0.8fr) minmax(55px, 0.8fr) minmax(65px, 1fr) minmax(70px, 1.1fr) minmax(75px, 1.2fr) minmax(55px, 0.8fr) minmax(65px, 1fr) minmax(65px, 1fr) minmax(65px, 1fr) !important;
         gap: 0.75rem !important;
         align-items: center !important;
         /* Sticky header positioning with solid background */
@@ -1803,7 +1876,7 @@ body {
     .portfolio-item:first-child .portfolio-cost,
     .portfolio-item:first-child .portfolio-value {
         font-size: 0.75rem !important; /* Force consistent font size for all headers */
-        text-align: left !important; /* Left align all header text */
+        text-align: center !important; /* Center all header text */
         white-space: normal !important; /* Allow text wrapping for all headers */
         overflow: visible !important; /* Allow content to be visible */
         text-overflow: unset !important; /* Remove ellipsis */
@@ -1811,6 +1884,28 @@ body {
         min-height: 2.2em !important; /* Slightly smaller for mobile */
         word-wrap: break-word !important; /* Force word wrapping */
         overflow-wrap: break-word !important; /* Modern word wrapping */
+    }
+
+    /* Center all header text on tablet except Symbol */
+    .portfolio-item:first-child .portfolio-return,
+    .portfolio-item:first-child .portfolio-pe2026,
+    .portfolio-item:first-child .portfolio-pfcf2026,
+    .portfolio-item:first-child .portfolio-first-buy,
+    .portfolio-item:first-child .portfolio-last-buy,
+    .portfolio-item:first-child .portfolio-fwd-rev-cagr,
+    .portfolio-item:first-child .portfolio-pe2026-watchlist,
+    .portfolio-item:first-child .portfolio-price,
+    .portfolio-item:first-child .portfolio-weight {
+        text-align: center !important; /* Center all headers */
+    }
+
+    /* Left-align Symbol and company name headers on tablet */
+    .portfolio-item:first-child .portfolio-symbol {
+        text-align: left !important;
+    }
+
+    .portfolio-item:first-child .portfolio-name {
+        text-align: left !important;
     }
 
     /* All header formatting is now handled by the uniform rules above */
@@ -1833,8 +1928,8 @@ body {
 
     .portfolio-sector {
         font-size: 0.75rem;
-        min-width: 80px;
-        max-width: 100px;
+        min-width: 65px;
+        max-width: 80px;
     }
 
     .portfolio-shares,
@@ -1853,16 +1948,16 @@ body {
     .portfolio-first-buy,
     .portfolio-last-buy {
         font-size: 0.7rem;
-        min-width: 80px;
-        max-width: 90px;
+        min-width: 50px;
+        max-width: 65px;
         white-space: normal; /* Allow text wrapping on mobile */
         line-height: 1.1; /* Tighter line spacing for mobile */
     }
 
     .portfolio-fwd-rev-cagr {
         font-size: 0.7rem;
-        min-width: 80px;
-        max-width: 90px;
+        min-width: 55px;
+        max-width: 70px;
         white-space: normal;
         line-height: 1.1;
     }
@@ -2114,20 +2209,20 @@ body {
 
     /* Portfolio Grid Container - Mobile */
     .portfolio-grid {
-        max-height: calc(2.5em + 9 * (0.5rem * 2 + 0.75rem + 1px)) !important; /* Reduced header height (2.5em) + 9 data rows */
+        max-height: calc(3em + 9 * (0.6rem * 2 + 0.9rem + 1.2px)) !important; /* Increased by 20% - header height (3em) + 9 data rows */
     }
 
     .portfolio-item {
-        min-width: 700px; /* Slightly smaller for very small screens */
-        grid-template-columns: 35px minmax(90px, 1.5fr) minmax(60px, 1.1fr) minmax(60px, 1.1fr) minmax(50px, 0.9fr) minmax(60px, 1.1fr) minmax(60px, 1.1fr) minmax(60px, 1.1fr) minmax(60px, 1.1fr) minmax(60px, 1.1fr) minmax(60px, 1.1fr);
-        gap: 0.5rem;
+        min-width: 650px; /* Reduced from 700px for better mobile fit */
+        grid-template-columns: 30px minmax(80px, 1.3fr) minmax(45px, 0.7fr) minmax(45px, 0.7fr) minmax(55px, 0.9fr) minmax(60px, 1fr) minmax(65px, 1.1fr) minmax(45px, 0.7fr) minmax(55px, 0.9fr) minmax(55px, 0.9fr) minmax(55px, 0.9fr);
+        gap: 0.4rem;
         padding: 0.5rem 0.75rem;
         font-size: 0.75rem;
     }
 
     /* CRITICAL: Ensure header uses same grid layout as data rows on mobile */
     .portfolio-item:first-child {
-        grid-template-columns: 35px minmax(90px, 1.5fr) minmax(60px, 1.1fr) minmax(60px, 1.1fr) minmax(50px, 0.9fr) minmax(60px, 1.1fr) minmax(60px, 1.1fr) minmax(60px, 1.1fr) minmax(60px, 1.1fr) minmax(60px, 1.1fr) minmax(60px, 1.1fr) !important;
+        grid-template-columns: 30px minmax(80px, 1.3fr) minmax(45px, 0.7fr) minmax(45px, 0.7fr) minmax(55px, 0.9fr) minmax(60px, 1fr) minmax(65px, 1.1fr) minmax(45px, 0.7fr) minmax(55px, 0.9fr) minmax(55px, 0.9fr) minmax(55px, 0.9fr) !important;
         gap: 0.5rem !important;
         align-items: center !important;
         background: #f8fafc !important; /* Solid background for sticky headers */
@@ -2165,7 +2260,7 @@ body {
     .portfolio-item:first-child .portfolio-cost,
     .portfolio-item:first-child .portfolio-value {
         font-size: 0.75rem !important; /* Force consistent font size for all headers */
-        text-align: left !important; /* Left align all header text */
+        text-align: center !important; /* Center all header text */
         white-space: normal !important; /* Allow text wrapping for all headers */
         overflow: visible !important; /* Allow content to be visible */
         text-overflow: unset !important; /* Remove ellipsis */
@@ -2173,6 +2268,28 @@ body {
         min-height: 2.0em !important; /* Even smaller for very small screens */
         word-wrap: break-word !important; /* Force word wrapping */
         overflow-wrap: break-word !important; /* Modern word wrapping */
+    }
+
+    /* Center all header text on very small mobile except Symbol */
+    .portfolio-item:first-child .portfolio-return,
+    .portfolio-item:first-child .portfolio-pe2026,
+    .portfolio-item:first-child .portfolio-pfcf2026,
+    .portfolio-item:first-child .portfolio-first-buy,
+    .portfolio-item:first-child .portfolio-last-buy,
+    .portfolio-item:first-child .portfolio-fwd-rev-cagr,
+    .portfolio-item:first-child .portfolio-pe2026-watchlist,
+    .portfolio-item:first-child .portfolio-price,
+    .portfolio-item:first-child .portfolio-weight {
+        text-align: center !important; /* Center all headers */
+    }
+
+    /* Left-align Symbol and company name headers on very small mobile */
+    .portfolio-item:first-child .portfolio-symbol {
+        text-align: left !important;
+    }
+
+    .portfolio-item:first-child .portfolio-name {
+        text-align: left !important;
     }
 
     .portfolio-name {
@@ -2183,8 +2300,8 @@ body {
 
     .portfolio-sector {
         font-size: 0.7rem;
-        min-width: 60px;
-        max-width: 80px;
+        min-width: 50px;
+        max-width: 65px;
     }
 
     .portfolio-shares,
@@ -2203,16 +2320,16 @@ body {
     .portfolio-first-buy,
     .portfolio-last-buy {
         font-size: 0.65rem;
-        min-width: 70px;
-        max-width: 80px;
+        min-width: 45px;
+        max-width: 60px;
         white-space: normal; /* Allow text wrapping on very small screens */
         line-height: 1.0; /* Very tight line spacing for small screens */
     }
 
     .portfolio-fwd-rev-cagr {
         font-size: 0.65rem;
-        min-width: 70px;
-        max-width: 80px;
+        min-width: 40px;
+        max-width: 55px;
         white-space: normal;
         line-height: 1.0;
     }
@@ -2312,3 +2429,5 @@ body {
 html {
     scroll-behavior: smooth;
 }
+
+
