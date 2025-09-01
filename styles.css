@@ -624,6 +624,9 @@ body {
     height: auto; /* Allow header to expand for wrapped text */
     min-height: 3em; /* Ensure minimum height for wrapped headers */
     /* CRITICAL: Ensure header uses same grid layout as data rows */
+    min-width: 100% !important; /* Ensure header extends full width */
+    width: 100% !important;
+    max-width: none !important; /* Remove max-width constraint for full background */
     display: grid !important;
     grid-template-columns: 50px minmax(120px, 1.5fr) minmax(70px, 0.9fr) minmax(70px, 0.9fr) minmax(75px, 1fr) minmax(80px, 1.2fr) minmax(85px, 1.3fr) minmax(70px, 0.9fr) minmax(80px, 1.1fr) minmax(80px, 1.1fr) minmax(80px, 1.1fr) !important;
     gap: 1rem !important;
@@ -634,6 +637,8 @@ body {
     z-index: 100 !important;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important; /* Add shadow for better separation */
 }
+
+
 
 .portfolio-item:first-child .portfolio-logo {
     visibility: hidden;
@@ -1521,19 +1526,24 @@ body {
 /* iPhone Pro Max and large mobile screens optimization */
 @media (max-width: 430px) {
     .portfolio-item {
-        min-width: 600px; /* Further reduced for iPhone Pro Max */
-        grid-template-columns: 28px minmax(75px, 1.2fr) minmax(40px, 0.6fr) minmax(40px, 0.6fr) minmax(50px, 0.8fr) minmax(55px, 0.9fr) minmax(60px, 1fr) minmax(40px, 0.6fr) minmax(50px, 0.8fr) minmax(50px, 0.8fr) minmax(50px, 0.8fr);
-        gap: 0.3rem;
-        padding: 0.4rem 0.6rem;
-        font-size: 0.7rem;
+        min-width: 850px; /* Much wider for better readability - horizontal scroll is fine */
+        grid-template-columns: 45px minmax(110px, 1.4fr) minmax(65px, 0.8fr) minmax(65px, 0.8fr) minmax(70px, 0.9fr) minmax(75px, 1.1fr) minmax(80px, 1.2fr) minmax(65px, 0.8fr) minmax(75px, 1fr) minmax(75px, 1fr) minmax(75px, 1fr);
+        gap: 0.8rem;
+        padding: 1rem 1.5rem;
+        font-size: 0.8rem;
     }
     
     .portfolio-item:first-child {
-        grid-template-columns: 28px minmax(75px, 1.2fr) minmax(40px, 0.6fr) minmax(40px, 0.6fr) minmax(50px, 0.8fr) minmax(55px, 0.9fr) minmax(60px, 1fr) minmax(40px, 0.6fr) minmax(50px, 0.8fr) minmax(50px, 0.8fr) minmax(50px, 0.8fr) !important;
-        gap: 0.3rem !important;
-        font-size: 0.7rem;
-        padding: 0.4rem 0.6rem;
+        min-width: 850px !important; /* Match data row width */
+        width: 100% !important; /* Use full container width */
+        max-width: none !important; /* Remove max-width constraint */
+        grid-template-columns: 45px minmax(110px, 1.4fr) minmax(65px, 0.8fr) minmax(65px, 0.8fr) minmax(70px, 0.9fr) minmax(75px, 1.1fr) minmax(80px, 1.2fr) minmax(65px, 0.8fr) minmax(75px, 1fr) minmax(75px, 1fr) minmax(75px, 1fr) !important;
+        gap: 0.8rem !important;
+        font-size: 0.8rem;
+        padding: 1rem 1.5rem !important;
     }
+
+
     
     .portfolio-logo {
         width: 22px;
@@ -1849,6 +1859,9 @@ body {
         min-height: 2.5em; /* Ensure minimum height for wrapped headers */
         background: #f8fafc !important; /* Solid background for sticky headers */
         /* CRITICAL: Ensure header uses same grid layout as data rows on tablet */
+        min-width: 750px !important; /* Match data row width */
+        width: 100% !important; /* Use full container width */
+        max-width: none !important; /* Remove max-width constraint for full background */
         grid-template-columns: 35px minmax(90px, 1.4fr) minmax(55px, 0.8fr) minmax(55px, 0.8fr) minmax(65px, 1fr) minmax(70px, 1.1fr) minmax(75px, 1.2fr) minmax(55px, 0.8fr) minmax(65px, 1fr) minmax(65px, 1fr) minmax(65px, 1fr) !important;
         gap: 0.75rem !important;
         align-items: center !important;
@@ -1858,6 +1871,8 @@ body {
         z-index: 100 !important;
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important; /* Add shadow for better separation */
     }
+
+
 
     /* Ensure ALL header columns use the same font size and uniform formatting on mobile */
     .portfolio-item:first-child .portfolio-symbol,
@@ -2213,17 +2228,20 @@ body {
     }
 
     .portfolio-item {
-        min-width: 650px; /* Reduced from 700px for better mobile fit */
-        grid-template-columns: 30px minmax(80px, 1.3fr) minmax(45px, 0.7fr) minmax(45px, 0.7fr) minmax(55px, 0.9fr) minmax(60px, 1fr) minmax(65px, 1.1fr) minmax(45px, 0.7fr) minmax(55px, 0.9fr) minmax(55px, 0.9fr) minmax(55px, 0.9fr);
-        gap: 0.4rem;
-        padding: 0.5rem 0.75rem;
-        font-size: 0.75rem;
+        min-width: 900px; /* Much wider for better readability - horizontal scroll is fine */
+        grid-template-columns: 50px minmax(120px, 1.5fr) minmax(70px, 0.9fr) minmax(70px, 0.9fr) minmax(75px, 1fr) minmax(80px, 1.2fr) minmax(85px, 1.3fr) minmax(70px, 0.9fr) minmax(80px, 1.1fr) minmax(80px, 1.1fr) minmax(80px, 1.1fr);
+        gap: 1rem;
+        padding: 1.25rem 2rem;
+        font-size: 0.9rem;
     }
 
     /* CRITICAL: Ensure header uses same grid layout as data rows on mobile */
     .portfolio-item:first-child {
-        grid-template-columns: 30px minmax(80px, 1.3fr) minmax(45px, 0.7fr) minmax(45px, 0.7fr) minmax(55px, 0.9fr) minmax(60px, 1fr) minmax(65px, 1.1fr) minmax(45px, 0.7fr) minmax(55px, 0.9fr) minmax(55px, 0.9fr) minmax(55px, 0.9fr) !important;
-        gap: 0.5rem !important;
+        min-width: 900px !important; /* Match data row width */
+        width: 100% !important; /* Use full container width */
+        max-width: none !important; /* Remove max-width constraint */
+        grid-template-columns: 50px minmax(120px, 1.5fr) minmax(70px, 0.9fr) minmax(70px, 0.9fr) minmax(75px, 1fr) minmax(80px, 1.2fr) minmax(85px, 1.3fr) minmax(70px, 0.9fr) minmax(80px, 1.1fr) minmax(80px, 1.1fr) minmax(80px, 1.1fr) !important;
+        gap: 1rem !important;
         align-items: center !important;
         background: #f8fafc !important; /* Solid background for sticky headers */
         /* Sticky header positioning with solid background */
@@ -2231,7 +2249,10 @@ body {
         top: 0 !important;
         z-index: 100 !important;
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important; /* Add shadow for better separation */
+        padding: 1.25rem 2rem !important;
     }
+
+
 
     .portfolio-logo {
         width: 25px;
@@ -2299,9 +2320,9 @@ body {
     }
 
     .portfolio-sector {
-        font-size: 0.7rem;
-        min-width: 50px;
-        max-width: 65px;
+        font-size: 0.65rem;
+        min-width: 45px;
+        max-width: 55px;
     }
 
     .portfolio-shares,
