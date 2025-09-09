@@ -749,15 +749,21 @@ function displayCompanyNews(newsData) {
     const newsContainer = document.getElementById('companyNews');
     if (!newsContainer) return;
     
+    console.log('Total news articles received:', newsData.length);
+    
     if (newsData.length === 0) {
         newsContainer.innerHTML = '<div class="no-news"><i class="far fa-newspaper"></i><p>No recent news found.</p><small>We check for news from the last 7 days.</small></div>';
         return;
     }
     
-    // Filter news to only include articles with company name in headline and exclude fool.com
+    // Filter news to only include articles with company name in headline and exclude fool.com and Seeking Alpha
     const filteredNews = newsData.filter(news => {
-        // Exclude articles from fool.com
-        if (news.url && news.url.toLowerCase().includes('fool.com')) {
+        // Exclude articles from fool.com and Seeking Alpha (check both URL and source)
+        const url = (news.url || '').toLowerCase();
+        const source = (news.source || '').toLowerCase();
+        
+        if (url.includes('fool.com') || url.includes('seekingalpha.com') || 
+            source.includes('fool') || source.includes('seeking alpha') || source.includes('seekingalpha')) {
             return false;
         }
         
@@ -778,6 +784,7 @@ function displayCompanyNews(newsData) {
         
         return hasCompanyName || hasTicker;
     });
+    
     
     if (filteredNews.length === 0) {
         newsContainer.innerHTML = '<div class="no-news"><i class="far fa-newspaper"></i><p>No relevant company news found.</p><small>We only show news that mentions the company name.</small></div>';

@@ -992,17 +992,17 @@ body {
 .news-item {
     background: white;
     border-radius: 16px;
-    padding: 1.5rem 1.25rem; /* tighter default padding */
+    padding: 1.25rem 1.25rem; /* reduced vertical padding */
     border: 1px solid #e5e7eb;
     display: flex;
     align-items: center;
-    gap: 2.5rem;
+    gap: 1.25rem; /* reduced gap to match events */
     transition: all 0.3s ease;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
     width: 100%;
     max-width: 100%;
     overflow: hidden;
-    min-height: 160px;
+    min-height: 120px; /* reduced from 160px */
 }
 
 .news-item:hover {
@@ -1012,9 +1012,9 @@ body {
 }
 
 .news-logo {
-    width: 80px;
-    height: 80px;
-    border-radius: 16px;
+    width: 60px;
+    height: 60px;
+    border-radius: 12px;
     overflow: hidden;
     background: #f8fafc;
     border: 1px solid #e5e7eb;
@@ -1042,14 +1042,21 @@ body {
     font-weight: 700;
     font-size: 1.2rem;
     color: #1f2937;
-    margin-bottom: 0.75rem;
+    margin-top: 0.25rem; /* add small top margin */
+    margin-bottom: 0.25rem; /* further reduced for tighter spacing */
 }
 
 .news-headline {
     font-size: 1rem;
     color: #4b5563;
-    margin-bottom: 0.75rem;
+    margin-bottom: 0.25rem; /* further reduced for tighter spacing */
     line-height: 1.5;
+    display: -webkit-box;
+    -webkit-line-clamp: 2; /* Limit to 2 lines for desktop */
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis; /* Show ... for overflow */
 }
 
 .news-date {
@@ -1840,7 +1847,7 @@ body {
 
     /* Portfolio Grid Container - Tablet */
     .portfolio-grid {
-        max-height: calc(3.6em + 9 * (0.9rem * 2 + 1.2rem + 1.2px)) !important; /* Increased by 20% - header height (3.6em) + 9 data rows */
+        max-height: calc((3.6em + 8 * (0.9rem * 2 + 1.2rem + 1.2px)) * 2) !important; /* Show 8 rows without scrolling - doubled height for mobile */
     }
 
     .portfolio-item {
@@ -2224,7 +2231,7 @@ body {
 
     /* Portfolio Grid Container - Mobile */
     .portfolio-grid {
-        max-height: calc(3em + 9 * (0.6rem * 2 + 0.9rem + 1.2px)) !important; /* Increased by 20% - header height (3em) + 9 data rows */
+        max-height: calc((3em + 8 * (0.6rem * 2 + 0.9rem + 1.2px)) * 2) !important; /* Show 8 rows without scrolling - doubled height for mobile */
     }
 
     .portfolio-item {
