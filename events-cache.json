@@ -1,30 +1,6 @@
 {
   "events": [
     {
-      "ticker": "CRM",
-      "date": "2025-09-03",
-      "name": "Earnings Report",
-      "companyName": "CRM",
-      "url": "https://finnhub.io/calendar/earnings?symbol=CRM",
-      "source": "Finnhub API"
-    },
-    {
-      "ticker": "GTLB",
-      "date": "2025-09-03",
-      "name": "Earnings Report",
-      "companyName": "GTLB",
-      "url": "https://finnhub.io/calendar/earnings?symbol=GTLB",
-      "source": "Finnhub API"
-    },
-    {
-      "ticker": "AVGO",
-      "date": "2025-09-04",
-      "name": "Earnings Report",
-      "companyName": "AVGO",
-      "url": "https://finnhub.io/calendar/earnings?symbol=AVGO",
-      "source": "Finnhub API"
-    },
-    {
       "ticker": "SEZL",
       "date": "2025-09-10",
       "name": "Conference",
@@ -41,7 +17,7 @@
       "source": "IR Page"
     }
   ],
-  "lastUpdated": "2025-08-31T16:16:36.477Z",
-  "totalEvents": 33,
-  "uniqueEvents": 33
+  "lastUpdated": "2025-09-08T03:27:46.471Z",
+  "totalEvents": 27,
+  "uniqueEvents": 27
 }
