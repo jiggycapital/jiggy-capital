@@ -1,6 +1,39 @@
 {
-  "events": [],
-  "lastUpdated": "2025-09-15T03:26:57.250Z",
+  "events": [
+    {
+      "ticker": "NOW",
+      "date": "2025-10-21",
+      "name": "Earnings Report",
+      "companyName": "NOW",
+      "url": "https://finnhub.io/calendar/earnings?symbol=NOW",
+      "source": "Finnhub API"
+    },
+    {
+      "ticker": "TER",
+      "date": "2025-10-21",
+      "name": "Earnings Report",
+      "companyName": "TER",
+      "url": "https://finnhub.io/calendar/earnings?symbol=TER",
+      "source": "Finnhub API"
+    },
+    {
+      "ticker": "AJG",
+      "date": "2025-10-22",
+      "name": "Earnings Report",
+      "companyName": "AJG",
+      "url": "https://finnhub.io/calendar/earnings?symbol=AJG",
+      "source": "Finnhub API"
+    },
+    {
+      "ticker": "FIX",
+      "date": "2025-10-22",
+      "name": "Earnings Report",
+      "companyName": "FIX",
+      "url": "https://finnhub.io/calendar/earnings?symbol=FIX",
+      "source": "Finnhub API"
+    }
+  ],
+  "lastUpdated": "2025-09-22T03:26:38.344Z",
   "totalEvents": 24,
   "uniqueEvents": 24
 }
