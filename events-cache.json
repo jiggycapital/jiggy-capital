@@ -1,14 +1,6 @@
 {
   "events": [
     {
-      "ticker": "NOW",
-      "date": "2025-10-21",
-      "name": "Earnings Report",
-      "companyName": "NOW",
-      "url": "https://finnhub.io/calendar/earnings?symbol=NOW",
-      "source": "Finnhub API"
-    },
-    {
       "ticker": "TER",
       "date": "2025-10-21",
       "name": "Earnings Report",
@@ -17,11 +9,11 @@
       "source": "Finnhub API"
     },
     {
-      "ticker": "AJG",
+      "ticker": "NOW",
       "date": "2025-10-22",
       "name": "Earnings Report",
-      "companyName": "AJG",
-      "url": "https://finnhub.io/calendar/earnings?symbol=AJG",
+      "companyName": "NOW",
+      "url": "https://finnhub.io/calendar/earnings?symbol=NOW",
       "source": "Finnhub API"
     },
     {
@@ -31,9 +23,41 @@
       "companyName": "FIX",
       "url": "https://finnhub.io/calendar/earnings?symbol=FIX",
       "source": "Finnhub API"
+    },
+    {
+      "ticker": "AJG",
+      "date": "2025-10-23",
+      "name": "Earnings Report",
+      "companyName": "AJG",
+      "url": "https://finnhub.io/calendar/earnings?symbol=AJG",
+      "source": "Finnhub API"
+    },
+    {
+      "ticker": "AMZN",
+      "date": "2025-10-23",
+      "name": "Earnings Report",
+      "companyName": "AMZN",
+      "url": "https://finnhub.io/calendar/earnings?symbol=AMZN",
+      "source": "Finnhub API"
+    },
+    {
+      "ticker": "RDDT",
+      "date": "2025-10-27",
+      "name": "Earnings Report",
+      "companyName": "RDDT",
+      "url": "https://finnhub.io/calendar/earnings?symbol=RDDT",
+      "source": "Finnhub API"
+    },
+    {
+      "ticker": "GOOGL",
+      "date": "2025-10-27",
+      "name": "Earnings Report",
+      "companyName": "GOOGL",
+      "url": "https://finnhub.io/calendar/earnings?symbol=GOOGL",
+      "source": "Finnhub API"
     }
   ],
-  "lastUpdated": "2025-09-22T03:26:38.344Z",
-  "totalEvents": 24,
-  "uniqueEvents": 24
+  "lastUpdated": "2025-09-29T03:24:18.070Z",
+  "totalEvents": 22,
+  "uniqueEvents": 22
 }
