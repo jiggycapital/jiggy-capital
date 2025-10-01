@@ -1,14 +1,6 @@
 {
   "events": [
     {
-      "ticker": "TER",
-      "date": "2025-10-21",
-      "name": "Earnings Report",
-      "companyName": "TER",
-      "url": "https://finnhub.io/calendar/earnings?symbol=TER",
-      "source": "Finnhub API"
-    },
-    {
       "ticker": "NOW",
       "date": "2025-10-22",
       "name": "Earnings Report",
@@ -50,14 +42,38 @@
     },
     {
       "ticker": "GOOGL",
-      "date": "2025-10-27",
+      "date": "2025-10-28",
       "name": "Earnings Report",
       "companyName": "GOOGL",
       "url": "https://finnhub.io/calendar/earnings?symbol=GOOGL",
       "source": "Finnhub API"
+    },
+    {
+      "ticker": "TER",
+      "date": "2025-10-28",
+      "name": "Earnings Report",
+      "companyName": "TER",
+      "url": "https://finnhub.io/calendar/earnings?symbol=TER",
+      "source": "Finnhub API"
+    },
+    {
+      "ticker": "DDOG",
+      "date": "2025-10-30",
+      "name": "Earnings Report",
+      "companyName": "DDOG",
+      "url": "https://finnhub.io/calendar/earnings?symbol=DDOG",
+      "source": "Finnhub API"
+    },
+    {
+      "ticker": "TEAM",
+      "date": "2025-10-30",
+      "name": "Earnings Report",
+      "companyName": "TEAM",
+      "url": "https://finnhub.io/calendar/earnings?symbol=TEAM",
+      "source": "Finnhub API"
     }
   ],
-  "lastUpdated": "2025-09-29T03:24:18.070Z",
+  "lastUpdated": "2025-10-01T01:29:14.372Z",
   "totalEvents": 22,
   "uniqueEvents": 22
 }
