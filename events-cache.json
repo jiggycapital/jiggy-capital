@@ -71,9 +71,41 @@
       "companyName": "TEAM",
       "url": "https://finnhub.io/calendar/earnings?symbol=TEAM",
       "source": "Finnhub API"
+    },
+    {
+      "ticker": "NTDOY",
+      "date": "2025-11-03",
+      "name": "Earnings Report",
+      "companyName": "7974.T",
+      "url": "https://finnhub.io/calendar/earnings?symbol=NTDOY",
+      "source": "Finnhub API"
+    },
+    {
+      "ticker": "TOST",
+      "date": "2025-11-03",
+      "name": "Earnings Report",
+      "companyName": "TOST",
+      "url": "https://finnhub.io/calendar/earnings?symbol=TOST",
+      "source": "Finnhub API"
+    },
+    {
+      "ticker": "HUBS",
+      "date": "2025-11-04",
+      "name": "Earnings Report",
+      "companyName": "HUBS",
+      "url": "https://finnhub.io/calendar/earnings?symbol=HUBS",
+      "source": "Finnhub API"
+    },
+    {
+      "ticker": "SEZL",
+      "date": "2025-11-05",
+      "name": "Earnings Report",
+      "companyName": "SEZL",
+      "url": "https://finnhub.io/calendar/earnings?symbol=SEZL",
+      "source": "Finnhub API"
     }
   ],
-  "lastUpdated": "2025-10-01T01:29:14.372Z",
-  "totalEvents": 22,
-  "uniqueEvents": 22
+  "lastUpdated": "2025-10-08T01:20:14.202Z",
+  "totalEvents": 19,
+  "uniqueEvents": 19
 }
