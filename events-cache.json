@@ -1,27 +1,11 @@
 {
   "events": [
     {
-      "ticker": "NOW",
-      "date": "2025-10-22",
-      "name": "Earnings Report",
-      "companyName": "NOW",
-      "url": "https://finnhub.io/calendar/earnings?symbol=NOW",
-      "source": "Finnhub API"
-    },
-    {
       "ticker": "FIX",
       "date": "2025-10-22",
       "name": "Earnings Report",
       "companyName": "FIX",
       "url": "https://finnhub.io/calendar/earnings?symbol=FIX",
-      "source": "Finnhub API"
-    },
-    {
-      "ticker": "AJG",
-      "date": "2025-10-23",
-      "name": "Earnings Report",
-      "companyName": "AJG",
-      "url": "https://finnhub.io/calendar/earnings?symbol=AJG",
       "source": "Finnhub API"
     },
     {
@@ -33,27 +17,27 @@
       "source": "Finnhub API"
     },
     {
-      "ticker": "RDDT",
-      "date": "2025-10-27",
-      "name": "Earnings Report",
-      "companyName": "RDDT",
-      "url": "https://finnhub.io/calendar/earnings?symbol=RDDT",
-      "source": "Finnhub API"
-    },
-    {
-      "ticker": "GOOGL",
-      "date": "2025-10-28",
-      "name": "Earnings Report",
-      "companyName": "GOOGL",
-      "url": "https://finnhub.io/calendar/earnings?symbol=GOOGL",
-      "source": "Finnhub API"
-    },
-    {
       "ticker": "TER",
       "date": "2025-10-28",
       "name": "Earnings Report",
       "companyName": "TER",
       "url": "https://finnhub.io/calendar/earnings?symbol=TER",
+      "source": "Finnhub API"
+    },
+    {
+      "ticker": "NOW",
+      "date": "2025-10-29",
+      "name": "Earnings Report",
+      "companyName": "NOW",
+      "url": "https://finnhub.io/calendar/earnings?symbol=NOW",
+      "source": "Finnhub API"
+    },
+    {
+      "ticker": "GOOGL",
+      "date": "2025-10-29",
+      "name": "Earnings Report",
+      "companyName": "GOOGL",
+      "url": "https://finnhub.io/calendar/earnings?symbol=GOOGL",
       "source": "Finnhub API"
     },
     {
@@ -73,6 +57,22 @@
       "source": "Finnhub API"
     },
     {
+      "ticker": "AJG",
+      "date": "2025-10-30",
+      "name": "Earnings Report",
+      "companyName": "AJG",
+      "url": "https://finnhub.io/calendar/earnings?symbol=AJG",
+      "source": "Finnhub API"
+    },
+    {
+      "ticker": "RDDT",
+      "date": "2025-10-30",
+      "name": "Earnings Report",
+      "companyName": "RDDT",
+      "url": "https://finnhub.io/calendar/earnings?symbol=RDDT",
+      "source": "Finnhub API"
+    },
+    {
       "ticker": "NTDOY",
       "date": "2025-11-03",
       "name": "Earnings Report",
@@ -81,16 +81,8 @@
       "source": "Finnhub API"
     },
     {
-      "ticker": "TOST",
-      "date": "2025-11-03",
-      "name": "Earnings Report",
-      "companyName": "TOST",
-      "url": "https://finnhub.io/calendar/earnings?symbol=TOST",
-      "source": "Finnhub API"
-    },
-    {
       "ticker": "HUBS",
-      "date": "2025-11-04",
+      "date": "2025-11-05",
       "name": "Earnings Report",
       "companyName": "HUBS",
       "url": "https://finnhub.io/calendar/earnings?symbol=HUBS",
@@ -103,9 +95,25 @@
       "companyName": "SEZL",
       "url": "https://finnhub.io/calendar/earnings?symbol=SEZL",
       "source": "Finnhub API"
+    },
+    {
+      "ticker": "MNDY",
+      "date": "2025-11-10",
+      "name": "Earnings Report",
+      "companyName": "MNDY",
+      "url": "https://finnhub.io/calendar/earnings?symbol=MNDY",
+      "source": "Finnhub API"
+    },
+    {
+      "ticker": "TOST",
+      "date": "2025-11-11",
+      "name": "Earnings Report",
+      "companyName": "TOST",
+      "url": "https://finnhub.io/calendar/earnings?symbol=TOST",
+      "source": "Finnhub API"
     }
   ],
-  "lastUpdated": "2025-10-08T01:20:14.202Z",
+  "lastUpdated": "2025-10-15T01:23:18.219Z",
   "totalEvents": 19,
   "uniqueEvents": 19
 }
