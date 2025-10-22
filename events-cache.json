@@ -2,18 +2,10 @@
   "events": [
     {
       "ticker": "FIX",
-      "date": "2025-10-22",
+      "date": "2025-10-23",
       "name": "Earnings Report",
       "companyName": "FIX",
       "url": "https://finnhub.io/calendar/earnings?symbol=FIX",
-      "source": "Finnhub API"
-    },
-    {
-      "ticker": "AMZN",
-      "date": "2025-10-23",
-      "name": "Earnings Report",
-      "companyName": "AMZN",
-      "url": "https://finnhub.io/calendar/earnings?symbol=AMZN",
       "source": "Finnhub API"
     },
     {
@@ -41,14 +33,6 @@
       "source": "Finnhub API"
     },
     {
-      "ticker": "DDOG",
-      "date": "2025-10-30",
-      "name": "Earnings Report",
-      "companyName": "DDOG",
-      "url": "https://finnhub.io/calendar/earnings?symbol=DDOG",
-      "source": "Finnhub API"
-    },
-    {
       "ticker": "TEAM",
       "date": "2025-10-30",
       "name": "Earnings Report",
@@ -70,6 +54,14 @@
       "name": "Earnings Report",
       "companyName": "RDDT",
       "url": "https://finnhub.io/calendar/earnings?symbol=RDDT",
+      "source": "Finnhub API"
+    },
+    {
+      "ticker": "AMZN",
+      "date": "2025-10-30",
+      "name": "Earnings Report",
+      "companyName": "AMZN",
+      "url": "https://finnhub.io/calendar/earnings?symbol=AMZN",
       "source": "Finnhub API"
     },
     {
@@ -97,11 +89,11 @@
       "source": "Finnhub API"
     },
     {
-      "ticker": "MNDY",
-      "date": "2025-11-10",
+      "ticker": "DDOG",
+      "date": "2025-11-06",
       "name": "Earnings Report",
-      "companyName": "MNDY",
-      "url": "https://finnhub.io/calendar/earnings?symbol=MNDY",
+      "companyName": "DDOG",
+      "url": "https://finnhub.io/calendar/earnings?symbol=DDOG",
       "source": "Finnhub API"
     },
     {
@@ -111,9 +103,25 @@
       "companyName": "TOST",
       "url": "https://finnhub.io/calendar/earnings?symbol=TOST",
       "source": "Finnhub API"
+    },
+    {
+      "ticker": "MNDY",
+      "date": "2025-11-17",
+      "name": "Earnings Report",
+      "companyName": "MNDY",
+      "url": "https://finnhub.io/calendar/earnings?symbol=MNDY",
+      "source": "Finnhub API"
+    },
+    {
+      "ticker": "NVDA",
+      "date": "2025-11-19",
+      "name": "Earnings Report",
+      "companyName": "NVDA",
+      "url": "https://finnhub.io/calendar/earnings?symbol=NVDA",
+      "source": "Finnhub API"
     }
   ],
-  "lastUpdated": "2025-10-15T01:23:18.219Z",
+  "lastUpdated": "2025-10-22T01:25:45.171Z",
   "totalEvents": 19,
   "uniqueEvents": 19
 }
