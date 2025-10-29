@@ -1,38 +1,6 @@
 {
   "events": [
     {
-      "ticker": "FIX",
-      "date": "2025-10-23",
-      "name": "Earnings Report",
-      "companyName": "FIX",
-      "url": "https://finnhub.io/calendar/earnings?symbol=FIX",
-      "source": "Finnhub API"
-    },
-    {
-      "ticker": "TER",
-      "date": "2025-10-28",
-      "name": "Earnings Report",
-      "companyName": "TER",
-      "url": "https://finnhub.io/calendar/earnings?symbol=TER",
-      "source": "Finnhub API"
-    },
-    {
-      "ticker": "NOW",
-      "date": "2025-10-29",
-      "name": "Earnings Report",
-      "companyName": "NOW",
-      "url": "https://finnhub.io/calendar/earnings?symbol=NOW",
-      "source": "Finnhub API"
-    },
-    {
-      "ticker": "GOOGL",
-      "date": "2025-10-29",
-      "name": "Earnings Report",
-      "companyName": "GOOGL",
-      "url": "https://finnhub.io/calendar/earnings?symbol=GOOGL",
-      "source": "Finnhub API"
-    },
-    {
       "ticker": "TEAM",
       "date": "2025-10-30",
       "name": "Earnings Report",
@@ -73,6 +41,14 @@
       "source": "Finnhub API"
     },
     {
+      "ticker": "TOST",
+      "date": "2025-11-04",
+      "name": "Earnings Report",
+      "companyName": "TOST",
+      "url": "https://finnhub.io/calendar/earnings?symbol=TOST",
+      "source": "Finnhub API"
+    },
+    {
       "ticker": "HUBS",
       "date": "2025-11-05",
       "name": "Earnings Report",
@@ -89,6 +65,30 @@
       "source": "Finnhub API"
     },
     {
+      "ticker": "SEZL",
+      "date": "2025-11-05",
+      "name": "Conference call",
+      "companyName": "SEZL",
+      "url": "https://investors.sezzle.com/events-and-presentations",
+      "source": "IR Page"
+    },
+    {
+      "ticker": "SEZL",
+      "date": "2025-11-05",
+      "name": "Conference",
+      "companyName": "SEZL",
+      "url": "https://investors.sezzle.com/events-and-presentations",
+      "source": "IR Page"
+    },
+    {
+      "ticker": "SEZL",
+      "date": "2025-11-05",
+      "name": "Upcoming Event",
+      "companyName": "SEZL",
+      "url": "https://investors.sezzle.com/events-and-presentations",
+      "source": "IR Page"
+    },
+    {
       "ticker": "DDOG",
       "date": "2025-11-06",
       "name": "Earnings Report",
@@ -97,20 +97,52 @@
       "source": "Finnhub API"
     },
     {
-      "ticker": "TOST",
-      "date": "2025-11-11",
-      "name": "Earnings Report",
-      "companyName": "TOST",
-      "url": "https://finnhub.io/calendar/earnings?symbol=TOST",
-      "source": "Finnhub API"
-    },
-    {
       "ticker": "MNDY",
-      "date": "2025-11-17",
+      "date": "2025-11-10",
       "name": "Earnings Report",
       "companyName": "MNDY",
       "url": "https://finnhub.io/calendar/earnings?symbol=MNDY",
       "source": "Finnhub API"
+    },
+    {
+      "ticker": "SEZL",
+      "date": "2025-11-17",
+      "name": "Conference call",
+      "companyName": "SEZL",
+      "url": "https://investors.sezzle.com/events-and-presentations",
+      "source": "IR Page"
+    },
+    {
+      "ticker": "SEZL",
+      "date": "2025-11-17",
+      "name": "Conference",
+      "companyName": "SEZL",
+      "url": "https://investors.sezzle.com/events-and-presentations",
+      "source": "IR Page"
+    },
+    {
+      "ticker": "SEZL",
+      "date": "2025-11-17",
+      "name": "Upcoming Event",
+      "companyName": "SEZL",
+      "url": "https://investors.sezzle.com/events-and-presentations",
+      "source": "IR Page"
+    },
+    {
+      "ticker": "SEZL",
+      "date": "2025-11-18",
+      "name": "Summit",
+      "companyName": "SEZL",
+      "url": "https://investors.sezzle.com/events-and-presentations",
+      "source": "IR Page"
+    },
+    {
+      "ticker": "SEZL",
+      "date": "2025-11-18",
+      "name": "Upcoming Event",
+      "companyName": "SEZL",
+      "url": "https://investors.sezzle.com/events-and-presentations",
+      "source": "IR Page"
     },
     {
       "ticker": "NVDA",
@@ -119,9 +151,25 @@
       "companyName": "NVDA",
       "url": "https://finnhub.io/calendar/earnings?symbol=NVDA",
       "source": "Finnhub API"
+    },
+    {
+      "ticker": "CRM",
+      "date": "2025-11-26",
+      "name": "Earnings Report",
+      "companyName": "CRM",
+      "url": "https://finnhub.io/calendar/earnings?symbol=CRM",
+      "source": "Finnhub API"
+    },
+    {
+      "ticker": "MRVL",
+      "date": "2025-11-27",
+      "name": "Earnings Report",
+      "companyName": "MRVL",
+      "url": "https://finnhub.io/calendar/earnings?symbol=MRVL",
+      "source": "Finnhub API"
     }
   ],
-  "lastUpdated": "2025-10-22T01:25:45.171Z",
-  "totalEvents": 19,
-  "uniqueEvents": 19
+  "lastUpdated": "2025-10-29T01:27:51.839Z",
+  "totalEvents": 27,
+  "uniqueEvents": 27
 }
