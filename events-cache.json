@@ -1,38 +1,6 @@
 {
   "events": [
     {
-      "ticker": "TEAM",
-      "date": "2025-10-30",
-      "name": "Earnings Report",
-      "companyName": "TEAM",
-      "url": "https://finnhub.io/calendar/earnings?symbol=TEAM",
-      "source": "Finnhub API"
-    },
-    {
-      "ticker": "AJG",
-      "date": "2025-10-30",
-      "name": "Earnings Report",
-      "companyName": "AJG",
-      "url": "https://finnhub.io/calendar/earnings?symbol=AJG",
-      "source": "Finnhub API"
-    },
-    {
-      "ticker": "RDDT",
-      "date": "2025-10-30",
-      "name": "Earnings Report",
-      "companyName": "RDDT",
-      "url": "https://finnhub.io/calendar/earnings?symbol=RDDT",
-      "source": "Finnhub API"
-    },
-    {
-      "ticker": "AMZN",
-      "date": "2025-10-30",
-      "name": "Earnings Report",
-      "companyName": "AMZN",
-      "url": "https://finnhub.io/calendar/earnings?symbol=AMZN",
-      "source": "Finnhub API"
-    },
-    {
       "ticker": "NTDOY",
       "date": "2025-11-03",
       "name": "Earnings Report",
@@ -169,7 +137,7 @@
       "source": "Finnhub API"
     }
   ],
-  "lastUpdated": "2025-10-29T01:27:51.839Z",
+  "lastUpdated": "2025-11-01T01:29:17.843Z",
   "totalEvents": 27,
   "uniqueEvents": 27
 }
