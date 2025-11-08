@@ -1,70 +1,6 @@
 {
   "events": [
     {
-      "ticker": "NTDOY",
-      "date": "2025-11-03",
-      "name": "Earnings Report",
-      "companyName": "7974.T",
-      "url": "https://finnhub.io/calendar/earnings?symbol=NTDOY",
-      "source": "Finnhub API"
-    },
-    {
-      "ticker": "TOST",
-      "date": "2025-11-04",
-      "name": "Earnings Report",
-      "companyName": "TOST",
-      "url": "https://finnhub.io/calendar/earnings?symbol=TOST",
-      "source": "Finnhub API"
-    },
-    {
-      "ticker": "HUBS",
-      "date": "2025-11-05",
-      "name": "Earnings Report",
-      "companyName": "HUBS",
-      "url": "https://finnhub.io/calendar/earnings?symbol=HUBS",
-      "source": "Finnhub API"
-    },
-    {
-      "ticker": "SEZL",
-      "date": "2025-11-05",
-      "name": "Earnings Report",
-      "companyName": "SEZL",
-      "url": "https://finnhub.io/calendar/earnings?symbol=SEZL",
-      "source": "Finnhub API"
-    },
-    {
-      "ticker": "SEZL",
-      "date": "2025-11-05",
-      "name": "Conference call",
-      "companyName": "SEZL",
-      "url": "https://investors.sezzle.com/events-and-presentations",
-      "source": "IR Page"
-    },
-    {
-      "ticker": "SEZL",
-      "date": "2025-11-05",
-      "name": "Conference",
-      "companyName": "SEZL",
-      "url": "https://investors.sezzle.com/events-and-presentations",
-      "source": "IR Page"
-    },
-    {
-      "ticker": "SEZL",
-      "date": "2025-11-05",
-      "name": "Upcoming Event",
-      "companyName": "SEZL",
-      "url": "https://investors.sezzle.com/events-and-presentations",
-      "source": "IR Page"
-    },
-    {
-      "ticker": "DDOG",
-      "date": "2025-11-06",
-      "name": "Earnings Report",
-      "companyName": "DDOG",
-      "url": "https://finnhub.io/calendar/earnings?symbol=DDOG",
-      "source": "Finnhub API"
-    },
-    {
       "ticker": "MNDY",
       "date": "2025-11-10",
       "name": "Earnings Report",
@@ -75,14 +11,6 @@
     {
       "ticker": "SEZL",
       "date": "2025-11-17",
-      "name": "Conference call",
-      "companyName": "SEZL",
-      "url": "https://investors.sezzle.com/events-and-presentations",
-      "source": "IR Page"
-    },
-    {
-      "ticker": "SEZL",
-      "date": "2025-11-17",
       "name": "Conference",
       "companyName": "SEZL",
       "url": "https://investors.sezzle.com/events-and-presentations",
@@ -92,6 +20,14 @@
       "ticker": "SEZL",
       "date": "2025-11-17",
       "name": "Upcoming Event",
+      "companyName": "SEZL",
+      "url": "https://investors.sezzle.com/events-and-presentations",
+      "source": "IR Page"
+    },
+    {
+      "ticker": "SEZL",
+      "date": "2025-11-18",
+      "name": "Conference",
       "companyName": "SEZL",
       "url": "https://investors.sezzle.com/events-and-presentations",
       "source": "IR Page"
@@ -121,23 +57,31 @@
       "source": "Finnhub API"
     },
     {
+      "ticker": "MRVL",
+      "date": "2025-12-02",
+      "name": "Earnings Report",
+      "companyName": "MRVL",
+      "url": "https://finnhub.io/calendar/earnings?symbol=MRVL",
+      "source": "Finnhub API"
+    },
+    {
       "ticker": "CRM",
-      "date": "2025-11-26",
+      "date": "2025-12-03",
       "name": "Earnings Report",
       "companyName": "CRM",
       "url": "https://finnhub.io/calendar/earnings?symbol=CRM",
       "source": "Finnhub API"
     },
     {
-      "ticker": "MRVL",
-      "date": "2025-11-27",
+      "ticker": "GTLB",
+      "date": "2025-12-05",
       "name": "Earnings Report",
-      "companyName": "MRVL",
-      "url": "https://finnhub.io/calendar/earnings?symbol=MRVL",
+      "companyName": "GTLB",
+      "url": "https://finnhub.io/calendar/earnings?symbol=GTLB",
       "source": "Finnhub API"
     }
   ],
-  "lastUpdated": "2025-11-01T01:29:17.843Z",
-  "totalEvents": 27,
-  "uniqueEvents": 27
+  "lastUpdated": "2025-11-08T01:21:59.544Z",
+  "totalEvents": 24,
+  "uniqueEvents": 24
 }
