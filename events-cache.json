@@ -47,25 +47,9 @@
       "companyName": "SEZL",
       "url": "https://investors.sezzle.com/events-and-presentations",
       "source": "IR Page"
-    },
-    {
-      "ticker": "SEZL",
-      "date": "2025-12-17",
-      "name": "Conference",
-      "companyName": "SEZL",
-      "url": "https://investors.sezzle.com/events-and-presentations",
-      "source": "IR Page"
-    },
-    {
-      "ticker": "SEZL",
-      "date": "2025-12-17",
-      "name": "Upcoming Event",
-      "companyName": "SEZL",
-      "url": "https://investors.sezzle.com/events-and-presentations",
-      "source": "IR Page"
     }
   ],
-  "lastUpdated": "2025-11-22T01:23:06.006Z",
-  "totalEvents": 23,
-  "uniqueEvents": 23
+  "lastUpdated": "2025-11-29T01:24:56.260Z",
+  "totalEvents": 17,
+  "uniqueEvents": 17
 }
