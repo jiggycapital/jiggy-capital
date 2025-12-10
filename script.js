@@ -303,11 +303,9 @@ function parseCSVToRows(csvText) {
 }
 
 // Helper functions moved to utils.js - keeping for backward compatibility
-// Use utils.toNumber and utils.toPercentage when utils.js is loaded
+// NOTE: utils.js is loaded first, so these are only fallbacks
+// Don't check window.* to avoid recursion - utils.js functions will override these
 function toNumber(value) {
-    if (typeof window !== 'undefined' && window.toNumber) {
-        return window.toNumber(value);
-    }
     if (value === null || value === undefined) return 0;
     const cleaned = String(value).replace(/[^0-9.\-]/g, '');
     const n = parseFloat(cleaned);
@@ -315,9 +313,6 @@ function toNumber(value) {
 }
 
 function toPercentage(value) {
-    if (typeof window !== 'undefined' && window.toPercentage) {
-        return window.toPercentage(value);
-    }
     if (value === null || value === undefined) return null;
     const str = String(value).trim();
     const cleaned = str.replace(/[^0-9.\-+]/g, '');
