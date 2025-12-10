@@ -326,10 +326,10 @@ function toPercentage(value) {
 }
 
 // Sanitization helper (fallback if utils.js not loaded)
+// NOTE: utils.js is loaded first, so this is only a fallback
 function sanitizeHTML(str) {
-    if (typeof window !== 'undefined' && window.sanitizeHTML) {
-        return window.sanitizeHTML(str);
-    }
+    // Don't check window.sanitizeHTML to avoid recursion - utils.js defines it
+    // If utils.js is loaded, it will override this function
     if (typeof str !== 'string') return '';
     const div = document.createElement('div');
     div.textContent = str;
