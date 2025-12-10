@@ -299,17 +299,17 @@ body {
 
 /* Portfolio Allocation Section */
 .allocation {
-    padding: 100px 0 80px 0; /* Reduced bottom padding to minimize whitespace */
+    padding: 60px 0 40px 0; /* Significantly reduced padding for better space usage */
     background: #f8fafc; /* Grey background to match alternating sections */
     margin-top: 0;
     position: relative;
     overflow: visible; /* Allow callouts to extend beyond container */
-    min-height: 900px; /* Reduced minimum height */
+    min-height: 650px; /* Reduced minimum height for more compact layout */
 }
 
 .allocation .section-title {
     text-align: center;
-    margin-bottom: 30px;
+    margin-bottom: 20px;
     font-size: 2.5rem;
     font-weight: 700;
     color: #1f2937;
@@ -318,7 +318,7 @@ body {
     left: 50%;
     transform: translateX(-50%);
     z-index: 10;
-    padding-top: 20px;
+    padding-top: 10px;
     margin-top: 0;
     width: 100%;
 }
@@ -328,9 +328,9 @@ body {
     display: flex;
     justify-content: center;
     gap: 1rem;
-    margin-bottom: 2rem;
+    margin-bottom: 1rem;
     position: absolute;
-    top: 80px;
+    top: 55px;
     left: 50%;
     transform: translateX(-50%);
     z-index: 10;
@@ -404,11 +404,18 @@ body {
     max-width: 820px; /* Larger desktop pie */
     height: 640px; /* Larger desktop pie */
     margin: 0 auto;
-    margin-top: 120px; /* Increased margin to center vertically */
+    margin-top: 70px; /* Reduced margin for more compact layout */
     position: relative;
     display: flex;
     justify-content: center;
     align-items: center;
+}
+
+/* Ensure chart callout logos maintain aspect ratio */
+.allocation-chart .chart-callout img {
+    object-fit: contain;
+    max-width: 100%;
+    max-height: 100%;
 }
 
 
@@ -1600,8 +1607,8 @@ body {
 
     /* Reduce whitespace on mobile */
     .allocation {
-        padding: 40px 0 60px 0 !important; /* Much reduced padding for mobile */
-        min-height: 500px !important; /* Much reduced minimum height */
+        padding: 30px 0 40px 0 !important; /* Much reduced padding for mobile */
+        min-height: 450px !important; /* Much reduced minimum height */
     }
 
     .allocation .section-title {
@@ -1611,8 +1618,9 @@ body {
 
     /* Mobile Toggle Button Styles */
     .allocation-toggle {
-        top: 60px !important; /* Adjusted position for mobile */
+        top: 45px !important; /* Adjusted position for mobile */
         gap: 0.5rem;
+        margin-bottom: 0.5rem !important;
     }
 
     .toggle-btn {
@@ -1680,7 +1688,7 @@ body {
         position: relative;
         transform: scale(0.90);
         transform-origin: center center;
-        margin-top: 48px; /* Add vertical breathing room under titles so top labels have space */
+        margin-top: 35px; /* Reduced margin for more compact mobile layout */
     }
 
     /* Mobile chart callout optimizations */
@@ -1731,8 +1739,9 @@ body {
     /* (callout absolute positions are computed in JS) */
 
     .chart-callout img {
-        width: 18px !important;
-        height: 18px !important;
+        width: 20px !important;
+        height: 20px !important;
+        object-fit: contain !important;
         border-radius: 3px !important;
     }
 
@@ -2225,8 +2234,9 @@ body {
     }
 
     .chart-callout img {
-        width: 14px !important;
-        height: 14px !important;
+        width: 16px !important;
+        height: 16px !important;
+        object-fit: contain !important;
     }
 
     /* Portfolio Grid Container - Mobile */
@@ -2418,8 +2428,9 @@ body {
     }
 
     .chart-callout img {
-        width: 14px !important;
-        height: 14px !important;
+        width: 16px !important;
+        height: 16px !important;
+        object-fit: contain !important;
         border-radius: 2px !important;
     }
 

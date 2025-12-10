@@ -2685,10 +2685,10 @@ function updateConsolidatedChart(view = 'company') {
             cutout: '50%',
             layout: {
                 padding: {
-                    top: isMobile ? 110 : (view === 'company' ? 56 : 80),
-                    bottom: isMobile ? 34 : 80,
-                    left: 20,
-                    right: 20
+                    top: isMobile ? 80 : (view === 'company' ? 40 : 50),
+                    bottom: isMobile ? 30 : 50,
+                    left: 15,
+                    right: 15
                 }
             },
             plugins: {
@@ -2981,15 +2981,15 @@ function createChartCallouts(chartData, colors, isSectorView = false) {
             background: rgba(255, 255, 255, 0.95);
             border: 1px solid ${itemColor}40;
             border-radius: 8px;
-            padding: 6px 8px;
+            padding: 8px 10px;
             font-size: 10px;
             font-weight: 600;
             color: #1f2937;
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12), 0 4px 16px rgba(0, 0, 0, 0.08);
             backdrop-filter: blur(8px);
             z-index: 10;
-            min-width: 50px;
-            min-height: 50px;
+            min-width: 56px;
+            min-height: 56px;
             text-align: center;
             display: flex;
             flex-direction: column;
@@ -3034,8 +3034,9 @@ function createChartCallouts(chartData, colors, isSectorView = false) {
                 img.src = logoUrl;
                 img.alt = item.symbol;
                 img.style.cssText = `
-                    width: 29px;
-                    height: 24px;
+                    width: 32px;
+                    height: 32px;
+                    object-fit: contain;
                     border-radius: 4px;
                     margin-bottom: 4px;
                     display: block;
