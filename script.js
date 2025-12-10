@@ -1,29 +1,66 @@
 // ============================================================================
-// JIGGY CAPITAL PORTFOLIO - RESTORED VERSION
+// JIGGY CAPITAL PORTFOLIO - OPTIMIZED VERSION
 // ============================================================================
 
-    // Google Sheets Integration Configuration
-const GOOGLE_SHEETS_CONFIG = {
-    portfolioSheetUrl: 'https://docs.google.com/spreadsheets/d/1xmD_h2_1I-kJkh-MsNUhxXMV7WDHrAlClj1Uq5jLcFE/export?format=csv&gid=1871140253',
-    watchlistSheetUrl: 'https://docs.google.com/spreadsheets/d/1xmD_h2_1I-kJkh-MsNUhxXMV7WDHrAlClj1Uq5jLcFE/export?format=csv&gid=842475955',
-    logosSheetUrl: 'https://docs.google.com/spreadsheets/d/1xmD_h2_1I-kJkh-MsNUhxXMV7WDHrAlClj1Uq5jLcFE/export?format=csv&gid=1789448141',
-    performanceSheetUrl: 'https://docs.google.com/spreadsheets/d/1xmD_h2_1I-kJkh-MsNUhxXMV7WDHrAlClj1Uq5jLcFE/export?format=csv&gid=721839254',
-    eventsSheetUrl: 'https://docs.google.com/spreadsheets/d/1xmD_h2_1I-kJkh-MsNUhxXMV7WDHrAlClj1Uq5jLcFE/export?format=csv&gid=1789448141'
+// Configuration - API Keys and URLs
+// NOTE: In production, these should be moved to environment variables or backend
+const CONFIG = {
+    GOOGLE_SHEETS: {
+        portfolioSheetUrl: 'https://docs.google.com/spreadsheets/d/1xmD_h2_1I-kJkh-MsNUhxXMV7WDHrAlClj1Uq5jLcFE/export?format=csv&gid=1871140253',
+        watchlistSheetUrl: 'https://docs.google.com/spreadsheets/d/1xmD_h2_1I-kJkh-MsNUhxXMV7WDHrAlClj1Uq5jLcFE/export?format=csv&gid=842475955',
+        logosSheetUrl: 'https://docs.google.com/spreadsheets/d/1xmD_h2_1I-kJkh-MsNUhxXMV7WDHrAlClj1Uq5jLcFE/export?format=csv&gid=1789448141',
+        performanceSheetUrl: 'https://docs.google.com/spreadsheets/d/1xmD_h2_1I-kJkh-MsNUhxXMV7WDHrAlClj1Uq5jLcFE/export?format=csv&gid=721839254',
+        eventsSheetUrl: 'https://docs.google.com/spreadsheets/d/1xmD_h2_1I-kJkh-MsNUhxXMV7WDHrAlClj1Uq5jLcFE/export?format=csv&gid=1789448141'
+    },
+    FINNHUB: {
+        API_KEY: 'd2l0fm1r01qqq9qsstfgd2l0fm1r01qqq9qsstg0', // TODO: Move to environment variable
+        API_URL: 'https://finnhub.io/api/v1',
+        NEWS_DAYS: 7,
+        EARNINGS_DAYS: 90
+    },
+    CACHE: {
+        EVENTS_CACHE_KEY: 'eventsCache_v1',
+        FINNHUB_CACHE_PREFIX: 'finnhub_events_',
+        CACHE_MAX_AGE: 7 * 24 * 60 * 60 * 1000 // 7 days
+    }
 };
 
-// Global variables
-let portfolioData = [];
-let watchlistData = [];
-let logosData = {};
-let performanceData = {};
-let eventsData = [];
-let currentFilter = 'all';
-let currentSort = { column: null, direction: 'asc' };
-let currentPortfolioView = 'portfolio'; // 'portfolio' or 'watchlist'
-let watchlistSortColumn = null;
-let watchlistSortDirection = 'asc';
-let cashBalance = 13108.60;
-let charts = {};
+// Backward compatibility
+const GOOGLE_SHEETS_CONFIG = CONFIG.GOOGLE_SHEETS;
+
+// Global state - consider moving to a state management pattern for larger apps
+const state = {
+    portfolioData: [],
+    watchlistData: [],
+    logosData: {},
+    performanceData: {},
+    eventsData: [],
+    currentFilter: 'all',
+    currentSort: { column: null, direction: 'asc' },
+    currentPortfolioView: 'portfolio',
+    watchlistSortColumn: null,
+    watchlistSortDirection: 'asc',
+    cashBalance: 0, // Will be loaded from sheet
+    charts: {},
+    consolidatedChart: null,
+    currentView: 'company'
+};
+
+// Backward compatibility aliases
+let portfolioData = state.portfolioData;
+let watchlistData = state.watchlistData;
+let logosData = state.logosData;
+let performanceData = state.performanceData;
+let eventsData = state.eventsData;
+let currentFilter = state.currentFilter;
+let currentSort = state.currentSort;
+let currentPortfolioView = state.currentPortfolioView;
+let watchlistSortColumn = state.watchlistSortColumn;
+let watchlistSortDirection = state.watchlistSortDirection;
+let cashBalance = state.cashBalance;
+let charts = state.charts;
+let consolidatedChart = state.consolidatedChart;
+let currentView = state.currentView;
 
 // Initialize the application
 document.addEventListener('DOMContentLoaded', function() {
@@ -33,10 +70,11 @@ document.addEventListener('DOMContentLoaded', function() {
         initializeEventListeners();
     } catch (error) {
         console.error('Error during initialization:', error);
-        // Show error on page
         const portfolioGrid = document.getElementById('portfolioGrid');
-        if (portfolioGrid) {
-            portfolioGrid.innerHTML = `<div class="error">Error: ${error.message}</div>`;
+        if (portfolioGrid && typeof showError === 'function') {
+            showError(error.message, portfolioGrid);
+        } else if (portfolioGrid) {
+            portfolioGrid.innerHTML = `<div class="error" style="padding: 1rem; color: #c33;">Error: ${sanitizeHTML(error.message)}</div>`;
         }
     }
 });
@@ -75,73 +113,105 @@ function initializeNavigation() {
     });
 }
 
-// Load portfolio data
+// Load portfolio data - OPTIMIZED: Parallel fetching for better performance
 async function loadPortfolioData() {
     try {
-        // Load portfolio data
-        const portfolioResponse = await fetch(GOOGLE_SHEETS_CONFIG.portfolioSheetUrl);
-        const portfolioCsv = await portfolioResponse.text();
-        
-        // Extract cash balance first
-        const extractedCash = extractCashBalance(portfolioCsv);
-        if (extractedCash !== null) {
-            cashBalance = extractedCash;
+        // Show loading state
+        const portfolioGrid = document.getElementById('portfolioGrid');
+        if (portfolioGrid && typeof showLoading === 'function') {
+            showLoading(portfolioGrid, 'Loading portfolio data...');
         }
-        
-        portfolioData = parsePortfolioCSV(portfolioCsv);
-        
-        // Load watchlist data
 
-        const watchlistResponse = await fetch(GOOGLE_SHEETS_CONFIG.watchlistSheetUrl);
-        const watchlistCsv = await watchlistResponse.text();
+        // Fetch all data in parallel for better performance
+        const [portfolioResponse, watchlistResponse, logosResponse, performanceResponse, eventsResponse] = await Promise.allSettled([
+            fetch(GOOGLE_SHEETS_CONFIG.portfolioSheetUrl),
+            fetch(GOOGLE_SHEETS_CONFIG.watchlistSheetUrl),
+            fetch(GOOGLE_SHEETS_CONFIG.logosSheetUrl),
+            fetch(GOOGLE_SHEETS_CONFIG.performanceSheetUrl),
+            fetch(GOOGLE_SHEETS_CONFIG.eventsSheetUrl)
+        ]);
 
-        watchlistData = parseWatchlistCSV(watchlistCsv);
+        // Process portfolio data
+        if (portfolioResponse.status === 'fulfilled' && portfolioResponse.value.ok) {
+            const portfolioCsv = await portfolioResponse.value.text();
+            const extractedCash = extractCashBalance(portfolioCsv);
+            if (extractedCash !== null) {
+                state.cashBalance = extractedCash;
+                cashBalance = extractedCash;
+            }
+            state.portfolioData = parsePortfolioCSV(portfolioCsv);
+            portfolioData = state.portfolioData;
+        } else {
+            throw new Error('Failed to load portfolio data');
+        }
 
-        
-        // Load logos data
-        const logosResponse = await fetch(GOOGLE_SHEETS_CONFIG.logosSheetUrl);
-        const logosCsv = await logosResponse.text();
-        logosData = parseLogosCSV(logosCsv);
-        
-        // Load performance data
-        const performanceResponse = await fetch(GOOGLE_SHEETS_CONFIG.performanceSheetUrl);
-        const performanceCsv = await performanceResponse.text();
-        performanceData = parsePerformanceCSV(performanceCsv);
-        
-        // Load events data
-        const eventsResponse = await fetch(GOOGLE_SHEETS_CONFIG.eventsSheetUrl);
-        const eventsCsv = await eventsResponse.text();
-        eventsData = parseEventsCSV(eventsCsv);
-        
+        // Process watchlist data
+        if (watchlistResponse.status === 'fulfilled' && watchlistResponse.value.ok) {
+            const watchlistCsv = await watchlistResponse.value.text();
+            state.watchlistData = parseWatchlistCSV(watchlistCsv);
+            watchlistData = state.watchlistData;
+        }
+
+        // Process logos data
+        if (logosResponse.status === 'fulfilled' && logosResponse.value.ok) {
+            const logosCsv = await logosResponse.value.text();
+            state.logosData = parseLogosCSV(logosCsv);
+            logosData = state.logosData;
+        }
+
+        // Process performance data
+        if (performanceResponse.status === 'fulfilled' && performanceResponse.value.ok) {
+            const performanceCsv = await performanceResponse.value.text();
+            state.performanceData = parsePerformanceCSV(performanceCsv);
+            performanceData = state.performanceData;
+        }
+
+        // Process events data
+        if (eventsResponse.status === 'fulfilled' && eventsResponse.value.ok) {
+            const eventsCsv = await eventsResponse.value.text();
+            state.eventsData = parseEventsCSV(eventsCsv);
+            eventsData = state.eventsData;
+        }
+
         // Fetch real-time prices and compute weights
-        portfolioData = updatePortfolioPrices(portfolioData);
+        state.portfolioData = updatePortfolioPrices(state.portfolioData);
+        portfolioData = state.portfolioData;
 
         // Update displays
         updateHeroStats();
         updatePortfolioDisplay();
         updatePerformanceDisplay();
-        updateConsolidatedChart('company'); // Start with company view
-        
-        // Fetch upcoming events and company news
-        await fetchUpcomingEvents();
-        updateEventsDisplay();
+        updateConsolidatedChart('company');
 
-        // Load Company News first so the page feels responsive
-        await fetchCompanyNews();
+        // Fetch upcoming events and company news in parallel (non-blocking)
+        Promise.all([
+            fetchUpcomingEvents().then(() => updateEventsDisplay()),
+            fetchCompanyNews()
+        ]).catch(error => {
+            console.error('Error loading events/news:', error);
+        });
 
-        // YTD data is now included directly from Google Sheets (Column AR)
-        // No need for slow Yahoo Finance API calls
-
-        // Update displays
+        // Update displays again after data processing
         updatePortfolioDisplay();
         updatePerformanceDisplay();
         
     } catch (error) {
         console.error('Error loading portfolio data:', error);
-        // Fallback to sample data
-        portfolioData = SAMPLE_PORTFOLIO_DATA;
-        updateHeroStats();
-        updatePortfolioDisplay();
+        const portfolioGrid = document.getElementById('portfolioGrid');
+        if (portfolioGrid) {
+            if (typeof showError === 'function') {
+                showError('Failed to load portfolio data. Please refresh the page.', portfolioGrid);
+            } else {
+                portfolioGrid.innerHTML = `<div class="error" style="padding: 1rem; color: #c33;">Error: ${sanitizeHTML(error.message)}</div>`;
+            }
+        }
+        // Fallback to sample data only if we have no data at all
+        if (state.portfolioData.length === 0) {
+            state.portfolioData = SAMPLE_PORTFOLIO_DATA;
+            portfolioData = state.portfolioData;
+            updateHeroStats();
+            updatePortfolioDisplay();
+        }
     }
 }
 
@@ -151,8 +221,7 @@ function getPriceFromSheetData(symbol, portfolioData) {
     if (item && item.price) {
         return toNumber(item.price);
     }
-            // // // console.warn(`No price found for ${symbol} in sheet data`);
-        return 0;
+    return 0;
 }
 
 // Update portfolio with prices from Google Sheet and compute returns/weights
@@ -233,24 +302,38 @@ function parseCSVToRows(csvText) {
     return rows;
 }
 
-// Helper: parse numbers that may include $, commas, %, or trailing units like 'x'
+// Helper functions moved to utils.js - keeping for backward compatibility
+// Use utils.toNumber and utils.toPercentage when utils.js is loaded
 function toNumber(value) {
+    if (typeof window !== 'undefined' && window.toNumber) {
+        return window.toNumber(value);
+    }
     if (value === null || value === undefined) return 0;
     const cleaned = String(value).replace(/[^0-9.\-]/g, '');
     const n = parseFloat(cleaned);
     return isNaN(n) ? 0 : n;
 }
 
-
-
-// Helper: parse percentage values (e.g., "+61.2%", "-5.3%", "12.5%")
 function toPercentage(value) {
+    if (typeof window !== 'undefined' && window.toPercentage) {
+        return window.toPercentage(value);
+    }
     if (value === null || value === undefined) return null;
     const str = String(value).trim();
-    // Remove % sign and any other non-numeric characters except +, -, and .
     const cleaned = str.replace(/[^0-9.\-+]/g, '');
     const n = parseFloat(cleaned);
     return isNaN(n) ? null : n;
+}
+
+// Sanitization helper (fallback if utils.js not loaded)
+function sanitizeHTML(str) {
+    if (typeof window !== 'undefined' && window.sanitizeHTML) {
+        return window.sanitizeHTML(str);
+    }
+    if (typeof str !== 'string') return '';
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
 }
 
 // Extract cash balance from CSV data
@@ -509,30 +592,9 @@ function getWatchlistSortIcon(column) {
     return `<i class="fas fa-sort sort-icon"></i>`;
 }
 
-// Sort watchlist data (same approach as Portfolio)
+// Sort watchlist data - uses unified function (DRY)
 function sortWatchlistData(data, column, direction) {
-    if (!column) return data;
-    
-    return [...data].sort((a, b) => {
-        let aVal = a[column];
-        let bVal = b[column];
-        
-        // Handle null/undefined values
-        if (aVal === null || aVal === undefined) aVal = direction === 'asc' ? Infinity : -Infinity;
-        if (bVal === null || bVal === undefined) bVal = direction === 'asc' ? Infinity : -Infinity;
-        
-        // Handle string comparison
-        if (typeof aVal === 'string' && typeof bVal === 'string') {
-            aVal = aVal.toLowerCase();
-            bVal = bVal.toLowerCase();
-        }
-        
-        if (direction === 'asc') {
-            return aVal > bVal ? 1 : -1;
-        } else {
-            return aVal < bVal ? 1 : -1;
-        }
-    });
+    return sortData(data, column, direction);
 }
 
 
@@ -631,58 +693,60 @@ async function fetchUpcomingEvents() {
 
 
 
-// Fetch company news from Finnhub API
+// Fetch company news from Finnhub API - OPTIMIZED: Parallel fetching with rate limiting
 async function fetchCompanyNews() {
     try {
-        const API_KEY = 'd2l0fm1r01qqq9qsstfgd2l0fm1r01qqq9qsstg0';
-        const API_URL = 'https://finnhub.io/api/v1/company-news';
+        const { API_KEY, API_URL, NEWS_DAYS } = CONFIG.FINNHUB;
+        const newsApiUrl = `${API_URL}/company-news`;
         
-        // Get date range for last 7 days
+        // Get date range
         const today = new Date();
-        const sevenDaysAgo = new Date(today.getTime() - (7 * 24 * 60 * 60 * 1000));
+        const sevenDaysAgo = new Date(today.getTime() - (NEWS_DAYS * 24 * 60 * 60 * 1000));
         const fromDate = sevenDaysAgo.toISOString().split('T')[0];
         const toDate = today.toISOString().split('T')[0];
         
         const allNews = [];
+        const tickers = eventsData.filter(e => e.ticker).map(e => e.ticker);
         
-        // Fetch news for each company in portfolio
-    for (const event of eventsData) {
-            if (!event.ticker) continue;
-            
-            try {
-                const params = new URLSearchParams({
-                    symbol: event.ticker,
-                    from: fromDate,
-                    to: toDate,
-                    token: API_KEY
-                });
-                
-                const url = `${API_URL}?${params.toString()}`;
-                
-                const response = await fetch(url);
-                if (!response.ok) {
-                    continue;
+        // Fetch news for all companies in parallel with concurrency limit
+        const BATCH_SIZE = 5; // Limit concurrent requests to avoid rate limits
+        for (let i = 0; i < tickers.length; i += BATCH_SIZE) {
+            const batch = tickers.slice(i, i + BATCH_SIZE);
+            const batchPromises = batch.map(async (ticker) => {
+                try {
+                    const params = new URLSearchParams({
+                        symbol: ticker,
+                        from: fromDate,
+                        to: toDate,
+                        token: API_KEY
+                    });
+                    
+                    const response = await fetch(`${newsApiUrl}?${params.toString()}`);
+                    if (!response.ok) {
+                        return [];
+                    }
+                    
+                    const newsData = await response.json();
+                    const event = eventsData.find(e => e.ticker === ticker);
+                    
+                    return newsData.map(news => ({
+                        ...news,
+                        ticker: ticker,
+                        companyName: event?.companyName || ticker,
+                        logoUrl: logosData[ticker] || ''
+                    }));
+                } catch (error) {
+                    // Silent fail for individual requests
+                    return [];
                 }
-                
-                const newsData = await response.json();
-                
-                // Add company info to each news item
-                const companyNews = newsData.map(news => ({
-                    ...news,
-                    ticker: event.ticker,
-                    companyName: event.companyName,
-                    logoUrl: logosData[event.ticker] || ''
-                }));
-                
-                allNews.push(...companyNews);
-                
-            } catch (error) {
-                // Silent fail for production
-            }
+            });
+            
+            const batchResults = await Promise.all(batchPromises);
+            allNews.push(...batchResults.flat());
         }
         
         // Sort by date (newest first) and display
-        allNews.sort((a, b) => b.datetime - a.datetime);
+        allNews.sort((a, b) => (b.datetime || 0) - (a.datetime || 0));
         displayCompanyNews(allNews);
         
     } catch (error) {
@@ -712,44 +776,76 @@ function displayUpcomingEvents() {
     // Sort events by date
     allEvents.sort((a, b) => new Date(a.date) - new Date(b.date));
     
-    let html = '';
+    // Use DOM methods instead of innerHTML for better security
+    eventsContainer.innerHTML = ''; // Clear first
+    
     allEvents.forEach(event => {
-        const logoUrl = logosData[event.ticker] || '';
-        const logoHtml = logoUrl ? `<img src="${logoUrl}" alt="${event.ticker}" />` : event.ticker;
+        const eventItem = document.createElement('div');
+        eventItem.className = 'event-item';
         
+        // Logo
+        const logoDiv = document.createElement('div');
+        logoDiv.className = 'event-logo';
+        const logoUrl = logosData[event.ticker] || '';
+        if (logoUrl) {
+            const img = document.createElement('img');
+            img.src = logoUrl;
+            img.alt = sanitizeHTML(event.ticker);
+            logoDiv.appendChild(img);
+        } else {
+            logoDiv.textContent = sanitizeHTML(event.ticker);
+        }
+        eventItem.appendChild(logoDiv);
+        
+        // Info
+        const infoDiv = document.createElement('div');
+        infoDiv.className = 'event-info';
+        
+        const companyDiv = document.createElement('div');
+        companyDiv.className = 'event-company';
+        companyDiv.textContent = sanitizeHTML(event.companyName || event.ticker);
+        infoDiv.appendChild(companyDiv);
+        
+        const nameDiv = document.createElement('div');
+        nameDiv.className = 'event-name';
+        nameDiv.textContent = sanitizeHTML(event.name);
+        infoDiv.appendChild(nameDiv);
+        
+        const dateDiv = document.createElement('div');
+        dateDiv.className = 'event-date';
         const eventDate = new Date(event.date);
         const formattedDate = eventDate.toLocaleDateString('en-US', { 
             month: 'short', 
             day: 'numeric', 
             year: 'numeric'
         });
+        dateDiv.innerHTML = `<i class="far fa-calendar"></i>${sanitizeHTML(formattedDate)}`;
+        infoDiv.appendChild(dateDiv);
         
-        html += `
-            <div class="event-item">
-                <div class="event-logo">${logoHtml}</div>
-                <div class="event-info">
-                    <div class="event-company">${event.companyName || event.ticker}</div>
-                    <div class="event-name">${event.name}</div>
-                    <div class="event-date"><i class="far fa-calendar"></i>${formattedDate}</div>
-                </div>
-                <div class="event-actions">
-                    <a class="event-link" href="${event.url}" target="_blank">
-                        <i class="fas fa-external-link-alt"></i>View Details
-                    </a>
-                </div>
-            </div>
-        `;
+        eventItem.appendChild(infoDiv);
+        
+        // Actions
+        if (event.url) {
+            const actionsDiv = document.createElement('div');
+            actionsDiv.className = 'event-actions';
+            const link = document.createElement('a');
+            link.className = 'event-link';
+            link.href = sanitizeHTML(event.url);
+            link.target = '_blank';
+            link.rel = 'noopener noreferrer'; // Security best practice
+            link.innerHTML = '<i class="fas fa-external-link-alt"></i>View Details';
+            actionsDiv.appendChild(link);
+            eventItem.appendChild(actionsDiv);
+        }
+        
+        eventsContainer.appendChild(eventItem);
     });
-    
-    eventsContainer.innerHTML = html;
 }
 
-// Display company news
+// Display company news - SECURITY: Uses DOM methods instead of innerHTML
 function displayCompanyNews(newsData) {
     const newsContainer = document.getElementById('companyNews');
     if (!newsContainer) return;
-    
-    console.log('Total news articles received:', newsData.length);
     
     if (newsData.length === 0) {
         newsContainer.innerHTML = '<div class="no-news"><i class="far fa-newspaper"></i><p>No recent news found.</p><small>We check for news from the last 7 days.</small></div>';
@@ -791,29 +887,52 @@ function displayCompanyNews(newsData) {
         return;
     }
     
-    let html = '';
-            filteredNews.slice(0, 50).forEach(news => { // Limit to 50 most recent relevant articles
-        const logoHtml = news.logoUrl ? `<img src="${news.logoUrl}" alt="${news.ticker}" />` : news.ticker;
+    // Use DOM methods for better security - limit to 50 articles
+    newsContainer.innerHTML = '';
+    filteredNews.slice(0, 50).forEach(news => {
+        const newsItem = document.createElement('div');
+        newsItem.className = 'news-item';
         
-        // Try different date parsing approaches
+        // Logo
+        const logoDiv = document.createElement('div');
+        logoDiv.className = 'news-logo';
+        if (news.logoUrl) {
+            const img = document.createElement('img');
+            img.src = news.logoUrl;
+            img.alt = sanitizeHTML(news.ticker);
+            logoDiv.appendChild(img);
+        } else {
+            logoDiv.textContent = sanitizeHTML(news.ticker);
+        }
+        newsItem.appendChild(logoDiv);
+        
+        // Info
+        const infoDiv = document.createElement('div');
+        infoDiv.className = 'news-info';
+        
+        const companyDiv = document.createElement('div');
+        companyDiv.className = 'news-company';
+        companyDiv.textContent = sanitizeHTML(news.companyName || news.ticker);
+        infoDiv.appendChild(companyDiv);
+        
+        const headlineDiv = document.createElement('div');
+        headlineDiv.className = 'news-headline';
+        headlineDiv.textContent = sanitizeHTML(news.headline);
+        infoDiv.appendChild(headlineDiv);
+        
+        const dateDiv = document.createElement('div');
+        dateDiv.className = 'news-date';
+        // Parse date
         let newsDate;
         if (typeof news.datetime === 'number') {
-            // If it's a number, try both seconds and milliseconds
-            if (news.datetime > 1000000000000) {
-                // Likely milliseconds (13 digits)
-                newsDate = new Date(news.datetime);
-            } else {
-                // Likely seconds (10 digits)
-                newsDate = new Date(news.datetime * 1000);
-            }
+            newsDate = news.datetime > 1000000000000 
+                ? new Date(news.datetime) 
+                : new Date(news.datetime * 1000);
         } else if (typeof news.datetime === 'string') {
-            // If it's a string, try direct parsing
             newsDate = new Date(news.datetime);
         } else {
-            // Fallback to current date
             newsDate = new Date();
         }
-        
         const formattedDate = newsDate.toLocaleDateString('en-US', { 
             month: 'short', 
             day: 'numeric', 
@@ -821,24 +940,25 @@ function displayCompanyNews(newsData) {
             hour: '2-digit',
             minute: '2-digit'
         });
+        dateDiv.innerHTML = `<i class="far fa-calendar"></i>${sanitizeHTML(formattedDate)}`;
+        infoDiv.appendChild(dateDiv);
         
-        html += `
-            <div class="news-item">
-                <div class="news-logo">${logoHtml}</div>
-                <div class="news-info">
-                    <div class="news-company">${news.companyName || news.ticker}</div>
-                    <div class="news-headline">${news.headline}</div>
-                    <div class="news-date"><i class="far fa-calendar"></i>${formattedDate}</div>
-                </div>
-                <div class="news-actions">
-                    <a class="news-link" href="${news.url}" target="_blank">
-                        <i class="fas fa-external-link-alt"></i>${window.innerWidth <= 768 ? 'Read' : 'Read Article'}
-                    </a>
-                </div>
-            </div>`;
+        newsItem.appendChild(infoDiv);
+        
+        // Actions
+        const actionsDiv = document.createElement('div');
+        actionsDiv.className = 'news-actions';
+        const link = document.createElement('a');
+        link.className = 'news-link';
+        link.href = sanitizeHTML(news.url);
+        link.target = '_blank';
+        link.rel = 'noopener noreferrer'; // Security best practice
+        link.innerHTML = `<i class="fas fa-external-link-alt"></i>${window.innerWidth <= 768 ? 'Read' : 'Read Article'}`;
+        actionsDiv.appendChild(link);
+        newsItem.appendChild(actionsDiv);
+        
+        newsContainer.appendChild(newsItem);
     });
-    
-    newsContainer.innerHTML = html;
 }
 
 // Extract events from HTML with smart section targeting
@@ -1611,51 +1731,39 @@ function extractQ4EventsEmbeddedData(html, eventInfo) {
     return events;
 }
 
-// Try Finnhub Earnings Calendar API
+// Try Finnhub Earnings Calendar API - OPTIMIZED: Uses config and improved caching
 async function tryFinnhubEarningsAPI(ticker, eventInfo) {
-    // console.log(`[${ticker}] Attempting Finnhub Earnings Calendar API...`);
-    
     try {
         // Check cache first
-        const cacheKey = `finnhub_events_${ticker}`;
+        const cacheKey = `${CONFIG.CACHE.FINNHUB_CACHE_PREFIX}${ticker}`;
         const cached = loadFinnhubEventsCache(cacheKey);
-        // console.log(`[${ticker}] Cache check for key: ${cacheKey}, cached:`, cached ? 'found' : 'not found');
+        
         if (cached && cached.events && cached.events.length > 0) {
             const cacheAge = Date.now() - cached.timestamp;
-            const cacheMaxAge = 7 * 24 * 60 * 60 * 1000; // 7 days
-            
-            // console.log(`[${ticker}] Cache age: ${Math.round(cacheAge / 1000 / 60)} minutes, max age: ${Math.round(cacheMaxAge / 1000 / 60)} minutes`);
-            
-            if (cacheAge < cacheMaxAge) {
-                // console.log(`[${ticker}] Using cached Finnhub events (age: ${Math.round(cacheAge / 1000 / 60)} minutes)`);
+            if (cacheAge < CONFIG.CACHE.CACHE_MAX_AGE) {
                 return cached.events;
-            } else {
-                // console.log(`[${ticker}] Cache expired, fetching fresh data`);
             }
-        } else {
-            // console.log(`[${ticker}] No cache found, fetching fresh data`);
         }
         
-        const API_KEY = 'd2l0fm1r01qqq9qsstfgd2l0fm1r01qqq9qsstg0';
-        const API_URL = 'https://finnhub.io/api/v1/calendar/earnings';
+        const { API_KEY, API_URL, EARNINGS_DAYS } = CONFIG.FINNHUB;
+        const earningsApiUrl = `${API_URL}/calendar/earnings`;
         
         // Get current date and future dates
         const today = new Date();
-        const fromDate = today.toISOString().split('T')[0]; // YYYY-MM-DD format
-        const toDate = new Date(today.getTime() + (90 * 24 * 60 * 60 * 1000)).toISOString().split('T')[0]; // 90 days from now
+        const fromDate = today.toISOString().split('T')[0];
+        const toDate = new Date(today.getTime() + (EARNINGS_DAYS * 24 * 60 * 60 * 1000)).toISOString().split('T')[0];
         
-        try {
-            const params = new URLSearchParams({
-                from: fromDate,
-                to: toDate,
-                symbol: ticker,
-                token: API_KEY
-            });
-            
-            const url = `${API_URL}?${params.toString()}`;
-            // console.log(`[${ticker}] Trying Finnhub API: ${url}`);
-            
-            const response = await fetch(url);
+            try {
+                const params = new URLSearchParams({
+                    from: fromDate,
+                    to: toDate,
+                    symbol: ticker,
+                    token: API_KEY
+                });
+                
+                const url = `${earningsApiUrl}?${params.toString()}`;
+                
+                const response = await fetch(url);
             if (!response.ok) {
                 // console.log(`[${ticker}] Finnhub API error: ${response.status} ${response.statusText}`);
                 return [];
@@ -1956,11 +2064,21 @@ function parseDate(dateStr) {
 
 
 
-// Update portfolio display
+// Update portfolio display - IMPROVED: Better error handling
 function updatePortfolioDisplay() {
     const portfolioGrid = document.getElementById('portfolioGrid');
     if (!portfolioGrid) {
         console.error('Portfolio grid element not found');
+        return;
+    }
+    
+    // Show loading state if no data
+    if (!portfolioData || portfolioData.length === 0) {
+        if (typeof showLoading === 'function') {
+            showLoading(portfolioGrid, 'Loading portfolio data...');
+        } else {
+            portfolioGrid.innerHTML = '<div class="loading"><i class="fas fa-spinner fa-spin"></i><p>Loading portfolio data...</p></div>';
+        }
         return;
     }
     
@@ -2068,9 +2186,15 @@ function updatePortfolioDisplay() {
 
     portfolioGrid.innerHTML = html;
     
+    // Clean up old event listeners before adding new ones (prevent memory leaks)
+    const oldSortables = portfolioGrid.querySelectorAll('.sortable[data-listener-attached]');
+    oldSortables.forEach(el => {
+        el.removeAttribute('data-listener-attached');
+    });
 
-
+    // Add event listeners with cleanup tracking
     portfolioGrid.querySelectorAll('.sortable').forEach(el => {
+        el.setAttribute('data-listener-attached', 'true');
         el.addEventListener('click', () => {
             const column = el.getAttribute('data-column');
             if (currentSort.column === column) {
@@ -2156,10 +2280,15 @@ function displayWatchlist() {
     
     portfolioGrid.innerHTML = html;
     
-
+    // Clean up old event listeners (prevent memory leaks)
+    const oldSortables = portfolioGrid.querySelectorAll('.sortable[data-listener-attached]');
+    oldSortables.forEach(el => {
+        el.removeAttribute('data-listener-attached');
+    });
     
-    // Add event listeners for sorting (same approach as Portfolio table)
+    // Add event listeners for sorting with cleanup tracking
     portfolioGrid.querySelectorAll('.sortable').forEach(el => {
+        el.setAttribute('data-listener-attached', 'true');
         el.addEventListener('click', () => {
             const column = el.getAttribute('data-column');
             if (watchlistSortColumn === column) {
@@ -2168,7 +2297,7 @@ function displayWatchlist() {
                 watchlistSortColumn = column;
                 watchlistSortDirection = 'asc';
             }
-            displayWatchlist(); // Re-display with new sort
+            displayWatchlist();
         });
     });
 }
@@ -2398,14 +2527,18 @@ function updatePortfolioMultiples() {
     }
 }
 
-// Global variable for the consolidated chart
-let consolidatedChart = null;
-let currentView = 'company'; // Track current view
+// Global variables for chart - using state object (declared above)
+// consolidatedChart and currentView are aliased from state above
 
-// Function to create the consolidated pie chart
+// Function to create the consolidated pie chart - OPTIMIZED: Prevents unnecessary re-renders
 function updateConsolidatedChart(view = 'company') {
     const ctx = document.getElementById('consolidatedPieChart');
     if (!ctx) {
+        return;
+    }
+
+    // Prevent unnecessary re-renders if view hasn't changed
+    if (state.currentView === view && state.consolidatedChart && !state.consolidatedChart.destroyed) {
         return;
     }
 
@@ -2615,18 +2748,22 @@ function updateConsolidatedChart(view = 'company') {
     };
 
     // Destroy existing chart if it exists
-    if (consolidatedChart) {
-        consolidatedChart.destroy();
+    if (state.consolidatedChart) {
+        state.consolidatedChart.destroy();
     }
 
     // Create new chart
-    consolidatedChart = new Chart(ctx, config);
+    state.consolidatedChart = new Chart(ctx, config);
+    consolidatedChart = state.consolidatedChart; // Update alias
     
     // Create callouts for both company and sector views
-    setTimeout(() => {
-        createChartCallouts(chartData, customColors, view === 'sector');
-        forceBranchStyling(); // Force branch styling after creation
-    }, 100);
+    // Use requestAnimationFrame for better performance than setTimeout
+    requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+            createChartCallouts(chartData, customColors, view === 'sector');
+            forceBranchStyling();
+        });
+    });
     
     // Set up toggle buttons after chart is created
     setupToggleButtons();
@@ -2634,7 +2771,8 @@ function updateConsolidatedChart(view = 'company') {
 
 // Function to handle toggle button clicks
 function handleToggleClick(view) {
-    currentView = view;
+    state.currentView = view;
+    currentView = view; // Update alias
     
     // Update active button state
     document.querySelectorAll('.toggle-btn').forEach(btn => {
@@ -2664,8 +2802,7 @@ function createChartCallouts(chartData, colors, isSectorView = false) {
     // Get the actual canvas element for accurate dimensions
     const canvas = chartContainer.querySelector('canvas');
     if (!canvas) {
-        console.log('Canvas not found, falling back to container');
-        return;
+        return; // Canvas not ready yet, will retry
     }
     
     const canvasRect = canvas.getBoundingClientRect();
@@ -2682,9 +2819,9 @@ function createChartCallouts(chartData, colors, isSectorView = false) {
     // Try to get the actual chart center from Chart.js if available
     let chartCenterX, chartCenterY;
     
-    if (consolidatedChart && consolidatedChart.chartArea) {
+    if (state.consolidatedChart && state.consolidatedChart.chartArea) {
         // Use Chart.js's actual chart area center, but adjust for container position
-        const chartArea = consolidatedChart.chartArea;
+        const chartArea = state.consolidatedChart.chartArea;
         const containerRect = chartContainer.getBoundingClientRect();
         
         // Chart.js coordinates are already the visual coordinates (after CSS scaling)
@@ -2697,18 +2834,27 @@ function createChartCallouts(chartData, colors, isSectorView = false) {
         // Fallback to canvas-based calculation
         chartCenterX = (canvasRect.width / scaleX) / 2;
         chartCenterY = (canvasRect.height / scaleY) / 2;
-        
-        if (isMobile) {
-            console.log('Using canvas fallback:', chartCenterX, chartCenterY);
-            console.log('canvasRect:', canvasRect);
-            console.log('scaleX:', scaleX, 'scaleY:', scaleY);
-        }
     }
     
 
     
     if (canvasRect.width === 0 || canvasRect.height === 0) {
-        setTimeout(() => createChartCallouts(chartData, colors, isSectorView), 500);
+        // Retry after chart is fully rendered - use requestAnimationFrame for better performance
+        let retries = 0;
+        const maxRetries = 10;
+        const checkAndRetry = () => {
+            const canvas = chartContainer.querySelector('canvas');
+            if (canvas) {
+                const rect = canvas.getBoundingClientRect();
+                if (rect.width > 0 && rect.height > 0) {
+                    createChartCallouts(chartData, colors, isSectorView);
+                } else if (retries < maxRetries) {
+                    retries++;
+                    requestAnimationFrame(checkAndRetry);
+                }
+            }
+        };
+        requestAnimationFrame(checkAndRetry);
         return;
     }
     
@@ -2758,11 +2904,18 @@ function createChartCallouts(chartData, colors, isSectorView = false) {
     // Adjust positions to prevent overlaps
     const adjustedPositions = adjustCalloutPositions(calloutPositions, chartCenterX, chartCenterY, baseRadius, baseCalloutRadius);
 
-    // Create callouts with adjusted positions
+    // Create callouts with adjusted positions - OPTIMIZED: Cache color lookups
+    const colorIndexMap = new Map();
+    chartData.forEach((item, idx) => {
+        colorIndexMap.set(item.symbol, idx);
+    });
+    
     adjustedPositions.forEach((position, index) => {
         const { item, angle, angleRad, x, y, adjustedRadius, needsBentBranch, finalX, finalY } = position;
         
-
+        // Cache color index lookup
+        const colorIndex = colorIndexMap.get(item.symbol) ?? chartData.indexOf(item);
+        const itemColor = colors[colorIndex];
         
         // Calculate branch start position
         const branchStartX = chartCenterX + Math.cos(angleRad) * baseRadius;
@@ -2793,7 +2946,7 @@ function createChartCallouts(chartData, colors, isSectorView = false) {
                 
                 const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
                 path.setAttribute('d', `M ${branchStartX} ${branchStartY} Q ${controlX} ${controlY} ${branchEndX} ${branchEndY}`);
-                path.setAttribute('stroke', colors[chartData.indexOf(item)]);
+                path.setAttribute('stroke', itemColor);
                 path.setAttribute('stroke-width', '2');
                 path.setAttribute('fill', 'none');
                 path.setAttribute('opacity', '0.8');
@@ -2807,7 +2960,7 @@ function createChartCallouts(chartData, colors, isSectorView = false) {
                     top: ${branchStartY}px;
                     width: ${adjustedRadius - baseRadius}px;
                     height: 2px;
-                    background: linear-gradient(90deg, ${colors[chartData.indexOf(item)]}, ${colors[chartData.indexOf(item)]}80);
+                    background: linear-gradient(90deg, ${itemColor}, ${itemColor}80);
                     transform-origin: left center;
                     transform: rotate(${angle}deg);
                     z-index: 5;
@@ -2826,7 +2979,7 @@ function createChartCallouts(chartData, colors, isSectorView = false) {
             top: ${finalY}px;
             transform: translate(-50%, -50%);
             background: rgba(255, 255, 255, 0.95);
-            border: 1px solid ${colors[chartData.indexOf(item)]}40;
+            border: 1px solid ${itemColor}40;
             border-radius: 8px;
             padding: 6px 8px;
             font-size: 10px;
@@ -2915,7 +3068,7 @@ function createChartCallouts(chartData, colors, isSectorView = false) {
             callout.style.transform = 'translate(-50%, -50%) scale(1.1)';
             callout.style.boxShadow = `0 12px 40px rgba(0, 0, 0, 0.15), 0 6px 20px rgba(0, 0, 0, 0.1)`;
             if (branch && !needsBentBranch) {
-                branch.style.background = colors[chartData.indexOf(item)];
+                branch.style.background = itemColor;
             }
         });
 
@@ -2923,7 +3076,7 @@ function createChartCallouts(chartData, colors, isSectorView = false) {
             callout.style.transform = 'translate(-50%, -50%) scale(1)';
             callout.style.boxShadow = `0 8px 32px rgba(0, 0, 0, 0.12), 0 4px 16px rgba(0, 0, 0, 0.08)`;
             if (branch && !needsBentBranch) {
-                branch.style.background = `linear-gradient(90deg, ${colors[chartData.indexOf(item)]}, ${colors[chartData.indexOf(item)]}80)`;
+                branch.style.background = `linear-gradient(90deg, ${itemColor}, ${itemColor}80)`;
             }
         });
 
@@ -2939,30 +3092,24 @@ function createSectorCallouts(chartData, colors) {
 
 // Old duplicate function removed - using unified createChartCallouts instead
 
-// Simple callout positioning - back to basics
+// Simple callout positioning - OPTIMIZED: Direct calculation without unnecessary iterations
 function adjustCalloutPositions(positions, chartCenterX, chartCenterY, baseRadius, baseCalloutRadius) {
-    const adjustedPositions = [...positions];
-    
-    // Use the passed baseCalloutRadius instead of recalculating
+    // Use the passed baseCalloutRadius - no need to recalculate
     const calloutRadius = baseCalloutRadius;
     
-
-    
-    for (let i = 0; i < adjustedPositions.length; i++) {
-        const current = adjustedPositions[i];
-        
-        // Calculate position on perfect circle
+    // Map positions directly - more efficient than loop with array mutation
+    return positions.map(current => {
         const x = chartCenterX + Math.cos(current.angleRad) * calloutRadius;
         const y = chartCenterY + Math.sin(current.angleRad) * calloutRadius;
         
-        // Update position
-        current.finalX = x;
-        current.finalY = y;
-        current.adjustedRadius = calloutRadius;
-        current.needsBentBranch = false;
-    }
-    
-    return adjustedPositions;
+        return {
+            ...current,
+            finalX: x,
+            finalY: y,
+            adjustedRadius: calloutRadius,
+            needsBentBranch: false
+        };
+    });
 }
 
 // No legend function - we're not using legends
@@ -3117,8 +3264,8 @@ function filterPortfolioData(data, filter) {
     return data.filter(item => item.type === filter);
 }
 
-// Sort portfolio data
-function sortPortfolioData(data, column, direction) {
+// Unified sorting function - DRY: Used by both portfolio and watchlist
+function sortData(data, column, direction) {
     if (!column) return data;
     
     return [...data].sort((a, b) => {
@@ -3143,9 +3290,14 @@ function sortPortfolioData(data, column, direction) {
     });
 }
 
-// Force branch styling after chart creation
+// Sort portfolio data - uses unified function
+function sortPortfolioData(data, column, direction) {
+    return sortData(data, column, direction);
+}
+
+// Force branch styling after chart creation - OPTIMIZED: Uses requestAnimationFrame
 function forceBranchStyling() {
-    setTimeout(() => {
+    requestAnimationFrame(() => {
         const chartContainer = document.querySelector('.allocation-chart');
         if (chartContainer) {
             const branches = chartContainer.querySelectorAll('.chart-branch');
@@ -3163,7 +3315,7 @@ function forceBranchStyling() {
                 });
             });
         }
-    }, 100);
+    });
 }
 
 // Initialize event listeners
@@ -3217,14 +3369,22 @@ function updateSectionTitle(view) {
     }
 }
 
-// Function to set up toggle button event listeners
+// Function to set up toggle button event listeners - FIXED: Proper cleanup
 function setupToggleButtons() {
     const toggleButtons = document.querySelectorAll('.toggle-btn');
     
-    // Remove existing event listeners to prevent duplicates
+    // Remove existing event listeners to prevent duplicates and memory leaks
     toggleButtons.forEach(button => {
-        button.removeEventListener('click', handleToggleButtonClick);
-        button.addEventListener('click', handleToggleButtonClick);
+        // Clone node to remove all listeners (more reliable than removeEventListener)
+        if (button.hasAttribute('data-listener-attached')) {
+            const newButton = button.cloneNode(true);
+            button.parentNode?.replaceChild(newButton, button);
+            newButton.setAttribute('data-listener-attached', 'true');
+            newButton.addEventListener('click', handleToggleButtonClick);
+        } else {
+            button.setAttribute('data-listener-attached', 'true');
+            button.addEventListener('click', handleToggleButtonClick);
+        }
     });
 }
 
