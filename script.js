@@ -2830,7 +2830,14 @@ function updateConsolidatedChart(view = 'company') {
 
     // Destroy existing chart if it exists
     if (state.consolidatedChart) {
-        state.consolidatedChart.destroy();
+        console.log('[DEBUG] Destroying existing chart');
+        if (!state.consolidatedChart.destroyed) {
+            state.consolidatedChart.destroy();
+        } else {
+            console.log('[DEBUG] Chart already destroyed');
+        }
+    } else {
+        console.log('[DEBUG] No existing chart to destroy');
     }
 
     // Create new chart
@@ -2856,18 +2863,41 @@ function updateConsolidatedChart(view = 'company') {
     setupToggleButtons();
 }
 
-// Function to handle toggle button clicks
+// Function to handle toggle button clicks for allocation chart
 function handleToggleClick(view) {
+    console.log('[DEBUG] handleToggleClick called with view:', view);
+    
+    if (!view || (view !== 'company' && view !== 'sector')) {
+        console.error('[DEBUG] Invalid view:', view);
+        return;
+    }
+    
+    console.log('[DEBUG] Current state.currentView:', state.currentView);
+    console.log('[DEBUG] Current state.consolidatedChart exists:', !!state.consolidatedChart);
+    
     state.currentView = view;
     currentView = view; // Update alias
     
-    // Update active button state
-    document.querySelectorAll('.toggle-btn').forEach(btn => {
-        btn.classList.remove('active');
-    });
-    document.querySelector(`[data-view="${view}"]`).classList.add('active');
+    // Update active button state - only for allocation toggle buttons
+    const allocationToggle = document.querySelector('.allocation-toggle');
+    if (allocationToggle) {
+        console.log('[DEBUG] Found allocation-toggle, updating buttons');
+        allocationToggle.querySelectorAll('.toggle-btn').forEach(btn => {
+            btn.classList.remove('active');
+        });
+        const targetBtn = allocationToggle.querySelector(`[data-view="${view}"]`);
+        if (targetBtn) {
+            targetBtn.classList.add('active');
+            console.log('[DEBUG] Activated button for view:', view);
+        } else {
+            console.error('[DEBUG] Could not find button with data-view:', view);
+        }
+    } else {
+        console.error('[DEBUG] Could not find .allocation-toggle element');
+    }
     
     // Update chart
+    console.log('[DEBUG] Calling updateConsolidatedChart with view:', view);
     updateConsolidatedChart(view);
 }
 
