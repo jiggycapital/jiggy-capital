@@ -1977,13 +1977,15 @@ async function getProxiedJSON(url) {
         // Direct fetch failed, continue to proxies
     }
     
-    // Updated proxy list - removed broken ones, added more reliable alternatives
+    // Updated proxy list - removed broken ones (cors-anywhere.herokuapp.com, thingproxy.freeboard.io)
+    // Using only known working proxies with fallbacks
     const proxies = [
         (u) => `https://api.allorigins.win/raw?url=${encodeURIComponent(u)}`,
         (u) => `https://cors.bridged.cc/${u}`,
         (u) => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(u)}`,
         (u) => `https://corsproxy.io/?${encodeURIComponent(u)}`,
-        (u) => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(u)}&format=json`
+        // Additional fallback: try allorigins with get method
+        (u) => `https://api.allorigins.win/get?url=${encodeURIComponent(u)}&callback=`
     ];
     
     for (let i = 0; i < proxies.length; i++) {
@@ -2017,7 +2019,24 @@ async function getProxiedJSON(url) {
                     }
                     
                     try {
-                        const json = JSON.parse(text);
+                        let json;
+                        // Handle allorigins get method which wraps in callback
+                        if (proxied.includes('api.allorigins.win/get')) {
+                            // allorigins get returns JSONP-like format, extract content
+                            const match = text.match(/^[^(]*\((.+)\);?\s*$/);
+                            if (match) {
+                                json = JSON.parse(match[1]);
+                                // allorigins wraps the response in a 'contents' field
+                                if (json && json.contents) {
+                                    json = JSON.parse(json.contents);
+                                }
+                            } else {
+                                json = JSON.parse(text);
+                            }
+                        } else {
+                            json = JSON.parse(text);
+                        }
+                        
                         // Basic check to ensure it's not an error page disguised as JSON
                         if (json && !json.error && !json.message?.includes('Access denied') && !json.message?.includes('Forbidden')) {
                             // console.log(`[PROXY] Success with proxy ${i + 1}, parsed JSON`);
