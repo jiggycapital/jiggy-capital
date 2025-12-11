@@ -732,9 +732,9 @@ body {
 .portfolio-weight {
     text-align: center;
     font-weight: 600;
-    min-width: 80px; /* Ensure consistent width for alignment */
-    width: 80px; /* Fixed width for consistent alignment */
-    max-width: 80px; /* Prevent expansion */
+    min-width: 90px; /* Increased width to prevent overflow */
+    width: 90px; /* Fixed width for consistent alignment */
+    max-width: 90px; /* Prevent expansion */
     font-size: 0.9rem; /* Consistent font size */
 }
 
@@ -756,18 +756,32 @@ body {
     cursor: pointer;
     user-select: none;
     transition: background-color 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    padding-right: 20px; /* Space for sort icon */
 }
 
 .sortable:hover {
     background-color: #f3f4f6;
     border-radius: 4px;
-    padding: 2px 4px;
-    margin: -2px -4px;
+}
+
+.sortable .header-text {
+    flex: 1;
+    text-align: center;
+    white-space: pre-line; /* Respect \n line breaks */
 }
 
 .sort-icon {
-    margin-left: 6px;
     color: #9ca3af;
+    font-size: 0.75rem;
+    flex-shrink: 0;
+    position: absolute;
+    right: 4px;
+    top: 50%;
+    transform: translateY(-50%);
 }
 
 .cash-summary {

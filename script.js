@@ -2186,7 +2186,7 @@ function updatePortfolioDisplay() {
     html += '<div class="portfolio-item">';
     headers.forEach(h => {
         if (h.key) {
-            html += `<div class="${h.cls} sortable" data-column="${h.key}">${h.label} ${sortIcon(h.key)}</div>`;
+            html += `<div class="${h.cls} sortable" data-column="${h.key}"><span class="header-text">${h.label}</span>${sortIcon(h.key)}</div>`;
         } else {
             html += `<div class="${h.cls}"></div>`;
         }
