@@ -1959,12 +1959,30 @@ async function getProxiedHTML(url) {
 async function getProxiedJSON(url) {
     // console.log(`[PROXY] Attempting to fetch JSON: ${url}`);
     
+    // First, try direct fetch (in case CORS is actually working)
+    try {
+        const directRes = await fetch(url, {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json'
+            }
+        });
+        if (directRes && directRes.ok) {
+            const json = await directRes.json();
+            if (json && !json.error) {
+                return json;
+            }
+        }
+    } catch (error) {
+        // Direct fetch failed, continue to proxies
+    }
+    
+    // Updated proxy list - removed broken ones, added more reliable alternatives
     const proxies = [
         (u) => `https://api.allorigins.win/raw?url=${encodeURIComponent(u)}`,
-        (u) => `https://cors-anywhere.herokuapp.com/${u}`,
-        (u) => `https://thingproxy.freeboard.io/fetch/${u}`,
-        (u) => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(u)}`,
         (u) => `https://cors.bridged.cc/${u}`,
+        (u) => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(u)}`,
+        (u) => `https://corsproxy.io/?${encodeURIComponent(u)}`,
         (u) => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(u)}&format=json`
     ];
     
@@ -1974,27 +1992,40 @@ async function getProxiedJSON(url) {
             const proxied = proxy(url);
             // console.log(`[PROXY] Trying proxy ${i + 1}: ${proxied}`);
             
+            // Add timeout to prevent hanging
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+            
             const res = await fetch(proxied, { 
                 method: 'GET',
                 headers: {
                     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
                     'Accept': 'application/json'
-                }
+                },
+                signal: controller.signal
             });
+            
+            clearTimeout(timeoutId);
             
             if (res && res.ok) {
                 const text = await res.text();
                 if (text && text.length > 0) {
                     // Check if we got an error page instead of actual content
-                    if (text.includes('403 Forbidden') || text.includes('Access denied') || text.includes('HTTP ERROR') || text.includes('CORS')) {
+                    if (text.includes('403 Forbidden') || text.includes('Access denied') || text.includes('HTTP ERROR') || text.includes('CORS') || text.includes('Rate limit')) {
                         // console.log(`[PROXY] Proxy ${i + 1} returned error page, trying next...`);
                         continue;
                     }
                     
                     try {
                         const json = JSON.parse(text);
-                        // console.log(`[PROXY] Success with proxy ${i + 1}, parsed JSON`);
-                        return json;
+                        // Basic check to ensure it's not an error page disguised as JSON
+                        if (json && !json.error && !json.message?.includes('Access denied') && !json.message?.includes('Forbidden')) {
+                            // console.log(`[PROXY] Success with proxy ${i + 1}, parsed JSON`);
+                            return json;
+                        }
+                        // If it's an error JSON, try next proxy
+                        // console.log(`[PROXY] Proxy ${i + 1} returned error JSON, trying next...`);
+                        continue;
                     } catch (parseError) {
                         // If it's not valid JSON, try next proxy
                         // console.log(`[PROXY] Proxy ${i + 1} returned non-JSON, trying next...`);
@@ -2005,12 +2036,17 @@ async function getProxiedJSON(url) {
                 // console.log(`[PROXY] Proxy ${i + 1} failed with status: ${res?.status}`);
             }
         } catch (error) {
-            // console.log(`[PROXY] Proxy ${i + 1} error: ${error.message}`);
+            // Handle timeout and other errors gracefully
+            if (error.name === 'AbortError') {
+                // console.log(`[PROXY] Proxy ${i + 1} timed out, trying next...`);
+            } else {
+                // console.log(`[PROXY] Proxy ${i + 1} error: ${error.message}`);
+            }
         }
     }
     
     // console.log(`[PROXY] All proxies failed for: ${url}`);
-    return null;
+    throw new Error('All proxies failed to fetch JSON data.');
 }
 
 // Simple localStorage cache for events
