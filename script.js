@@ -723,7 +723,16 @@ async function fetchCompanyNews() {
         // Only fetch news for companies actually in the portfolio
         const tickers = state.portfolioData
             .filter(item => item.symbol && item.symbol.toUpperCase() !== 'CASH')
-            .map(item => item.symbol);
+            .map(item => item.symbol.toUpperCase()); // Normalize to uppercase for consistency
+        
+        // Debug: Log portfolio tickers to verify filtering
+        console.log('[Company News] Fetching news for portfolio tickers:', tickers);
+        
+        if (tickers.length === 0) {
+            console.warn('[Company News] No portfolio tickers found, skipping news fetch');
+            displayCompanyNews([]);
+            return;
+        }
         
         // Fetch news for all companies in parallel with concurrency limit
         const BATCH_SIZE = 5; // Limit concurrent requests to avoid rate limits
@@ -747,12 +756,14 @@ async function fetchCompanyNews() {
                         return [];
                     }
                     
-                    // Get company name from portfolio data
-                    const portfolioItem = state.portfolioData.find(item => item.symbol === ticker);
+                    // Get company name from portfolio data (match case-insensitive)
+                    const portfolioItem = state.portfolioData.find(item => 
+                        item.symbol && item.symbol.toUpperCase() === ticker.toUpperCase()
+                    );
                     
                     return newsData.map(news => ({
                         ...news,
-                        ticker: ticker,
+                        ticker: ticker.toUpperCase(), // Normalize ticker to uppercase
                         companyName: portfolioItem?.name || ticker,
                         logoUrl: logosData[ticker] || ''
                     }));
@@ -892,14 +903,20 @@ function displayCompanyNews(newsData) {
             .map(item => item.symbol.toUpperCase())
     );
     
+    // Debug: Log portfolio tickers and news tickers for troubleshooting
+    const newsTickers = [...new Set(newsData.map(n => (n.ticker || '').toUpperCase()))];
+    console.log('[Company News] Portfolio tickers:', Array.from(portfolioTickers));
+    console.log('[Company News] News tickers received:', newsTickers);
+    console.log('[Company News] News items before filtering:', newsData.length);
+    
     // Filter news to only include:
     // 1. Companies in the portfolio
     // 2. Articles with company name in headline
     // 3. Exclude fool.com and Seeking Alpha
     const filteredNews = newsData.filter(news => {
         // Only show news for companies in the portfolio
-        const newsTicker = (news.ticker || '').toUpperCase();
-        if (!portfolioTickers.has(newsTicker)) {
+        const newsTicker = (news.ticker || '').toUpperCase().trim();
+        if (!newsTicker || !portfolioTickers.has(newsTicker)) {
             return false;
         }
         
@@ -1909,14 +1926,14 @@ function getQuarterFromDate(date) {
 async function getProxiedHTML(url) {
     // console.log(`[PROXY] Attempting to fetch: ${url}`);
     
+    // Updated proxy list - removed broken ones (cors-anywhere.herokuapp.com, thingproxy.freeboard.io)
     const proxies = [
         (u) => `https://api.allorigins.win/raw?url=${encodeURIComponent(u)}`,
-        (u) => `https://cors-anywhere.herokuapp.com/${u}`,
-        (u) => `https://thingproxy.freeboard.io/fetch/${u}`,
-        (u) => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(u)}`,
         (u) => `https://cors.bridged.cc/${u}`,
-        (u) => `https://r.jina.ai/http://cors.isomorphic-git.org/${encodeURIComponent(u)}`,
-        (u) => `https://r.jina.ai/http://r.jina.ai/http://r.jina.ai/http://` // noop fallback (will likely fail)
+        (u) => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(u)}`,
+        (u) => `https://corsproxy.io/?${encodeURIComponent(u)}`,
+        // Additional fallback: try allorigins with get method
+        (u) => `https://api.allorigins.win/get?url=${encodeURIComponent(u)}&callback=`
     ];
     
     for (let i = 0; i < proxies.length; i++) {
