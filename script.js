@@ -722,12 +722,15 @@ async function fetchCompanyNews() {
                         token: API_KEY
                     });
                     
-                    const response = await fetch(`${newsApiUrl}?${params.toString()}`);
-                    if (!response.ok) {
+                    const url = `${newsApiUrl}?${params.toString()}`;
+                    
+                    // Use CORS proxy to avoid CORS errors
+                    const newsData = await getProxiedJSON(url);
+                    
+                    if (!newsData || !Array.isArray(newsData)) {
                         return [];
                     }
                     
-                    const newsData = await response.json();
                     const event = eventsData.find(e => e.ticker === ticker);
                     
                     return newsData.map(news => ({
@@ -1764,13 +1767,13 @@ async function tryFinnhubEarningsAPI(ticker, eventInfo) {
                 
                 const url = `${earningsApiUrl}?${params.toString()}`;
                 
-                const response = await fetch(url);
-            if (!response.ok) {
-                // console.log(`[${ticker}] Finnhub API error: ${response.status} ${response.statusText}`);
+                // Use CORS proxy to avoid CORS errors
+                const data = await getProxiedJSON(url);
+                
+            if (!data) {
+                // console.log(`[${ticker}] Finnhub API error: No data returned`);
                 return [];
             }
-            
-            const data = await response.json();
             // console.log(`[${ticker}] Finnhub API response:`, data);
             
             if (data && data.earningsCalendar && Array.isArray(data.earningsCalendar)) {
@@ -1894,6 +1897,64 @@ async function getProxiedHTML(url) {
                     }
                     // console.log(`[PROXY] Success with proxy ${i + 1}, content length: ${txt.length}`);
                     return txt;
+                }
+            } else {
+                // console.log(`[PROXY] Proxy ${i + 1} failed with status: ${res?.status}`);
+            }
+        } catch (error) {
+            // console.log(`[PROXY] Proxy ${i + 1} error: ${error.message}`);
+        }
+    }
+    
+    // console.log(`[PROXY] All proxies failed for: ${url}`);
+    return null;
+}
+
+// Fetch JSON from URL using CORS proxy (for APIs that don't support CORS)
+async function getProxiedJSON(url) {
+    // console.log(`[PROXY] Attempting to fetch JSON: ${url}`);
+    
+    const proxies = [
+        (u) => `https://api.allorigins.win/raw?url=${encodeURIComponent(u)}`,
+        (u) => `https://cors-anywhere.herokuapp.com/${u}`,
+        (u) => `https://thingproxy.freeboard.io/fetch/${u}`,
+        (u) => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(u)}`,
+        (u) => `https://cors.bridged.cc/${u}`,
+        (u) => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(u)}&format=json`
+    ];
+    
+    for (let i = 0; i < proxies.length; i++) {
+        const proxy = proxies[i];
+        try {
+            const proxied = proxy(url);
+            // console.log(`[PROXY] Trying proxy ${i + 1}: ${proxied}`);
+            
+            const res = await fetch(proxied, { 
+                method: 'GET',
+                headers: {
+                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+                    'Accept': 'application/json'
+                }
+            });
+            
+            if (res && res.ok) {
+                const text = await res.text();
+                if (text && text.length > 0) {
+                    // Check if we got an error page instead of actual content
+                    if (text.includes('403 Forbidden') || text.includes('Access denied') || text.includes('HTTP ERROR') || text.includes('CORS')) {
+                        // console.log(`[PROXY] Proxy ${i + 1} returned error page, trying next...`);
+                        continue;
+                    }
+                    
+                    try {
+                        const json = JSON.parse(text);
+                        // console.log(`[PROXY] Success with proxy ${i + 1}, parsed JSON`);
+                        return json;
+                    } catch (parseError) {
+                        // If it's not valid JSON, try next proxy
+                        // console.log(`[PROXY] Proxy ${i + 1} returned non-JSON, trying next...`);
+                        continue;
+                    }
                 }
             } else {
                 // console.log(`[PROXY] Proxy ${i + 1} failed with status: ${res?.status}`);
