@@ -666,9 +666,22 @@ async function fetchUpcomingEvents() {
                 }
             });
             
-            // Assign events to portfolio items
+            // Only assign events to companies actually in the portfolio
+            // Create a set of portfolio tickers for fast lookup
+            const portfolioTickers = new Set(
+                state.portfolioData
+                    .filter(item => item.symbol && item.symbol.toUpperCase() !== 'CASH')
+                    .map(item => item.symbol.toUpperCase())
+            );
+            
+            // Assign events to portfolio items only
             eventsData.forEach(event => {
-                event.upcomingEvents = eventsByTicker[event.ticker] || [];
+                // Only process if this company is in the portfolio
+                if (event.ticker && portfolioTickers.has(event.ticker.toUpperCase())) {
+                    event.upcomingEvents = eventsByTicker[event.ticker] || [];
+                } else {
+                    event.upcomingEvents = [];
+                }
             });
             
             // Display events
@@ -707,7 +720,10 @@ async function fetchCompanyNews() {
         const toDate = today.toISOString().split('T')[0];
         
         const allNews = [];
-        const tickers = eventsData.filter(e => e.ticker).map(e => e.ticker);
+        // Only fetch news for companies actually in the portfolio
+        const tickers = state.portfolioData
+            .filter(item => item.symbol && item.symbol.toUpperCase() !== 'CASH')
+            .map(item => item.symbol);
         
         // Fetch news for all companies in parallel with concurrency limit
         const BATCH_SIZE = 5; // Limit concurrent requests to avoid rate limits
@@ -731,12 +747,13 @@ async function fetchCompanyNews() {
                         return [];
                     }
                     
-                    const event = eventsData.find(e => e.ticker === ticker);
+                    // Get company name from portfolio data
+                    const portfolioItem = state.portfolioData.find(item => item.symbol === ticker);
                     
                     return newsData.map(news => ({
                         ...news,
                         ticker: ticker,
-                        companyName: event?.companyName || ticker,
+                        companyName: portfolioItem?.name || ticker,
                         logoUrl: logosData[ticker] || ''
                     }));
                 } catch (error) {
@@ -764,11 +781,23 @@ function displayUpcomingEvents() {
     const eventsContainer = document.getElementById('upcomingEvents');
     if (!eventsContainer) return;
     
-    // Collect all events from all companies
+    // Collect all events from portfolio companies only
     const allEvents = [];
+    
+    // Create a set of portfolio tickers for fast lookup
+    const portfolioTickers = new Set(
+        state.portfolioData
+            .filter(item => item.symbol && item.symbol.toUpperCase() !== 'CASH')
+            .map(item => item.symbol.toUpperCase())
+    );
+    
+    // Only show events for companies in the portfolio
     eventsData.forEach(company => {
-        if (company.upcomingEvents && Array.isArray(company.upcomingEvents)) {
-            allEvents.push(...company.upcomingEvents);
+        // Only process if this company is in the portfolio
+        if (company.ticker && portfolioTickers.has(company.ticker.toUpperCase())) {
+            if (company.upcomingEvents && Array.isArray(company.upcomingEvents)) {
+                allEvents.push(...company.upcomingEvents);
+            }
         }
     });
     
@@ -856,8 +885,24 @@ function displayCompanyNews(newsData) {
         return;
     }
     
-    // Filter news to only include articles with company name in headline and exclude fool.com and Seeking Alpha
+    // Create a set of portfolio tickers for fast lookup
+    const portfolioTickers = new Set(
+        state.portfolioData
+            .filter(item => item.symbol && item.symbol.toUpperCase() !== 'CASH')
+            .map(item => item.symbol.toUpperCase())
+    );
+    
+    // Filter news to only include:
+    // 1. Companies in the portfolio
+    // 2. Articles with company name in headline
+    // 3. Exclude fool.com and Seeking Alpha
     const filteredNews = newsData.filter(news => {
+        // Only show news for companies in the portfolio
+        const newsTicker = (news.ticker || '').toUpperCase();
+        if (!portfolioTickers.has(newsTicker)) {
+            return false;
+        }
+        
         // Exclude articles from fool.com and Seeking Alpha (check both URL and source)
         const url = (news.url || '').toLowerCase();
         const source = (news.source || '').toLowerCase();
