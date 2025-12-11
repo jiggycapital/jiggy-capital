@@ -2594,10 +2594,15 @@ function updatePortfolioMultiples() {
 
 // Function to create the consolidated pie chart - OPTIMIZED: Prevents unnecessary re-renders
 function updateConsolidatedChart(view = 'company') {
+    console.log('[DEBUG] updateConsolidatedChart called with view:', view);
+    
     const ctx = document.getElementById('consolidatedPieChart');
     if (!ctx) {
+        console.error('[DEBUG] Could not find consolidatedPieChart canvas element');
         return;
     }
+    
+    console.log('[DEBUG] Found canvas element, current chart exists:', !!state.consolidatedChart);
 
     // Update state view
     state.currentView = view;
@@ -2612,7 +2617,11 @@ function updateConsolidatedChart(view = 'company') {
     let chartData = [];
     let customColors = [];
 
+    console.log('[DEBUG] Processing view:', view);
+    console.log('[DEBUG] portfolioData length:', portfolioData?.length || 0);
+
     if (view === 'company') {
+        console.log('[DEBUG] Processing company view');
         // Company view - Portfolio Allocation
         chartData.push(...portfolioData.filter(item => item.weight > 0));
         
@@ -2651,6 +2660,7 @@ function updateConsolidatedChart(view = 'company') {
         });
     } else {
         // Sector view - Sector Allocation
+        console.log('[DEBUG] Processing sector view');
         const sectorData = {};
         
         // Group portfolio items by sector
@@ -2662,6 +2672,8 @@ function updateConsolidatedChart(view = 'company') {
                 sectorData[item.sector] += item.weight;
             }
         });
+        
+        console.log('[DEBUG] Sector data after grouping:', sectorData);
         
         // Add cash as a sector if it exists
         if (cashBalance > 0) {
@@ -2680,8 +2692,12 @@ function updateConsolidatedChart(view = 'company') {
             weight: weight
         }));
         
+        console.log('[DEBUG] Chart data before sorting:', chartData);
+        
         // Sort by weight (descending)
         chartData.sort((a, b) => b.weight - a.weight);
+        
+        console.log('[DEBUG] Chart data after sorting:', chartData);
 
         // Sector color mapping
         const sectorColorMap = {
@@ -2709,8 +2725,12 @@ function updateConsolidatedChart(view = 'company') {
     }
 
     if (chartData.length === 0) {
+        console.warn('[DEBUG] No chart data to display for view:', view);
         return;
     }
+    
+    console.log('[DEBUG] Final chartData length:', chartData.length);
+    console.log('[DEBUG] Final chartData:', chartData);
 
     const data = {
         labels: chartData.map(item => {
@@ -2814,8 +2834,14 @@ function updateConsolidatedChart(view = 'company') {
     }
 
     // Create new chart
+    console.log('[DEBUG] Creating new chart with config:', {
+        labels: config.data.labels.length,
+        datasets: config.data.datasets.length,
+        view: view
+    });
     state.consolidatedChart = new Chart(ctx, config);
     consolidatedChart = state.consolidatedChart; // Update alias
+    console.log('[DEBUG] Chart created successfully');
     
     // Create callouts for both company and sector views
     // Use requestAnimationFrame for better performance than setTimeout
@@ -3433,38 +3459,60 @@ function updateSectionTitle(view) {
 
 // Function to set up toggle button event listeners - FIXED: Proper cleanup and allocation-specific
 function setupToggleButtons() {
+    console.log('[DEBUG] setupToggleButtons called');
     // Only set up buttons for allocation section, not portfolio section
     const allocationToggle = document.querySelector('.allocation-toggle');
-    if (!allocationToggle) return;
+    if (!allocationToggle) {
+        console.error('[DEBUG] Could not find .allocation-toggle element');
+        return;
+    }
     
     const toggleButtons = allocationToggle.querySelectorAll('.toggle-btn');
+    console.log('[DEBUG] Found', toggleButtons.length, 'toggle buttons');
     
     // Remove existing event listeners to prevent duplicates and memory leaks
-    toggleButtons.forEach(button => {
+    toggleButtons.forEach((button, index) => {
+        console.log(`[DEBUG] Setting up button ${index + 1}, data-view:`, button.getAttribute('data-view'));
         // Clone node to remove all listeners (more reliable than removeEventListener)
         if (button.hasAttribute('data-listener-attached')) {
+            console.log(`[DEBUG] Button ${index + 1} already has listener, cloning to remove old one`);
             const newButton = button.cloneNode(true);
             button.parentNode?.replaceChild(newButton, button);
             newButton.setAttribute('data-listener-attached', 'true');
             newButton.addEventListener('click', handleToggleButtonClick);
+            console.log(`[DEBUG] Button ${index + 1} listener reattached`);
         } else {
             button.setAttribute('data-listener-attached', 'true');
             button.addEventListener('click', handleToggleButtonClick);
+            console.log(`[DEBUG] Button ${index + 1} listener attached`);
         }
     });
+    console.log('[DEBUG] setupToggleButtons completed');
 }
 
 // Function to handle toggle button click events
 function handleToggleButtonClick() {
     const view = this.getAttribute('data-view');
-    if (!view) return;
+    console.log('[DEBUG] handleToggleButtonClick - button clicked, data-view:', view);
+    console.log('[DEBUG] Button element:', this);
+    console.log('[DEBUG] Closest .portfolio-toggle:', this.closest('.portfolio-toggle'));
+    console.log('[DEBUG] Closest .allocation-toggle:', this.closest('.allocation-toggle'));
+    
+    if (!view) {
+        console.error('[DEBUG] No data-view attribute found on button');
+        return;
+    }
     
     // Check if this is a portfolio/watchlist toggle (not pie chart toggle)
     if (this.closest('.portfolio-toggle')) {
+        console.log('[DEBUG] This is a portfolio toggle, calling switchView');
         switchView(view);
     } else if (this.closest('.allocation-toggle')) {
         // This is a pie chart toggle button
+        console.log('[DEBUG] This is an allocation toggle, calling handleToggleClick');
         handleToggleClick(view);
+    } else {
+        console.error('[DEBUG] Button is not in .portfolio-toggle or .allocation-toggle');
     }
 }
 
