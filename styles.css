@@ -1588,10 +1588,19 @@ body {
     
     .portfolio-item:first-child {
         min-width: 850px !important; /* Match data row width */
-        width: 100% !important; /* Use full container width */
+        width: max-content !important; /* Allow header to expand to match table content width */
         max-width: none !important; /* Remove max-width constraint */
         grid-template-columns: 45px minmax(110px, 1.4fr) minmax(65px, 0.8fr) minmax(65px, 0.8fr) minmax(70px, 0.9fr) minmax(75px, 1.1fr) minmax(80px, 1.2fr) minmax(65px, 0.8fr) minmax(75px, 1fr) minmax(75px, 1fr) minmax(75px, 1fr) !important;
         gap: 0.8rem !important;
+        align-items: center !important;
+        background: #f8fafc !important; /* Solid background for sticky headers */
+        /* Sticky header positioning with solid background */
+        position: sticky !important;
+        top: 0 !important;
+        left: 0 !important; /* Ensure header starts at left edge */
+        right: 0 !important; /* Ensure header extends to right edge */
+        z-index: 100 !important;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important; /* Add shadow for better separation */
         font-size: 0.8rem;
         padding: 1rem 1.5rem !important;
     }
