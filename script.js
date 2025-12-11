@@ -181,7 +181,13 @@ async function loadPortfolioData() {
         updateHeroStats();
         updatePortfolioDisplay();
         updatePerformanceDisplay();
+        
+        // Initialize chart and set up toggle buttons
         updateConsolidatedChart('company');
+        // Set up toggle buttons after a short delay to ensure DOM is ready
+        setTimeout(() => {
+            setupToggleButtons();
+        }, 200);
 
         // Fetch upcoming events and company news in parallel (non-blocking)
         Promise.all([
@@ -2532,10 +2538,9 @@ function updateConsolidatedChart(view = 'company') {
         return;
     }
 
-    // Prevent unnecessary re-renders if view hasn't changed
-    if (state.currentView === view && state.consolidatedChart && !state.consolidatedChart.destroyed) {
-        return;
-    }
+    // Update state view
+    state.currentView = view;
+    currentView = view;
 
     // Update title based on view
     const titleElement = document.getElementById('allocationTitle');
@@ -3365,9 +3370,13 @@ function updateSectionTitle(view) {
     }
 }
 
-// Function to set up toggle button event listeners - FIXED: Proper cleanup
+// Function to set up toggle button event listeners - FIXED: Proper cleanup and allocation-specific
 function setupToggleButtons() {
-    const toggleButtons = document.querySelectorAll('.toggle-btn');
+    // Only set up buttons for allocation section, not portfolio section
+    const allocationToggle = document.querySelector('.allocation-toggle');
+    if (!allocationToggle) return;
+    
+    const toggleButtons = allocationToggle.querySelectorAll('.toggle-btn');
     
     // Remove existing event listeners to prevent duplicates and memory leaks
     toggleButtons.forEach(button => {
@@ -3387,11 +3396,12 @@ function setupToggleButtons() {
 // Function to handle toggle button click events
 function handleToggleButtonClick() {
     const view = this.getAttribute('data-view');
+    if (!view) return;
     
     // Check if this is a portfolio/watchlist toggle (not pie chart toggle)
     if (this.closest('.portfolio-toggle')) {
         switchView(view);
-    } else {
+    } else if (this.closest('.allocation-toggle')) {
         // This is a pie chart toggle button
         handleToggleClick(view);
     }
