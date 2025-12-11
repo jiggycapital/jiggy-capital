@@ -493,7 +493,7 @@ body {
     display: grid;
     width: 100%;
     max-width: 100%;
-    grid-template-columns: 50px minmax(120px, 1.5fr) minmax(70px, 0.9fr) minmax(70px, 0.9fr) minmax(75px, 1fr) minmax(80px, 1.2fr) minmax(85px, 1.3fr) minmax(70px, 0.9fr) minmax(80px, 1.1fr) minmax(80px, 1.1fr) minmax(80px, 1.1fr) minmax(80px, 1fr) minmax(80px, 1fr) minmax(90px, 1.1fr);
+    grid-template-columns: 50px minmax(120px, 1.5fr) minmax(70px, 0.9fr) minmax(70px, 0.9fr) minmax(75px, 1fr) minmax(80px, 1.2fr) minmax(85px, 1.3fr) minmax(70px, 0.9fr) minmax(80px, 1.1fr) minmax(80px, 1.1fr) minmax(80px, 1.1fr) minmax(80px, 1fr) minmax(80px, 1fr) minmax(100px, 1.1fr);
     gap: 1rem;
     align-items: center;
     transition: background-color 0.3s ease;
@@ -636,7 +636,7 @@ body {
     width: 100% !important;
     max-width: none !important; /* Remove max-width constraint for full background */
     display: grid !important;
-    grid-template-columns: 50px minmax(120px, 1.5fr) minmax(70px, 0.9fr) minmax(70px, 0.9fr) minmax(75px, 1fr) minmax(80px, 1.2fr) minmax(85px, 1.3fr) minmax(70px, 0.9fr) minmax(80px, 1.1fr) minmax(80px, 1.1fr) minmax(80px, 1.1fr) minmax(80px, 1fr) minmax(80px, 1fr) minmax(90px, 1.1fr) !important;
+    grid-template-columns: 50px minmax(120px, 1.5fr) minmax(70px, 0.9fr) minmax(70px, 0.9fr) minmax(75px, 1fr) minmax(80px, 1.2fr) minmax(85px, 1.3fr) minmax(70px, 0.9fr) minmax(80px, 1.1fr) minmax(80px, 1.1fr) minmax(80px, 1.1fr) minmax(80px, 1fr) minmax(80px, 1fr) minmax(100px, 1.1fr) !important;
     gap: 1rem !important;
     align-items: center !important;
     /* Sticky header positioning with solid background */
@@ -732,10 +732,12 @@ body {
 .portfolio-weight {
     text-align: center;
     font-weight: 600;
-    min-width: 90px; /* Increased width to prevent overflow */
-    width: 90px; /* Fixed width for consistent alignment */
-    max-width: 90px; /* Prevent expansion */
+    min-width: 100px; /* Increased width to prevent overflow */
+    width: 100px; /* Fixed width for consistent alignment */
+    max-width: 100px; /* Prevent expansion */
     font-size: 0.9rem; /* Consistent font size */
+    overflow: visible; /* Allow content to be visible */
+    white-space: nowrap; /* Prevent text wrapping */
 }
 
 .portfolio-shares,
@@ -760,7 +762,8 @@ body {
     align-items: center;
     justify-content: center;
     position: relative;
-    padding-right: 20px; /* Space for sort icon */
+    padding-right: 22px; /* Space for sort icon */
+    overflow: visible; /* Allow content to be visible */
 }
 
 .sortable:hover {
