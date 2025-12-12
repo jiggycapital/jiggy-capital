@@ -21,6 +21,14 @@ export interface CompanyFinancialData {
   metrics: FinancialMetric[];
 }
 
+export type MetricCategory = "universal" | "segment" | "company-specific";
+
+export interface MetricCategoryInfo {
+  metric: string;
+  category: MetricCategory;
+  companyCount: number; // How many companies have this metric
+}
+
 // Simple in-memory cache
 const cache = new Map<string, { data: any; timestamp: number }>();
 const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
@@ -280,5 +288,93 @@ export function getAllQuarters(companies: CompanyFinancialData[]): string[] {
     
     return parseQuarter(a) - parseQuarter(b);
   });
+}
+
+// Segment-specific metric patterns (metrics that appear in specific industry segments)
+const SEGMENT_METRIC_PATTERNS = [
+  /arr|annual recurring revenue/i,
+  /deferred revenue/i,
+  /rpo|remaining performance obligation/i,
+  /bookings/i,
+  /billings/i,
+  /subscription.*revenue/i,
+  /services.*revenue/i,
+  /saas.*revenue/i,
+  /customer.*count/i,
+  /large.*customer/i,
+  /enterprise.*customer/i,
+  /net.*retention/i,
+  /dollar.*retention/i,
+  /nrr|net revenue retention/i,
+  /dollar-based net retention/i,
+];
+
+// Categorize metrics based on how many companies have them
+export function categorizeMetrics(companies: CompanyFinancialData[]): MetricCategoryInfo[] {
+  const metricCounts = new Map<string, number>();
+  const totalCompanies = companies.length;
+  
+  // Count how many companies have each metric
+  companies.forEach(company => {
+    const companyMetrics = new Set<string>();
+    company.metrics.forEach(metric => {
+      companyMetrics.add(metric.metric);
+    });
+    
+    companyMetrics.forEach(metric => {
+      metricCounts.set(metric, (metricCounts.get(metric) || 0) + 1);
+    });
+  });
+  
+  // Categorize each metric
+  const categorized: MetricCategoryInfo[] = [];
+  
+  metricCounts.forEach((count, metric) => {
+    let category: MetricCategory;
+    
+    // Check if it's a segment-specific metric by pattern matching
+    const isSegmentMetric = SEGMENT_METRIC_PATTERNS.some(pattern => pattern.test(metric));
+    
+    if (count >= 5) {
+      // Universal if 5+ companies have it (unless it's a known segment metric)
+      if (isSegmentMetric && count < totalCompanies * 0.8) {
+        // Segment-specific: appears in multiple companies but not universal
+        category = "segment";
+      } else {
+        // Universal: appears in 5+ companies and is common
+        category = "universal";
+      }
+    } else {
+      // Company-specific: appears in fewer than 5 companies
+      category = "company-specific";
+    }
+    
+    categorized.push({
+      metric,
+      category,
+      companyCount: count,
+    });
+  });
+  
+  return categorized.sort((a, b) => {
+    // Sort by category (universal first, then segment, then company-specific)
+    const categoryOrder = { "universal": 0, "segment": 1, "company-specific": 2 };
+    const categoryDiff = categoryOrder[a.category] - categoryOrder[b.category];
+    if (categoryDiff !== 0) return categoryDiff;
+    
+    // Then sort by metric name
+    return a.metric.localeCompare(b.metric);
+  });
+}
+
+// Get metrics by category
+export function getMetricsByCategory(
+  companies: CompanyFinancialData[],
+  category: MetricCategory
+): string[] {
+  const categorized = categorizeMetrics(companies);
+  return categorized
+    .filter(info => info.category === category)
+    .map(info => info.metric);
 }
 

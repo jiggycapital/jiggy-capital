@@ -19,7 +19,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { fetchAllCompanyData, getAllMetrics, getAllQuarters, type CompanyFinancialData } from "@/lib/financial-sheets";
+import { fetchAllCompanyData, getAllMetrics, getAllQuarters, categorizeMetrics, getMetricsByCategory, type CompanyFinancialData, type MetricCategory } from "@/lib/financial-sheets";
 import { formatCurrency, formatNumber, formatPercentage, parseNumeric } from "@/lib/utils";
 import { Download } from "lucide-react";
 
@@ -38,6 +38,7 @@ export function DRTableView() {
   const [viewMode, setViewMode] = useState<ViewMode>("company");
   const [selectedCompany, setSelectedCompany] = useState<string>("all");
   const [selectedMetric, setSelectedMetric] = useState<string>("all");
+  const [selectedCategory, setSelectedCategory] = useState<MetricCategory | "all">("all");
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [globalFilter, setGlobalFilter] = useState("");
@@ -67,6 +68,19 @@ export function DRTableView() {
     return getAllMetrics(companiesData);
   }, [companiesData]);
 
+  // Categorize metrics
+  const metricCategories = useMemo(() => {
+    return categorizeMetrics(companiesData);
+  }, [companiesData]);
+
+  // Filter metrics by selected category
+  const filteredMetrics = useMemo(() => {
+    if (selectedCategory === "all") {
+      return allMetrics;
+    }
+    return getMetricsByCategory(companiesData, selectedCategory);
+  }, [allMetrics, selectedCategory, companiesData]);
+
   const allQuarters = useMemo(() => {
     return getAllQuarters(companiesData);
   }, [companiesData]);
@@ -80,7 +94,7 @@ export function DRTableView() {
       : companiesData.filter(c => c.companyName === selectedCompany);
     
     const metricsToShow = selectedMetric === "all"
-      ? allMetrics
+      ? filteredMetrics
       : [selectedMetric];
     
     companiesToShow.forEach(company => {
@@ -103,7 +117,7 @@ export function DRTableView() {
     });
     
     return data;
-  }, [companiesData, selectedCompany, selectedMetric, allMetrics]);
+  }, [companiesData, selectedCompany, selectedMetric, filteredMetrics]);
 
   // Build columns dynamically
   const columns = useMemo<ColumnDef<TableRowData>[]>(() => {
@@ -307,26 +321,134 @@ export function DRTableView() {
             </Select>
             
             <Select 
+              value={selectedCategory} 
+              onValueChange={(v) => {
+                setSelectedCategory(v as MetricCategory | "all");
+                setSelectedMetric("all"); // Reset metric when category changes
+              }}
+            >
+              <SelectTrigger className="w-[200px] bg-slate-800 border-slate-700 text-slate-100">
+                <SelectValue placeholder="All Categories" />
+              </SelectTrigger>
+              <SelectContent className="bg-slate-800 border-slate-700">
+                <SelectItem value="all">All Categories</SelectItem>
+                <SelectItem value="universal">Universal (5+ companies)</SelectItem>
+                <SelectItem value="segment">Segment-Specific</SelectItem>
+                <SelectItem value="company-specific">Company-Specific</SelectItem>
+              </SelectContent>
+            </Select>
+            
+            <Select 
               value={selectedMetric} 
               onValueChange={setSelectedMetric}
             >
               <SelectTrigger className="w-[250px] bg-slate-800 border-slate-700 text-slate-100">
                 <SelectValue placeholder={viewMode === "metric" ? "Select Metric" : "All Metrics"} />
               </SelectTrigger>
-              <SelectContent className="bg-slate-800 border-slate-700">
+              <SelectContent className="bg-slate-800 border-slate-700 max-h-[400px]">
                 {viewMode === "metric" ? (
-                  // In metric view, metric selection is required
-                  allMetrics.map(metric => (
-                    <SelectItem key={metric} value={metric}>{metric}</SelectItem>
-                  ))
+                  // In metric view, metric selection is required - group by category
+                  (() => {
+                    const universalMetrics = filteredMetrics.filter(m => {
+                      const info = metricCategories.find(c => c.metric === m);
+                      return info?.category === "universal";
+                    });
+                    const segmentMetrics = filteredMetrics.filter(m => {
+                      const info = metricCategories.find(c => c.metric === m);
+                      return info?.category === "segment";
+                    });
+                    const companyMetrics = filteredMetrics.filter(m => {
+                      const info = metricCategories.find(c => c.metric === m);
+                      return info?.category === "company-specific";
+                    });
+                    
+                    return (
+                      <>
+                        {universalMetrics.length > 0 && (
+                          <>
+                            <div className="px-2 py-1.5 text-xs font-semibold text-slate-400 border-b border-slate-700">
+                              Universal ({universalMetrics.length})
+                            </div>
+                            {universalMetrics.map(metric => (
+                              <SelectItem key={metric} value={metric}>{metric}</SelectItem>
+                            ))}
+                          </>
+                        )}
+                        {segmentMetrics.length > 0 && (
+                          <>
+                            <div className="px-2 py-1.5 text-xs font-semibold text-slate-400 border-b border-slate-700 mt-2">
+                              Segment-Specific ({segmentMetrics.length})
+                            </div>
+                            {segmentMetrics.map(metric => (
+                              <SelectItem key={metric} value={metric}>{metric}</SelectItem>
+                            ))}
+                          </>
+                        )}
+                        {companyMetrics.length > 0 && (
+                          <>
+                            <div className="px-2 py-1.5 text-xs font-semibold text-slate-400 border-b border-slate-700 mt-2">
+                              Company-Specific ({companyMetrics.length})
+                            </div>
+                            {companyMetrics.map(metric => (
+                              <SelectItem key={metric} value={metric}>{metric}</SelectItem>
+                            ))}
+                          </>
+                        )}
+                      </>
+                    );
+                  })()
                 ) : (
-                  // In company view, "all" is allowed
-                  <>
-                    <SelectItem value="all">All Metrics</SelectItem>
-                    {allMetrics.map(metric => (
-                      <SelectItem key={metric} value={metric}>{metric}</SelectItem>
-                    ))}
-                  </>
+                  // In company view, "all" is allowed - group by category
+                  (() => {
+                    const universalMetrics = filteredMetrics.filter(m => {
+                      const info = metricCategories.find(c => c.metric === m);
+                      return info?.category === "universal";
+                    });
+                    const segmentMetrics = filteredMetrics.filter(m => {
+                      const info = metricCategories.find(c => c.metric === m);
+                      return info?.category === "segment";
+                    });
+                    const companyMetrics = filteredMetrics.filter(m => {
+                      const info = metricCategories.find(c => c.metric === m);
+                      return info?.category === "company-specific";
+                    });
+                    
+                    return (
+                      <>
+                        <SelectItem value="all">All Metrics</SelectItem>
+                        {universalMetrics.length > 0 && (
+                          <>
+                            <div className="px-2 py-1.5 text-xs font-semibold text-slate-400 border-b border-slate-700 mt-2">
+                              Universal ({universalMetrics.length})
+                            </div>
+                            {universalMetrics.map(metric => (
+                              <SelectItem key={metric} value={metric}>{metric}</SelectItem>
+                            ))}
+                          </>
+                        )}
+                        {segmentMetrics.length > 0 && (
+                          <>
+                            <div className="px-2 py-1.5 text-xs font-semibold text-slate-400 border-b border-slate-700 mt-2">
+                              Segment-Specific ({segmentMetrics.length})
+                            </div>
+                            {segmentMetrics.map(metric => (
+                              <SelectItem key={metric} value={metric}>{metric}</SelectItem>
+                            ))}
+                          </>
+                        )}
+                        {companyMetrics.length > 0 && (
+                          <>
+                            <div className="px-2 py-1.5 text-xs font-semibold text-slate-400 border-b border-slate-700 mt-2">
+                              Company-Specific ({companyMetrics.length})
+                            </div>
+                            {companyMetrics.map(metric => (
+                              <SelectItem key={metric} value={metric}>{metric}</SelectItem>
+                            ))}
+                          </>
+                        )}
+                      </>
+                    );
+                  })()
                 )}
               </SelectContent>
             </Select>
