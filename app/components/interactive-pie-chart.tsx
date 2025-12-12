@@ -120,13 +120,16 @@ export function InteractivePieChart({ positionsData, logos, view, onViewChange }
     }
 
     const totalWeight = chartData.reduce((sum, item) => sum + item.value, 0);
-    // Account for margins (100px on each side)
-    const chartWidth = containerSize.width - 200;
-    const chartHeight = containerSize.height - 200;
+    // Chart center is in the middle of the container (margins are handled by Nivo)
     const chartCenterX = containerSize.width / 2;
     const chartCenterY = containerSize.height / 2;
-    const baseRadius = Math.min(chartWidth, chartHeight) * 0.3;
-    const baseCalloutRadius = Math.min(chartWidth, chartHeight) * 0.45;
+    
+    // Calculate radius based on available space (accounting for margins)
+    const availableWidth = containerSize.width - 200; // 100px margin on each side
+    const availableHeight = containerSize.height - 200; // 100px margin on each side
+    const chartRadius = Math.min(availableWidth, availableHeight) / 2;
+    const baseRadius = chartRadius * 0.5; // Inner radius of donut
+    const baseCalloutRadius = chartRadius * 0.85; // Position callouts at 85% of chart radius
 
     return calloutItems.map((item) => {
       const itemIndex = chartData.findIndex(d => d.id === item.id);
@@ -145,7 +148,7 @@ export function InteractivePieChart({ positionsData, logos, view, onViewChange }
       const midAngle = sliceStartAngle + (sliceAngle / 2);
       const angleRad = (midAngle * Math.PI) / 180;
       
-      // Calculate callout position
+      // Calculate callout position relative to chart center
       const calloutX = chartCenterX + Math.cos(angleRad) * baseCalloutRadius;
       const calloutY = chartCenterY + Math.sin(angleRad) * baseCalloutRadius;
 
