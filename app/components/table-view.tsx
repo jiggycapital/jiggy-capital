@@ -868,14 +868,25 @@ function formatCellValue(value: string, columnKey: string, isNumeric: boolean, c
     return <span className="text-slate-300">{value}</span>;
   }
 
-  // Forward Estimates: Currency in Billions
+  // Forward Estimates: Currency in Billions (except EPS which is regular currency)
   // Handle variations like "Forward Estimates (12/9)" or just "Forward Estimates"
   if (categoryLower.includes("forward estimates") || 
       (categoryLower.includes("forward") && categoryLower.includes("estimate") && !categoryLower.includes("growth"))) {
     // Try to parse as numeric even if not initially detected as numeric
     const num = parseNumeric(value);
     if (num !== null) {
-      // Format zero values as well
+      // EPS columns should be formatted as regular currency, not billions
+      // Check for EPS in column name (case-insensitive)
+      if (columnKeyLower.includes("eps") || 
+          columnKeyLower.includes("earnings per share") ||
+          columnKeyLower.includes("earnings/share")) {
+        return <span className="text-slate-300">{formatCurrency(num)}</span>;
+      }
+      // Everything else in Forward Estimates is in billions
+      // Only format as billions if the value is actually meaningful (not zero or very small)
+      if (num === 0 || Math.abs(num) < 0.001) {
+        return <span className="text-slate-500">-</span>;
+      }
       return <span className="text-slate-300">{formatCurrencyBillions(num)}</span>;
     }
     // If parsing fails, return the raw value
