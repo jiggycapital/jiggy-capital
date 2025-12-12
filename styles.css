@@ -1597,10 +1597,12 @@ body {
         /* Sticky header positioning with solid background */
         position: sticky !important;
         top: 0 !important;
+        left: 0 !important; /* Ensure header starts at left edge when scrolling */
         z-index: 100 !important;
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important; /* Add shadow for better separation */
         font-size: 0.8rem;
         padding: 1rem 1.5rem !important; /* Match data row padding exactly */
+        box-sizing: border-box !important;
     }
 
 
@@ -1930,8 +1932,24 @@ body {
         /* Sticky header positioning with solid background */
         position: sticky !important;
         top: 0 !important;
+        left: 0 !important; /* Ensure header starts at left edge when scrolling */
         z-index: 100 !important;
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important; /* Add shadow for better separation */
+        /* Extend background to cover full scrollable width */
+        box-sizing: border-box !important;
+    }
+    
+    /* Extend header background to cover full scrollable area on mobile */
+    .portfolio-grid .portfolio-item:first-child::before {
+        content: '';
+        position: absolute;
+        left: -100vw;
+        right: -100vw;
+        top: 0;
+        bottom: 0;
+        background: #f8fafc;
+        z-index: -1;
+        pointer-events: none;
     }
 
 
@@ -2310,9 +2328,11 @@ body {
         /* Sticky header positioning with solid background */
         position: sticky !important;
         top: 0 !important;
+        left: 0 !important; /* Ensure header starts at left edge when scrolling */
         z-index: 100 !important;
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important; /* Add shadow for better separation */
         padding: 1.25rem 2rem !important; /* Match data row padding exactly */
+        box-sizing: border-box !important;
     }
 
 
