@@ -194,29 +194,19 @@ export function ColumnSelector({
 
   return (
     <Dialog open={true} onOpenChange={onClose}>
-      <DialogContent className="max-w-[1400px] h-[90vh] bg-slate-900 border-slate-800 text-slate-100 p-0">
-        <DialogHeader className="px-6 pt-6 pb-4 border-b border-slate-800">
-          <div className="flex items-center justify-between">
-            <div>
-              <DialogTitle className="text-slate-100 text-xl">Column Selection</DialogTitle>
-              <DialogDescription className="text-slate-400 mt-1">
-                Select and reorder columns to display in the table
-              </DialogDescription>
-            </div>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={onClose}
-              className="h-8 w-8 p-0 text-slate-400 hover:text-slate-100"
-            >
-              <X className="h-4 w-4" />
-            </Button>
+      <DialogContent className="max-w-[1400px] h-[85vh] max-h-[900px] bg-slate-900 border-slate-800 text-slate-100 p-0 flex flex-col">
+        <DialogHeader className="px-6 pt-6 pb-4 border-b border-slate-800 flex-shrink-0">
+          <div>
+            <DialogTitle className="text-slate-100 text-xl">Column Selection</DialogTitle>
+            <DialogDescription className="text-slate-400 mt-1">
+              Select and reorder columns to display in the table
+            </DialogDescription>
           </div>
         </DialogHeader>
 
-        <div className="flex flex-col h-full overflow-hidden">
+        <div className="flex flex-col flex-1 min-h-0 overflow-hidden">
           {/* Search Bar */}
-          <div className="px-6 py-4 border-b border-slate-800">
+          <div className="px-6 py-4 border-b border-slate-800 flex-shrink-0">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400" />
               <Input
@@ -228,15 +218,15 @@ export function ColumnSelector({
             </div>
           </div>
 
-          <div className="flex flex-1 overflow-hidden">
+          <div className="flex flex-1 min-h-0 overflow-hidden">
             {/* Left Sidebar - Categories */}
-            <div className="w-64 border-r border-slate-800 bg-slate-950 flex flex-col">
-              <div className="px-4 py-3 border-b border-slate-800">
+            <div className="w-64 border-r border-slate-800 bg-slate-950 flex flex-col min-h-0">
+              <div className="px-4 py-3 border-b border-slate-800 flex-shrink-0">
                 <h3 className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
                   Categories
                 </h3>
               </div>
-              <ScrollArea className="flex-1">
+              <ScrollArea className="flex-1 min-h-0">
                 <div className="py-2">
                   {categories.map((category) => {
                     const Icon = getCategoryIcon(category);
@@ -279,13 +269,13 @@ export function ColumnSelector({
             </div>
 
             {/* Center Panel - Columns for Selected Category */}
-            <div className="flex-1 border-r border-slate-800 flex flex-col">
-              <div className="px-4 py-3 border-b border-slate-800 bg-slate-800/50">
+            <div className="flex-1 border-r border-slate-800 flex flex-col min-h-0">
+              <div className="px-4 py-3 border-b border-slate-800 bg-slate-800/50 flex-shrink-0">
                 <h3 className="text-sm font-semibold text-slate-100">
                   {selectedCategory === "Favorites" ? "My Saved Favorites" : selectedCategory || "All Columns"}
                 </h3>
               </div>
-              <ScrollArea className="flex-1">
+              <ScrollArea className="flex-1 min-h-0">
                 <div className="p-4 space-y-1">
                   {filteredColumns.length === 0 ? (
                     <div className="text-center text-slate-500 py-8">
@@ -339,13 +329,13 @@ export function ColumnSelector({
             </div>
 
             {/* Right Panel - Selected Columns */}
-            <div className="w-80 flex flex-col bg-slate-950">
-              <div className="px-4 py-3 border-b border-slate-800">
+            <div className="w-80 flex flex-col bg-slate-950 min-h-0">
+              <div className="px-4 py-3 border-b border-slate-800 flex-shrink-0">
                 <h3 className="text-sm font-semibold text-slate-100">
                   Selected Columns ({selectedColumns.length})
                 </h3>
               </div>
-              <ScrollArea className="flex-1">
+              <ScrollArea className="flex-1 min-h-0">
                 <div className="p-4 space-y-1">
                   {selectedColumns.length === 0 ? (
                     <div className="text-center text-slate-500 py-8 text-sm">
@@ -394,10 +384,10 @@ export function ColumnSelector({
           </div>
 
           {/* Footer with Tip and Actions */}
-          <div className="px-6 py-4 border-t border-slate-800 flex items-center justify-between bg-slate-950">
+          <div className="px-6 py-4 border-t border-slate-800 flex items-center justify-between bg-slate-950 flex-shrink-0">
             <div className="flex items-center gap-2 text-sm text-slate-500">
               <span className="text-yellow-400">💡</span>
-              <span>Koyfin Tip! Save your favorite columns by clicking the star next to the label.</span>
+              <span>Save your favorite columns by clicking the star next to the label.</span>
             </div>
             <div className="flex gap-2">
               <Button
