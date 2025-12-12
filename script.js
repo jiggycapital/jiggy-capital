@@ -108,14 +108,17 @@ function initializeNavigation() {
             const targetId = link.getAttribute('href');
             
             // Only handle anchor links (starting with #), allow normal navigation for other links
-            if (targetId && targetId.startsWith('#')) {
-                e.preventDefault();
-                const targetSection = document.querySelector(targetId);
-                if (targetSection) {
-                    targetSection.scrollIntoView({ behavior: 'smooth' });
-                }
+            if (!targetId || !targetId.startsWith('#')) {
+                // This is an external link or non-anchor link, allow normal navigation
+                return; // Don't prevent default, let browser handle navigation
             }
-            // For external links (like /analyze.html), allow default navigation behavior
+            
+            // This is an anchor link, handle smooth scrolling
+            e.preventDefault();
+            const targetSection = document.querySelector(targetId);
+            if (targetSection) {
+                targetSection.scrollIntoView({ behavior: 'smooth' });
+            }
         });
     });
 }
