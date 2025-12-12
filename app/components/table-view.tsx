@@ -20,7 +20,18 @@ import {
   DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuTrigger,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuLabel,
 } from "@/components/ui/dropdown-menu";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -29,7 +40,7 @@ import { fetchSheetData, parseSheetData, fetchLogos, type DatasetType } from "@/
 import { formatCurrency, formatNumber, formatPercentage, parseNumeric } from "@/lib/utils";
 import { StockDetailSheet } from "@/components/stock-detail-sheet";
 import type { PortfolioRow } from "@/types/portfolio";
-import { Settings2, Download } from "lucide-react";
+import { Settings2, Download, Save, FolderOpen, Trash2 } from "lucide-react";
 
 export function TableView() {
   const [positionsData, setPositionsData] = useState<PortfolioRow[]>([]);
@@ -45,10 +56,86 @@ export function TableView() {
   const [globalFilter, setGlobalFilter] = useState("");
   const [showColumnSelector, setShowColumnSelector] = useState(false);
   const [columnOrder, setColumnOrder] = useState<string[]>([]);
+  const [templates, setTemplates] = useState<Record<string, string[]>>({});
+  const [showTemplateMenu, setShowTemplateMenu] = useState(false);
+  const [showSaveTemplateDialog, setShowSaveTemplateDialog] = useState(false);
+  const [newTemplateName, setNewTemplateName] = useState("");
 
   useEffect(() => {
     loadData();
+    loadTemplates();
   }, []);
+
+  // Load templates from localStorage
+  function loadTemplates() {
+    try {
+      const saved = localStorage.getItem('jiggy-table-templates');
+      if (saved) {
+        setTemplates(JSON.parse(saved));
+      }
+    } catch (err) {
+      console.error('Failed to load templates:', err);
+    }
+  }
+
+  // Save templates to localStorage
+  function saveTemplates(newTemplates: Record<string, string[]>) {
+    try {
+      localStorage.setItem('jiggy-table-templates', JSON.stringify(newTemplates));
+      setTemplates(newTemplates);
+    } catch (err) {
+      console.error('Failed to save templates:', err);
+    }
+  }
+
+  // Get default template columns
+  function getDefaultTemplateColumns(allCols: string[]): string[] {
+    const defaultCols = ['Ticker', 'Company', 'Market Cap', 'P/2026e FCF', '2026e P/E'];
+    // Try to find matching columns (case-insensitive, partial match)
+    const found: string[] = [];
+    defaultCols.forEach(defaultCol => {
+      const match = allCols.find(col => {
+        const colLower = col.toLowerCase();
+        const defaultLower = defaultCol.toLowerCase();
+        return colLower === defaultLower || 
+               colLower.includes(defaultLower) || 
+               defaultLower.includes(colLower);
+      });
+      if (match) {
+        found.push(match);
+      }
+    });
+    return found.length > 0 ? found : allCols.slice(0, 5);
+  }
+
+  // Save current view as template
+  function saveCurrentAsTemplate() {
+    if (!newTemplateName.trim()) return;
+    const newTemplates = { ...templates, [newTemplateName.trim()]: visibleColumns };
+    saveTemplates(newTemplates);
+    setShowSaveTemplateDialog(false);
+    setNewTemplateName("");
+  }
+
+  // Load a template
+  function loadTemplate(templateName: string) {
+    const template = templates[templateName];
+    if (template) {
+      // Filter to only include columns that exist in allColumns
+      const validColumns = template.filter(col => allColumns.includes(col));
+      if (validColumns.length > 0) {
+        handleColumnVisibilityChange(validColumns);
+      }
+    }
+    setShowTemplateMenu(false);
+  }
+
+  // Delete a template
+  function deleteTemplate(templateName: string) {
+    const newTemplates = { ...templates };
+    delete newTemplates[templateName];
+    saveTemplates(newTemplates);
+  }
 
   async function loadData() {
     try {
@@ -104,13 +191,20 @@ export function TableView() {
   // Initialize column order and visibility if empty
   useEffect(() => {
     if (allColumns.length > 0 && columnOrder.length === 0) {
+      // Check if we have a saved default template or use the default columns
+      const defaultTemplate = getDefaultTemplateColumns(allColumns);
       setColumnOrder(allColumns);
-      // Initialize all columns as visible by default
+      
+      // Set visibility: show default template columns, hide others
       const initialVisibility: VisibilityState = {};
       allColumns.forEach(col => {
-        initialVisibility[col] = true;
+        initialVisibility[col] = defaultTemplate.includes(col);
       });
       setColumnVisibility(initialVisibility);
+      
+      // Set initial column order to have default template columns first
+      const ordered = [...defaultTemplate, ...allColumns.filter(col => !defaultTemplate.includes(col))];
+      setColumnOrder(ordered);
     }
   }, [allColumns, columnOrder.length]);
 
@@ -323,6 +417,59 @@ export function TableView() {
                 onChange={(e) => setGlobalFilter(e.target.value)}
                 className="max-w-sm bg-slate-800 border-slate-700 text-slate-100"
               />
+              <DropdownMenu open={showTemplateMenu} onOpenChange={setShowTemplateMenu}>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className="bg-slate-800 border-slate-700 text-slate-100"
+                  >
+                    <FolderOpen className="h-4 w-4 mr-2" />
+                    Templates
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="bg-slate-800 border-slate-700 text-slate-100 w-56">
+                  <DropdownMenuLabel>Templates</DropdownMenuLabel>
+                  <DropdownMenuSeparator className="bg-slate-700" />
+                  <DropdownMenuItem
+                    onClick={() => {
+                      setShowSaveTemplateDialog(true);
+                      setShowTemplateMenu(false);
+                    }}
+                    className="cursor-pointer focus:bg-slate-700"
+                  >
+                    <Save className="h-4 w-4 mr-2" />
+                    Save Current View
+                  </DropdownMenuItem>
+                  {Object.keys(templates).length > 0 && (
+                    <>
+                      <DropdownMenuSeparator className="bg-slate-700" />
+                      <DropdownMenuLabel>Load Template</DropdownMenuLabel>
+                      {Object.keys(templates).map((templateName) => (
+                        <DropdownMenuItem
+                          key={templateName}
+                          onClick={() => loadTemplate(templateName)}
+                          className="cursor-pointer focus:bg-slate-700"
+                        >
+                          <FolderOpen className="h-4 w-4 mr-2" />
+                          {templateName}
+                        </DropdownMenuItem>
+                      ))}
+                      <DropdownMenuSeparator className="bg-slate-700" />
+                      <DropdownMenuLabel>Delete Template</DropdownMenuLabel>
+                      {Object.keys(templates).map((templateName) => (
+                        <DropdownMenuItem
+                          key={templateName}
+                          onClick={() => deleteTemplate(templateName)}
+                          className="cursor-pointer focus:bg-slate-700 text-red-400"
+                        >
+                          <Trash2 className="h-4 w-4 mr-2" />
+                          {templateName}
+                        </DropdownMenuItem>
+                      ))}
+                    </>
+                  )}
+                </DropdownMenuContent>
+              </DropdownMenu>
               <Button
                 variant="outline"
                 onClick={() => setShowColumnSelector(true)}
@@ -464,16 +611,92 @@ export function TableView() {
           onOpenChange={(open) => !open && setSelectedStock(null)}
         />
       )}
+
+      <Dialog open={showSaveTemplateDialog} onOpenChange={setShowSaveTemplateDialog}>
+        <DialogContent className="bg-slate-900 border-slate-800 text-slate-100">
+          <DialogHeader>
+            <DialogTitle>Save Template</DialogTitle>
+            <DialogDescription className="text-slate-400">
+              Save your current column configuration as a template for quick access.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-4">
+            <Input
+              placeholder="Template name..."
+              value={newTemplateName}
+              onChange={(e) => setNewTemplateName(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && newTemplateName.trim()) {
+                  saveCurrentAsTemplate();
+                }
+              }}
+              className="bg-slate-800 border-slate-700 text-slate-100"
+              autoFocus
+            />
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setShowSaveTemplateDialog(false);
+                setNewTemplateName("");
+              }}
+              className="bg-slate-800 border-slate-700 text-slate-100"
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={saveCurrentAsTemplate}
+              disabled={!newTemplateName.trim()}
+              className="bg-slate-700 hover:bg-slate-600 text-slate-100"
+            >
+              Save
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
 
 function formatColumnName(name: string): string {
-  return name
-    .replace(/([A-Z])/g, " $1")
-    .replace(/_/g, " ")
-    .replace(/\b\w/g, (l) => l.toUpperCase())
-    .trim();
+  // Common financial acronyms that should not be split (case-insensitive matching)
+  const acronyms = ['EBITDA', 'FCF', 'GP', 'PE', 'P/E', 'EV', 'ROE', 'ROA', 'ROIC', 'EPS', 'DPS', 'CAGR', 'YTD', 'TTM', 'LTM', 'NOPAT', 'WACC', 'DCF', 'NPV', 'IRR', 'P/E', 'EV/EBITDA'];
+  
+  // First, replace underscores with spaces
+  let formatted = name.replace(/_/g, " ");
+  
+  // Protect slashes - ensure no spaces around them
+  formatted = formatted.replace(/\s*\/\s*/g, '/');
+  
+  // Protect acronyms by temporarily replacing them with placeholders
+  const acronymMap = new Map<string, string>();
+  acronyms.forEach((acronym, index) => {
+    const placeholder = `__ACRONYM${index}__`;
+    // Match acronym case-insensitively, as whole words
+    const regex = new RegExp(`\\b${acronym.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'gi');
+    if (regex.test(formatted)) {
+      formatted = formatted.replace(regex, placeholder);
+      acronymMap.set(placeholder, acronym);
+    }
+  });
+  
+  // Now add spaces before capital letters (camelCase -> camel Case)
+  // But only if not preceded by a slash or number
+  formatted = formatted.replace(/([a-z0-9])([A-Z])/g, '$1 $2');
+  
+  // Restore acronyms
+  acronymMap.forEach((acronym, placeholder) => {
+    formatted = formatted.replace(new RegExp(placeholder, 'g'), acronym);
+  });
+  
+  // Capitalize first letter of each word
+  formatted = formatted.replace(/\b\w/g, (l) => l.toUpperCase());
+  
+  // Clean up multiple spaces
+  formatted = formatted.replace(/\s+/g, ' ').trim();
+  
+  return formatted;
 }
 
 function formatCellValue(value: string, columnKey: string, isNumeric: boolean): React.ReactNode {
