@@ -136,18 +136,22 @@ export function DRTableView() {
         }
         
         // Format based on metric type
-        const metric = row.getValue("metric") as string;
-        const isPercentage = metric.toLowerCase().includes("%") || 
-                            metric.toLowerCase().includes("margin") ||
-                            metric.toLowerCase().includes("roic") ||
-                            metric.toLowerCase().includes("roe");
-        const isCurrency = metric.toLowerCase().includes("revenue") ||
-                          metric.toLowerCase().includes("income") ||
-                          metric.toLowerCase().includes("cash flow") ||
-                          metric.toLowerCase().includes("ebitda") ||
-                          metric.toLowerCase().includes("profit") ||
-                          metric.toLowerCase().includes("debt") ||
-                          metric.toLowerCase().includes("equity");
+        const metric = viewMode === "company" 
+          ? (row.getValue("metric") as string)
+          : selectedMetric;
+        const isPercentage = metric?.toLowerCase().includes("%") || 
+                            metric?.toLowerCase().includes("margin") ||
+                            metric?.toLowerCase().includes("roic") ||
+                            metric?.toLowerCase().includes("roe") ||
+                            false;
+        const isCurrency = metric?.toLowerCase().includes("revenue") ||
+                          metric?.toLowerCase().includes("income") ||
+                          metric?.toLowerCase().includes("cash flow") ||
+                          metric?.toLowerCase().includes("ebitda") ||
+                          metric?.toLowerCase().includes("profit") ||
+                          metric?.toLowerCase().includes("debt") ||
+                          metric?.toLowerCase().includes("equity") ||
+                          false;
         
         if (isPercentage) {
           return <span className="text-slate-300 font-mono">{formatPercentage(value)}</span>;
@@ -197,16 +201,29 @@ export function DRTableView() {
   const handleExport = () => {
     if (tableData.length === 0) return;
     
-    const headers = ["Company", "Metric", ...allQuarters];
+    const headers = viewMode === "company" 
+      ? ["Company", "Metric", ...allQuarters]
+      : ["Company", ...allQuarters];
+    
     const rows = tableData.map(row => {
-      return [
-        row.company,
-        row.metric,
-        ...allQuarters.map(q => {
-          const val = row[q];
-          return val !== null && val !== undefined ? String(val) : "";
-        }),
-      ].join(',');
+      if (viewMode === "company") {
+        return [
+          row.company,
+          row.metric,
+          ...allQuarters.map(q => {
+            const val = row[q];
+            return val !== null && val !== undefined ? String(val) : "";
+          }),
+        ].join(',');
+      } else {
+        return [
+          row.company,
+          ...allQuarters.map(q => {
+            const val = row[q];
+            return val !== null && val !== undefined ? String(val) : "";
+          }),
+        ].join(',');
+      }
     });
     
     const csv = [headers.join(','), ...rows].join('\n');
@@ -214,7 +231,10 @@ export function DRTableView() {
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `dr-table-${new Date().toISOString().split('T')[0]}.csv`;
+    const filename = viewMode === "metric" && selectedMetric !== "all"
+      ? `dr-table-${selectedMetric}-${new Date().toISOString().split('T')[0]}.csv`
+      : `dr-table-${new Date().toISOString().split('T')[0]}.csv`;
+    a.download = filename;
     a.click();
     window.URL.revokeObjectURL(url);
   };
