@@ -185,6 +185,9 @@ export function DRTableView() {
         header: "Company",
         enableSorting: true,
         enableHiding: false,
+        meta: {
+          sticky: true,
+        },
       },
     ];
     
@@ -570,32 +573,38 @@ export function DRTableView() {
               <TableHeader>
                 {table.getHeaderGroups().map((headerGroup) => (
                   <TableRow key={headerGroup.id} className="border-slate-800">
-                    {headerGroup.headers.map((header) => (
-                      <TableHead
-                        key={header.id}
-                        className={`bg-slate-800 text-slate-200 font-semibold ${
-                          header.column.getCanSort() ? 'cursor-pointer select-none hover:bg-slate-700' : ''
-                        }`}
-                        onClick={header.column.getToggleSortingHandler()}
-                      >
-                        <div className="flex items-center gap-2">
-                          {header.isPlaceholder
-                            ? null
-                            : flexRender(
-                                header.column.columnDef.header,
-                                header.getContext()
-                              )}
-                          {header.column.getCanSort() && (
-                            <span className="text-slate-400">
-                              {{
-                                asc: " ↑",
-                                desc: " ↓",
-                              }[header.column.getIsSorted() as string] ?? " ↕"}
-                            </span>
-                          )}
-                        </div>
-                      </TableHead>
-                    ))}
+                    {headerGroup.headers.map((header, index) => {
+                      const isSticky = header.column.columnDef.meta?.sticky;
+                      return (
+                        <TableHead
+                          key={header.id}
+                          className={`bg-slate-800 text-slate-200 font-semibold ${
+                            header.column.getCanSort() ? 'cursor-pointer select-none hover:bg-slate-700' : ''
+                          } ${
+                            isSticky ? 'sticky left-0 z-20 shadow-[2px_0_4px_rgba(0,0,0,0.3)]' : ''
+                          }`}
+                          onClick={header.column.getToggleSortingHandler()}
+                          style={isSticky ? { minWidth: '150px', maxWidth: '150px' } : undefined}
+                        >
+                          <div className="flex items-center gap-2">
+                            {header.isPlaceholder
+                              ? null
+                              : flexRender(
+                                  header.column.columnDef.header,
+                                  header.getContext()
+                                )}
+                            {header.column.getCanSort() && (
+                              <span className="text-slate-400">
+                                {{
+                                  asc: " ↑",
+                                  desc: " ↓",
+                                }[header.column.getIsSorted() as string] ?? " ↕"}
+                              </span>
+                            )}
+                          </div>
+                        </TableHead>
+                      );
+                    })}
                   </TableRow>
                 ))}
               </TableHeader>
@@ -606,14 +615,20 @@ export function DRTableView() {
                       key={row.id}
                       className="border-slate-800 hover:bg-slate-800/50"
                     >
-                      {row.getVisibleCells().map((cell) => (
-                        <TableCell
-                          key={cell.id}
-                          className="font-mono text-xs text-slate-300 py-1 whitespace-nowrap"
-                        >
-                          {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                        </TableCell>
-                      ))}
+                      {row.getVisibleCells().map((cell) => {
+                        const isSticky = cell.column.columnDef.meta?.sticky;
+                        return (
+                          <TableCell
+                            key={cell.id}
+                            className={`font-mono text-xs text-slate-300 py-1 whitespace-nowrap ${
+                              isSticky ? 'sticky left-0 z-10 bg-slate-900 shadow-[2px_0_4px_rgba(0,0,0,0.3)]' : ''
+                            }`}
+                            style={isSticky ? { minWidth: '150px', maxWidth: '150px' } : undefined}
+                          >
+                            {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                          </TableCell>
+                        );
+                      })}
                     </TableRow>
                   ))
                 ) : (
