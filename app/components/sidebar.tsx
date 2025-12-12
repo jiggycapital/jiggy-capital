@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { LayoutDashboard, Table2, BarChart3 } from "lucide-react";
+import { LayoutDashboard, Table2, BarChart3, TrendingUp, Database } from "lucide-react";
 
 export function Sidebar() {
   const pathname = usePathname();
@@ -23,6 +23,16 @@ export function Sidebar() {
       title: "Chart",
       href: "/chart",
       icon: BarChart3,
+    },
+    {
+      title: "DR Table",
+      href: "/dr-table",
+      icon: Database,
+    },
+    {
+      title: "DR Chart",
+      href: "/dr-chart",
+      icon: TrendingUp,
     },
   ];
 
