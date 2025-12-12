@@ -266,7 +266,8 @@ export function TableView() {
             return valA - valB;
           };
           
-          return {
+          // Build column definition - conditionally include sortingFn only for numeric columns
+          const columnDef: ColumnDef<PortfolioRow> = {
             accessorKey: key,
             header: formatColumnName(key),
             cell: ({ row }) => {
@@ -301,9 +302,15 @@ export function TableView() {
               }
             },
             enableSorting: true,
-            sortingFn: isNumeric ? numericSortingFn : undefined, // Use default alphanumeric for non-numeric
             enableHiding: true,
-          } as ColumnDef<PortfolioRow>;
+          };
+
+          // Only add sortingFn for numeric columns - TanStack Table will use default alphanumeric for others
+          if (isNumeric) {
+            columnDef.sortingFn = numericSortingFn;
+          }
+
+          return columnDef;
         } catch (err) {
           console.error('[TABLE DEBUG] Error building column for', key, err);
           // Return a valid column definition even on error
