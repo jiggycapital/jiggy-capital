@@ -181,7 +181,12 @@ export function TableView() {
 
     console.log('[TABLE DEBUG] Built columns:', {
       count: builtColumns.length,
-      firstFew: builtColumns.slice(0, 3).map(c => c.accessorKey),
+      firstFew: builtColumns.slice(0, 3).map(c => {
+        if ('accessorKey' in c) {
+          return c.accessorKey;
+        }
+        return 'unknown';
+      }),
     });
 
     return builtColumns;
