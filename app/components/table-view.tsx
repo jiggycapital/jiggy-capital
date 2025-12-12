@@ -137,7 +137,7 @@ export function TableView() {
       console.warn('[TABLE DEBUG] No data, but have columns, creating placeholder columns');
     }
 
-    const builtColumns = visibleColumns
+    const builtColumns: ColumnDef<PortfolioRow>[] = visibleColumns
       .filter(key => {
         if (!key || key.trim() === "") {
           console.warn('[TABLE DEBUG] Filtering out empty column key');
@@ -164,13 +164,20 @@ export function TableView() {
             },
             enableSorting: true,
             enableHiding: true,
-          };
+          } as ColumnDef<PortfolioRow>;
         } catch (err) {
           console.error('[TABLE DEBUG] Error building column for', key, err);
-          return null;
+          // Return a valid column definition even on error
+          return {
+            accessorKey: key,
+            header: formatColumnName(key),
+            cell: () => <span className="text-slate-500">Error</span>,
+            enableSorting: false,
+            enableHiding: true,
+          } as ColumnDef<PortfolioRow>;
         }
       })
-      .filter((col): col is ColumnDef<PortfolioRow> => col !== null);
+      .filter((col): col is ColumnDef<PortfolioRow> => col !== null && col !== undefined);
 
     console.log('[TABLE DEBUG] Built columns:', {
       count: builtColumns.length,
