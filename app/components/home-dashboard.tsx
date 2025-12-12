@@ -94,17 +94,6 @@ export function HomeDashboard() {
   const totalGain = totalPortfolioValue - totalCostBasis;
   const totalGainPercent = totalCostBasis > 0 ? (totalGain / totalCostBasis) * 100 : 0;
 
-  // Top movers - using column V (index 21) from Portfolio sheet
-  // Need to find which column header corresponds to column V
-  // Column V is the 22nd column (0-indexed: 21)
-  const getColumnVValue = (row: any, headers: string[]): number | null => {
-    if (headers.length > 21) {
-      const columnVHeader = headers[21];
-      return parseNumeric(row[columnVHeader] || row[headers[21]] || "");
-    }
-    return null;
-  };
-
   // Get column V value - use the stored header name from loadData
   const getColumnVValue = (row: any): number | null => {
     const columnVHeader = row._columnVHeader;
