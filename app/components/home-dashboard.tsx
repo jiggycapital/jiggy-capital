@@ -2,7 +2,8 @@
 
 import { useEffect, useState, useMemo } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { fetchSheetData, parseSheetData, type DatasetType } from "@/lib/google-sheets";
+import { fetchSheetData, parseSheetData, fetchLogos, type DatasetType } from "@/lib/google-sheets";
+import { InteractivePieChart } from "@/components/interactive-pie-chart";
 import { formatPercentage, formatCurrency, parseNumeric } from "@/lib/utils";
 import { 
   PieChart, Pie, Cell, ResponsiveContainer, Tooltip
@@ -12,6 +13,8 @@ import { TrendingUp, TrendingDown, PieChart as PieChartIcon, Activity, Target, P
 export function HomeDashboard() {
   const [positionsData, setPositionsData] = useState<any[]>([]);
   const [performanceData, setPerformanceData] = useState<any>(null);
+  const [logos, setLogos] = useState<Record<string, string>>({});
+  const [pieChartView, setPieChartView] = useState<"company" | "sector">("company");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -42,6 +45,10 @@ export function HomeDashboard() {
       
       setPositionsData(dataWithColumnV);
       
+      // Load logos
+      const logosData = await fetchLogos();
+      setLogos(logosData);
+      
       // Load performance data
       // YTD Performance is in cell B3 (row 2, column 1 in 0-indexed)
       const performanceRows = await fetchSheetData("performance");
@@ -53,9 +60,16 @@ export function HomeDashboard() {
         ytdPerformanceValue = performanceRows[2][1]?.trim().replace(/^"|"$/g, '') || null;
       }
       
+      // Get Lifetime CAGR from cell B4 (row 3, column 1)
+      let lifetimeCagrValue = null;
+      if (performanceRows.length > 3 && performanceRows[3].length > 1) {
+        lifetimeCagrValue = performanceRows[3][1]?.trim().replace(/^"|"$/g, '') || null;
+      }
+      
       setPerformanceData({
         parsed: performanceParsed,
         ytdPerformance: ytdPerformanceValue,
+        lifetimeCagr: lifetimeCagrValue,
         rawRows: performanceRows,
       });
     } catch (err) {
@@ -86,8 +100,7 @@ export function HomeDashboard() {
     const ytdPerformance = performanceData?.ytdPerformance || null;
     const ytdPerformanceNum = ytdPerformance ? parseNumeric(ytdPerformance.toString().replace(/[+%]/g, '')) : null;
     
-    const lifetimeCagr = performanceParsed.find((row: any) => row["Lifetime CAGR"])?.["Lifetime CAGR"] ||
-                         performanceParsed[0]?.["Lifetime CAGR"] || null;
+    const lifetimeCagr = performanceData?.lifetimeCagr || null;
     
     // Get benchmark comparisons from parsed performance data
     let benchmarkComparisons = {
@@ -504,66 +517,24 @@ export function HomeDashboard() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Sector Allocation - Enhanced */}
+        {/* Interactive Pie Chart */}
         <Card className="bg-slate-900/50 backdrop-blur-sm border-slate-800 shadow-xl lg:col-span-2">
           <CardHeader>
             <CardTitle className="text-xl font-bold text-slate-100 flex items-center gap-2">
               <PieChartIcon className="h-5 w-5" />
-              Sector Allocation
+              {pieChartView === "company" ? "Portfolio Allocation" : "Sector Allocation"}
             </CardTitle>
-            <CardDescription className="text-slate-400">By Percentage</CardDescription>
+            <CardDescription className="text-slate-400">
+              {pieChartView === "company" ? "By Holdings" : "By Sector"}
+            </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <ResponsiveContainer width="100%" height={280}>
-                <PieChart>
-                  <Pie
-                    data={sectorData}
-                    cx="50%"
-                    cy="50%"
-                    labelLine={false}
-                    label={({ name, percent }) => `${name} ${((percent || 0) * 100).toFixed(0)}%`}
-                    outerRadius={90}
-                    fill="#8884d8"
-                    dataKey="value"
-                  >
-                    {sectorData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                    ))}
-                  </Pie>
-                  <Tooltip 
-                    formatter={(value: number, name: string, props: any) => `${props.payload.percentage.toFixed(1)}%`}
-                    contentStyle={{ 
-                      backgroundColor: '#0f172a', 
-                      border: '1px solid #334155',
-                      borderRadius: '8px',
-                      color: '#e2e8f0'
-                    }}
-                  />
-                </PieChart>
-              </ResponsiveContainer>
-              <div className="space-y-2">
-                {sectorData.slice(0, 8).map((sector, idx) => (
-                  <div key={idx} className="flex items-center justify-between p-2 rounded-lg bg-slate-800/50 hover:bg-slate-800 transition-colors">
-                    <div className="flex items-center gap-3">
-                      <div 
-                        className="w-4 h-4 rounded" 
-                        style={{ backgroundColor: COLORS[idx % COLORS.length] }}
-                      />
-                      <div>
-                        <div className="text-sm font-semibold text-slate-100">{sector.name}</div>
-                        <div className="text-xs text-slate-400">{sector.count} holdings</div>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <div className="text-sm font-mono font-semibold text-slate-100">
-                        {sector.percentage.toFixed(1)}%
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
+            <InteractivePieChart
+              positionsData={positionsData}
+              logos={logos}
+              view={pieChartView}
+              onViewChange={setPieChartView}
+            />
           </CardContent>
         </Card>
 
