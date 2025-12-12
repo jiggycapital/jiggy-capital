@@ -538,15 +538,15 @@ export function TableView() {
             </TabsList>
           </Tabs>
 
-          <div className="rounded-md border border-slate-800 mt-4 overflow-x-auto">
+          <div className="rounded-md border border-slate-800 mt-4 overflow-x-auto overflow-y-auto max-h-[calc(100vh-300px)]">
             <Table>
-              <TableHeader>
+              <TableHeader className="sticky top-0 bg-slate-900 z-10">
                 {table.getHeaderGroups().map((headerGroup) => (
                   <TableRow key={headerGroup.id} className="border-slate-800 hover:bg-slate-800/50">
                     {headerGroup.headers.map((header) => (
                       <TableHead
                         key={header.id}
-                        className="text-slate-300 font-mono text-xs cursor-pointer select-none whitespace-nowrap"
+                        className="text-slate-300 font-mono text-xs cursor-pointer select-none whitespace-nowrap bg-slate-900"
                         onClick={header.column.getToggleSortingHandler()}
                       >
                         <div className="flex items-center gap-2">
