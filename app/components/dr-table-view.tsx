@@ -35,9 +35,9 @@ export function DRTableView() {
   const [companiesData, setCompaniesData] = useState<CompanyFinancialData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [viewMode, setViewMode] = useState<ViewMode>("company");
+  const [viewMode, setViewMode] = useState<ViewMode>("metric");
   const [selectedCompany, setSelectedCompany] = useState<string>("all");
-  const [selectedMetric, setSelectedMetric] = useState<string>("all");
+  const [selectedMetric, setSelectedMetric] = useState<string>("");
   const [selectedCategory, setSelectedCategory] = useState<MetricCategory | "all">("all");
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
@@ -86,25 +86,24 @@ export function DRTableView() {
   }, [companiesData]);
 
   // Transform data for table display
+  // Default to metric view: one metric across all companies
   const tableData = useMemo<TableRowData[]>(() => {
     const data: TableRowData[] = [];
     
-    const companiesToShow = selectedCompany === "all" 
-      ? companiesData 
-      : companiesData.filter(c => c.companyName === selectedCompany);
-    
-    const metricsToShow = selectedMetric === "all"
-      ? filteredMetrics
-      : [selectedMetric];
-    
-    companiesToShow.forEach(company => {
-      metricsToShow.forEach(metricName => {
-        const metric = company.metrics.find(m => m.metric === metricName);
-        if (!metric) return;
+    // Metric view: one metric across all companies
+    if (viewMode === "metric" || !selectedMetric || selectedMetric === "") {
+      if (!selectedMetric || selectedMetric === "") {
+        return []; // No metric selected
+      }
+      
+      // Show selected metric across all companies that have it
+      companiesData.forEach(company => {
+        const metric = company.metrics.find(m => m.metric === selectedMetric);
+        if (!metric) return; // Skip companies that don't have this metric
         
         const row: TableRowData = {
           company: company.companyName,
-          metric: metricName,
+          metric: selectedMetric,
         };
         
         // Add quarter values
@@ -114,10 +113,36 @@ export function DRTableView() {
         
         data.push(row);
       });
-    });
+    } else {
+      // Company view: all metrics for selected company(ies)
+      const companiesToShow = selectedCompany === "all" 
+        ? companiesData 
+        : companiesData.filter(c => c.companyName === selectedCompany);
+      
+      const metricsToShow = filteredMetrics;
+      
+      companiesToShow.forEach(company => {
+        metricsToShow.forEach(metricName => {
+          const metric = company.metrics.find(m => m.metric === metricName);
+          if (!metric) return;
+          
+          const row: TableRowData = {
+            company: company.companyName,
+            metric: metricName,
+          };
+          
+          // Add quarter values
+          metric.data.forEach(point => {
+            row[point.quarter] = point.value;
+          });
+          
+          data.push(row);
+        });
+      });
+    }
     
     return data;
-  }, [companiesData, selectedCompany, selectedMetric, filteredMetrics]);
+  }, [companiesData, selectedCompany, selectedMetric, filteredMetrics, viewMode]);
 
   // Build columns dynamically
   const columns = useMemo<ColumnDef<TableRowData>[]>(() => {
@@ -130,7 +155,7 @@ export function DRTableView() {
       },
     ];
     
-    // Only show metric column in company view mode
+    // Only show metric column in company view mode (not in metric view)
     if (viewMode === "company") {
       baseColumns.push({
         accessorKey: "metric",
@@ -218,7 +243,7 @@ export function DRTableView() {
     
     const headers = viewMode === "company" 
       ? ["Company", "Metric", ...allQuarters]
-      : ["Company", ...allQuarters];
+      : ["Company", ...allQuarters]; // Metric view: Company + quarters (metric is in the title)
     
     const rows = tableData.map(row => {
       if (viewMode === "company") {
@@ -295,36 +320,46 @@ export function DRTableView() {
           </div>
           
           {/* View Mode Toggle */}
-          <Tabs value={viewMode} onValueChange={(v) => setViewMode(v as ViewMode)} className="mb-4">
+          <Tabs value={viewMode} onValueChange={(v) => {
+            setViewMode(v as ViewMode);
+            if (v === "metric") {
+              // Reset to empty when switching to metric view
+              if (!selectedMetric || selectedMetric === "all") {
+                setSelectedMetric("");
+              }
+            }
+          }} className="mb-4">
             <TabsList className="bg-slate-800">
-              <TabsTrigger value="company" className="data-[state=active]:bg-slate-700">
-                Company View
-              </TabsTrigger>
               <TabsTrigger value="metric" className="data-[state=active]:bg-slate-700">
-                Metric View
+                Metric View (One Metric Across Companies)
+              </TabsTrigger>
+              <TabsTrigger value="company" className="data-[state=active]:bg-slate-700">
+                Company View (All Metrics for Company)
               </TabsTrigger>
             </TabsList>
           </Tabs>
           
           {/* Filters */}
           <div className="flex items-center gap-2 flex-wrap">
-            <Select value={selectedCompany} onValueChange={setSelectedCompany}>
-              <SelectTrigger className="w-[200px] bg-slate-800 border-slate-700 text-slate-100">
-                <SelectValue placeholder="All Companies" />
-              </SelectTrigger>
-              <SelectContent className="bg-slate-800 border-slate-700">
-                <SelectItem value="all">All Companies</SelectItem>
-                {allCompanies.map(company => (
-                  <SelectItem key={company} value={company}>{company}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            {viewMode === "company" && (
+              <Select value={selectedCompany} onValueChange={setSelectedCompany}>
+                <SelectTrigger className="w-[200px] bg-slate-800 border-slate-700 text-slate-100">
+                  <SelectValue placeholder="All Companies" />
+                </SelectTrigger>
+                <SelectContent className="bg-slate-800 border-slate-700">
+                  <SelectItem value="all">All Companies</SelectItem>
+                  {allCompanies.map(company => (
+                    <SelectItem key={company} value={company}>{company}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
             
             <Select 
               value={selectedCategory} 
               onValueChange={(v) => {
                 setSelectedCategory(v as MetricCategory | "all");
-                setSelectedMetric("all"); // Reset metric when category changes
+                setSelectedMetric(""); // Reset metric when category changes
               }}
             >
               <SelectTrigger className="w-[200px] bg-slate-800 border-slate-700 text-slate-100">
@@ -339,123 +374,71 @@ export function DRTableView() {
             </Select>
             
             <Select 
-              value={selectedMetric} 
+              value={selectedMetric || ""} 
               onValueChange={setSelectedMetric}
             >
-              <SelectTrigger className="w-[250px] bg-slate-800 border-slate-700 text-slate-100">
-                <SelectValue placeholder={viewMode === "metric" ? "Select Metric" : "All Metrics"} />
+              <SelectTrigger className="w-[300px] bg-slate-800 border-slate-700 text-slate-100">
+                <SelectValue placeholder={viewMode === "metric" ? "Select a metric to view across companies" : "All Metrics"} />
               </SelectTrigger>
               <SelectContent className="bg-slate-800 border-slate-700 max-h-[400px]">
-                {viewMode === "metric" ? (
-                  // In metric view, metric selection is required - group by category
-                  (() => {
-                    const universalMetrics = filteredMetrics.filter(m => {
-                      const info = metricCategories.find(c => c.metric === m);
-                      return info?.category === "universal";
-                    });
-                    const segmentMetrics = filteredMetrics.filter(m => {
-                      const info = metricCategories.find(c => c.metric === m);
-                      return info?.category === "segment";
-                    });
-                    const companyMetrics = filteredMetrics.filter(m => {
-                      const info = metricCategories.find(c => c.metric === m);
-                      return info?.category === "company-specific";
-                    });
-                    
-                    return (
-                      <>
-                        {universalMetrics.length > 0 && (
-                          <>
-                            <div className="px-2 py-1.5 text-xs font-semibold text-slate-400 border-b border-slate-700">
-                              Universal ({universalMetrics.length})
-                            </div>
-                            {universalMetrics.map(metric => (
-                              <SelectItem key={metric} value={metric}>{metric}</SelectItem>
-                            ))}
-                          </>
-                        )}
-                        {segmentMetrics.length > 0 && (
-                          <>
-                            <div className="px-2 py-1.5 text-xs font-semibold text-slate-400 border-b border-slate-700 mt-2">
-                              Segment-Specific ({segmentMetrics.length})
-                            </div>
-                            {segmentMetrics.map(metric => (
-                              <SelectItem key={metric} value={metric}>{metric}</SelectItem>
-                            ))}
-                          </>
-                        )}
-                        {companyMetrics.length > 0 && (
-                          <>
-                            <div className="px-2 py-1.5 text-xs font-semibold text-slate-400 border-b border-slate-700 mt-2">
-                              Company-Specific ({companyMetrics.length})
-                            </div>
-                            {companyMetrics.map(metric => (
-                              <SelectItem key={metric} value={metric}>{metric}</SelectItem>
-                            ))}
-                          </>
-                        )}
-                      </>
-                    );
-                  })()
-                ) : (
-                  // In company view, "all" is allowed - group by category
-                  (() => {
-                    const universalMetrics = filteredMetrics.filter(m => {
-                      const info = metricCategories.find(c => c.metric === m);
-                      return info?.category === "universal";
-                    });
-                    const segmentMetrics = filteredMetrics.filter(m => {
-                      const info = metricCategories.find(c => c.metric === m);
-                      return info?.category === "segment";
-                    });
-                    const companyMetrics = filteredMetrics.filter(m => {
-                      const info = metricCategories.find(c => c.metric === m);
-                      return info?.category === "company-specific";
-                    });
-                    
-                    return (
-                      <>
+                {(() => {
+                  const universalMetrics = filteredMetrics.filter(m => {
+                    const info = metricCategories.find(c => c.metric === m);
+                    return info?.category === "universal";
+                  });
+                  const segmentMetrics = filteredMetrics.filter(m => {
+                    const info = metricCategories.find(c => c.metric === m);
+                    return info?.category === "segment";
+                  });
+                  const companyMetrics = filteredMetrics.filter(m => {
+                    const info = metricCategories.find(c => c.metric === m);
+                    return info?.category === "company-specific";
+                  });
+                  
+                  return (
+                    <>
+                      {viewMode === "company" && (
                         <SelectItem value="all">All Metrics</SelectItem>
-                        {universalMetrics.length > 0 && (
-                          <>
-                            <div className="px-2 py-1.5 text-xs font-semibold text-slate-400 border-b border-slate-700 mt-2">
-                              Universal ({universalMetrics.length})
-                            </div>
-                            {universalMetrics.map(metric => (
-                              <SelectItem key={metric} value={metric}>{metric}</SelectItem>
-                            ))}
-                          </>
-                        )}
-                        {segmentMetrics.length > 0 && (
-                          <>
-                            <div className="px-2 py-1.5 text-xs font-semibold text-slate-400 border-b border-slate-700 mt-2">
-                              Segment-Specific ({segmentMetrics.length})
-                            </div>
-                            {segmentMetrics.map(metric => (
-                              <SelectItem key={metric} value={metric}>{metric}</SelectItem>
-                            ))}
-                          </>
-                        )}
-                        {companyMetrics.length > 0 && (
-                          <>
-                            <div className="px-2 py-1.5 text-xs font-semibold text-slate-400 border-b border-slate-700 mt-2">
-                              Company-Specific ({companyMetrics.length})
-                            </div>
-                            {companyMetrics.map(metric => (
-                              <SelectItem key={metric} value={metric}>{metric}</SelectItem>
-                            ))}
-                          </>
-                        )}
-                      </>
-                    );
-                  })()
-                )}
+                      )}
+                      {universalMetrics.length > 0 && (
+                        <>
+                          <div className="px-2 py-1.5 text-xs font-semibold text-slate-400 border-b border-slate-700">
+                            Universal ({universalMetrics.length})
+                          </div>
+                          {universalMetrics.map(metric => (
+                            <SelectItem key={metric} value={metric}>{metric}</SelectItem>
+                          ))}
+                        </>
+                      )}
+                      {segmentMetrics.length > 0 && (
+                        <>
+                          <div className="px-2 py-1.5 text-xs font-semibold text-slate-400 border-b border-slate-700 mt-2">
+                            Segment-Specific ({segmentMetrics.length})
+                          </div>
+                          {segmentMetrics.map(metric => (
+                            <SelectItem key={metric} value={metric}>{metric}</SelectItem>
+                          ))}
+                        </>
+                      )}
+                      {companyMetrics.length > 0 && (
+                        <>
+                          <div className="px-2 py-1.5 text-xs font-semibold text-slate-400 border-b border-slate-700 mt-2">
+                            Company-Specific ({companyMetrics.length})
+                          </div>
+                          {companyMetrics.map(metric => (
+                            <SelectItem key={metric} value={metric}>{metric}</SelectItem>
+                          ))}
+                        </>
+                      )}
+                    </>
+                  );
+                })()}
               </SelectContent>
             </Select>
             
-            {viewMode === "metric" && selectedMetric !== "all" && (
+            {viewMode === "metric" && selectedMetric && (
               <div className="text-sm text-slate-400 ml-2">
-                Showing <span className="text-slate-300 font-semibold">{selectedMetric}</span> across companies
+                Showing <span className="text-slate-300 font-semibold">{selectedMetric}</span> across {tableData.length} companies
               </div>
             )}
           </div>

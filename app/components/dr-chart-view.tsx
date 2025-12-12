@@ -45,12 +45,16 @@ export function DRChartView() {
       setLoading(true);
       const data = await fetchAllCompanyData();
       setCompaniesData(data);
-      // Auto-select first company and first metric
+      // Auto-select first metric (metric view is default)
       if (data.length > 0) {
-        setSelectedCompanies([data[0].companyName]);
         const firstMetric = getAllMetrics(data)[0];
         if (firstMetric) {
           setSelectedMetric(firstMetric);
+          // Auto-select all companies that have this metric
+          const companiesWithMetric = data
+            .filter(company => company.metrics.some(m => m.metric === firstMetric))
+            .map(company => company.companyName);
+          setSelectedCompanies(companiesWithMetric.slice(0, 10)); // Limit to first 10 for performance
         }
       }
     } catch (err) {
@@ -252,7 +256,12 @@ export function DRChartView() {
                   Companies (Select multiple)
                 </label>
                 <div className="max-h-48 overflow-y-auto space-y-2 border border-slate-700 rounded p-2 bg-slate-900">
-                  {allCompanies.map(company => (
+                {companiesWithMetric.length === 0 && selectedMetric ? (
+                  <div className="text-sm text-slate-400 py-2">
+                    No companies have this metric
+                  </div>
+                ) : (
+                  companiesWithMetric.map(company => (
                     <div key={company} className="flex items-center space-x-2">
                       <Checkbox
                         id={company}
@@ -267,7 +276,8 @@ export function DRChartView() {
                         {company}
                       </label>
                     </div>
-                  ))}
+                  ))
+                )}
                 </div>
               </div>
             </div>
@@ -277,6 +287,9 @@ export function DRChartView() {
             <div className="mt-6">
               <div className="mb-4 text-slate-300">
                 <h3 className="text-lg font-semibold mb-1">{selectedMetric}</h3>
+                <p className="text-sm text-slate-400">
+                  Showing {selectedCompanies.length} of {companiesWithMetric.length} {companiesWithMetric.length === 1 ? 'company' : 'companies'} with this metric
+                </p>
                 <p className="text-sm text-slate-400">
                   {selectedCompanies.length} {selectedCompanies.length === 1 ? 'company' : 'companies'} selected
                 </p>
