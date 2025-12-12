@@ -88,7 +88,7 @@ export function ChartView() {
 
   // Prepare chart data
   const chartData = useMemo(() => {
-    if (!xAxisColumn || yAxisColumns.length === 0) return [];
+    if (!xAxisColumn || yAxisColumns.length === 0 || currentData.length === 0) return [];
     
     return currentData.map(row => {
       const dataPoint: any = {
@@ -97,11 +97,11 @@ export function ChartView() {
       
       yAxisColumns.forEach(col => {
         const value = parseNumeric(String(row[col] || ""));
-        dataPoint[col] = value;
+        dataPoint[col] = value !== null ? value : 0;
       });
       
       return dataPoint;
-    });
+    }).filter(point => point.name); // Filter out empty names
   }, [currentData, xAxisColumn, yAxisColumns]);
 
   const toggleYAxisColumn = (column: string) => {
@@ -208,9 +208,9 @@ export function ChartView() {
                   <SelectTrigger className="bg-slate-900 border-slate-700 text-slate-100">
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="line">Line Chart</SelectItem>
-                    <SelectItem value="bar">Bar Chart</SelectItem>
+                  <SelectContent className="bg-slate-900 border-slate-700">
+                    <SelectItem value="line" className="text-slate-100">Line Chart</SelectItem>
+                    <SelectItem value="bar" className="text-slate-100">Bar Chart</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -219,16 +219,20 @@ export function ChartView() {
                 <label className="text-sm font-medium text-slate-300 mb-2 block">
                   X-Axis
                 </label>
-                <Select value={xAxisColumn} onValueChange={setXAxisColumn}>
+                <Select value={xAxisColumn || ""} onValueChange={setXAxisColumn}>
                   <SelectTrigger className="bg-slate-900 border-slate-700 text-slate-100">
                     <SelectValue placeholder="Select X-axis column" />
                   </SelectTrigger>
-                  <SelectContent>
-                    {allColumns.map(col => (
-                      <SelectItem key={col} value={col}>
-                        {formatColumnName(col)}
-                      </SelectItem>
-                    ))}
+                  <SelectContent className="bg-slate-900 border-slate-700">
+                    {allColumns.length > 0 ? (
+                      allColumns.map(col => (
+                        <SelectItem key={col} value={col} className="text-slate-100">
+                          {formatColumnName(col)}
+                        </SelectItem>
+                      ))
+                    ) : (
+                      <SelectItem value="" disabled>No columns available</SelectItem>
+                    )}
                   </SelectContent>
                 </Select>
               </div>
