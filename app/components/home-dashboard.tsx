@@ -18,7 +18,7 @@ export function HomeDashboard() {
   async function loadData() {
     try {
       setLoading(true);
-      const rows = await fetchSheetData("positions");
+      const rows = await fetchSheetData("portfolio");
       const data = parseSheetData(rows);
       setPositionsData(data);
     } catch (err) {
@@ -44,42 +44,61 @@ export function HomeDashboard() {
     );
   }
 
-  // Calculate portfolio stats
+  // Calculate portfolio stats from Portfolio sheet
+  // Get YTD Gain from the data
   const ytdGains = positionsData
-    .map(row => parseNumeric(row["YTD Gain"] || row["YTD % Chg"] || row["Total Return (YTD) %"]))
+    .map(row => parseNumeric(row["YTD Gain"] || row["YTD Gain %"] || row["YTD PnL %"] || row["YTD % Chg"] || row["Total Return (YTD) %"]))
     .filter((v): v is number => v !== null);
   
   const avgYtd = ytdGains.length > 0 
     ? ytdGains.reduce((a, b) => a + b, 0) / ytdGains.length 
     : 0;
 
-  // Top movers
+  // Get total portfolio value
+  const totalPortfolioValue = positionsData
+    .map(row => parseNumeric(row["Market Value"] || row["Value"] || "0"))
+    .filter((v): v is number => v !== null)
+    .reduce((a, b) => a + b, 0);
+
+  // Get total cost basis
+  const totalCostBasis = positionsData
+    .map(row => parseNumeric(row["Cost Basis"] || row["Cost"] || "0"))
+    .filter((v): v is number => v !== null)
+    .reduce((a, b) => a + b, 0);
+
+  // Calculate total gain
+  const totalGain = totalPortfolioValue - totalCostBasis;
+  const totalGainPercent = totalCostBasis > 0 ? (totalGain / totalCostBasis) * 100 : 0;
+
+  // Top movers - using Daily PnL % or Change % from Portfolio sheet
   const topGainers = positionsData
     .map(row => ({
       ticker: row.Ticker || row.Symbol || "",
-      company: row.Company || row.Name || "",
-      gain: parseNumeric(row["1 Day % Chg"] || row["Daily % Chg"] || row["1-Day % Chg"]) || 0,
+      company: row.Name || row.Company || "",
+      gain: parseNumeric(row["Daily PnL %"] || row["Change %"] || row["1 Day % Chg"] || row["Daily % Chg"] || row["1-Day % Chg"]) || 0,
     }))
-    .filter(item => item.ticker)
+    .filter(item => item.ticker && item.ticker !== "")
     .sort((a, b) => b.gain - a.gain)
     .slice(0, 5);
 
   const topLosers = positionsData
     .map(row => ({
       ticker: row.Ticker || row.Symbol || "",
-      company: row.Company || row.Name || "",
-      gain: parseNumeric(row["1 Day % Chg"] || row["Daily % Chg"] || row["1-Day % Chg"]) || 0,
+      company: row.Name || row.Company || "",
+      gain: parseNumeric(row["Daily PnL %"] || row["Change %"] || row["1 Day % Chg"] || row["Daily % Chg"] || row["1-Day % Chg"]) || 0,
     }))
-    .filter(item => item.ticker)
+    .filter(item => item.ticker && item.ticker !== "")
     .sort((a, b) => a.gain - b.gain)
     .slice(0, 5);
 
-  // Sector allocation
+  // Sector allocation - using Market Value instead of Market Cap for portfolio weighting
   const sectorMap = new Map<string, number>();
   positionsData.forEach(row => {
     const sector = row.Sector || "Unknown";
-    const marketCap = parseNumeric(row["Market Cap"] || row["Market Cap (M)"] || "0") || 0;
-    sectorMap.set(sector, (sectorMap.get(sector) || 0) + marketCap);
+    const marketValue = parseNumeric(row["Market Value"] || row["Value"] || "0") || 0;
+    if (sector && sector !== "" && marketValue > 0) {
+      sectorMap.set(sector, (sectorMap.get(sector) || 0) + marketValue);
+    }
   });
 
   const sectorData = Array.from(sectorMap.entries())
@@ -99,12 +118,20 @@ export function HomeDashboard() {
       </div>
 
       {/* Portfolio Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <Card className="bg-slate-900 border-slate-800">
           <CardHeader className="pb-2">
-            <CardDescription className="text-slate-400">Average YTD Return</CardDescription>
+            <CardDescription className="text-slate-400">Total Portfolio Value</CardDescription>
             <CardTitle className="text-2xl font-mono text-slate-100">
-              {formatPercentage(avgYtd)}
+              {formatCurrency(totalPortfolioValue)}
+            </CardTitle>
+          </CardHeader>
+        </Card>
+        <Card className="bg-slate-900 border-slate-800">
+          <CardHeader className="pb-2">
+            <CardDescription className="text-slate-400">Total Gain</CardDescription>
+            <CardTitle className={`text-2xl font-mono ${totalGain >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+              {formatCurrency(totalGain)} ({formatPercentage(totalGainPercent)})
             </CardTitle>
           </CardHeader>
         </Card>
@@ -112,7 +139,7 @@ export function HomeDashboard() {
           <CardHeader className="pb-2">
             <CardDescription className="text-slate-400">Total Holdings</CardDescription>
             <CardTitle className="text-2xl font-mono text-slate-100">
-              {positionsData.length}
+              {positionsData.filter(row => row.Ticker && row.Ticker !== "").length}
             </CardTitle>
           </CardHeader>
         </Card>
