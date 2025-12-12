@@ -76,12 +76,20 @@ export function HomeDashboard() {
 
   // Calculate comprehensive portfolio metrics (percentage-only)
   const portfolioMetrics = useMemo(() => {
-    // Get YTD performance from performance sheet (cell B3)
+    // Get performance metrics from performance sheet
+    const performanceParsed = performanceData?.parsed || [];
+    const dailyPerformance = performanceParsed.find((row: any) => row["Day Performance"] || row["Daily Performance"])?.["Day Performance"] || 
+                             performanceParsed.find((row: any) => row["Daily Performance"])?.["Daily Performance"] ||
+                             performanceParsed[0]?.["Day Performance"] || 
+                             performanceParsed[0]?.["Daily Performance"] || null;
+    
     const ytdPerformance = performanceData?.ytdPerformance || null;
     const ytdPerformanceNum = ytdPerformance ? parseNumeric(ytdPerformance.toString().replace(/[+%]/g, '')) : null;
     
+    const lifetimeCagr = performanceParsed.find((row: any) => row["Lifetime CAGR"])?.["Lifetime CAGR"] ||
+                         performanceParsed[0]?.["Lifetime CAGR"] || null;
+    
     // Get benchmark comparisons from parsed performance data
-    const performanceParsed = performanceData?.parsed || [];
     let benchmarkComparisons = {
       qqq: null as string | null,
       igv: null as string | null,
@@ -170,32 +178,91 @@ export function HomeDashboard() {
       ? dailyMoves.reduce((sum, item) => sum + (item.dailyMove * item.value), 0) / dailyMoves.reduce((sum, item) => sum + item.value, 0)
       : 0;
 
-    // Top holdings by YTD performance
+    // Calculate total portfolio value for weight calculation
+    const totalPortfolioValue = positionsData
+      .map(row => parseNumeric(row["Market Value"] || row["Value"] || "0"))
+      .filter((v): v is number => v !== null)
+      .reduce((a, b) => a + b, 0);
+
+    // Top holdings by position % (weight)
     const topHoldings = positionsData
-      .map(row => ({
-        ticker: row.Ticker || row.Symbol || "",
-        company: row.Name || row.Company || "",
-        ytd: parseNumeric(row["YTD Gain"] || row["YTD Gain %"] || row["YTD PnL %"] || row["YTD % Chg"] || row["Total Return (YTD) %"] || "0") || 0,
-        totalGain: (() => {
-          const costBasis = parseNumeric(row["Cost Basis"] || row["Cost"] || "0") || 0;
-          const marketValue = parseNumeric(row["Market Value"] || row["Value"] || "0") || 0;
-          return costBasis > 0 ? ((marketValue - costBasis) / costBasis) * 100 : 0;
-        })(),
-        dailyMove: getColumnVValue(row) || 0,
-      }))
-      .filter(item => item.ticker && item.ticker !== "")
-      .sort((a, b) => Math.abs(b.ytd) - Math.abs(a.ytd))
+      .map(row => {
+        const marketValue = parseNumeric(row["Market Value"] || row["Value"] || "0") || 0;
+        const weight = totalPortfolioValue > 0 ? (marketValue / totalPortfolioValue) * 100 : 0;
+        return {
+          ticker: row.Ticker || row.Symbol || "",
+          company: row.Name || row.Company || "",
+          weight,
+          ytd: parseNumeric(row["YTD Gain"] || row["YTD Gain %"] || row["YTD PnL %"] || row["YTD % Chg"] || row["Total Return (YTD) %"] || "0") || 0,
+          totalGain: (() => {
+            const costBasis = parseNumeric(row["Cost Basis"] || row["Cost"] || "0") || 0;
+            return costBasis > 0 ? ((marketValue - costBasis) / costBasis) * 100 : 0;
+          })(),
+          dailyMove: getColumnVValue(row) || 0,
+        };
+      })
+      .filter(item => item.ticker && item.ticker !== "" && item.ticker.toUpperCase() !== "CASH")
+      .sort((a, b) => b.weight - a.weight)
       .slice(0, 10);
 
+    // Calculate portfolio multiples (weighted averages)
+    const portfolioItems = positionsData.filter(row => {
+      const ticker = (row.Ticker || row.Symbol || "").toUpperCase();
+      const value = parseNumeric(row["Market Value"] || row["Value"] || "0") || 0;
+      return ticker !== "CASH" && value > 0;
+    });
+
+    let weightedFCF = 0;
+    let fcfWeightSum = 0;
+    let weightedPE = 0;
+    let peWeightSum = 0;
+    let weightedPEG = 0;
+    let pegWeightSum = 0;
+
+    portfolioItems.forEach(row => {
+      const marketValue = parseNumeric(row["Market Value"] || row["Value"] || "0") || 0;
+      const weight = totalPortfolioValue > 0 ? (marketValue / totalPortfolioValue) : 0;
+      const weightDecimal = weight / 100;
+
+      const pfcf2026 = parseNumeric(row["P/2026e FCF"] || row["P/2026 FCF"] || row["P/FCF 2026"] || "0") || 0;
+      const pe2026 = parseNumeric(row["2026e P/E"] || row["2026 P/E"] || row["P/E 2026"] || "0") || 0;
+      const peg = parseNumeric(row["PEG"] || row["P/E/G"] || "0") || 0;
+
+      if (pfcf2026 > 0 && weight > 0) {
+        weightedFCF += pfcf2026 * weightDecimal;
+        fcfWeightSum += weightDecimal;
+      }
+      if (pe2026 > 0 && weight > 0) {
+        weightedPE += pe2026 * weightDecimal;
+        peWeightSum += weightDecimal;
+      }
+      if (peg > 0 && weight > 0) {
+        weightedPEG += peg * weightDecimal;
+        pegWeightSum += weightDecimal;
+      }
+    });
+
+    const portfolioMultiples = {
+      fcf2026: fcfWeightSum > 0 ? weightedFCF / fcfWeightSum : null,
+      pe2026: peWeightSum > 0 ? weightedPE / peWeightSum : null,
+      peg: pegWeightSum > 0 ? weightedPEG / pegWeightSum : null,
+    };
+
     return {
+      dailyPerformance,
       ytdPerformance,
       ytdPerformanceNum,
+      lifetimeCagr,
       weightedYtd,
       weightedTotalGainPercent,
       weightedDailyMove,
       topHoldings,
-      holdingCount: positionsData.filter(row => row.Ticker && row.Ticker !== "").length,
+      holdingCount: positionsData.filter(row => {
+        const ticker = (row.Ticker || row.Symbol || "").toUpperCase();
+        return ticker && ticker !== "" && ticker !== "CASH";
+      }).length,
       benchmarkComparisons,
+      portfolioMultiples,
     };
   }, [positionsData, performanceData]);
 
@@ -235,7 +302,10 @@ export function HomeDashboard() {
         company: row.Name || row.Company || "",
         gain: getColumnVValue(row) || 0,
       }))
-      .filter(item => item.ticker && item.ticker !== "")
+      .filter(item => {
+        const ticker = (item.ticker || "").toUpperCase();
+        return ticker && ticker !== "" && ticker !== "CASH";
+      })
       .sort((a, b) => b.gain - a.gain)
       .slice(0, 5);
   }, [positionsData]);
@@ -247,7 +317,10 @@ export function HomeDashboard() {
         company: row.Name || row.Company || "",
         gain: getColumnVValue(row) || 0,
       }))
-      .filter(item => item.ticker && item.ticker !== "")
+      .filter(item => {
+        const ticker = (item.ticker || "").toUpperCase();
+        return ticker && ticker !== "" && ticker !== "CASH";
+      })
       .sort((a, b) => a.gain - b.gain)
       .slice(0, 5);
   }, [positionsData]);
@@ -279,12 +352,26 @@ export function HomeDashboard() {
 
   return (
     <div className="space-y-6 pb-8">
-      {/* Hero Section - Large Performance Metrics */}
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
-        <Card className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 border-slate-700 shadow-xl hover:shadow-2xl transition-all duration-300 lg:col-span-2">
+      {/* Hero Section - Three Performance Metrics */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <Card className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 border-slate-700 shadow-xl hover:shadow-2xl transition-all duration-300">
+          <CardHeader className="pb-3">
+            <CardDescription className="text-slate-400 text-sm uppercase tracking-wider">Daily Performance</CardDescription>
+            <CardTitle className={`text-4xl font-mono font-bold mt-2 ${
+              (() => {
+                const num = portfolioMetrics.dailyPerformance ? parseNumeric(portfolioMetrics.dailyPerformance.toString().replace(/[+%]/g, '')) : portfolioMetrics.weightedDailyMove;
+                return (num ?? 0) >= 0 ? 'text-green-400' : 'text-red-400';
+              })()
+            }`}>
+              {portfolioMetrics.dailyPerformance || formatPercentage(portfolioMetrics.weightedDailyMove)}
+            </CardTitle>
+          </CardHeader>
+        </Card>
+
+        <Card className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 border-slate-700 shadow-xl hover:shadow-2xl transition-all duration-300">
           <CardHeader className="pb-3">
             <CardDescription className="text-slate-400 text-sm uppercase tracking-wider">YTD Performance</CardDescription>
-            <CardTitle className={`text-5xl font-mono font-bold mt-2 ${
+            <CardTitle className={`text-4xl font-mono font-bold mt-2 ${
               (portfolioMetrics.ytdPerformanceNum ?? portfolioMetrics.weightedYtd) >= 0 
                 ? 'text-green-400' 
                 : 'text-red-400'
@@ -293,111 +380,128 @@ export function HomeDashboard() {
                 ? portfolioMetrics.ytdPerformance 
                 : formatPercentage(portfolioMetrics.weightedYtd)}
             </CardTitle>
-            <div className="flex items-center gap-2 mt-2">
-              {(portfolioMetrics.ytdPerformanceNum ?? portfolioMetrics.weightedYtd) >= 0 ? (
-                <TrendingUp className="h-5 w-5 text-green-400" />
-              ) : (
-                <TrendingDown className="h-5 w-5 text-red-400" />
-              )}
-              <span className="text-slate-400 text-sm">From Performance Sheet</span>
-            </div>
           </CardHeader>
         </Card>
 
-        <Card className="bg-gradient-to-br from-slate-900 via-blue-900/20 to-slate-900 border-slate-700 shadow-xl hover:shadow-2xl transition-all duration-300">
+        <Card className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 border-slate-700 shadow-xl hover:shadow-2xl transition-all duration-300">
           <CardHeader className="pb-3">
-            <CardDescription className="text-slate-400 text-sm uppercase tracking-wider flex items-center gap-2">
-              <Percent className="h-4 w-4" />
-              Daily Move %
-            </CardDescription>
-            <CardTitle className={`text-3xl font-mono font-bold mt-2 ${
-              portfolioMetrics.weightedDailyMove >= 0 ? 'text-green-400' : 'text-red-400'
+            <CardDescription className="text-slate-400 text-sm uppercase tracking-wider">Lifetime CAGR</CardDescription>
+            <CardTitle className={`text-4xl font-mono font-bold mt-2 ${
+              (() => {
+                const num = portfolioMetrics.lifetimeCagr ? parseNumeric(portfolioMetrics.lifetimeCagr.toString().replace(/[+%]/g, '')) : null;
+                return (num ?? 0) >= 0 ? 'text-green-400' : 'text-red-400';
+              })()
             }`}>
-              {formatPercentage(portfolioMetrics.weightedDailyMove)}
+              {portfolioMetrics.lifetimeCagr || "0%"}
             </CardTitle>
             <div className="text-slate-400 text-xs mt-2">
-              {portfolioMetrics.holdingCount} holdings
+              Jan 29th, 2020 -
             </div>
           </CardHeader>
         </Card>
       </div>
 
-      {/* Benchmark Performance Comparison */}
-      {(portfolioMetrics.benchmarkComparisons.qqq || portfolioMetrics.benchmarkComparisons.igv || portfolioMetrics.benchmarkComparisons.smh) && (
+      {/* Performance Analytics Section */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Benchmark Performance Comparison */}
+        {(portfolioMetrics.benchmarkComparisons.qqq || portfolioMetrics.benchmarkComparisons.igv || portfolioMetrics.benchmarkComparisons.smh) && (
+          <Card className="bg-slate-900/50 backdrop-blur-sm border-slate-800 shadow-xl">
+            <CardHeader>
+              <CardTitle className="text-xl font-bold text-slate-100 flex items-center gap-2">
+                <Activity className="h-5 w-5" />
+                Benchmark Performance YTD
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                {portfolioMetrics.benchmarkComparisons.qqq && (
+                  <div className="flex items-center justify-between p-3 rounded-lg bg-slate-800/50 hover:bg-slate-800 transition-colors">
+                    <div className="flex items-center gap-3">
+                      <span className="text-slate-100 font-semibold">QQQ</span>
+                    </div>
+                    <div className={`text-lg font-mono font-bold ${
+                      (() => {
+                        const num = parseNumeric(portfolioMetrics.benchmarkComparisons.qqq.toString().replace(/[+%bp]/g, ''));
+                        return num !== null && num >= 0 ? 'text-green-400' : 'text-red-400';
+                      })()
+                    }`}>
+                      {portfolioMetrics.benchmarkComparisons.qqq}
+                    </div>
+                  </div>
+                )}
+                {portfolioMetrics.benchmarkComparisons.igv && (
+                  <div className="flex items-center justify-between p-3 rounded-lg bg-slate-800/50 hover:bg-slate-800 transition-colors">
+                    <div className="flex items-center gap-3">
+                      <span className="text-slate-100 font-semibold">IGV</span>
+                    </div>
+                    <div className={`text-lg font-mono font-bold ${
+                      (() => {
+                        const num = parseNumeric(portfolioMetrics.benchmarkComparisons.igv.toString().replace(/[+%bp]/g, ''));
+                        return num !== null && num >= 0 ? 'text-green-400' : 'text-red-400';
+                      })()
+                    }`}>
+                      {portfolioMetrics.benchmarkComparisons.igv}
+                    </div>
+                  </div>
+                )}
+                {portfolioMetrics.benchmarkComparisons.smh && (
+                  <div className="flex items-center justify-between p-3 rounded-lg bg-slate-800/50 hover:bg-slate-800 transition-colors">
+                    <div className="flex items-center gap-3">
+                      <span className="text-slate-100 font-semibold">SMH</span>
+                    </div>
+                    <div className={`text-lg font-mono font-bold ${
+                      (() => {
+                        const num = parseNumeric(portfolioMetrics.benchmarkComparisons.smh.toString().replace(/[+%bp]/g, ''));
+                        return num !== null && num >= 0 ? 'text-green-400' : 'text-red-400';
+                      })()
+                    }`}>
+                      {portfolioMetrics.benchmarkComparisons.smh}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Portfolio Multiples */}
         <Card className="bg-slate-900/50 backdrop-blur-sm border-slate-800 shadow-xl">
           <CardHeader>
             <CardTitle className="text-xl font-bold text-slate-100 flex items-center gap-2">
-              <Activity className="h-5 w-5" />
-              Performance vs Benchmarks
+              <Target className="h-5 w-5" />
+              Portfolio Multiples
             </CardTitle>
-            <CardDescription className="text-slate-400">YTD Comparison</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {portfolioMetrics.benchmarkComparisons.qqq && (
-                <div className="flex items-center justify-between p-4 rounded-lg bg-slate-800/50 hover:bg-slate-800 transition-colors border border-slate-700">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-blue-500/20 flex items-center justify-center">
-                      <span className="text-blue-400 font-mono font-bold text-sm">QQQ</span>
-                    </div>
-                    <div>
-                      <div className="text-xs text-slate-400">vs QQQ</div>
-                    </div>
-                  </div>
-                  <div className={`text-lg font-mono font-bold ${
-                    (() => {
-                      const num = parseNumeric(portfolioMetrics.benchmarkComparisons.qqq.toString().replace(/[+%bp]/g, ''));
-                      return num !== null && num >= 0 ? 'text-green-400' : 'text-red-400';
-                    })()
-                  }`}>
-                    {portfolioMetrics.benchmarkComparisons.qqq}
-                  </div>
+            <div className="space-y-3">
+              <div className="flex items-center justify-between p-3 rounded-lg bg-slate-800/50 hover:bg-slate-800 transition-colors">
+                <div className="flex items-center gap-3">
+                  <span className="text-slate-400 text-sm">2026 FCF Multiple</span>
                 </div>
-              )}
-              {portfolioMetrics.benchmarkComparisons.igv && (
-                <div className="flex items-center justify-between p-4 rounded-lg bg-slate-800/50 hover:bg-slate-800 transition-colors border border-slate-700">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-purple-500/20 flex items-center justify-center">
-                      <span className="text-purple-400 font-mono font-bold text-sm">IGV</span>
-                    </div>
-                    <div>
-                      <div className="text-xs text-slate-400">vs IGV</div>
-                    </div>
-                  </div>
-                  <div className={`text-lg font-mono font-bold ${
-                    (() => {
-                      const num = parseNumeric(portfolioMetrics.benchmarkComparisons.igv.toString().replace(/[+%bp]/g, ''));
-                      return num !== null && num >= 0 ? 'text-green-400' : 'text-red-400';
-                    })()
-                  }`}>
-                    {portfolioMetrics.benchmarkComparisons.igv}
-                  </div>
+                <div className="text-lg font-mono font-bold text-slate-100">
+                  {portfolioMetrics.portfolioMultiples.fcf2026 ? `${portfolioMetrics.portfolioMultiples.fcf2026.toFixed(1)}x` : '-'}
                 </div>
-              )}
-              {portfolioMetrics.benchmarkComparisons.smh && (
-                <div className="flex items-center justify-between p-4 rounded-lg bg-slate-800/50 hover:bg-slate-800 transition-colors border border-slate-700">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-cyan-500/20 flex items-center justify-center">
-                      <span className="text-cyan-400 font-mono font-bold text-sm">SMH</span>
-                    </div>
-                    <div>
-                      <div className="text-xs text-slate-400">vs SMH</div>
-                    </div>
-                  </div>
-                  <div className={`text-lg font-mono font-bold ${
-                    (() => {
-                      const num = parseNumeric(portfolioMetrics.benchmarkComparisons.smh.toString().replace(/[+%bp]/g, ''));
-                      return num !== null && num >= 0 ? 'text-green-400' : 'text-red-400';
-                    })()
-                  }`}>
-                    {portfolioMetrics.benchmarkComparisons.smh}
-                  </div>
+              </div>
+              <div className="flex items-center justify-between p-3 rounded-lg bg-slate-800/50 hover:bg-slate-800 transition-colors">
+                <div className="flex items-center gap-3">
+                  <span className="text-slate-400 text-sm">2026 P/E Multiple</span>
                 </div>
-              )}
+                <div className="text-lg font-mono font-bold text-slate-100">
+                  {portfolioMetrics.portfolioMultiples.pe2026 ? `${portfolioMetrics.portfolioMultiples.pe2026.toFixed(1)}x` : '-'}
+                </div>
+              </div>
+              <div className="flex items-center justify-between p-3 rounded-lg bg-slate-800/50 hover:bg-slate-800 transition-colors">
+                <div className="flex items-center gap-3">
+                  <span className="text-slate-400 text-sm">PEG Multiple</span>
+                </div>
+                <div className="text-lg font-mono font-bold text-slate-100">
+                  {portfolioMetrics.portfolioMultiples.peg ? `${portfolioMetrics.portfolioMultiples.peg.toFixed(2)}x` : '-'}
+                </div>
+              </div>
             </div>
           </CardContent>
         </Card>
-      )}
+      </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Sector Allocation - Enhanced */}
@@ -470,7 +574,7 @@ export function HomeDashboard() {
               <Target className="h-5 w-5" />
               Top Holdings
             </CardTitle>
-            <CardDescription className="text-slate-400">By YTD Performance</CardDescription>
+            <CardDescription className="text-slate-400">By Position %</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
@@ -493,11 +597,11 @@ export function HomeDashboard() {
                     </div>
                   </div>
                   <div className="text-right flex-shrink-0 ml-4">
-                    <div className={`text-sm font-mono font-semibold ${holding.ytd >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                      {formatPercentage(holding.ytd)}
+                    <div className="text-sm font-mono font-semibold text-slate-100">
+                      {holding.weight.toFixed(1)}%
                     </div>
-                    <div className={`text-xs ${holding.totalGain >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                      Total: {formatPercentage(holding.totalGain)}
+                    <div className={`text-xs ${holding.ytd >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                      YTD: {formatPercentage(holding.ytd)}
                     </div>
                     <div className={`text-xs mt-0.5 ${holding.dailyMove >= 0 ? 'text-green-400' : 'text-red-400'}`}>
                       Daily: {formatPercentage(holding.dailyMove)}
