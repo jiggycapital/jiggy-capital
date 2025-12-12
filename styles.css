@@ -645,10 +645,10 @@ body {
     height: auto; /* Allow header to expand for wrapped text */
     min-height: 3em; /* Ensure minimum height for wrapped headers */
     /* CRITICAL: Ensure header uses same grid layout as data rows */
-    /* Match the min-width of portfolio-item to ensure header extends full table width */
-    min-width: 100% !important; /* Start with container width */
-    width: max-content !important; /* Allow header to expand to match table content width */
-    max-width: none !important; /* Remove max-width constraint for full background */
+    /* Match the exact width constraints of portfolio-item to ensure header aligns with columns */
+    min-width: 100% !important; /* Match container width */
+    width: 100% !important; /* Match container width - will expand with grid columns */
+    max-width: 100% !important; /* Match container width */
     display: grid !important;
     grid-template-columns: 50px minmax(120px, 1.5fr) minmax(70px, 0.9fr) minmax(70px, 0.9fr) minmax(75px, 1fr) minmax(80px, 1.2fr) minmax(85px, 1.3fr) minmax(70px, 0.9fr) minmax(80px, 1.1fr) minmax(80px, 1.1fr) minmax(80px, 1.1fr) minmax(80px, 1fr) minmax(80px, 1fr) minmax(110px, 1.2fr) !important;
     gap: 1rem !important;
@@ -656,8 +656,6 @@ body {
     /* Sticky header positioning with solid background */
     position: sticky !important;
     top: 0 !important;
-    left: 0 !important; /* Ensure header starts at left edge */
-    right: 0 !important; /* Ensure header extends to right edge */
     z-index: 100 !important;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important; /* Add shadow for better separation */
 }
@@ -1588,8 +1586,8 @@ body {
     
     .portfolio-item:first-child {
         min-width: 850px !important; /* Match data row width */
-        width: max-content !important; /* Allow header to expand to match table content width */
-        max-width: none !important; /* Remove max-width constraint */
+        width: 100% !important; /* Match container width - will expand with grid columns */
+        max-width: 100% !important; /* Match container width */
         grid-template-columns: 45px minmax(110px, 1.4fr) minmax(65px, 0.8fr) minmax(65px, 0.8fr) minmax(70px, 0.9fr) minmax(75px, 1.1fr) minmax(80px, 1.2fr) minmax(65px, 0.8fr) minmax(75px, 1fr) minmax(75px, 1fr) minmax(75px, 1fr) !important;
         gap: 0.8rem !important;
         align-items: center !important;
@@ -1597,8 +1595,6 @@ body {
         /* Sticky header positioning with solid background */
         position: sticky !important;
         top: 0 !important;
-        left: 0 !important; /* Ensure header starts at left edge */
-        right: 0 !important; /* Ensure header extends to right edge */
         z-index: 100 !important;
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important; /* Add shadow for better separation */
         font-size: 0.8rem;
@@ -1924,16 +1920,14 @@ body {
         background: #f8fafc !important; /* Solid background for sticky headers */
         /* CRITICAL: Ensure header uses same grid layout as data rows on tablet */
         min-width: 750px !important; /* Match data row width */
-        width: max-content !important; /* Allow header to expand to match table content width */
-        max-width: none !important; /* Remove max-width constraint for full background */
+        width: 100% !important; /* Match container width - will expand with grid columns */
+        max-width: 100% !important; /* Match container width */
         grid-template-columns: 35px minmax(90px, 1.4fr) minmax(55px, 0.8fr) minmax(55px, 0.8fr) minmax(65px, 1fr) minmax(70px, 1.1fr) minmax(75px, 1.2fr) minmax(55px, 0.8fr) minmax(65px, 1fr) minmax(65px, 1fr) minmax(65px, 1fr) !important;
         gap: 0.75rem !important;
         align-items: center !important;
         /* Sticky header positioning with solid background */
         position: sticky !important;
         top: 0 !important;
-        left: 0 !important; /* Ensure header starts at left edge */
-        right: 0 !important; /* Ensure header extends to right edge */
         z-index: 100 !important;
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important; /* Add shadow for better separation */
     }
@@ -2305,8 +2299,8 @@ body {
     /* CRITICAL: Ensure header uses same grid layout as data rows on mobile */
     .portfolio-item:first-child {
         min-width: 900px !important; /* Match data row width */
-        width: max-content !important; /* Allow header to expand to match table content width */
-        max-width: none !important; /* Remove max-width constraint */
+        width: 100% !important; /* Match container width - will expand with grid columns */
+        max-width: 100% !important; /* Match container width */
         grid-template-columns: 50px minmax(120px, 1.5fr) minmax(70px, 0.9fr) minmax(70px, 0.9fr) minmax(75px, 1fr) minmax(80px, 1.2fr) minmax(85px, 1.3fr) minmax(70px, 0.9fr) minmax(80px, 1.1fr) minmax(80px, 1.1fr) minmax(80px, 1.1fr) !important;
         gap: 1rem !important;
         align-items: center !important;
@@ -2314,8 +2308,6 @@ body {
         /* Sticky header positioning with solid background */
         position: sticky !important;
         top: 0 !important;
-        left: 0 !important; /* Ensure header starts at left edge */
-        right: 0 !important; /* Ensure header extends to right edge */
         z-index: 100 !important;
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important; /* Add shadow for better separation */
         padding: 1.25rem 2rem !important;
