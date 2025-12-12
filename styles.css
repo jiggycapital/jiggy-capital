@@ -647,10 +647,10 @@ body {
     height: auto; /* Allow header to expand for wrapped text */
     min-height: 3em; /* Ensure minimum height for wrapped headers */
     /* CRITICAL: Ensure header uses same grid layout as data rows */
-    /* Let grid columns determine width naturally to match data rows while covering container */
+    /* Constrain width to container while allowing grid to determine column widths */
     min-width: 100% !important; /* At least match container width */
-    width: fit-content !important; /* Expand to fit grid columns without overshooting */
-    max-width: none !important; /* Allow expansion to match content */
+    width: 100% !important; /* Match container width exactly */
+    max-width: 100% !important; /* Prevent expansion beyond container */
     display: grid !important;
     grid-template-columns: 50px minmax(120px, 1.5fr) minmax(70px, 0.9fr) minmax(70px, 0.9fr) minmax(75px, 1fr) minmax(80px, 1.2fr) minmax(85px, 1.3fr) minmax(70px, 0.9fr) minmax(80px, 1.1fr) minmax(80px, 1.1fr) minmax(80px, 1.1fr) minmax(80px, 1fr) minmax(80px, 1fr) minmax(110px, 1.2fr) !important;
     gap: 1rem !important;
