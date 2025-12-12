@@ -59,6 +59,38 @@ export async function fetchCompanySheetNames(): Promise<string[]> {
   return commonCompanies;
 }
 
+// Retry with exponential backoff for rate limiting
+async function fetchWithRetry(
+  url: string,
+  sheetName: string,
+  maxRetries: number = 3,
+  initialDelay: number = 1000
+): Promise<Response> {
+  for (let attempt = 0; attempt < maxRetries; attempt++) {
+    try {
+      const response = await fetch(url, {
+        next: { revalidate: 300 }, // Revalidate every 5 minutes
+      });
+      
+      // If we get a 429, wait and retry
+      if (response.status === 429) {
+        const delay = initialDelay * Math.pow(2, attempt) + Math.random() * 1000; // Add jitter
+        console.warn(`Rate limited for ${sheetName}, retrying in ${delay}ms (attempt ${attempt + 1}/${maxRetries})`);
+        await new Promise(resolve => setTimeout(resolve, delay));
+        continue;
+      }
+      
+      return response;
+    } catch (error) {
+      if (attempt === maxRetries - 1) throw error;
+      const delay = initialDelay * Math.pow(2, attempt);
+      await new Promise(resolve => setTimeout(resolve, delay));
+    }
+  }
+  
+  throw new Error(`Failed to fetch ${sheetName} after ${maxRetries} attempts`);
+}
+
 // Fetch a specific sheet by name using Google Sheets CSV export
 export async function fetchCompanySheet(sheetName: string): Promise<string[][]> {
   const cacheKey = `financial-sheet-${sheetName}`;
@@ -74,12 +106,9 @@ export async function fetchCompanySheet(sheetName: string): Promise<string[][]> 
   const url = `https://docs.google.com/spreadsheets/d/${FINANCIAL_SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodedSheetName}`;
   
   try {
-    const response = await fetch(url, {
-      next: { revalidate: 300 }, // Revalidate every 5 minutes
-    });
+    const response = await fetchWithRetry(url, sheetName);
     
     if (!response.ok) {
-      // If sheet name doesn't work, try alternative method
       throw new Error(`Failed to fetch sheet ${sheetName}: ${response.statusText}`);
     }
     
@@ -219,30 +248,58 @@ function parseFinancialValue(valueStr: string): number | null {
   return isNegative ? -num : num;
 }
 
-// Fetch all company financial data
+// Batch processing helper - process items in batches with delay
+async function processInBatches<T, R>(
+  items: T[],
+  batchSize: number,
+  delayMs: number,
+  processor: (item: T) => Promise<R | null>
+): Promise<R[]> {
+  const results: R[] = [];
+  
+  for (let i = 0; i < items.length; i += batchSize) {
+    const batch = items.slice(i, i + batchSize);
+    
+    // Process batch in parallel
+    const batchPromises = batch.map(processor);
+    const batchResults = await Promise.allSettled(batchPromises);
+    
+    // Collect successful results
+    batchResults.forEach((result) => {
+      if (result.status === 'fulfilled' && result.value !== null) {
+        results.push(result.value);
+      }
+    });
+    
+    // Add delay between batches (except for the last batch)
+    if (i + batchSize < items.length) {
+      await new Promise(resolve => setTimeout(resolve, delayMs));
+    }
+  }
+  
+  return results;
+}
+
+// Fetch all company financial data with rate limiting
 export async function fetchAllCompanyData(): Promise<CompanyFinancialData[]> {
   const companyNames = await fetchCompanySheetNames();
-  const allData: CompanyFinancialData[] = [];
   
-  // Fetch data for each company (with error handling for missing sheets)
-  const fetchPromises = companyNames.map(async (companyName) => {
-    try {
-      const rows = await fetchCompanySheet(companyName);
-      const data = parseFinancialSheet(rows, companyName);
-      return data;
-    } catch (error) {
-      console.warn(`Failed to fetch data for ${companyName}:`, error);
-      return null;
+  // Process in batches of 5 with 200ms delay between batches to avoid rate limits
+  const allData = await processInBatches(
+    companyNames,
+    5, // Batch size
+    200, // Delay between batches (ms)
+    async (companyName) => {
+      try {
+        const rows = await fetchCompanySheet(companyName);
+        const data = parseFinancialSheet(rows, companyName);
+        return data;
+      } catch (error) {
+        console.warn(`Failed to fetch data for ${companyName}:`, error);
+        return null;
+      }
     }
-  });
-  
-  const results = await Promise.allSettled(fetchPromises);
-  
-  results.forEach((result, index) => {
-    if (result.status === 'fulfilled' && result.value) {
-      allData.push(result.value);
-    }
-  });
+  );
   
   return allData;
 }
