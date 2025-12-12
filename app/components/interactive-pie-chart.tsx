@@ -189,7 +189,7 @@ export function InteractivePieChart({ positionsData, logos, view, onViewChange }
       >
         <ResponsivePie
           data={chartData}
-          margin={{ top: 100, right: 100, bottom: 100, left: 100 }}
+          margin={{ top: 60, right: 60, bottom: 60, left: 60 }}
           innerRadius={0.5}
           padAngle={2}
           cornerRadius={4}
