@@ -17,9 +17,10 @@ import {
   Legend,
   ResponsiveContainer,
 } from "recharts";
-import { fetchAllCompanyData, getAllMetrics, getAllQuarters, type CompanyFinancialData } from "@/lib/financial-sheets";
+import { fetchAllCompanyData, getAllMetrics, getAllQuarters, categorizeMetrics, getMetricsByCategory, type CompanyFinancialData, type MetricCategory } from "@/lib/financial-sheets";
 import { formatCurrency, formatNumber, formatPercentage } from "@/lib/utils";
 import { Settings2, Download } from "lucide-react";
+import { Input } from "@/components/ui/input";
 
 const COLORS = [
   "#3b82f6", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6",
@@ -34,6 +35,8 @@ export function DRChartView() {
   const [chartType, setChartType] = useState<"line" | "bar">("line");
   const [selectedCompanies, setSelectedCompanies] = useState<string[]>([]);
   const [selectedMetric, setSelectedMetric] = useState<string>("");
+  const [selectedCategory, setSelectedCategory] = useState<MetricCategory | "all">("all");
+  const [metricSearch, setMetricSearch] = useState<string>("");
   const [showSettings, setShowSettings] = useState(true);
 
   useEffect(() => {
@@ -45,11 +48,16 @@ export function DRChartView() {
       setLoading(true);
       const data = await fetchAllCompanyData();
       setCompaniesData(data);
-      // Auto-select first metric (metric view is default)
+      // Auto-select "Net New Revenue Growth" if available
       if (data.length > 0) {
-        const firstMetric = getAllMetrics(data)[0];
-        if (firstMetric) {
-          setSelectedMetric(firstMetric);
+        const allMetrics = getAllMetrics(data);
+        const netNewRevenueGrowth = allMetrics.find(m => 
+          m.toLowerCase().includes("net new revenue growth")
+        );
+        if (netNewRevenueGrowth) {
+          setSelectedMetric(netNewRevenueGrowth);
+        } else if (allMetrics.length > 0) {
+          setSelectedMetric(allMetrics[0]);
         }
       }
     } catch (err) {
@@ -66,6 +74,29 @@ export function DRChartView() {
   const allMetrics = useMemo(() => {
     return getAllMetrics(companiesData);
   }, [companiesData]);
+
+  // Categorize metrics
+  const metricCategories = useMemo(() => {
+    return categorizeMetrics(companiesData);
+  }, [companiesData]);
+
+  // Filter metrics by selected category and search
+  const filteredMetrics = useMemo(() => {
+    let metrics = allMetrics;
+    
+    // Filter by category
+    if (selectedCategory !== "all") {
+      metrics = getMetricsByCategory(companiesData, selectedCategory);
+    }
+    
+    // Filter by search term
+    if (metricSearch) {
+      const searchLower = metricSearch.toLowerCase();
+      metrics = metrics.filter(m => m.toLowerCase().includes(searchLower));
+    }
+    
+    return metrics;
+  }, [allMetrics, selectedCategory, metricSearch, companiesData]);
 
   const allQuarters = useMemo(() => {
     return getAllQuarters(companiesData);
@@ -243,20 +274,120 @@ export function DRChartView() {
 
               <div>
                 <label className="text-sm font-medium text-slate-300 mb-2 block">
+                  Metric Category
+                </label>
+                <Select 
+                  value={selectedCategory} 
+                  onValueChange={(v) => {
+                    setSelectedCategory(v as MetricCategory | "all");
+                    setSelectedMetric(""); // Reset metric when category changes
+                    setMetricSearch(""); // Reset search
+                  }}
+                >
+                  <SelectTrigger className="bg-slate-900 border-slate-700 text-slate-100">
+                    <SelectValue placeholder="All Categories" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-slate-900 border-slate-700">
+                    <SelectItem value="all" className="text-slate-100">All Categories</SelectItem>
+                    <SelectItem value="universal" className="text-slate-100">Universal (5+ companies)</SelectItem>
+                    <SelectItem value="segment" className="text-slate-100">Segment-Specific</SelectItem>
+                    <SelectItem value="company-specific" className="text-slate-100">Company-Specific</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <label className="text-sm font-medium text-slate-300 mb-2 block">
+                  Search Metrics
+                </label>
+                <Input
+                  placeholder="Type to search metrics..."
+                  value={metricSearch}
+                  onChange={(e) => setMetricSearch(e.target.value)}
+                  className="bg-slate-900 border-slate-700 text-slate-100"
+                />
+              </div>
+
+              <div>
+                <label className="text-sm font-medium text-slate-300 mb-2 block">
                   Metric
                 </label>
                 <Select value={selectedMetric} onValueChange={setSelectedMetric}>
                   <SelectTrigger className="bg-slate-900 border-slate-700 text-slate-100">
                     <SelectValue placeholder="Select metric" />
                   </SelectTrigger>
-                  <SelectContent className="bg-slate-900 border-slate-700">
-                    {allMetrics.map(metric => (
-                      <SelectItem key={metric} value={metric} className="text-slate-100">
-                        {metric}
-                      </SelectItem>
-                    ))}
+                  <SelectContent className="bg-slate-900 border-slate-700 max-h-[400px]">
+                    {(() => {
+                      if (filteredMetrics.length === 0) {
+                        return (
+                          <div className="px-2 py-4 text-sm text-slate-400 text-center">
+                            No metrics found
+                          </div>
+                        );
+                      }
+
+                      // Group metrics by category for display
+                      const universalMetrics = filteredMetrics.filter(m => {
+                        const info = metricCategories.find(c => c.metric === m);
+                        return info?.category === "universal";
+                      });
+                      const segmentMetrics = filteredMetrics.filter(m => {
+                        const info = metricCategories.find(c => c.metric === m);
+                        return info?.category === "segment";
+                      });
+                      const companyMetrics = filteredMetrics.filter(m => {
+                        const info = metricCategories.find(c => c.metric === m);
+                        return info?.category === "company-specific";
+                      });
+                      
+                      return (
+                        <>
+                          {universalMetrics.length > 0 && (
+                            <>
+                              <div className="px-2 py-1.5 text-xs font-semibold text-slate-400 border-b border-slate-700">
+                                Universal ({universalMetrics.length})
+                              </div>
+                              {universalMetrics.map(metric => (
+                                <SelectItem key={metric} value={metric} className="text-slate-100">
+                                  {metric}
+                                </SelectItem>
+                              ))}
+                            </>
+                          )}
+                          {segmentMetrics.length > 0 && (
+                            <>
+                              <div className="px-2 py-1.5 text-xs font-semibold text-slate-400 border-b border-slate-700 mt-2">
+                                Segment-Specific ({segmentMetrics.length})
+                              </div>
+                              {segmentMetrics.map(metric => (
+                                <SelectItem key={metric} value={metric} className="text-slate-100">
+                                  {metric}
+                                </SelectItem>
+                              ))}
+                            </>
+                          )}
+                          {companyMetrics.length > 0 && (
+                            <>
+                              <div className="px-2 py-1.5 text-xs font-semibold text-slate-400 border-b border-slate-700 mt-2">
+                                Company-Specific ({companyMetrics.length})
+                              </div>
+                              {companyMetrics.map(metric => (
+                                <SelectItem key={metric} value={metric} className="text-slate-100">
+                                  {metric}
+                                </SelectItem>
+                              ))}
+                            </>
+                          )}
+                        </>
+                      );
+                    })()}
                   </SelectContent>
                 </Select>
+                {filteredMetrics.length > 0 && (
+                  <p className="text-xs text-slate-400 mt-1">
+                    {filteredMetrics.length} metric{filteredMetrics.length !== 1 ? 's' : ''} available
+                  </p>
+                )}
               </div>
 
               <div>
