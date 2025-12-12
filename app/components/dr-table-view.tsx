@@ -19,9 +19,11 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { fetchAllCompanyData, getAllMetrics, getAllQuarters, categorizeMetrics, getMetricsByCategory, type CompanyFinancialData, type MetricCategory } from "@/lib/financial-sheets";
 import { formatCurrency, formatNumber, formatPercentage, parseNumeric } from "@/lib/utils";
-import { Download } from "lucide-react";
+import { Download, Settings2 } from "lucide-react";
 
 interface TableRowData {
   company: string;
@@ -42,6 +44,7 @@ export function DRTableView() {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [globalFilter, setGlobalFilter] = useState("");
+  const [quarterVisibility, setQuarterVisibility] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
     loadData();
@@ -84,6 +87,22 @@ export function DRTableView() {
   const allQuarters = useMemo(() => {
     return getAllQuarters(companiesData);
   }, [companiesData]);
+
+  // Initialize quarter visibility - all visible by default
+  useEffect(() => {
+    if (allQuarters.length > 0 && Object.keys(quarterVisibility).length === 0) {
+      const initialVisibility: Record<string, boolean> = {};
+      allQuarters.forEach(quarter => {
+        initialVisibility[quarter] = true;
+      });
+      setQuarterVisibility(initialVisibility);
+    }
+  }, [allQuarters, quarterVisibility]);
+
+  // Get visible quarters
+  const visibleQuarters = useMemo(() => {
+    return allQuarters.filter(quarter => quarterVisibility[quarter] !== false);
+  }, [allQuarters, quarterVisibility]);
 
   // Transform data for table display
   // Default to metric view: one metric across all companies
@@ -165,8 +184,8 @@ export function DRTableView() {
       });
     }
     
-    // Add quarter columns
-    const quarterColumns: ColumnDef<TableRowData>[] = allQuarters.map(quarter => ({
+    // Add quarter columns (only visible ones)
+    const quarterColumns: ColumnDef<TableRowData>[] = visibleQuarters.map(quarter => ({
       accessorKey: quarter,
       header: quarter,
       cell: ({ row }) => {
@@ -199,7 +218,13 @@ export function DRTableView() {
                           false);
         
         if (isPercentage) {
-          return <span className="text-slate-300 font-mono">{formatPercentage(value)}</span>;
+          // Color-code percentages: green for positive, red for negative
+          const colorClass = value > 0 
+            ? "text-green-400" 
+            : value < 0 
+            ? "text-red-400" 
+            : "text-slate-300";
+          return <span className={`${colorClass} font-mono`}>{formatPercentage(value)}</span>;
         } else if (isCurrency) {
           return <span className="text-slate-300 font-mono">{formatCurrency(value)}</span>;
         } else {
@@ -218,7 +243,7 @@ export function DRTableView() {
     }));
     
     return [...baseColumns, ...quarterColumns];
-  }, [allQuarters]);
+  }, [visibleQuarters, viewMode, selectedMetric]);
 
   const table = useReactTable({
     data: tableData,
@@ -243,19 +268,42 @@ export function DRTableView() {
     },
   });
 
+  const toggleQuarterVisibility = (quarter: string) => {
+    setQuarterVisibility(prev => ({
+      ...prev,
+      [quarter]: !prev[quarter],
+    }));
+  };
+
+  const showAllQuarters = () => {
+    const allVisible: Record<string, boolean> = {};
+    allQuarters.forEach(quarter => {
+      allVisible[quarter] = true;
+    });
+    setQuarterVisibility(allVisible);
+  };
+
+  const hideAllQuarters = () => {
+    const allHidden: Record<string, boolean> = {};
+    allQuarters.forEach(quarter => {
+      allHidden[quarter] = false;
+    });
+    setQuarterVisibility(allHidden);
+  };
+
   const handleExport = () => {
     if (tableData.length === 0) return;
     
     const headers = viewMode === "company" 
-      ? ["Company", "Metric", ...allQuarters]
-      : ["Company", ...allQuarters]; // Metric view: Company + quarters (metric is in the title)
+      ? ["Company", "Metric", ...visibleQuarters]
+      : ["Company", ...visibleQuarters]; // Metric view: Company + quarters (metric is in the title)
     
     const rows = tableData.map(row => {
       if (viewMode === "company") {
         return [
           row.company,
           row.metric,
-          ...allQuarters.map(q => {
+          ...visibleQuarters.map(q => {
             const val = row[q];
             return val !== null && val !== undefined ? String(val) : "";
           }),
@@ -263,7 +311,7 @@ export function DRTableView() {
       } else {
         return [
           row.company,
-          ...allQuarters.map(q => {
+          ...visibleQuarters.map(q => {
             const val = row[q];
             return val !== null && val !== undefined ? String(val) : "";
           }),
@@ -307,6 +355,60 @@ export function DRTableView() {
           <div className="flex items-center justify-between mb-4">
             <CardTitle className="text-slate-100">DR Table - Financial Time Series</CardTitle>
             <div className="flex items-center gap-2">
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className="bg-slate-800 border-slate-700 text-slate-100"
+                  >
+                    <Settings2 className="h-4 w-4 mr-2" />
+                    Quarter Visibility
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-80 bg-slate-800 border-slate-700 text-slate-100">
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <h4 className="font-semibold text-slate-200">Show/Hide Quarters</h4>
+                      <div className="flex gap-2">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={showAllQuarters}
+                          className="text-xs h-7 text-slate-300 hover:text-slate-100"
+                        >
+                          Show All
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={hideAllQuarters}
+                          className="text-xs h-7 text-slate-300 hover:text-slate-100"
+                        >
+                          Hide All
+                        </Button>
+                      </div>
+                    </div>
+                    <div className="max-h-64 overflow-y-auto space-y-2 border-t border-slate-700 pt-2">
+                      {allQuarters.map(quarter => (
+                        <div key={quarter} className="flex items-center space-x-2">
+                          <Checkbox
+                            id={quarter}
+                            checked={quarterVisibility[quarter] !== false}
+                            onCheckedChange={() => toggleQuarterVisibility(quarter)}
+                            className="border-slate-600 data-[state=checked]:bg-slate-700"
+                          />
+                          <label
+                            htmlFor={quarter}
+                            className="text-sm text-slate-300 cursor-pointer flex-1"
+                          >
+                            {quarter}
+                          </label>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </PopoverContent>
+              </Popover>
               <Input
                 placeholder="Search..."
                 value={globalFilter}
