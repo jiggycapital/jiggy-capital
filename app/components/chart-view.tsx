@@ -124,17 +124,19 @@ export function ChartView() {
   };
 
   const handleExport = () => {
-    if (chartData.length === 0) return;
+    if (chartData.length === 0 || !xAxisColumn || xAxisColumn.trim() === "") return;
     
     const headers = [xAxisColumn, ...yAxisColumns].join(',');
     const rows = chartData.map(row => {
-      return [xAxisColumn, ...yAxisColumns].map(col => {
-        const value = row[col] || '';
-        if (String(value).includes(',') || String(value).includes('"')) {
-          return `"${String(value).replace(/"/g, '""')}"`;
-        }
-        return value;
-      }).join(',');
+      return [xAxisColumn, ...yAxisColumns]
+        .filter((col): col is string => col !== undefined && col.trim() !== "")
+        .map(col => {
+          const value = row[col] || '';
+          if (String(value).includes(',') || String(value).includes('"')) {
+            return `"${String(value).replace(/"/g, '""')}"`;
+          }
+          return value;
+        }).join(',');
     });
     
     const csv = [headers, ...rows].join('\n');
