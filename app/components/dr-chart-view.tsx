@@ -21,6 +21,7 @@ import { fetchAllCompanyData, getAllMetrics, getAllQuarters, categorizeMetrics, 
 import { formatCurrency, formatNumber, formatPercentage } from "@/lib/utils";
 import { Settings2, Download } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
 const COLORS = [
   "#3b82f6", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6",
@@ -37,6 +38,7 @@ export function DRChartView() {
   const [selectedMetric, setSelectedMetric] = useState<string>("");
   const [selectedCategory, setSelectedCategory] = useState<MetricCategory | "all">("all");
   const [metricSearch, setMetricSearch] = useState<string>("");
+  const [quarterVisibility, setQuarterVisibility] = useState<Record<string, boolean>>({});
   const [showSettings, setShowSettings] = useState(true);
 
   useEffect(() => {
@@ -102,6 +104,24 @@ export function DRChartView() {
     return getAllQuarters(companiesData);
   }, [companiesData]);
 
+  // Initialize quarter visibility - hide 2019-2020 quarters by default
+  useEffect(() => {
+    if (allQuarters.length > 0 && Object.keys(quarterVisibility).length === 0) {
+      const initialVisibility: Record<string, boolean> = {};
+      allQuarters.forEach(quarter => {
+        // Hide quarters from 2019-2020 (Q1 19 through Q4 20)
+        const is2019_2020 = /Q[1-4]\s+(19|20)$/.test(quarter);
+        initialVisibility[quarter] = !is2019_2020;
+      });
+      setQuarterVisibility(initialVisibility);
+    }
+  }, [allQuarters, quarterVisibility]);
+
+  // Get visible quarters
+  const visibleQuarters = useMemo(() => {
+    return allQuarters.filter(quarter => quarterVisibility[quarter] !== false);
+  }, [allQuarters, quarterVisibility]);
+
   // Get companies that have the selected metric
   const companiesWithMetric = useMemo(() => {
     if (!selectedMetric) return allCompanies;
@@ -119,14 +139,45 @@ export function DRChartView() {
     );
   };
 
+  const selectAllCompanies = () => {
+    setSelectedCompanies([...companiesWithMetric]);
+  };
+
+  const deselectAllCompanies = () => {
+    setSelectedCompanies([]);
+  };
+
+  const toggleQuarterVisibility = (quarter: string) => {
+    setQuarterVisibility(prev => ({
+      ...prev,
+      [quarter]: !prev[quarter],
+    }));
+  };
+
+  const showAllQuarters = () => {
+    const allVisible: Record<string, boolean> = {};
+    allQuarters.forEach(quarter => {
+      allVisible[quarter] = true;
+    });
+    setQuarterVisibility(allVisible);
+  };
+
+  const hideAllQuarters = () => {
+    const allHidden: Record<string, boolean> = {};
+    allQuarters.forEach(quarter => {
+      allHidden[quarter] = false;
+    });
+    setQuarterVisibility(allHidden);
+  };
+
   // Prepare chart data - time series by quarter
   const chartData = useMemo(() => {
     if (!selectedMetric || selectedCompanies.length === 0) return [];
 
-    // Create data points for each quarter
+    // Create data points for each visible quarter
     const dataPoints: Record<string, any> = {};
 
-    allQuarters.forEach(quarter => {
+    visibleQuarters.forEach(quarter => {
       dataPoints[quarter] = { quarter };
     });
 
@@ -158,7 +209,7 @@ export function DRChartView() {
       };
       return parseQuarter(a.quarter) - parseQuarter(b.quarter);
     });
-  }, [selectedCompanies, selectedMetric, allQuarters, companiesData]);
+  }, [selectedCompanies, selectedMetric, visibleQuarters, companiesData]);
 
   // Determine if metric should be formatted as currency or percentage
   const isCurrencyMetric = useMemo(() => {
@@ -235,6 +286,60 @@ export function DRChartView() {
           <div className="flex items-center justify-between">
             <CardTitle className="text-slate-100">DR Chart - Financial Time Series</CardTitle>
             <div className="flex items-center gap-2">
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className="bg-slate-800 border-slate-700 text-slate-100"
+                  >
+                    <Settings2 className="h-4 w-4 mr-2" />
+                    Quarter Visibility
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-80 bg-slate-800 border-slate-700 text-slate-100">
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <h4 className="font-semibold text-slate-200">Show/Hide Quarters</h4>
+                      <div className="flex gap-2">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={showAllQuarters}
+                          className="text-xs h-7 text-slate-300 hover:text-slate-100"
+                        >
+                          Show All
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={hideAllQuarters}
+                          className="text-xs h-7 text-slate-300 hover:text-slate-100"
+                        >
+                          Hide All
+                        </Button>
+                      </div>
+                    </div>
+                    <div className="max-h-64 overflow-y-auto space-y-2 border-t border-slate-700 pt-2">
+                      {allQuarters.map(quarter => (
+                        <div key={quarter} className="flex items-center space-x-2">
+                          <Checkbox
+                            id={`quarter-${quarter}`}
+                            checked={quarterVisibility[quarter] !== false}
+                            onCheckedChange={() => toggleQuarterVisibility(quarter)}
+                            className="border-slate-600 data-[state=checked]:bg-slate-700"
+                          />
+                          <label
+                            htmlFor={`quarter-${quarter}`}
+                            className="text-sm text-slate-300 cursor-pointer flex-1"
+                          >
+                            {quarter}
+                          </label>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </PopoverContent>
+              </Popover>
               <Button
                 variant="outline"
                 onClick={() => setShowSettings(!showSettings)}
@@ -391,31 +496,60 @@ export function DRChartView() {
               </div>
 
               <div>
-                <label className="text-sm font-medium text-slate-300 mb-2 block">
-                  Companies (Select multiple)
-                </label>
+                <div className="flex items-center justify-between mb-2">
+                  <label className="text-sm font-medium text-slate-300">
+                    Companies (Select multiple)
+                  </label>
+                  <div className="flex gap-2">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={selectAllCompanies}
+                      className="text-xs h-7 text-slate-300 hover:text-slate-100"
+                      disabled={companiesWithMetric.length === 0}
+                    >
+                      Select All
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={deselectAllCompanies}
+                      className="text-xs h-7 text-slate-300 hover:text-slate-100"
+                      disabled={selectedCompanies.length === 0}
+                    >
+                      Deselect All
+                    </Button>
+                  </div>
+                </div>
                 <div className="max-h-48 overflow-y-auto space-y-2 border border-slate-700 rounded p-2 bg-slate-900">
                 {companiesWithMetric.length === 0 && selectedMetric ? (
                   <div className="text-sm text-slate-400 py-2">
                     No companies have this metric
                   </div>
                 ) : (
-                  companiesWithMetric.map(company => (
-                    <div key={company} className="flex items-center space-x-2">
-                      <Checkbox
-                        id={company}
-                        checked={selectedCompanies.includes(company)}
-                        onCheckedChange={() => toggleCompany(company)}
-                        className="border-slate-700"
-                      />
-                      <label
-                        htmlFor={company}
-                        className="text-sm text-slate-300 cursor-pointer"
-                      >
-                        {company}
-                      </label>
-                    </div>
-                  ))
+                  <>
+                    {companiesWithMetric.map(company => (
+                      <div key={company} className="flex items-center space-x-2">
+                        <Checkbox
+                          id={company}
+                          checked={selectedCompanies.includes(company)}
+                          onCheckedChange={() => toggleCompany(company)}
+                          className="border-slate-700"
+                        />
+                        <label
+                          htmlFor={company}
+                          className="text-sm text-slate-300 cursor-pointer"
+                        >
+                          {company}
+                        </label>
+                      </div>
+                    ))}
+                    {selectedCompanies.length > 0 && (
+                      <div className="text-xs text-slate-400 pt-2 border-t border-slate-700">
+                        {selectedCompanies.length} of {companiesWithMetric.length} selected
+                      </div>
+                    )}
+                  </>
                 )}
                 </div>
               </div>
