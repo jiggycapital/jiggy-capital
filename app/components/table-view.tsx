@@ -37,7 +37,7 @@ import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ColumnSelector } from "@/components/column-selector";
-import { fetchSheetData, parseSheetData, fetchLogos, type DatasetType } from "@/lib/google-sheets";
+import { fetchSheetData, parseSheetData, fetchLogos, extractColumnCategories, type DatasetType } from "@/lib/google-sheets";
 import { formatCurrency, formatNumber, formatPercentage, parseNumeric } from "@/lib/utils";
 import { StockDetailSheet } from "@/components/stock-detail-sheet";
 import type { PortfolioRow } from "@/types/portfolio";
@@ -47,6 +47,7 @@ export function TableView() {
   const [positionsData, setPositionsData] = useState<PortfolioRow[]>([]);
   const [watchlistData, setWatchlistData] = useState<PortfolioRow[]>([]);
   const [logos, setLogos] = useState<Record<string, string>>({});
+  const [columnCategories, setColumnCategories] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<"positions" | "watchlist" | "combined">("positions");
@@ -146,6 +147,11 @@ export function TableView() {
         fetchSheetData("watchlist"),
         fetchLogos(),
       ]);
+      
+      // Extract categories from positions sheet (use positions as primary source)
+      const categories = extractColumnCategories(positionsRows);
+      setColumnCategories(categories);
+      
       setPositionsData(parseSheetData(positionsRows));
       setWatchlistData(parseSheetData(watchlistRows));
       setLogos(logosData);
@@ -610,6 +616,7 @@ export function TableView() {
           allColumns={allColumns}
           visibleColumns={visibleColumns}
           columnOrder={columnOrder}
+          columnCategories={columnCategories}
           onClose={() => setShowColumnSelector(false)}
           onSave={(columns) => {
             handleColumnVisibilityChange(columns);

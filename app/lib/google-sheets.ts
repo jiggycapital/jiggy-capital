@@ -142,6 +142,51 @@ export function findDataStartRow(rows: string[][], headerRow: number): number {
   return headerRow + 1;
 }
 
+// Extract category information from Row 1 (category row) and map to Row 2 (header row)
+// Handles merged cells by propagating category names across empty cells
+export function extractColumnCategories(rows: string[][]): Record<string, string> {
+  const headerRowIndex = findHeaderRow(rows);
+  const categoryRowIndex = headerRowIndex > 0 ? headerRowIndex - 1 : -1;
+  
+  const categoryMap: Record<string, string> = {};
+  
+  // If we have a category row, extract categories
+  if (categoryRowIndex >= 0 && categoryRowIndex < rows.length) {
+    const categoryRow = rows[categoryRowIndex];
+    const headerRow = rows[headerRowIndex];
+    
+    let currentCategory = "Other";
+    
+    // Process each column
+    // Merged cells in CSV appear as empty strings, so we propagate the last seen category
+    for (let i = 0; i < Math.max(categoryRow.length, headerRow.length); i++) {
+      const categoryCell = (categoryRow[i] || '').trim().replace(/^"|"$/g, '');
+      const headerCell = (headerRow[i] || '').trim().replace(/^"|"$/g, '');
+      
+      // If category cell has content, it's a new category header (start of merged cell range)
+      if (categoryCell && categoryCell.length > 0) {
+        currentCategory = categoryCell;
+      }
+      
+      // Map this column to the current category (even if category cell was empty due to merge)
+      if (headerCell && headerCell.length > 0) {
+        categoryMap[headerCell] = currentCategory;
+      }
+    }
+  } else {
+    // No category row, assign all columns to "Other"
+    const headerRow = rows[headerRowIndex];
+    headerRow.forEach(header => {
+      const cleanHeader = header.trim().replace(/^"|"$/g, '');
+      if (cleanHeader) {
+        categoryMap[cleanHeader] = "Other";
+      }
+    });
+  }
+  
+  return categoryMap;
+}
+
 export function parseSheetData(rows: string[][]): Record<string, string>[] {
   const headerRowIndex = findHeaderRow(rows);
   const headers = rows[headerRowIndex].map(h => h.trim().replace(/^"|"$/g, ''));
