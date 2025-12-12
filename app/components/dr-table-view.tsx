@@ -88,16 +88,30 @@ export function DRTableView() {
     return getAllQuarters(companiesData);
   }, [companiesData]);
 
-  // Initialize quarter visibility - all visible by default
+  // Initialize quarter visibility - hide 2019-2020 quarters by default
   useEffect(() => {
     if (allQuarters.length > 0 && Object.keys(quarterVisibility).length === 0) {
       const initialVisibility: Record<string, boolean> = {};
       allQuarters.forEach(quarter => {
-        initialVisibility[quarter] = true;
+        // Hide quarters from 2019-2020 (Q1 19 through Q4 20)
+        const is2019_2020 = /Q[1-4]\s+(19|20)$/.test(quarter);
+        initialVisibility[quarter] = !is2019_2020;
       });
       setQuarterVisibility(initialVisibility);
     }
   }, [allQuarters, quarterVisibility]);
+
+  // Set default metric to "Net New Revenue Growth" when data loads
+  useEffect(() => {
+    if (allMetrics.length > 0 && !selectedMetric) {
+      const netNewRevenueGrowth = allMetrics.find(m => 
+        m.toLowerCase().includes("net new revenue growth")
+      );
+      if (netNewRevenueGrowth) {
+        setSelectedMetric(netNewRevenueGrowth);
+      }
+    }
+  }, [allMetrics, selectedMetric]);
 
   // Get visible quarters
   const visibleQuarters = useMemo(() => {
