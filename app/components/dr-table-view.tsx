@@ -28,10 +28,13 @@ interface TableRowData {
   [key: string]: string | number | null; // Dynamic quarter columns
 }
 
+type ViewMode = "company" | "metric";
+
 export function DRTableView() {
   const [companiesData, setCompaniesData] = useState<CompanyFinancialData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [viewMode, setViewMode] = useState<ViewMode>("company");
   const [selectedCompany, setSelectedCompany] = useState<string>("all");
   const [selectedMetric, setSelectedMetric] = useState<string>("all");
   const [sorting, setSorting] = useState<SortingState>([]);
@@ -110,13 +113,17 @@ export function DRTableView() {
         enableSorting: true,
         enableHiding: false,
       },
-      {
+    ];
+    
+    // Only show metric column in company view mode
+    if (viewMode === "company") {
+      baseColumns.push({
         accessorKey: "metric",
         header: "Metric",
         enableSorting: true,
         enableHiding: false,
-      },
-    ];
+      });
+    }
     
     // Add quarter columns
     const quarterColumns: ColumnDef<TableRowData>[] = allQuarters.map(quarter => ({
@@ -232,7 +239,7 @@ export function DRTableView() {
     <div className="space-y-4">
       <Card className="bg-slate-900 border-slate-800">
         <CardHeader>
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between mb-4">
             <CardTitle className="text-slate-100">DR Table - Financial Time Series</CardTitle>
             <div className="flex items-center gap-2">
               <Input
@@ -241,28 +248,6 @@ export function DRTableView() {
                 onChange={(e) => setGlobalFilter(e.target.value)}
                 className="max-w-sm bg-slate-800 border-slate-700 text-slate-100"
               />
-              <Select value={selectedCompany} onValueChange={setSelectedCompany}>
-                <SelectTrigger className="w-[200px] bg-slate-800 border-slate-700 text-slate-100">
-                  <SelectValue placeholder="All Companies" />
-                </SelectTrigger>
-                <SelectContent className="bg-slate-800 border-slate-700">
-                  <SelectItem value="all">All Companies</SelectItem>
-                  {allCompanies.map(company => (
-                    <SelectItem key={company} value={company}>{company}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <Select value={selectedMetric} onValueChange={setSelectedMetric}>
-                <SelectTrigger className="w-[200px] bg-slate-800 border-slate-700 text-slate-100">
-                  <SelectValue placeholder="All Metrics" />
-                </SelectTrigger>
-                <SelectContent className="bg-slate-800 border-slate-700">
-                  <SelectItem value="all">All Metrics</SelectItem>
-                  {allMetrics.map(metric => (
-                    <SelectItem key={metric} value={metric}>{metric}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
               <Button
                 variant="outline"
                 onClick={handleExport}
@@ -272,6 +257,64 @@ export function DRTableView() {
                 Export
               </Button>
             </div>
+          </div>
+          
+          {/* View Mode Toggle */}
+          <Tabs value={viewMode} onValueChange={(v) => setViewMode(v as ViewMode)} className="mb-4">
+            <TabsList className="bg-slate-800">
+              <TabsTrigger value="company" className="data-[state=active]:bg-slate-700">
+                Company View
+              </TabsTrigger>
+              <TabsTrigger value="metric" className="data-[state=active]:bg-slate-700">
+                Metric View
+              </TabsTrigger>
+            </TabsList>
+          </Tabs>
+          
+          {/* Filters */}
+          <div className="flex items-center gap-2 flex-wrap">
+            <Select value={selectedCompany} onValueChange={setSelectedCompany}>
+              <SelectTrigger className="w-[200px] bg-slate-800 border-slate-700 text-slate-100">
+                <SelectValue placeholder="All Companies" />
+              </SelectTrigger>
+              <SelectContent className="bg-slate-800 border-slate-700">
+                <SelectItem value="all">All Companies</SelectItem>
+                {allCompanies.map(company => (
+                  <SelectItem key={company} value={company}>{company}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            
+            <Select 
+              value={selectedMetric} 
+              onValueChange={setSelectedMetric}
+            >
+              <SelectTrigger className="w-[250px] bg-slate-800 border-slate-700 text-slate-100">
+                <SelectValue placeholder={viewMode === "metric" ? "Select Metric" : "All Metrics"} />
+              </SelectTrigger>
+              <SelectContent className="bg-slate-800 border-slate-700">
+                {viewMode === "metric" ? (
+                  // In metric view, metric selection is required
+                  allMetrics.map(metric => (
+                    <SelectItem key={metric} value={metric}>{metric}</SelectItem>
+                  ))
+                ) : (
+                  // In company view, "all" is allowed
+                  <>
+                    <SelectItem value="all">All Metrics</SelectItem>
+                    {allMetrics.map(metric => (
+                      <SelectItem key={metric} value={metric}>{metric}</SelectItem>
+                    ))}
+                  </>
+                )}
+              </SelectContent>
+            </Select>
+            
+            {viewMode === "metric" && selectedMetric !== "all" && (
+              <div className="text-sm text-slate-400 ml-2">
+                Showing <span className="text-slate-300 font-semibold">{selectedMetric}</span> across companies
+              </div>
+            )}
           </div>
         </CardHeader>
         <CardContent>
