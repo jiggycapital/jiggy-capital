@@ -877,6 +877,7 @@ function formatCellValue(value: string, columnKey: string, isNumeric: boolean, c
 
   // Forward Estimates: Currency in Billions (except EPS which is regular currency)
   // Handle variations like "Forward Estimates (12/9)" or just "Forward Estimates"
+  // Note: Google Sheets may already format values in billions, so we need to detect the scale
   if (categoryLower.includes("forward estimates") || 
       (categoryLower.includes("forward") && categoryLower.includes("estimate") && !categoryLower.includes("growth"))) {
     // Try to parse as numeric even if not initially detected as numeric
@@ -894,7 +895,23 @@ function formatCellValue(value: string, columnKey: string, isNumeric: boolean, c
       if (num === 0 || Math.abs(num) < 0.001) {
         return <span className="text-slate-500">-</span>;
       }
-      return <span className="text-slate-300">{formatCurrencyBillions(num)}</span>;
+      
+      // Google Sheets may export values in different scales. 
+      // If the value is less than 1000, it's likely already in billions (e.g., 29.51 for $29.51B)
+      // If it's 1000-1e6, it might be in millions
+      // If it's > 1e6, it's likely in raw units (thousands or actual value)
+      // We'll use a heuristic: if value < 1000, treat as already in billions; otherwise divide by 1e9
+      if (Math.abs(num) < 1000) {
+        // Already appears to be in billions format (e.g., 29.51)
+        // Multiply by 1e9 to get the actual value, then format
+        return <span className="text-slate-300">{formatCurrencyBillions(num * 1e9)}</span>;
+      } else if (Math.abs(num) < 1e6) {
+        // Might be in millions, convert to billions
+        return <span className="text-slate-300">{formatCurrencyBillions(num * 1e3)}</span>;
+      } else {
+        // Raw value (likely in actual dollars), convert to billions
+        return <span className="text-slate-300">{formatCurrencyBillions(num)}</span>;
+      }
     }
     // If parsing fails, return the raw value
     return <span className="text-slate-300">{value || "-"}</span>;
