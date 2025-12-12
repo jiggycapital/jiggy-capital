@@ -22,6 +22,8 @@ import { formatCurrency, formatNumber, formatPercentage } from "@/lib/utils";
 import { Settings2, Download } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Switch } from "@/components/ui/switch";
 
 const COLORS = [
   "#3b82f6", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6",
@@ -40,6 +42,7 @@ export function DRChartView() {
   const [metricSearch, setMetricSearch] = useState<string>("");
   const [quarterVisibility, setQuarterVisibility] = useState<Record<string, boolean>>({});
   const [showSettings, setShowSettings] = useState(true);
+  const [showDataTable, setShowDataTable] = useState(false);
 
   useEffect(() => {
     loadData();
@@ -698,6 +701,101 @@ export function DRChartView() {
                 )}
               </ResponsiveContainer>
               </div>
+              
+              {/* Data Table Toggle */}
+              <div className="mt-6 flex items-center justify-between border-t border-slate-800 pt-4">
+                <div className="flex items-center gap-3">
+                  <Switch
+                    id="show-data-table"
+                    checked={showDataTable}
+                    onCheckedChange={setShowDataTable}
+                  />
+                  <label
+                    htmlFor="show-data-table"
+                    className="text-sm font-medium text-slate-300 cursor-pointer"
+                  >
+                    Show Data Table
+                  </label>
+                </div>
+              </div>
+
+              {/* Data Table */}
+              {showDataTable && chartData.length > 0 && (
+                <div className="mt-4 rounded-lg border border-slate-800 overflow-hidden">
+                  <div className="overflow-x-auto">
+                    <Table>
+                      <TableHeader>
+                        <TableRow className="border-slate-800 bg-slate-900">
+                          <TableHead className="text-slate-200 font-semibold sticky left-0 bg-slate-900 z-10 border-r border-slate-800">
+                            Quarter
+                          </TableHead>
+                          {selectedCompanies.map((company) => (
+                            <TableHead
+                              key={company}
+                              className="text-slate-200 font-semibold text-right"
+                              style={{ color: COLORS[selectedCompanies.indexOf(company) % COLORS.length] }}
+                            >
+                              {company}
+                            </TableHead>
+                          ))}
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {chartData.map((point, index) => (
+                          <TableRow
+                            key={index}
+                            className="border-slate-800 hover:bg-slate-900/50"
+                          >
+                            <TableCell className="font-mono text-xs text-slate-300 py-2 sticky left-0 bg-slate-950 z-10 border-r border-slate-800">
+                              {point.quarter}
+                            </TableCell>
+                            {selectedCompanies.map((company) => {
+                              const value = point[company];
+                              let formattedValue: React.ReactNode;
+                              
+                              if (value === null || value === undefined) {
+                                formattedValue = <span className="text-slate-500">-</span>;
+                              } else if (isPercentageMetric) {
+                                const colorClass = value > 0 
+                                  ? "text-green-400" 
+                                  : value < 0 
+                                  ? "text-red-400" 
+                                  : "text-slate-300";
+                                formattedValue = (
+                                  <span className={`${colorClass} font-mono`}>
+                                    {formatPercentage(value)}
+                                  </span>
+                                );
+                              } else if (isCurrencyMetric) {
+                                formattedValue = (
+                                  <span className="text-slate-300 font-mono">
+                                    {formatCurrency(value)}
+                                  </span>
+                                );
+                              } else {
+                                formattedValue = (
+                                  <span className="text-slate-300 font-mono">
+                                    {formatNumber(value)}
+                                  </span>
+                                );
+                              }
+                              
+                              return (
+                                <TableCell
+                                  key={company}
+                                  className="font-mono text-xs text-right py-2"
+                                >
+                                  {formattedValue}
+                                </TableCell>
+                              );
+                            })}
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+                </div>
+              )}
             </div>
           ) : (
             <div className="mt-6 text-center text-slate-400 py-12">
