@@ -73,12 +73,29 @@ export function TableView() {
 
   // Get all available columns
   const allColumns = useMemo(() => {
-    if (currentData.length === 0) return [];
+    console.log('[TABLE DEBUG] Computing allColumns, currentData length:', currentData.length);
+    if (currentData.length === 0) {
+      console.log('[TABLE DEBUG] No data, returning empty columns');
+      return [];
+    }
     const keys = new Set<string>();
-    currentData.forEach(row => {
-      Object.keys(row).forEach(key => keys.add(key));
+    currentData.forEach((row, index) => {
+      const rowKeys = Object.keys(row);
+      if (index === 0) {
+        console.log('[TABLE DEBUG] First row keys:', rowKeys.slice(0, 10));
+      }
+      rowKeys.forEach(key => {
+        if (key && key.trim() !== "") {
+          keys.add(key);
+        }
+      });
     });
-    return Array.from(keys);
+    const columns = Array.from(keys).filter(col => col && col.trim() !== "");
+    console.log('[TABLE DEBUG] All columns computed:', {
+      total: columns.length,
+      firstFew: columns.slice(0, 10),
+    });
+    return columns;
   }, [currentData]);
 
   // Initialize column order and visibility if empty
@@ -105,26 +122,81 @@ export function TableView() {
   }, [columnOrder, columnVisibility, allColumns]);
 
   const columns = useMemo<ColumnDef<PortfolioRow>[]>(() => {
-    return visibleColumns.map(key => {
-      const sampleValue = currentData[0]?.[key];
-      const isNumeric = parseNumeric(String(sampleValue || "")) !== null;
-      
-      return {
-        accessorKey: key,
-        header: formatColumnName(key),
-        cell: ({ row }) => {
-          const value = row.getValue(key) as string;
-          return formatCellValue(value, key, isNumeric);
-        },
-        enableSorting: true,
-        enableHiding: true,
-      };
+    console.log('[TABLE DEBUG] Building columns:', {
+      visibleColumnsCount: visibleColumns.length,
+      visibleColumns: visibleColumns.slice(0, 5),
+      currentDataCount: currentData.length,
     });
+
+    if (visibleColumns.length === 0) {
+      console.warn('[TABLE DEBUG] No visible columns, returning empty array');
+      return [];
+    }
+
+    if (currentData.length === 0) {
+      console.warn('[TABLE DEBUG] No data, but have columns, creating placeholder columns');
+    }
+
+    const builtColumns = visibleColumns
+      .filter(key => {
+        if (!key || key.trim() === "") {
+          console.warn('[TABLE DEBUG] Filtering out empty column key');
+          return false;
+        }
+        return true;
+      })
+      .map(key => {
+        try {
+          const sampleValue = currentData.length > 0 ? currentData[0]?.[key] : null;
+          const isNumeric = parseNumeric(String(sampleValue || "")) !== null;
+          
+          return {
+            accessorKey: key,
+            header: formatColumnName(key),
+            cell: ({ row }) => {
+              try {
+                const value = row.getValue(key) as string;
+                return formatCellValue(value, key, isNumeric);
+              } catch (err) {
+                console.error('[TABLE DEBUG] Error in cell renderer for', key, err);
+                return <span className="text-slate-500">-</span>;
+              }
+            },
+            enableSorting: true,
+            enableHiding: true,
+          };
+        } catch (err) {
+          console.error('[TABLE DEBUG] Error building column for', key, err);
+          return null;
+        }
+      })
+      .filter((col): col is ColumnDef<PortfolioRow> => col !== null);
+
+    console.log('[TABLE DEBUG] Built columns:', {
+      count: builtColumns.length,
+      firstFew: builtColumns.slice(0, 3).map(c => c.accessorKey),
+    });
+
+    return builtColumns;
   }, [visibleColumns, currentData]);
+
+  console.log('[TABLE DEBUG] Before useReactTable:', {
+    dataCount: currentData.length,
+    columnsCount: columns.length,
+    visibleColumnsCount: visibleColumns.length,
+    columnOrderLength: columnOrder.length,
+    allColumnsLength: allColumns.length,
+  });
 
   const table = useReactTable({
     data: currentData,
-    columns,
+    columns: columns.length > 0 ? columns : [
+      {
+        accessorKey: 'placeholder',
+        header: 'No Columns',
+        cell: () => 'No columns available',
+      } as ColumnDef<PortfolioRow>
+    ],
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     getSortedRowModel: getSortedRowModel(),
@@ -145,6 +217,11 @@ export function TableView() {
         pageSize: 50,
       },
     },
+  });
+
+  console.log('[TABLE DEBUG] After useReactTable:', {
+    headerGroupsCount: table.getHeaderGroups().length,
+    rowModelCount: table.getRowModel().rows.length,
   });
 
   const handleColumnVisibilityChange = (columns: string[]) => {
