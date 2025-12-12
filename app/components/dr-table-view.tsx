@@ -179,19 +179,24 @@ export function DRTableView() {
         const metric = viewMode === "company" 
           ? (row.getValue("metric") as string)
           : selectedMetric;
-        const isPercentage = metric?.toLowerCase().includes("%") || 
-                            metric?.toLowerCase().includes("margin") ||
-                            metric?.toLowerCase().includes("roic") ||
-                            metric?.toLowerCase().includes("roe") ||
+        const metricLower = metric?.toLowerCase() || "";
+        // Check if metric ends with "Growth" (case-insensitive)
+        const endsWithGrowth = metricLower.endsWith("growth");
+        const isPercentage = endsWithGrowth ||
+                            metricLower.includes("%") || 
+                            metricLower.includes("margin") ||
+                            metricLower.includes("roic") ||
+                            metricLower.includes("roe") ||
                             false;
-        const isCurrency = metric?.toLowerCase().includes("revenue") ||
-                          metric?.toLowerCase().includes("income") ||
-                          metric?.toLowerCase().includes("cash flow") ||
-                          metric?.toLowerCase().includes("ebitda") ||
-                          metric?.toLowerCase().includes("profit") ||
-                          metric?.toLowerCase().includes("debt") ||
-                          metric?.toLowerCase().includes("equity") ||
-                          false;
+        const isCurrency = !endsWithGrowth && (
+                          metricLower.includes("revenue") ||
+                          metricLower.includes("income") ||
+                          metricLower.includes("cash flow") ||
+                          metricLower.includes("ebitda") ||
+                          metricLower.includes("profit") ||
+                          metricLower.includes("debt") ||
+                          metricLower.includes("equity") ||
+                          false);
         
         if (isPercentage) {
           return <span className="text-slate-300 font-mono">{formatPercentage(value)}</span>;
