@@ -13,6 +13,13 @@ import {
   type ColumnFiltersState,
   type VisibilityState,
 } from "@tanstack/react-table";
+
+// Extend ColumnMeta to include sticky property
+declare module "@tanstack/react-table" {
+  interface ColumnMeta<TData, TValue> {
+    sticky?: boolean;
+  }
+}
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
