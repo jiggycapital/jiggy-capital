@@ -128,8 +128,8 @@ export function InteractivePieChart({ positionsData, logos, view, onViewChange }
     const availableWidth = containerSize.width - 200; // 100px margin on each side
     const availableHeight = containerSize.height - 200; // 100px margin on each side
     const chartRadius = Math.min(availableWidth, availableHeight) / 2;
-    const baseRadius = chartRadius * 0.5; // Inner radius of donut
-    const baseCalloutRadius = chartRadius * 0.85; // Position callouts at 85% of chart radius
+    // Position callouts further out - at ~103% of chart radius (matching website)
+    const baseCalloutRadius = chartRadius * 1.03;
 
     return calloutItems.map((item) => {
       const itemIndex = chartData.findIndex(d => d.id === item.id);
@@ -225,7 +225,7 @@ export function InteractivePieChart({ positionsData, logos, view, onViewChange }
                 zIndex: 10,
               }}
             >
-              <div className="bg-slate-800/95 border border-slate-600 rounded-lg p-2 shadow-xl flex flex-col items-center min-w-[56px] min-h-[56px] justify-center hover:scale-110 transition-all cursor-pointer hover:bg-slate-700/95 hover:border-slate-500">
+              <div className="bg-white/95 border border-slate-300 rounded-lg p-2 shadow-lg flex flex-col items-center min-w-[56px] min-h-[56px] justify-center hover:scale-110 transition-all cursor-pointer backdrop-blur-sm">
                 {view === "company" && item.logo ? (
                   <>
                     <img
@@ -236,16 +236,16 @@ export function InteractivePieChart({ positionsData, logos, view, onViewChange }
                         (e.target as HTMLImageElement).style.display = 'none';
                       }}
                     />
-                    <div className="text-xs text-slate-200 font-semibold font-mono">
+                    <div className="text-xs text-slate-600 font-semibold">
                       {item.value.toFixed(1)}%
                     </div>
                   </>
                 ) : (
                   <>
-                    <div className="text-xs font-semibold text-slate-100 mb-1 text-center">
+                    <div className="text-xs font-semibold text-slate-700 mb-1 text-center leading-tight">
                       {item.label.length > 12 ? item.label.substring(0, 12) + "..." : item.label}
                     </div>
-                    <div className="text-xs text-slate-300 font-semibold font-mono">
+                    <div className="text-xs text-slate-600 font-semibold">
                       {item.value.toFixed(1)}%
                     </div>
                   </>
