@@ -50,11 +50,6 @@ export function DRChartView() {
         const firstMetric = getAllMetrics(data)[0];
         if (firstMetric) {
           setSelectedMetric(firstMetric);
-          // Auto-select all companies that have this metric
-          const companiesWithMetric = data
-            .filter(company => company.metrics.some(m => m.metric === firstMetric))
-            .map(company => company.companyName);
-          setSelectedCompanies(companiesWithMetric.slice(0, 10)); // Limit to first 10 for performance
         }
       }
     } catch (err) {
@@ -75,6 +70,15 @@ export function DRChartView() {
   const allQuarters = useMemo(() => {
     return getAllQuarters(companiesData);
   }, [companiesData]);
+
+  // Get companies that have the selected metric
+  const companiesWithMetric = useMemo(() => {
+    if (!selectedMetric) return allCompanies;
+    return companiesData
+      .filter(company => company.metrics.some(m => m.metric === selectedMetric))
+      .map(company => company.companyName)
+      .sort();
+  }, [companiesData, selectedMetric, allCompanies]);
 
   const toggleCompany = (company: string) => {
     setSelectedCompanies(prev =>
