@@ -30,7 +30,7 @@ export function ChartView() {
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<"positions" | "watchlist" | "combined">("positions");
   const [chartType, setChartType] = useState<"line" | "bar">("line");
-  const [xAxisColumn, setXAxisColumn] = useState<string>("");
+  const [xAxisColumn, setXAxisColumn] = useState<string | undefined>(undefined);
   const [yAxisColumns, setYAxisColumns] = useState<string[]>([]);
   const [showSettings, setShowSettings] = useState(false);
 
@@ -86,14 +86,17 @@ export function ChartView() {
 
   // Set default X-axis (first column, usually ticker)
   useEffect(() => {
-    if (allColumns.length > 0 && !xAxisColumn) {
-      setXAxisColumn(allColumns[0]);
+    if (allColumns.length > 0 && (!xAxisColumn || xAxisColumn.trim() === "")) {
+      const firstValidColumn = allColumns.find(col => col && col.trim() !== "");
+      if (firstValidColumn) {
+        setXAxisColumn(firstValidColumn);
+      }
     }
   }, [allColumns, xAxisColumn]);
 
   // Prepare chart data
   const chartData = useMemo(() => {
-    if (!xAxisColumn || yAxisColumns.length === 0 || currentData.length === 0) return [];
+    if (!xAxisColumn || xAxisColumn.trim() === "" || yAxisColumns.length === 0 || currentData.length === 0) return [];
     
     return currentData.map(row => {
       const dataPoint: any = {
@@ -101,15 +104,18 @@ export function ChartView() {
       };
       
       yAxisColumns.forEach(col => {
-        const value = parseNumeric(String(row[col] || ""));
-        dataPoint[col] = value !== null ? value : 0;
+        if (col && col.trim() !== "") {
+          const value = parseNumeric(String(row[col] || ""));
+          dataPoint[col] = value !== null ? value : 0;
+        }
       });
       
       return dataPoint;
-    }).filter(point => point.name); // Filter out empty names
+    }).filter(point => point.name && point.name.trim() !== ""); // Filter out empty names
   }, [currentData, xAxisColumn, yAxisColumns]);
 
   const toggleYAxisColumn = (column: string) => {
+    if (!column || column.trim() === "") return;
     setYAxisColumns(prev =>
       prev.includes(column)
         ? prev.filter(c => c !== column)
@@ -224,7 +230,14 @@ export function ChartView() {
                 <label className="text-sm font-medium text-slate-300 mb-2 block">
                   X-Axis
                 </label>
-                <Select value={xAxisColumn || undefined} onValueChange={setXAxisColumn}>
+                <Select 
+                  value={xAxisColumn && xAxisColumn.trim() !== "" ? xAxisColumn : undefined} 
+                  onValueChange={(value) => {
+                    if (value && value.trim() !== "") {
+                      setXAxisColumn(value);
+                    }
+                  }}
+                >
                   <SelectTrigger className="bg-slate-900 border-slate-700 text-slate-100">
                     <SelectValue placeholder="Select X-axis column" />
                   </SelectTrigger>
@@ -249,22 +262,24 @@ export function ChartView() {
                   Y-Axis Metrics (Select multiple)
                 </label>
                 <div className="max-h-48 overflow-y-auto space-y-2 border border-slate-700 rounded p-2 bg-slate-900">
-                  {numericColumns.map(col => (
-                    <div key={col} className="flex items-center space-x-2">
-                      <Checkbox
-                        id={col}
-                        checked={yAxisColumns.includes(col)}
-                        onCheckedChange={() => toggleYAxisColumn(col)}
-                        className="border-slate-700"
-                      />
-                      <label
-                        htmlFor={col}
-                        className="text-sm text-slate-300 cursor-pointer"
-                      >
-                        {formatColumnName(col)}
-                      </label>
-                    </div>
-                  ))}
+                  {numericColumns
+                    .filter(col => col && col.trim() !== "")
+                    .map(col => (
+                      <div key={col} className="flex items-center space-x-2">
+                        <Checkbox
+                          id={col}
+                          checked={yAxisColumns.includes(col)}
+                          onCheckedChange={() => toggleYAxisColumn(col)}
+                          className="border-slate-700"
+                        />
+                        <label
+                          htmlFor={col}
+                          className="text-sm text-slate-300 cursor-pointer"
+                        >
+                          {formatColumnName(col)}
+                        </label>
+                      </div>
+                    ))}
                 </div>
               </div>
             </div>
