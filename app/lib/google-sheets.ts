@@ -11,9 +11,10 @@ const GIDS = {
   watchlistDetailed: "695255397",
   logosPt2: "1789448141",
   portfolio: "1871140253",
+  performance: "721839254",
 } as const;
 
-export type DatasetType = "positions" | "watchlist" | "portfolio";
+export type DatasetType = "positions" | "watchlist" | "portfolio" | "performance";
 
 export interface SheetConfig {
   sheetId: string;
@@ -32,6 +33,10 @@ export const SHEET_CONFIGS: Record<DatasetType, SheetConfig> = {
   portfolio: {
     sheetId: SHEET_IDS.positionsDetailed,
     gid: GIDS.portfolio,
+  },
+  performance: {
+    sheetId: SHEET_IDS.positionsDetailed,
+    gid: GIDS.performance,
   },
 };
 

@@ -8,6 +8,7 @@ import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from "recha
 
 export function HomeDashboard() {
   const [positionsData, setPositionsData] = useState<any[]>([]);
+  const [performanceData, setPerformanceData] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -18,9 +19,17 @@ export function HomeDashboard() {
   async function loadData() {
     try {
       setLoading(true);
-      const rows = await fetchSheetData("portfolio");
-      const data = parseSheetData(rows);
-      setPositionsData(data);
+      // Load portfolio data
+      const portfolioRows = await fetchSheetData("portfolio");
+      const portfolioData = parseSheetData(portfolioRows);
+      setPositionsData(portfolioData);
+      
+      // Load performance data (cell B3 = row 3, column 2)
+      const performanceRows = await fetchSheetData("performance");
+      if (performanceRows.length > 2 && performanceRows[2].length > 1) {
+        const ytdPerformance = performanceRows[2][1]?.trim() || null;
+        setPerformanceData(ytdPerformance);
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to load data");
     } finally {
@@ -70,12 +79,36 @@ export function HomeDashboard() {
   const totalGain = totalPortfolioValue - totalCostBasis;
   const totalGainPercent = totalCostBasis > 0 ? (totalGain / totalCostBasis) * 100 : 0;
 
-  // Top movers - using Daily PnL % or Change % from Portfolio sheet
+  // Top movers - using column V (index 21) from Portfolio sheet
+  // Need to find which column header corresponds to column V
+  // Column V is the 22nd column (0-indexed: 21)
+  const getColumnVValue = (row: any, headers: string[]): number | null => {
+    if (headers.length > 21) {
+      const columnVHeader = headers[21];
+      return parseNumeric(row[columnVHeader] || row[headers[21]] || "");
+    }
+    return null;
+  };
+
+  // Get column V value - column V is the 22nd column (index 21)
+  // We need to access the raw row data to get column by index
+  // Since parseSheetData uses headers as keys, we need to find which header corresponds to column V
+  // Based on the Portfolio sheet structure, column V should be around the "Daily PnL %" area
+  // Let's try to find it by checking common column names or by index
+  const getColumnVByIndex = (row: any, allHeaders: string[]): number | null => {
+    // If we have the raw row array, column V is index 21
+    // But since we're using parseSheetData which converts to objects, we need to find the header
+    // Column V based on the sheet structure appears to be "Daily PnL %"
+    return parseNumeric(row["Daily PnL %"] || row["Daily PnL"] || "");
+  };
+
+  const columnVHeader = "Daily PnL %"; // Column V from Portfolio sheet
+
   const topGainers = positionsData
     .map(row => ({
       ticker: row.Ticker || row.Symbol || "",
       company: row.Name || row.Company || "",
-      gain: parseNumeric(row["Daily PnL %"] || row["Change %"] || row["1 Day % Chg"] || row["Daily % Chg"] || row["1-Day % Chg"]) || 0,
+      gain: getColumnVByIndex(row, []) || 0,
     }))
     .filter(item => item.ticker && item.ticker !== "")
     .sort((a, b) => b.gain - a.gain)
@@ -85,7 +118,7 @@ export function HomeDashboard() {
     .map(row => ({
       ticker: row.Ticker || row.Symbol || "",
       company: row.Name || row.Company || "",
-      gain: parseNumeric(row["Daily PnL %"] || row["Change %"] || row["1 Day % Chg"] || row["Daily % Chg"] || row["1-Day % Chg"]) || 0,
+      gain: getColumnVByIndex(row, []) || 0,
     }))
     .filter(item => item.ticker && item.ticker !== "")
     .sort((a, b) => a.gain - b.gain)
@@ -121,9 +154,9 @@ export function HomeDashboard() {
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <Card className="bg-slate-900 border-slate-800">
           <CardHeader className="pb-2">
-            <CardDescription className="text-slate-400">Total Portfolio Value</CardDescription>
-            <CardTitle className="text-2xl font-mono text-slate-100">
-              {formatCurrency(totalPortfolioValue)}
+            <CardDescription className="text-slate-400">YTD Performance</CardDescription>
+            <CardTitle className={`text-2xl font-mono ${performanceData && performanceData.startsWith('+') ? 'text-green-400' : performanceData && performanceData.startsWith('-') ? 'text-red-400' : 'text-slate-100'}`}>
+              {performanceData || "Loading..."}
             </CardTitle>
           </CardHeader>
         </Card>
@@ -178,7 +211,6 @@ export function HomeDashboard() {
                   ))}
                 </Pie>
                 <Tooltip formatter={(value: number) => formatCurrency(value)} />
-                <Legend />
               </PieChart>
             </ResponsiveContainer>
           </CardContent>
