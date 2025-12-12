@@ -236,40 +236,82 @@ async function loadAnalyzeData() {
     }
 }
 
-// Parse detailed CSV with all columns
+// Parse detailed CSV with all columns - Enhanced to handle Google Sheets structure
 function parseDetailedCSV(csv) {
     const lines = csv.split('\n').filter(line => line.trim());
     if (lines.length < 2) return [];
     
-    // Parse header
-    const headers = parseCSVLine(lines[0]);
-    
-    // Find data start (skip metadata rows)
-    let dataStartIndex = 1;
-    for (let i = 1; i < Math.min(10, lines.length); i++) {
-        const firstCell = lines[i].split(',')[0].trim();
-        // Look for first row that looks like a ticker (letters/numbers, not "General Information", etc.)
-        if (firstCell && firstCell.length > 0 && firstCell.length < 10 && 
-            !firstCell.includes('General') && !firstCell.includes('Information') &&
-            !firstCell.includes('Median') && !firstCell.includes('Min') && !firstCell.includes('Max') &&
-            !firstCell.includes('Sum')) {
-            dataStartIndex = i;
+    // Find header row (look for "Ticker" or similar in first few rows)
+    let headerIndex = 0;
+    for (let i = 0; i < Math.min(5, lines.length); i++) {
+        const firstCell = parseCSVLine(lines[i])[0] || '';
+        if (firstCell.toLowerCase().includes('ticker') || 
+            firstCell.toLowerCase().includes('company') ||
+            firstCell.toLowerCase().includes('symbol')) {
+            headerIndex = i;
             break;
         }
+    }
+    
+    // Parse header
+    const headers = parseCSVLine(lines[headerIndex]);
+    // Clean headers (remove quotes, trim)
+    const cleanHeaders = headers.map(h => h.trim().replace(/^"|"$/g, ''));
+    
+    // Find data start (skip metadata rows after header)
+    let dataStartIndex = headerIndex + 1;
+    for (let i = dataStartIndex; i < Math.min(dataStartIndex + 10, lines.length); i++) {
+        const values = parseCSVLine(lines[i]);
+        const firstCell = (values[0] || '').trim().replace(/^"|"$/g, '');
+        
+        // Skip summary rows
+        if (firstCell.toLowerCase().includes('general') || 
+            firstCell.toLowerCase().includes('information') ||
+            firstCell.toLowerCase().includes('median') || 
+            firstCell.toLowerCase().includes('min') || 
+            firstCell.toLowerCase().includes('max') ||
+            firstCell.toLowerCase().includes('sum') ||
+            firstCell.toLowerCase().includes('earnings') ||
+            firstCell === '') {
+            continue;
+        }
+        
+        // Found first data row
+        dataStartIndex = i;
+        break;
     }
     
     // Parse data rows
     const data = [];
     for (let i = dataStartIndex; i < lines.length; i++) {
         const values = parseCSVLine(lines[i]);
-        if (values.length === 0 || !values[0] || values[0].trim() === '') continue;
+        if (values.length === 0) continue;
+        
+        const firstCell = (values[0] || '').trim().replace(/^"|"$/g, '');
+        
+        // Stop at summary rows
+        if (firstCell.toLowerCase().includes('median') || 
+            firstCell.toLowerCase().includes('min') || 
+            firstCell.toLowerCase().includes('max') ||
+            firstCell.toLowerCase().includes('sum') ||
+            firstCell === '') {
+            break;
+        }
         
         const row = {};
-        headers.forEach((header, index) => {
-            const value = values[index] || '';
-            row[header] = value.trim();
+        cleanHeaders.forEach((header, index) => {
+            let value = (values[index] || '').trim().replace(/^"|"$/g, '');
+            // Clean up Google Finance errors
+            if (value === '#N/A' || value === '#DIV/0!' || value === '#VALUE!' || value === '#REF!') {
+                value = '';
+            }
+            row[header] = value;
         });
-        data.push(row);
+        
+        // Only add rows with a ticker/symbol
+        if (row[cleanHeaders[0]] && row[cleanHeaders[0]].length > 0) {
+            data.push(row);
+        }
     }
     
     return data;
@@ -319,13 +361,36 @@ function renderTable() {
     analyzeState.visibleColumns.forEach(column => {
         const th = document.createElement('th');
         th.className = 'sortable';
-        th.textContent = formatColumnName(column);
+        
+        // Create header content with icon
+        const headerContent = document.createElement('div');
+        headerContent.style.display = 'flex';
+        headerContent.style.alignItems = 'center';
+        headerContent.style.justifyContent = 'space-between';
+        headerContent.style.gap = '0.5rem';
+        
+        const headerText = document.createElement('span');
+        headerText.textContent = formatColumnName(column);
+        headerContent.appendChild(headerText);
+        
+        // Add sort icon
+        const sortIcon = document.createElement('i');
+        sortIcon.className = 'fas fa-sort';
+        sortIcon.style.fontSize = '0.75rem';
+        sortIcon.style.color = '#9ca3af';
+        headerContent.appendChild(sortIcon);
+        
+        th.appendChild(headerContent);
         th.dataset.column = column;
         th.addEventListener('click', () => sortTable(column));
         
         // Add sort indicator if this is the sorted column
         if (analyzeState.sortColumn === column) {
             th.classList.add(`sort-${analyzeState.sortDirection}`);
+            sortIcon.className = analyzeState.sortDirection === 'asc' 
+                ? 'fas fa-sort-up' 
+                : 'fas fa-sort-down';
+            sortIcon.style.color = '#2563eb';
         }
         
         headerRow.appendChild(th);
@@ -346,13 +411,28 @@ function renderTable() {
                 td.classList.add('number');
                 const num = parseFloat(value);
                 if (!isNaN(num)) {
-                    if (num < 0) td.classList.add('negative');
-                    else if (num > 0 && column.toLowerCase().includes('change') || 
-                             column.toLowerCase().includes('growth') ||
-                             column.toLowerCase().includes('%')) {
+                    // Negative values
+                    if (num < 0) {
+                        td.classList.add('negative');
+                    }
+                    // Positive values for growth/change columns
+                    else if (num > 0 && (
+                        column.toLowerCase().includes('change') || 
+                        column.toLowerCase().includes('growth') ||
+                        column.toLowerCase().includes('return') ||
+                        column.toLowerCase().includes('gain') ||
+                        column.toLowerCase().includes('%') ||
+                        column.toLowerCase().includes('yoy') ||
+                        column.toLowerCase().includes('cagr')
+                    )) {
                         td.classList.add('positive');
                     }
                 }
+            }
+            
+            // Add tooltip for long values
+            if (value.length > 20) {
+                td.title = value;
             }
             
             tr.appendChild(td);
@@ -371,31 +451,54 @@ function formatColumnName(column) {
         .trim();
 }
 
-// Format cell value for display
+// Format cell value for display - Enhanced formatting
 function formatCellValue(value) {
-    if (!value || value === '') return '-';
+    if (!value || value === '' || value === '#N/A' || value === '#DIV/0!' || value === '#VALUE!') {
+        return '-';
+    }
     
     // Handle percentage values
-    if (typeof value === 'string' && value.includes('%')) {
-        return value;
+    if (typeof value === 'string') {
+        // Check if it's already a percentage string
+        if (value.includes('%')) {
+            return value;
+        }
+        // Check if it's a percentage number (ends with % or is between -100 and 100)
+        const num = parseFloat(value);
+        if (!isNaN(num) && Math.abs(num) <= 100 && (value.includes('%') || 
+            value.toLowerCase().includes('percent') || 
+            value.toLowerCase().includes('growth') ||
+            value.toLowerCase().includes('change'))) {
+            return num.toFixed(2) + '%';
+        }
     }
     
     // Handle numeric values
     const num = parseFloat(value);
     if (!isNaN(num)) {
+        // Format currency (if column name suggests it)
+        const isCurrency = false; // Could be enhanced to detect currency columns
+        
         // Format large numbers
-        if (Math.abs(num) >= 1e9) {
+        if (Math.abs(num) >= 1e12) {
+            return (num / 1e12).toFixed(2) + 'T';
+        } else if (Math.abs(num) >= 1e9) {
             return (num / 1e9).toFixed(2) + 'B';
         } else if (Math.abs(num) >= 1e6) {
             return (num / 1e6).toFixed(2) + 'M';
         } else if (Math.abs(num) >= 1e3) {
             return (num / 1e3).toFixed(2) + 'K';
         }
-        // Format decimals
+        
+        // Format decimals with appropriate precision
         if (num % 1 !== 0) {
+            // Use 2 decimal places for most numbers, more for very small numbers
+            if (Math.abs(num) < 1 && Math.abs(num) > 0) {
+                return num.toFixed(4);
+            }
             return num.toFixed(2);
         }
-        return num.toString();
+        return num.toLocaleString();
     }
     
     return value;
