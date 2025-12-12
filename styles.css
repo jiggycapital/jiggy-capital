@@ -2301,7 +2301,7 @@ body {
     /* CRITICAL: Ensure header uses EXACT same grid layout as data rows on mobile */
     .portfolio-item:first-child {
         min-width: 900px !important; /* Match data row min-width exactly */
-        width: 100% !important; /* Fill container width */
+        width: 900px !important; /* Match data row width exactly - same as min-width */
         max-width: none !important; /* Allow expansion */
         grid-template-columns: 50px minmax(120px, 1.5fr) minmax(70px, 0.9fr) minmax(70px, 0.9fr) minmax(75px, 1fr) minmax(80px, 1.2fr) minmax(85px, 1.3fr) minmax(70px, 0.9fr) minmax(80px, 1.1fr) minmax(80px, 1.1fr) minmax(80px, 1.1fr) !important;
         gap: 1rem !important; /* Match data row gap exactly */
