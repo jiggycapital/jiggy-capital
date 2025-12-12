@@ -28,10 +28,12 @@ export const SHEET_CONFIGS: Record<DatasetType, SheetConfig> = {
     sheetId: SHEET_IDS.watchlistDetailed,
     gid: GIDS.watchlistDetailed,
   },
-  logos: {
-    sheetId: SHEET_IDS.positionsDetailed,
-    gid: GIDS.logosPt2,
-  },
+};
+
+// Separate config for logos sheet
+const LOGOS_CONFIG: SheetConfig = {
+  sheetId: SHEET_IDS.positionsDetailed,
+  gid: GIDS.logosPt2,
 };
 
 export function getSheetUrl(config: SheetConfig): string {
@@ -206,8 +208,7 @@ export async function fetchLogos(): Promise<Record<string, string>> {
     return cached.data;
   }
 
-  const config = SHEET_CONFIGS.logos;
-  const url = getSheetUrl(config);
+  const url = getSheetUrl(LOGOS_CONFIG);
   
   try {
     const response = await fetch(url, {
