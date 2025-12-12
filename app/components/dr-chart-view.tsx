@@ -129,6 +129,8 @@ export function DRChartView() {
   const isCurrencyMetric = useMemo(() => {
     if (!selectedMetric) return false;
     const metricLower = selectedMetric.toLowerCase();
+    // Metrics ending in "Growth" should be percentages, not currency
+    if (metricLower.endsWith("growth")) return false;
     return metricLower.includes("revenue") ||
            metricLower.includes("income") ||
            metricLower.includes("cash flow") ||
@@ -142,7 +144,9 @@ export function DRChartView() {
   const isPercentageMetric = useMemo(() => {
     if (!selectedMetric) return false;
     const metricLower = selectedMetric.toLowerCase();
-    return metricLower.includes("%") ||
+    // Check if metric ends with "Growth"
+    return metricLower.endsWith("growth") ||
+           metricLower.includes("%") ||
            metricLower.includes("margin") ||
            metricLower.includes("roic") ||
            metricLower.includes("roe") ||
