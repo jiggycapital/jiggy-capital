@@ -193,8 +193,8 @@ export function InteractivePieChart({ positionsData, logos, view, onViewChange }
           colors={getColor}
           borderWidth={2}
           borderColor={{ from: 'color', modifiers: [['darker', 0.2]] }}
-          arcLinkLabels={false}
-          arcLabels={false}
+          enableArcLinkLabels={false}
+          enableArcLabels={false}
           tooltip={({ datum }) => (
             <div className="bg-slate-900 border border-slate-700 rounded-lg p-3 shadow-xl">
               <div className="text-slate-100 font-semibold">{datum.label}</div>
