@@ -56,13 +56,9 @@ export function StockDetailSheet({ stock, open, onOpenChange }: StockDetailSheet
   const profitabilityHistory = useMemo(() => {
     const data = [];
     for (let year = 2018; year <= 2027; year++) {
-      const ebitdaKey = `${year} EBITDA` || `${year}e EBITDA`;
-      const fcfKey = `${year} FCF` || `${year}e FCF` || `${year} Free Cash Flow`;
-      const revenueKey = `${year} Revenue` || `${year}e Revenue`;
-      
-      const ebitda = parseNumeric(stock[ebitdaKey] as string);
-      const fcf = parseNumeric(stock[fcfKey] as string);
-      const revenue = parseNumeric(stock[revenueKey] as string);
+      const ebitda = parseNumeric(String(stock[`${year} EBITDA`] || stock[`${year}e EBITDA`] || ""));
+      const fcf = parseNumeric(String(stock[`${year} FCF`] || stock[`${year}e FCF`] || stock[`${year} Free Cash Flow`] || ""));
+      const revenue = parseNumeric(String(stock[`${year} Revenue`] || stock[`${year}e Revenue`] || ""));
       
       if (revenue !== null) {
         data.push({
@@ -77,9 +73,9 @@ export function StockDetailSheet({ stock, open, onOpenChange }: StockDetailSheet
 
   // Valuation metrics
   const valuationMetrics = useMemo(() => {
-    const currentPE = parseNumeric(stock["P/E"] || stock["Current P/E"] || stock["P/E (NTM)"] as string);
-    const pe2026 = parseNumeric(stock["2026e P/E"] || stock["2026 P/E"] as string);
-    const historicalPE = parseNumeric(stock["Historical Avg P/E"] || stock["5Y Avg P/E"] as string);
+    const currentPE = parseNumeric(String(stock["P/E"] || stock["Current P/E"] || stock["P/E (NTM)"] || ""));
+    const pe2026 = parseNumeric(String(stock["2026e P/E"] || stock["2026 P/E"] || ""));
+    const historicalPE = parseNumeric(String(stock["Historical Avg P/E"] || stock["5Y Avg P/E"] || ""));
     
     return {
       currentPE,
