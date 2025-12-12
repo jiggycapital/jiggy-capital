@@ -81,16 +81,26 @@ export function TableView() {
     return Array.from(keys);
   }, [currentData]);
 
-  // Initialize column order if empty
+  // Initialize column order and visibility if empty
   useEffect(() => {
     if (allColumns.length > 0 && columnOrder.length === 0) {
       setColumnOrder(allColumns);
+      // Initialize all columns as visible by default
+      const initialVisibility: VisibilityState = {};
+      allColumns.forEach(col => {
+        initialVisibility[col] = true;
+      });
+      setColumnVisibility(initialVisibility);
     }
   }, [allColumns, columnOrder.length]);
 
   // Get visible columns in order
   const visibleColumns = useMemo(() => {
-    if (columnOrder.length === 0) return allColumns.slice(0, 15);
+    if (columnOrder.length === 0) {
+      // Show first 20 columns by default if no order set yet
+      return allColumns.slice(0, 20);
+    }
+    // Show columns that are not explicitly hidden (undefined or true means visible)
     return columnOrder.filter(col => columnVisibility[col] !== false);
   }, [columnOrder, columnVisibility, allColumns]);
 
