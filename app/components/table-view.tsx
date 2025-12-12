@@ -859,13 +859,22 @@ function formatCellValue(value: string, columnKey: string, isNumeric: boolean, c
   }
 
   // Forward Growth Estimates: Percentages
-  if (categoryLower.includes("forward growth estimates")) {
-    if (isNumeric) {
-      const num = parseNumeric(value);
-      if (num !== null) {
-        const colorClass = num > 0 ? "text-green-400" : num < 0 ? "text-red-400" : "text-slate-300";
-        return <span className={colorClass}>{formatPercentage(num)}</span>;
-      }
+  // Handle both "Forward" and "Foward" (typo) variations
+  // Check for various category name patterns
+  const isForwardGrowthCategory = 
+      categoryLower.includes("forward growth estimates") || 
+      categoryLower.includes("foward growth estimates") ||
+      categoryLower.includes("forward growth") ||
+      categoryLower.includes("foward growth") ||
+      (categoryLower.includes("forward") && categoryLower.includes("growth")) ||
+      (categoryLower.includes("foward") && categoryLower.includes("growth"));
+  
+  if (isForwardGrowthCategory) {
+    // Try to parse as numeric even if not initially detected as numeric
+    const num = parseNumeric(value);
+    if (num !== null) {
+      const colorClass = num > 0 ? "text-green-400" : num < 0 ? "text-red-400" : "text-slate-300";
+      return <span className={colorClass}>{formatPercentage(num)}</span>;
     }
     return <span className="text-slate-300">{value}</span>;
   }
