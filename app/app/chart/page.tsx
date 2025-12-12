@@ -1,4 +1,7 @@
+"use client";
+
 import { ChartView } from "@/components/chart-view";
+import { ErrorBoundary } from "@/components/error-boundary";
 
 export default function ChartPage() {
   return (
@@ -7,7 +10,9 @@ export default function ChartPage() {
         <h1 className="text-3xl font-bold text-slate-100 mb-2">Charts & Graphs</h1>
         <p className="text-slate-400">Customizable financial charts and visualizations</p>
       </div>
-      <ChartView />
+      <ErrorBoundary>
+        <ChartView />
+      </ErrorBoundary>
     </div>
   );
 }
