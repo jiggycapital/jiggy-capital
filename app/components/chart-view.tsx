@@ -219,7 +219,7 @@ export function ChartView() {
                 <label className="text-sm font-medium text-slate-300 mb-2 block">
                   X-Axis
                 </label>
-                <Select value={xAxisColumn || ""} onValueChange={setXAxisColumn}>
+                <Select value={xAxisColumn || undefined} onValueChange={setXAxisColumn}>
                   <SelectTrigger className="bg-slate-900 border-slate-700 text-slate-100">
                     <SelectValue placeholder="Select X-axis column" />
                   </SelectTrigger>
@@ -231,7 +231,7 @@ export function ChartView() {
                         </SelectItem>
                       ))
                     ) : (
-                      <SelectItem value="" disabled>No columns available</SelectItem>
+                      <div className="px-2 py-1.5 text-sm text-slate-400">No columns available</div>
                     )}
                   </SelectContent>
                 </Select>
