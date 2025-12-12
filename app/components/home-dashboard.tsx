@@ -22,9 +22,24 @@ export function HomeDashboard() {
       // Load portfolio data
       const portfolioRows = await fetchSheetData("portfolio");
       const portfolioData = parseSheetData(portfolioRows);
-      setPositionsData(portfolioData);
       
-      // Load performance data (cell B3 = row 3, column 2)
+      // Find column V header (index 21) from raw rows
+      const headerRowIndex = portfolioRows.findIndex((row, idx) => {
+        const firstCell = (row[0] || '').toLowerCase();
+        return firstCell.includes('ticker') || firstCell.includes('symbol');
+      });
+      const headerRow = headerRowIndex >= 0 ? portfolioRows[headerRowIndex] : [];
+      const columnVHeader = headerRow.length > 21 ? headerRow[21]?.trim().replace(/^"|"$/g, '') : null;
+      
+      // Store column V header name for later use
+      const dataWithColumnV = portfolioData.map(row => ({
+        ...row,
+        _columnVHeader: columnVHeader,
+      }));
+      
+      setPositionsData(dataWithColumnV);
+      
+      // Load performance data (cell B3 = row 3, column 2, 0-indexed: row 2, column 1)
       const performanceRows = await fetchSheetData("performance");
       if (performanceRows.length > 2 && performanceRows[2].length > 1) {
         const ytdPerformance = performanceRows[2][1]?.trim() || null;
@@ -90,25 +105,21 @@ export function HomeDashboard() {
     return null;
   };
 
-  // Get column V value - column V is the 22nd column (index 21)
-  // We need to access the raw row data to get column by index
-  // Since parseSheetData uses headers as keys, we need to find which header corresponds to column V
-  // Based on the Portfolio sheet structure, column V should be around the "Daily PnL %" area
-  // Let's try to find it by checking common column names or by index
-  const getColumnVByIndex = (row: any, allHeaders: string[]): number | null => {
-    // If we have the raw row array, column V is index 21
-    // But since we're using parseSheetData which converts to objects, we need to find the header
-    // Column V based on the sheet structure appears to be "Daily PnL %"
+  // Get column V value - use the stored header name from loadData
+  const getColumnVValue = (row: any): number | null => {
+    const columnVHeader = row._columnVHeader;
+    if (columnVHeader) {
+      return parseNumeric(row[columnVHeader] || "");
+    }
+    // Fallback to common column names if header not found
     return parseNumeric(row["Daily PnL %"] || row["Daily PnL"] || "");
   };
-
-  const columnVHeader = "Daily PnL %"; // Column V from Portfolio sheet
 
   const topGainers = positionsData
     .map(row => ({
       ticker: row.Ticker || row.Symbol || "",
       company: row.Name || row.Company || "",
-      gain: getColumnVByIndex(row, []) || 0,
+      gain: getColumnVValue(row) || 0,
     }))
     .filter(item => item.ticker && item.ticker !== "")
     .sort((a, b) => b.gain - a.gain)
@@ -118,7 +129,7 @@ export function HomeDashboard() {
     .map(row => ({
       ticker: row.Ticker || row.Symbol || "",
       company: row.Name || row.Company || "",
-      gain: getColumnVByIndex(row, []) || 0,
+      gain: getColumnVValue(row) || 0,
     }))
     .filter(item => item.ticker && item.ticker !== "")
     .sort((a, b) => a.gain - b.gain)
