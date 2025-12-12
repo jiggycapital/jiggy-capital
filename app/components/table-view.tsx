@@ -12,6 +12,7 @@ import {
   type SortingState,
   type ColumnFiltersState,
   type VisibilityState,
+  sortingFns,
 } from "@tanstack/react-table";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -247,6 +248,18 @@ export function TableView() {
           const sampleValue = currentData.length > 0 ? currentData[0]?.[key] : null;
           const isNumeric = parseNumeric(String(sampleValue || "")) !== null;
           
+          // Create a custom sorting function for numeric columns
+          // Use a closure to capture the key value
+          const numericSortingFn = (rowA: any, rowB: any, columnId: string) => {
+            // Use the columnId parameter (which should be the key)
+            const valA = parseNumeric(String(rowA.getValue(columnId) || ""));
+            const valB = parseNumeric(String(rowB.getValue(columnId) || ""));
+            if (valA === null && valB === null) return 0;
+            if (valA === null) return 1; // nulls go to end
+            if (valB === null) return -1; // nulls go to end
+            return valA - valB;
+          };
+          
           return {
             accessorKey: key,
             header: formatColumnName(key),
@@ -282,6 +295,7 @@ export function TableView() {
               }
             },
             enableSorting: true,
+            sortingFn: isNumeric ? numericSortingFn : undefined, // Use default alphanumeric for non-numeric
             enableHiding: true,
           } as ColumnDef<PortfolioRow>;
         } catch (err) {
