@@ -1,0 +1,503 @@
+/* ============================================================================
+   JIGGY CAPITAL ANALYZE PAGE - FINANCIAL VISUALIZATION DASHBOARD
+   ============================================================================ */
+
+/* Analyze Section */
+.analyze-section {
+    padding: 100px 20px 40px;
+    min-height: 100vh;
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+}
+
+.analyze-container {
+    max-width: 1800px;
+    margin: 0 auto;
+}
+
+/* Header */
+.analyze-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    padding: 1.5rem;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.analyze-title {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #1f2937;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.analyze-title i {
+    color: #2563eb;
+}
+
+.analyze-controls {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+}
+
+.control-group {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.control-group label {
+    font-weight: 600;
+    color: #4b5563;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.control-select {
+    padding: 0.5rem 1rem;
+    border: 2px solid #e5e7eb;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    background: white;
+    color: #1f2937;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.control-select:hover {
+    border-color: #2563eb;
+}
+
+.control-select:focus {
+    outline: none;
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.control-button {
+    padding: 0.5rem 1rem;
+    background: #2563eb;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.2s ease;
+}
+
+.control-button:hover {
+    background: #1d4ed8;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+}
+
+.control-button:active {
+    transform: translateY(0);
+}
+
+/* Section Headers */
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    padding: 1rem 1.5rem;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.section-header h2 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #1f2937;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.section-header h2 i {
+    color: #2563eb;
+}
+
+.table-controls,
+.graph-controls {
+    display: flex;
+    gap: 0.75rem;
+}
+
+/* Table Section */
+.table-section {
+    margin-bottom: 2rem;
+}
+
+.table-container {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    position: relative;
+    min-height: 400px;
+}
+
+.table-wrapper {
+    overflow-x: auto;
+    overflow-y: auto;
+    max-height: 70vh;
+}
+
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+}
+
+.data-table thead {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: #f8fafc;
+    border-bottom: 2px solid #e5e7eb;
+}
+
+.data-table th {
+    padding: 1rem;
+    text-align: left;
+    font-weight: 600;
+    color: #374151;
+    white-space: nowrap;
+    cursor: pointer;
+    user-select: none;
+    position: relative;
+    min-width: 100px;
+}
+
+.data-table th:hover {
+    background: #f3f4f6;
+}
+
+.data-table th.sortable::after {
+    content: ' ↕';
+    position: absolute;
+    right: 0.5rem;
+    color: #9ca3af;
+    font-size: 0.8rem;
+}
+
+.data-table th.sort-asc::after {
+    content: ' ↑';
+    color: #2563eb;
+}
+
+.data-table th.sort-desc::after {
+    content: ' ↓';
+    color: #2563eb;
+}
+
+.data-table td {
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid #e5e7eb;
+    color: #4b5563;
+}
+
+.data-table tbody tr:hover {
+    background: #f9fafb;
+}
+
+.data-table tbody tr:nth-child(even) {
+    background: #fafbfc;
+}
+
+.data-table tbody tr:nth-child(even):hover {
+    background: #f3f4f6;
+}
+
+/* Number formatting */
+.data-table .number {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+}
+
+.data-table .percentage {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+}
+
+.data-table .positive {
+    color: #15803d;
+    font-weight: 600;
+}
+
+.data-table .negative {
+    color: #dc2626;
+    font-weight: 600;
+}
+
+/* Column Settings Panel */
+.column-settings-panel {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+    margin-bottom: 1rem;
+    padding: 1.5rem;
+    position: relative;
+}
+
+.settings-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid #e5e7eb;
+}
+
+.settings-header h3 {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #1f2937;
+}
+
+.close-btn {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    color: #6b7280;
+    cursor: pointer;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+}
+
+.close-btn:hover {
+    background: #f3f4f6;
+    color: #1f2937;
+}
+
+.settings-content {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.settings-section {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.settings-section label {
+    font-weight: 600;
+    color: #374151;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.column-checkboxes,
+.metric-checkboxes {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 0.75rem;
+    max-height: 300px;
+    overflow-y: auto;
+    padding: 1rem;
+    background: #f9fafb;
+    border-radius: 8px;
+    border: 1px solid #e5e7eb;
+}
+
+.column-checkbox-item,
+.metric-checkbox-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+.column-checkbox-item:hover,
+.metric-checkbox-item:hover {
+    background: #f3f4f6;
+}
+
+.column-checkbox-item input[type="checkbox"],
+.metric-checkbox-item input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+}
+
+.column-checkbox-item label,
+.metric-checkbox-item label {
+    cursor: pointer;
+    font-weight: 400;
+    color: #4b5563;
+    flex: 1;
+}
+
+.settings-actions {
+    display: flex;
+    gap: 0.75rem;
+    padding-top: 1rem;
+    border-top: 1px solid #e5e7eb;
+}
+
+.action-btn {
+    padding: 0.5rem 1rem;
+    border: 2px solid #e5e7eb;
+    border-radius: 8px;
+    background: white;
+    color: #374151;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.action-btn:hover {
+    border-color: #2563eb;
+    color: #2563eb;
+    background: #eff6ff;
+}
+
+.action-btn.primary {
+    background: #2563eb;
+    color: white;
+    border-color: #2563eb;
+}
+
+.action-btn.primary:hover {
+    background: #1d4ed8;
+    border-color: #1d4ed8;
+}
+
+/* Graph Section */
+.graph-section {
+    margin-bottom: 2rem;
+}
+
+.graph-container {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+    padding: 2rem;
+    min-height: 500px;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.graph-settings-panel {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+    margin-bottom: 1rem;
+    padding: 1.5rem;
+    position: relative;
+}
+
+#main-chart {
+    max-height: 600px;
+    width: 100% !important;
+    height: auto !important;
+}
+
+/* Loading and Error States */
+.loading-message,
+.error-message {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    padding: 3rem;
+    color: #6b7280;
+    font-size: 1.1rem;
+}
+
+.loading-message i {
+    font-size: 2rem;
+    color: #2563eb;
+}
+
+.error-message {
+    color: #dc2626;
+}
+
+.error-message i {
+    font-size: 2rem;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .analyze-header {
+        flex-direction: column;
+        gap: 1rem;
+        align-items: stretch;
+    }
+    
+    .analyze-controls {
+        flex-direction: column;
+    }
+    
+    .section-header {
+        flex-direction: column;
+        gap: 1rem;
+        align-items: stretch;
+    }
+    
+    .column-checkboxes,
+    .metric-checkboxes {
+        grid-template-columns: 1fr;
+    }
+    
+    .table-wrapper {
+        max-height: 50vh;
+    }
+    
+    .graph-container {
+        padding: 1rem;
+        min-height: 400px;
+    }
+}
+
+/* Scrollbar Styling */
+.table-wrapper::-webkit-scrollbar,
+.column-checkboxes::-webkit-scrollbar,
+.metric-checkboxes::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+.table-wrapper::-webkit-scrollbar-track,
+.column-checkboxes::-webkit-scrollbar-track,
+.metric-checkboxes::-webkit-scrollbar-track {
+    background: #f1f5f9;
+    border-radius: 4px;
+}
+
+.table-wrapper::-webkit-scrollbar-thumb,
+.column-checkboxes::-webkit-scrollbar-thumb,
+.metric-checkboxes::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 4px;
+}
+
+.table-wrapper::-webkit-scrollbar-thumb:hover,
+.column-checkboxes::-webkit-scrollbar-thumb:hover,
+.metric-checkboxes::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}
+

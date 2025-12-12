@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <!-- Content Security Policy -->
+    <meta http-equiv="Content-Security-Policy" content="connect-src 'self' https:; script-src 'self' 'unsafe-inline' https:; script-src-elem 'self' 'unsafe-inline' https:; style-src 'self' 'unsafe-inline' https:; style-src-elem 'self' 'unsafe-inline' https:; font-src 'self' data: https:; img-src 'self' data: https:; frame-src 'self' https:;">
+    <title>Analyze - Jiggy Capital</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <link rel="icon" type="image/png" href="favicon.svg">
+    
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-EH291BHWTE"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-EH291BHWTE');
+    </script>
+    
+    <!-- External Libraries -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="styles.css?v=43.4">
+    <link rel="stylesheet" href="analyze.css?v=1.0">
+    
+    <!-- Utilities -->
+    <script src="utils.js?v=1.0"></script>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <i class="fas fa-chart-line"></i>
+                <span>Jiggy Capital</span>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="/" class="nav-link">Home</a></li>
+                <li><a href="/analyze.html" class="nav-link active">Analyze</a></li>
+            </ul>
+            <div class="hamburger">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Analyze Section -->
+    <section id="analyze" class="analyze-section">
+        <div class="analyze-container">
+            <!-- Header Controls -->
+            <div class="analyze-header">
+                <h1 class="analyze-title">
+                    <i class="fas fa-chart-bar"></i>
+                    Financial Analysis Dashboard
+                </h1>
+                <div class="analyze-controls">
+                    <!-- Dataset Selector -->
+                    <div class="control-group">
+                        <label for="dataset-selector">
+                            <i class="fas fa-database"></i>
+                            Dataset:
+                        </label>
+                        <select id="dataset-selector" class="control-select">
+                            <option value="holdings">My Holdings</option>
+                            <option value="watchlist">Watchlist</option>
+                        </select>
+                    </div>
+                    
+                    <!-- Refresh Button -->
+                    <button id="refresh-data" class="control-button" title="Refresh Data">
+                        <i class="fas fa-sync-alt"></i>
+                        Refresh
+                    </button>
+                </div>
+            </div>
+
+            <!-- Table Section -->
+            <div class="table-section">
+                <div class="section-header">
+                    <h2>
+                        <i class="fas fa-table"></i>
+                        Data Table
+                    </h2>
+                    <div class="table-controls">
+                        <button id="column-settings-btn" class="control-button" title="Column Settings">
+                            <i class="fas fa-columns"></i>
+                            Columns
+                        </button>
+                        <button id="export-table-btn" class="control-button" title="Export Table">
+                            <i class="fas fa-download"></i>
+                            Export
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Column Settings Panel (Hidden by default) -->
+                <div id="column-settings-panel" class="column-settings-panel" style="display: none;">
+                    <div class="settings-header">
+                        <h3>Column Settings</h3>
+                        <button id="close-column-settings" class="close-btn">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <div class="settings-content">
+                        <div class="settings-section">
+                            <h4>Visible Columns</h4>
+                            <div id="column-checkboxes" class="column-checkboxes">
+                                <!-- Dynamically populated -->
+                            </div>
+                        </div>
+                        <div class="settings-actions">
+                            <button id="select-all-columns" class="action-btn">Select All</button>
+                            <button id="deselect-all-columns" class="action-btn">Deselect All</button>
+                            <button id="reset-columns" class="action-btn">Reset to Default</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Table Container -->
+                <div class="table-container">
+                    <div id="data-table-wrapper" class="table-wrapper">
+                        <table id="data-table" class="data-table">
+                            <thead id="table-header">
+                                <!-- Dynamically populated -->
+                            </thead>
+                            <tbody id="table-body">
+                                <!-- Dynamically populated -->
+                            </tbody>
+                        </table>
+                    </div>
+                    <div id="table-loading" class="loading-message">
+                        <i class="fas fa-spinner fa-spin"></i>
+                        <span>Loading data...</span>
+                    </div>
+                    <div id="table-error" class="error-message" style="display: none;">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <span>Error loading data. Please try again.</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Graph Section -->
+            <div class="graph-section">
+                <div class="section-header">
+                    <h2>
+                        <i class="fas fa-chart-line"></i>
+                        Charts & Graphs
+                    </h2>
+                    <div class="graph-controls">
+                        <button id="graph-settings-btn" class="control-button" title="Graph Settings">
+                            <i class="fas fa-cog"></i>
+                            Settings
+                        </button>
+                        <button id="export-graph-btn" class="control-button" title="Export Graph">
+                            <i class="fas fa-download"></i>
+                            Export
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Graph Settings Panel (Hidden by default) -->
+                <div id="graph-settings-panel" class="graph-settings-panel" style="display: none;">
+                    <div class="settings-header">
+                        <h3>Graph Settings</h3>
+                        <button id="close-graph-settings" class="close-btn">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <div class="settings-content">
+                        <div class="settings-section">
+                            <label for="chart-type-select">
+                                <i class="fas fa-chart-bar"></i>
+                                Chart Type:
+                            </label>
+                            <select id="chart-type-select" class="control-select">
+                                <option value="line">Line Chart</option>
+                                <option value="bar">Bar Chart</option>
+                                <option value="scatter">Scatter Plot</option>
+                                <option value="area">Area Chart</option>
+                                <option value="bubble">Bubble Chart</option>
+                            </select>
+                        </div>
+                        <div class="settings-section">
+                            <label for="x-axis-select">
+                                <i class="fas fa-arrows-alt-h"></i>
+                                X-Axis:
+                            </label>
+                            <select id="x-axis-select" class="control-select">
+                                <!-- Dynamically populated -->
+                            </select>
+                        </div>
+                        <div class="settings-section">
+                            <label>
+                                <i class="fas fa-arrows-alt-v"></i>
+                                Y-Axis Metrics:
+                            </label>
+                            <div id="y-axis-checkboxes" class="metric-checkboxes">
+                                <!-- Dynamically populated -->
+                            </div>
+                        </div>
+                        <div class="settings-section">
+                            <label for="time-range-select">
+                                <i class="fas fa-calendar"></i>
+                                Time Range:
+                            </label>
+                            <select id="time-range-select" class="control-select">
+                                <option value="all">All Data</option>
+                                <option value="1y">1 Year</option>
+                                <option value="3y">3 Years</option>
+                                <option value="5y">5 Years</option>
+                                <option value="10y">10 Years</option>
+                            </select>
+                        </div>
+                        <div class="settings-actions">
+                            <button id="apply-graph-settings" class="action-btn primary">Apply Settings</button>
+                            <button id="reset-graph-settings" class="action-btn">Reset</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Graph Container -->
+                <div class="graph-container">
+                    <canvas id="main-chart"></canvas>
+                    <div id="graph-loading" class="loading-message">
+                        <i class="fas fa-spinner fa-spin"></i>
+                        <span>Loading chart...</span>
+                    </div>
+                    <div id="graph-error" class="error-message" style="display: none;">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <span>Error loading chart. Please configure settings.</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Scripts -->
+    <script src="analyze.js?v=1.0"></script>
+</body>
+</html>
+
