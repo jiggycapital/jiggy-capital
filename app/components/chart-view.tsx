@@ -65,9 +65,14 @@ export function ChartView() {
     if (currentData.length === 0) return [];
     const keys = new Set<string>();
     currentData.forEach(row => {
-      Object.keys(row).forEach(key => keys.add(key));
+      Object.keys(row).forEach(key => {
+        // Filter out empty keys
+        if (key && key.trim() !== "") {
+          keys.add(key);
+        }
+      });
     });
-    return Array.from(keys);
+    return Array.from(keys).filter(col => col && col.trim() !== "");
   }, [currentData]);
 
   // Get numeric columns for Y-axis
@@ -225,11 +230,13 @@ export function ChartView() {
                   </SelectTrigger>
                   <SelectContent className="bg-slate-900 border-slate-700">
                     {allColumns.length > 0 ? (
-                      allColumns.map(col => (
-                        <SelectItem key={col} value={col} className="text-slate-100">
-                          {formatColumnName(col)}
-                        </SelectItem>
-                      ))
+                      allColumns
+                        .filter(col => col && col.trim() !== "")
+                        .map(col => (
+                          <SelectItem key={col} value={col} className="text-slate-100">
+                            {formatColumnName(col)}
+                          </SelectItem>
+                        ))
                     ) : (
                       <div className="px-2 py-1.5 text-sm text-slate-400">No columns available</div>
                     )}
