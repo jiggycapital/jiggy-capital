@@ -339,6 +339,10 @@ export function TableView() {
     allColumnsLength: allColumns.length,
   });
 
+  // Determine if pagination should be enabled (only for Holdings/Positions)
+  const usePagination = activeTab === "positions";
+  const pageSize = usePagination ? 50 : 10000; // Large number effectively disables pagination
+
   const table = useReactTable({
     data: currentData,
     columns: columns.length > 0 ? columns : [
@@ -362,13 +366,23 @@ export function TableView() {
       columnFilters,
       columnVisibility,
       globalFilter,
+      pagination: {
+        pageIndex: 0,
+        pageSize: pageSize,
+      },
     },
     initialState: {
       pagination: {
-        pageSize: 50,
+        pageSize: pageSize,
       },
     },
   });
+
+  // Reset pagination when switching tabs
+  useEffect(() => {
+    table.setPageIndex(0);
+    table.setPageSize(pageSize);
+  }, [activeTab, pageSize]);
 
   console.log('[TABLE DEBUG] After useReactTable:', {
     headerGroupsCount: table.getHeaderGroups().length,
@@ -578,36 +592,43 @@ export function TableView() {
             </Table>
           </div>
 
-          <div className="flex items-center justify-between mt-4">
-            <div className="text-sm text-slate-400">
-              Showing {table.getState().pagination.pageIndex * table.getState().pagination.pageSize + 1} to{" "}
-              {Math.min(
-                (table.getState().pagination.pageIndex + 1) * table.getState().pagination.pageSize,
-                table.getFilteredRowModel().rows.length
-              )}{" "}
-              of {table.getFilteredRowModel().rows.length} entries
+          {usePagination && (
+            <div className="flex items-center justify-between mt-4">
+              <div className="text-sm text-slate-400">
+                Showing {table.getState().pagination.pageIndex * table.getState().pagination.pageSize + 1} to{" "}
+                {Math.min(
+                  (table.getState().pagination.pageIndex + 1) * table.getState().pagination.pageSize,
+                  table.getFilteredRowModel().rows.length
+                )}{" "}
+                of {table.getFilteredRowModel().rows.length} entries
+              </div>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => table.previousPage()}
+                  disabled={!table.getCanPreviousPage()}
+                  className="bg-slate-800 border-slate-700 text-slate-100"
+                >
+                  Previous
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => table.nextPage()}
+                  disabled={!table.getCanNextPage()}
+                  className="bg-slate-800 border-slate-700 text-slate-100"
+                >
+                  Next
+                </Button>
+              </div>
             </div>
-            <div className="flex items-center gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => table.previousPage()}
-                disabled={!table.getCanPreviousPage()}
-                className="bg-slate-800 border-slate-700 text-slate-100"
-              >
-                Previous
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => table.nextPage()}
-                disabled={!table.getCanNextPage()}
-                className="bg-slate-800 border-slate-700 text-slate-100"
-              >
-                Next
-              </Button>
+          )}
+          {!usePagination && (
+            <div className="mt-4 text-sm text-slate-400">
+              Showing all {table.getFilteredRowModel().rows.length} entries
             </div>
-          </div>
+          )}
         </CardContent>
       </Card>
 
