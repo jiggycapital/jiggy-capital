@@ -558,28 +558,38 @@ export function DRChartView() {
 
           {chartData.length > 0 && selectedCompanies.length > 0 && selectedMetric ? (
             <div className="mt-6">
-              <div className="mb-4 text-slate-300">
-                <h3 className="text-lg font-semibold mb-1">{selectedMetric}</h3>
-                <p className="text-sm text-slate-400">
-                  Showing {selectedCompanies.length} of {companiesWithMetric.length} {companiesWithMetric.length === 1 ? 'company' : 'companies'} with this metric
-                </p>
-                <p className="text-sm text-slate-400">
-                  {selectedCompanies.length} {selectedCompanies.length === 1 ? 'company' : 'companies'} selected
-                </p>
+              <div className="mb-6 text-slate-100">
+                <h2 className="text-2xl font-bold mb-2 text-slate-50">{selectedMetric}</h2>
+                <div className="flex items-center gap-4 text-sm text-slate-400">
+                  <span className="flex items-center gap-1">
+                    <span className="w-2 h-2 rounded-full bg-slate-500"></span>
+                    {selectedCompanies.length} {selectedCompanies.length === 1 ? 'company' : 'companies'} selected
+                  </span>
+                  {selectedCompanies.length < companiesWithMetric.length && (
+                    <span className="text-slate-500">
+                      ({companiesWithMetric.length} total available)
+                    </span>
+                  )}
+                </div>
               </div>
-              <ResponsiveContainer width="100%" height={600}>
+              <div className="bg-slate-950 rounded-lg border border-slate-800 p-6">
+                <ResponsiveContainer width="100%" height={600}>
                 {chartType === "line" ? (
-                  <LineChart data={chartData}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#475569" />
+                  <LineChart data={chartData} margin={{ top: 10, right: 30, left: 20, bottom: 60 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#334155" opacity={0.5} />
                     <XAxis 
                       dataKey="quarter" 
-                      stroke="#94a3b8"
+                      stroke="#cbd5e1"
                       angle={-45}
                       textAnchor="end"
                       height={80}
+                      tick={{ fill: '#cbd5e1', fontSize: 12 }}
+                      tickLine={{ stroke: '#64748b' }}
                     />
                     <YAxis 
-                      stroke="#94a3b8"
+                      stroke="#cbd5e1"
+                      tick={{ fill: '#cbd5e1', fontSize: 12 }}
+                      tickLine={{ stroke: '#64748b' }}
                       tickFormatter={(value) => {
                         if (isPercentageMetric) {
                           return formatPercentage(value);
@@ -590,7 +600,14 @@ export function DRChartView() {
                       }}
                     />
                     <Tooltip
-                      contentStyle={{ backgroundColor: "#1e293b", border: "1px solid #475569", color: "#e2e8f0" }}
+                      contentStyle={{ 
+                        backgroundColor: "#0f172a", 
+                        border: "1px solid #334155", 
+                        color: "#f1f5f9",
+                        borderRadius: "6px",
+                        padding: "8px 12px"
+                      }}
+                      labelStyle={{ color: "#cbd5e1", fontWeight: 600, marginBottom: "4px" }}
                       formatter={(value: any) => {
                         if (value === null || value === undefined) return "-";
                         if (isPercentageMetric) {
@@ -601,7 +618,11 @@ export function DRChartView() {
                         return formatNumber(value);
                       }}
                     />
-                    <Legend />
+                    <Legend 
+                      wrapperStyle={{ paddingTop: "20px" }}
+                      iconType="line"
+                      formatter={(value) => <span style={{ color: '#cbd5e1', fontSize: '13px' }}>{value}</span>}
+                    />
                     {selectedCompanies.map((company, index) => (
                       <Line
                         key={company}
@@ -609,24 +630,29 @@ export function DRChartView() {
                         dataKey={company}
                         stroke={COLORS[index % COLORS.length]}
                         name={company}
-                        strokeWidth={2}
-                        dot={{ r: 4 }}
+                        strokeWidth={3}
+                        dot={{ r: 5, fill: COLORS[index % COLORS.length], strokeWidth: 2, stroke: '#0f172a' }}
+                        activeDot={{ r: 7, strokeWidth: 2, stroke: '#0f172a' }}
                         connectNulls={false}
                       />
                     ))}
                   </LineChart>
                 ) : (
-                  <BarChart data={chartData}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#475569" />
+                  <BarChart data={chartData} margin={{ top: 10, right: 30, left: 20, bottom: 60 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#334155" opacity={0.5} />
                     <XAxis 
                       dataKey="quarter" 
-                      stroke="#94a3b8"
+                      stroke="#cbd5e1"
                       angle={-45}
                       textAnchor="end"
                       height={80}
+                      tick={{ fill: '#cbd5e1', fontSize: 12 }}
+                      tickLine={{ stroke: '#64748b' }}
                     />
                     <YAxis 
-                      stroke="#94a3b8"
+                      stroke="#cbd5e1"
+                      tick={{ fill: '#cbd5e1', fontSize: 12 }}
+                      tickLine={{ stroke: '#64748b' }}
                       tickFormatter={(value) => {
                         if (isPercentageMetric) {
                           return formatPercentage(value);
@@ -637,7 +663,14 @@ export function DRChartView() {
                       }}
                     />
                     <Tooltip
-                      contentStyle={{ backgroundColor: "#1e293b", border: "1px solid #475569", color: "#e2e8f0" }}
+                      contentStyle={{ 
+                        backgroundColor: "#0f172a", 
+                        border: "1px solid #334155", 
+                        color: "#f1f5f9",
+                        borderRadius: "6px",
+                        padding: "8px 12px"
+                      }}
+                      labelStyle={{ color: "#cbd5e1", fontWeight: 600, marginBottom: "4px" }}
                       formatter={(value: any) => {
                         if (value === null || value === undefined) return "-";
                         if (isPercentageMetric) {
@@ -648,18 +681,23 @@ export function DRChartView() {
                         return formatNumber(value);
                       }}
                     />
-                    <Legend />
+                    <Legend 
+                      wrapperStyle={{ paddingTop: "20px" }}
+                      formatter={(value) => <span style={{ color: '#cbd5e1', fontSize: '13px' }}>{value}</span>}
+                    />
                     {selectedCompanies.map((company, index) => (
                       <Bar
                         key={company}
                         dataKey={company}
                         fill={COLORS[index % COLORS.length]}
                         name={company}
+                        radius={[4, 4, 0, 0]}
                       />
                     ))}
                   </BarChart>
                 )}
               </ResponsiveContainer>
+              </div>
             </div>
           ) : (
             <div className="mt-6 text-center text-slate-400 py-12">
