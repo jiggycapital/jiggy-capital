@@ -29,18 +29,20 @@ export function HomeDashboard() {
       const portfolioRows = await fetchSheetData("portfolio");
       const portfolioData = parseSheetData(portfolioRows);
       
-      // Find column V header (index 21) from raw rows
+      // Find column V header (index 21) and column AT header (index 45) from raw rows
       const headerRowIndex = portfolioRows.findIndex((row, idx) => {
         const firstCell = (row[0] || '').toLowerCase();
         return firstCell.includes('ticker') || firstCell.includes('symbol');
       });
       const headerRow = headerRowIndex >= 0 ? portfolioRows[headerRowIndex] : [];
       const columnVHeader = headerRow.length > 21 ? headerRow[21]?.trim().replace(/^"|"$/g, '') : null;
+      const columnATHeader = headerRow.length > 45 ? headerRow[45]?.trim().replace(/^"|"$/g, '') : null;
       
-      // Store column V header name for later use
+      // Store column V and AT header names for later use
       const dataWithColumnV = portfolioData.map(row => ({
         ...row,
         _columnVHeader: columnVHeader,
+        _columnATHeader: columnATHeader,
       }));
       
       setPositionsData(dataWithColumnV);
@@ -86,6 +88,15 @@ export function HomeDashboard() {
       return parseNumeric(row[columnVHeader] || "");
     }
     return parseNumeric(row["Daily PnL %"] || row["Daily PnL"] || "");
+  };
+
+  // Get column AT value for YTD Gain
+  const getColumnATValue = (row: any): number | null => {
+    const columnATHeader = row._columnATHeader;
+    if (columnATHeader) {
+      return parseNumeric(row[columnATHeader] || "");
+    }
+    return null;
   };
 
   // Calculate comprehensive portfolio metrics (percentage-only)
@@ -151,10 +162,10 @@ export function HomeDashboard() {
       }
     }
 
-    // Calculate weighted average YTD gain
+    // Calculate weighted average YTD gain from column AT
     const ytdGains = positionsData
       .map(row => {
-        const ytd = parseNumeric(row["YTD Gain"] || row["YTD Gain %"] || row["YTD PnL %"] || row["YTD % Chg"] || row["Total Return (YTD) %"] || "0");
+        const ytd = getColumnATValue(row) || 0;
         const value = parseNumeric(row["Market Value"] || row["Value"] || "0") || 0;
         return { ytd: ytd || 0, value };
       })
@@ -206,7 +217,7 @@ export function HomeDashboard() {
           ticker: row.Ticker || row.Symbol || "",
           company: row.Name || row.Company || "",
           weight,
-          ytd: parseNumeric(row["YTD Gain"] || row["YTD Gain %"] || row["YTD PnL %"] || row["YTD % Chg"] || row["Total Return (YTD) %"] || "0") || 0,
+          ytd: getColumnATValue(row) || 0,
           totalGain: (() => {
             const costBasis = parseNumeric(row["Cost Basis"] || row["Cost"] || "0") || 0;
             return costBasis > 0 ? ((marketValue - costBasis) / costBasis) * 100 : 0;
