@@ -573,14 +573,27 @@ export function DRTableView() {
                     {headerGroup.headers.map((header) => (
                       <TableHead
                         key={header.id}
-                        className="bg-slate-800 text-slate-200 font-semibold"
+                        className={`bg-slate-800 text-slate-200 font-semibold ${
+                          header.column.getCanSort() ? 'cursor-pointer select-none hover:bg-slate-700' : ''
+                        }`}
+                        onClick={header.column.getToggleSortingHandler()}
                       >
-                        {header.isPlaceholder
-                          ? null
-                          : flexRender(
-                              header.column.columnDef.header,
-                              header.getContext()
-                            )}
+                        <div className="flex items-center gap-2">
+                          {header.isPlaceholder
+                            ? null
+                            : flexRender(
+                                header.column.columnDef.header,
+                                header.getContext()
+                              )}
+                          {header.column.getCanSort() && (
+                            <span className="text-slate-400">
+                              {{
+                                asc: " ↑",
+                                desc: " ↓",
+                              }[header.column.getIsSorted() as string] ?? " ↕"}
+                            </span>
+                          )}
+                        </div>
                       </TableHead>
                     ))}
                   </TableRow>
