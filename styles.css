@@ -1588,7 +1588,7 @@ body {
     
     .portfolio-item:first-child {
         min-width: 850px !important; /* Match data row min-width exactly */
-        width: 100% !important; /* Fill container width */
+        width: 850px !important; /* Match data row width exactly - same as min-width */
         max-width: none !important; /* Allow expansion */
         grid-template-columns: 45px minmax(110px, 1.4fr) minmax(65px, 0.8fr) minmax(65px, 0.8fr) minmax(70px, 0.9fr) minmax(75px, 1.1fr) minmax(80px, 1.2fr) minmax(65px, 0.8fr) minmax(75px, 1fr) minmax(75px, 1fr) minmax(75px, 1fr) !important;
         gap: 0.8rem !important; /* Match data row gap exactly */
@@ -1922,7 +1922,7 @@ body {
         background: #f8fafc !important; /* Solid background for sticky headers */
         /* CRITICAL: Ensure header uses EXACT same layout as data rows on tablet */
         min-width: 750px !important; /* Match data row min-width exactly */
-        width: 100% !important; /* Fill container width */
+        width: 750px !important; /* Match data row width exactly - same as min-width */
         max-width: none !important; /* Allow expansion */
         grid-template-columns: 35px minmax(90px, 1.4fr) minmax(55px, 0.8fr) minmax(55px, 0.8fr) minmax(65px, 1fr) minmax(70px, 1.1fr) minmax(75px, 1.2fr) minmax(55px, 0.8fr) minmax(65px, 1fr) minmax(65px, 1fr) minmax(65px, 1fr) !important;
         gap: 0.6rem !important; /* Match data row gap exactly */
