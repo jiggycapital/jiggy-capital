@@ -18,6 +18,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { fetchAllCompanyData, getAllMetrics, getAllQuarters, type CompanyFinancialData } from "@/lib/financial-sheets";
 import { formatCurrency, formatNumber, formatPercentage, parseNumeric } from "@/lib/utils";
 import { Download } from "lucide-react";
