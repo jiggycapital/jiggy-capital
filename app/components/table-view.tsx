@@ -25,7 +25,7 @@ import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ColumnSelector } from "@/components/column-selector";
-import { fetchSheetData, parseSheetData, type DatasetType } from "@/lib/google-sheets";
+import { fetchSheetData, parseSheetData, fetchLogos, type DatasetType } from "@/lib/google-sheets";
 import { formatCurrency, formatNumber, formatPercentage, parseNumeric } from "@/lib/utils";
 import { StockDetailSheet } from "@/components/stock-detail-sheet";
 import type { PortfolioRow } from "@/types/portfolio";
@@ -34,6 +34,7 @@ import { Settings2, Download } from "lucide-react";
 export function TableView() {
   const [positionsData, setPositionsData] = useState<PortfolioRow[]>([]);
   const [watchlistData, setWatchlistData] = useState<PortfolioRow[]>([]);
+  const [logos, setLogos] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<"positions" | "watchlist" | "combined">("positions");
@@ -52,12 +53,14 @@ export function TableView() {
   async function loadData() {
     try {
       setLoading(true);
-      const [positionsRows, watchlistRows] = await Promise.all([
+      const [positionsRows, watchlistRows, logosData] = await Promise.all([
         fetchSheetData("positions"),
         fetchSheetData("watchlist"),
+        fetchLogos(),
       ]);
       setPositionsData(parseSheetData(positionsRows));
       setWatchlistData(parseSheetData(watchlistRows));
+      setLogos(logosData);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to load data");
     } finally {
@@ -156,6 +159,28 @@ export function TableView() {
             cell: ({ row }) => {
               try {
                 const value = row.getValue(key) as string;
+                // Check if this is the Ticker column and we have a logo
+                const isTickerColumn = key.toLowerCase() === 'ticker' || key.toLowerCase() === 'symbol';
+                if (isTickerColumn && value) {
+                  const ticker = String(value).toUpperCase().trim();
+                  const logoUrl = logos[ticker];
+                  if (logoUrl) {
+                    return (
+                      <div className="flex items-center gap-2">
+                        <img 
+                          src={logoUrl} 
+                          alt={`${ticker} logo`}
+                          className="h-6 w-6 object-contain flex-shrink-0"
+                          onError={(e) => {
+                            // Hide image on error, show ticker only
+                            (e.target as HTMLImageElement).style.display = 'none';
+                          }}
+                        />
+                        <span>{value}</span>
+                      </div>
+                    );
+                  }
+                }
                 return formatCellValue(value, key, isNumeric);
               } catch (err) {
                 console.error('[TABLE DEBUG] Error in cell renderer for', key, err);
@@ -190,7 +215,7 @@ export function TableView() {
     });
 
     return builtColumns;
-  }, [visibleColumns, currentData]);
+  }, [visibleColumns, currentData, logos]);
 
   console.log('[TABLE DEBUG] Before useReactTable:', {
     dataCount: currentData.length,

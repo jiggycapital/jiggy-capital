@@ -9,6 +9,7 @@ const SHEET_IDS = {
 const GIDS = {
   positionsDetailed: "1134366200",
   watchlistDetailed: "695255397",
+  logosPt2: "1789448141",
 } as const;
 
 export type DatasetType = "positions" | "watchlist";
@@ -26,6 +27,10 @@ export const SHEET_CONFIGS: Record<DatasetType, SheetConfig> = {
   watchlist: {
     sheetId: SHEET_IDS.watchlistDetailed,
     gid: GIDS.watchlistDetailed,
+  },
+  logos: {
+    sheetId: SHEET_IDS.positionsDetailed,
+    gid: GIDS.logosPt2,
   },
 };
 
@@ -172,5 +177,56 @@ export function parseSheetData(rows: string[][]): Record<string, string>[] {
   }
   
   return data;
+}
+
+// Parse logos data - expects Ticker in column A (index 0) and Link in column C (index 2)
+export function parseLogosData(rows: string[][]): Record<string, string> {
+  const logoMap: Record<string, string> = {};
+  const headerRowIndex = findHeaderRow(rows);
+  const dataStartRow = findDataStartRow(rows, headerRowIndex);
+  
+  for (let i = dataStartRow; i < rows.length; i++) {
+    const row = rows[i];
+    const ticker = (row[0] || '').trim().replace(/^"|"$/g, '').toUpperCase();
+    const logoUrl = (row[2] || '').trim().replace(/^"|"$/g, ''); // Column C (index 2)
+    
+    if (ticker && logoUrl && ticker !== '' && logoUrl !== '') {
+      logoMap[ticker] = logoUrl;
+    }
+  }
+  
+  return logoMap;
+}
+
+export async function fetchLogos(): Promise<Record<string, string>> {
+  const cacheKey = 'logos';
+  const cached = cache.get(cacheKey);
+  
+  if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
+    return cached.data;
+  }
+
+  const config = SHEET_CONFIGS.logos;
+  const url = getSheetUrl(config);
+  
+  try {
+    const response = await fetch(url, {
+      next: { revalidate: 300 }, // Revalidate every 5 minutes
+    });
+    
+    if (!response.ok) {
+      throw new Error(`Failed to fetch logos: ${response.statusText}`);
+    }
+    
+    const csvText = await response.text();
+    const rows = parseCSV(csvText);
+    const logoMap = parseLogosData(rows);
+    
+    cache.set(cacheKey, { data: logoMap, timestamp: Date.now() });
+    return logoMap;
+  } catch (error) {
+    console.error('Error fetching logos:', error);
+    return {};
+  }
 }
 
