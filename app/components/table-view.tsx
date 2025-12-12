@@ -295,6 +295,17 @@ export function TableView() {
                     );
                   }
                 }
+                // Special handling for Company column - clean and truncate
+                const isCompanyColumn = key.toLowerCase() === 'company' || key.toLowerCase() === 'name';
+                if (isCompanyColumn && value) {
+                  const cleaned = cleanCompanyName(String(value));
+                  return (
+                    <span className="text-slate-300 truncate block max-w-[150px]" title={String(value)}>
+                      {cleaned}
+                    </span>
+                  );
+                }
+                
                 return formatCellValue(value, key, isNumeric, columnCategories[key]);
               } catch (err) {
                 console.error('[TABLE DEBUG] Error in cell renderer for', key, err);
@@ -550,11 +561,14 @@ export function TableView() {
               <TableHeader className="sticky top-0 bg-slate-900 z-10">
                 {table.getHeaderGroups().map((headerGroup) => (
                   <TableRow key={headerGroup.id} className="border-slate-800 hover:bg-slate-800/50">
-                    {headerGroup.headers.map((header) => (
+                    {headerGroup.headers.map((header) => {
+                      const isCompanyColumn = header.column.id.toLowerCase() === 'company' || header.column.id.toLowerCase() === 'name';
+                      return (
                       <TableHead
                         key={header.id}
-                        className="text-slate-300 font-mono text-xs cursor-pointer select-none whitespace-nowrap bg-slate-900"
+                        className={`text-slate-300 font-mono text-xs cursor-pointer select-none whitespace-nowrap bg-slate-900 ${isCompanyColumn ? 'w-[150px] max-w-[150px]' : ''}`}
                         onClick={header.column.getToggleSortingHandler()}
+                        style={isCompanyColumn ? { width: '150px', maxWidth: '150px' } : undefined}
                       >
                         <div className="flex items-center gap-2">
                           {header.isPlaceholder
@@ -566,7 +580,8 @@ export function TableView() {
                           }[header.column.getIsSorted() as string] ?? " ↕"}
                         </div>
                       </TableHead>
-                    ))}
+                    );
+                    })}
                   </TableRow>
                 ))}
               </TableHeader>
@@ -746,6 +761,24 @@ function formatColumnName(name: string): string {
   formatted = formatted.replace(/\s+/g, ' ').trim();
   
   return formatted;
+}
+
+// Clean company names by removing common suffixes and truncating
+function cleanCompanyName(name: string): string {
+  if (!name) return name;
+  
+  // Remove common suffixes (case-insensitive, with various punctuation)
+  let cleaned = name
+    .replace(/\s+(Inc|Incorporated|Corp|Corporation|Ltd|Limited|LLC|LLP|PLC|Holding|Holdings|Holdings Ltd|Holdings Inc|Holdings Corp|Group|Co|Company|Co\.|S\.A\.|S\.A|NV|N\.V\.|ADR|Unsponsored|Sponsored).*$/i, '')
+    .replace(/\s+-\s+.*$/i, '') // Remove everything after " - " (like " - ADR Representing...")
+    .trim();
+  
+  // Truncate to 20 characters with ellipsis
+  if (cleaned.length > 20) {
+    cleaned = cleaned.substring(0, 20) + '...';
+  }
+  
+  return cleaned;
 }
 
 function formatCellValue(value: string, columnKey: string, isNumeric: boolean, category?: string): React.ReactNode {
