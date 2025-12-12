@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { JetBrains_Mono } from "next/font/google";
 import "./globals.css";
-import { Navigation } from "@/components/navigation";
+import { Sidebar } from "@/components/sidebar";
 
 const jetbrainsMono = JetBrains_Mono({
   variable: "--font-mono",
@@ -22,8 +22,8 @@ export default function RootLayout({
   return (
     <html lang="en" className="dark">
       <body className={`${jetbrainsMono.variable} antialiased terminal-bg`}>
-        <Navigation />
-        <main className="min-h-screen">{children}</main>
+        <Sidebar />
+        <main className="ml-64 min-h-screen">{children}</main>
       </body>
     </html>
   );
