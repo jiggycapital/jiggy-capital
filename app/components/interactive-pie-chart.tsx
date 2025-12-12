@@ -86,10 +86,11 @@ export function InteractivePieChart({ positionsData, logos, view, onViewChange }
     'Cash': '#22C55E'
   };
 
-  const getColor = (datum: any, index: number) => {
+  const getColor = (datum: any) => {
     if (view === "sector") {
-      return sectorColorMap[datum.id] || COLORS[index % COLORS.length];
+      return sectorColorMap[datum.id] || COLORS[chartData.findIndex(d => d.id === datum.id) % COLORS.length];
     }
+    const index = chartData.findIndex(d => d.id === datum.id);
     return COLORS[index % COLORS.length];
   };
 
