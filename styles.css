@@ -454,8 +454,8 @@ body {
     flex-direction: column;
     gap: 0;
     width: 100%;
-    max-width: 100%;
-    margin-top: 60px; /* Reduced spacing between title and table */
+    max-width: 85%; /* Constrain to 85% of container to prevent over-extension */
+    margin: 60px auto 0; /* Center the table */
     overflow-x: auto; /* Allow horizontal scroll to keep header/background aligned */
     -webkit-overflow-scrolling: touch;
 }
