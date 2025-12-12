@@ -38,7 +38,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ColumnSelector } from "@/components/column-selector";
 import { fetchSheetData, parseSheetData, fetchLogos, extractColumnCategories, type DatasetType } from "@/lib/google-sheets";
-import { formatCurrency, formatNumber, formatPercentage, parseNumeric } from "@/lib/utils";
+import { formatCurrency, formatCurrencyBillions, formatMultiple, formatNumber, formatPercentage, formatDate, parseNumeric } from "@/lib/utils";
 import { StockDetailSheet } from "@/components/stock-detail-sheet";
 import type { PortfolioRow } from "@/types/portfolio";
 import { Settings2, Download, Save, FolderOpen, Trash2 } from "lucide-react";
@@ -294,7 +294,7 @@ export function TableView() {
                     );
                   }
                 }
-                return formatCellValue(value, key, isNumeric);
+                return formatCellValue(value, key, isNumeric, columnCategories[key]);
               } catch (err) {
                 console.error('[TABLE DEBUG] Error in cell renderer for', key, err);
                 return <span className="text-slate-500">-</span>;
@@ -720,27 +720,241 @@ function formatColumnName(name: string): string {
   return formatted;
 }
 
-function formatCellValue(value: string, columnKey: string, isNumeric: boolean): React.ReactNode {
+function formatCellValue(value: string, columnKey: string, isNumeric: boolean, category?: string): React.ReactNode {
   if (!value || value === "" || value === "#N/A" || value === "#DIV/0!") {
     return <span className="text-slate-500">-</span>;
   }
 
+  const columnKeyLower = columnKey.toLowerCase();
+  const categoryLower = category?.toLowerCase() || "";
+
+  // Earnings Checklist: Text
+  if (categoryLower.includes("earnings checklist")) {
+    return <span className="text-slate-300">{value}</span>;
+  }
+
+  // Earnings Comps: Earnings Date = Date, everything else = Currency
+  if (categoryLower.includes("earnings comps")) {
+    if (columnKeyLower.includes("earnings date") || columnKeyLower.includes("date")) {
+      return <span className="text-slate-300">{formatDate(value)}</span>;
+    }
+    if (isNumeric) {
+      const num = parseNumeric(value);
+      if (num !== null) {
+        return <span className="text-slate-300">{formatCurrency(num)}</span>;
+      }
+    }
+    return <span className="text-slate-300">{value}</span>;
+  }
+
+  // Earnings Expectations: Currency and then Percentages
+  if (categoryLower.includes("earnings expectations")) {
+    if (isNumeric) {
+      const num = parseNumeric(value);
+      if (num !== null) {
+        // Check if it's a percentage column (usually has % in name or is a ratio)
+        if (columnKeyLower.includes("percent") || columnKeyLower.includes("%") || 
+            columnKeyLower.includes("ratio") || columnKeyLower.includes("margin") ||
+            columnKeyLower.includes("growth") || columnKeyLower.includes("change")) {
+          const colorClass = num > 0 ? "text-green-400" : num < 0 ? "text-red-400" : "text-slate-300";
+          return <span className={colorClass}>{formatPercentage(num)}</span>;
+        }
+        return <span className="text-slate-300">{formatCurrency(num)}</span>;
+      }
+    }
+    return <span className="text-slate-300">{value}</span>;
+  }
+
+  // Earnings Results: Revenue (Currency) and then Percentages
+  if (categoryLower.includes("earnings results")) {
+    if (isNumeric) {
+      const num = parseNumeric(value);
+      if (num !== null) {
+        if (columnKeyLower.includes("revenue")) {
+          return <span className="text-slate-300">{formatCurrency(num)}</span>;
+        }
+        // Everything else is percentage
+        const colorClass = num > 0 ? "text-green-400" : num < 0 ? "text-red-400" : "text-slate-300";
+        return <span className={colorClass}>{formatPercentage(num)}</span>;
+      }
+    }
+    return <span className="text-slate-300">{value}</span>;
+  }
+
+  // Price Action (not 52W): Price is Currency, everything else is Percentages
+  if (categoryLower.includes("price action") && !categoryLower.includes("52w")) {
+    if (isNumeric) {
+      const num = parseNumeric(value);
+      if (num !== null) {
+        if (columnKeyLower.includes("price") && !columnKeyLower.includes("change") && 
+            !columnKeyLower.includes("%") && !columnKeyLower.includes("percent") &&
+            !columnKeyLower.includes("52w")) {
+          return <span className="text-slate-300">{formatCurrency(num)}</span>;
+        }
+        // Everything else is percentage
+        const colorClass = num > 0 ? "text-green-400" : num < 0 ? "text-red-400" : "text-slate-300";
+        return <span className={colorClass}>{formatPercentage(num)}</span>;
+      }
+    }
+    return <span className="text-slate-300">{value}</span>;
+  }
+
+  // Fundamentals: Mix - FCF Yield is %, P/E is multiple with "x"
+  if (categoryLower.includes("fundamentals") || categoryLower.includes("fundementals")) {
+    if (isNumeric) {
+      const num = parseNumeric(value);
+      if (num !== null) {
+        if (columnKeyLower.includes("fcf yield") || columnKeyLower.includes("yield")) {
+          return <span className="text-slate-300">{formatPercentage(num)}</span>;
+        }
+        if (columnKeyLower.includes("p/e") || columnKeyLower.includes("pe") || 
+            columnKeyLower.includes("multiple") || columnKeyLower.includes("p/fcf") ||
+            columnKeyLower.includes("ev/") || columnKeyLower.includes("p/s")) {
+          return <span className="text-slate-300">{formatMultiple(num)}</span>;
+        }
+        // Default to currency for other numeric values
+        return <span className="text-slate-300">{formatCurrency(num)}</span>;
+      }
+    }
+    return <span className="text-slate-300">{value}</span>;
+  }
+
+  // Historical Financials: Currency in Billions, then Percentages for Gross Margin
+  if (categoryLower.includes("historical financials")) {
+    if (isNumeric) {
+      const num = parseNumeric(value);
+      if (num !== null) {
+        if (columnKeyLower.includes("margin") || columnKeyLower.includes("percent") || 
+            columnKeyLower.includes("%") || columnKeyLower.includes("ratio")) {
+          return <span className="text-slate-300">{formatPercentage(num)}</span>;
+        }
+        // Revenue, EBITDA, FCF, etc. in billions
+        return <span className="text-slate-300">{formatCurrencyBillions(num)}</span>;
+      }
+    }
+    return <span className="text-slate-300">{value}</span>;
+  }
+
+  // Historical Margins/Growth: Percentages
+  if (categoryLower.includes("historical margins") || categoryLower.includes("historical growth")) {
+    if (isNumeric) {
+      const num = parseNumeric(value);
+      if (num !== null) {
+        const colorClass = num > 0 ? "text-green-400" : num < 0 ? "text-red-400" : "text-slate-300";
+        return <span className={colorClass}>{formatPercentage(num)}</span>;
+      }
+    }
+    return <span className="text-slate-300">{value}</span>;
+  }
+
+  // Forward Estimates: Currency in Billions
+  if (categoryLower.includes("forward estimates")) {
+    if (isNumeric) {
+      const num = parseNumeric(value);
+      if (num !== null) {
+        return <span className="text-slate-300">{formatCurrencyBillions(num)}</span>;
+      }
+    }
+    return <span className="text-slate-300">{value}</span>;
+  }
+
+  // Forward Growth Estimates: Percentages
+  if (categoryLower.includes("forward growth estimates")) {
+    if (isNumeric) {
+      const num = parseNumeric(value);
+      if (num !== null) {
+        const colorClass = num > 0 ? "text-green-400" : num < 0 ? "text-red-400" : "text-slate-300";
+        return <span className={colorClass}>{formatPercentage(num)}</span>;
+      }
+    }
+    return <span className="text-slate-300">{value}</span>;
+  }
+
+  // Forward Multiples: Number with "x" at end
+  if (categoryLower.includes("forward multiples")) {
+    if (isNumeric) {
+      const num = parseNumeric(value);
+      if (num !== null) {
+        return <span className="text-slate-300">{formatMultiple(num)}</span>;
+      }
+    }
+    return <span className="text-slate-300">{value}</span>;
+  }
+
+  // Moving Averages: Currency for first two, then Percentages
+  if (categoryLower.includes("moving averages")) {
+    if (isNumeric) {
+      const num = parseNumeric(value);
+      if (num !== null) {
+        // First two columns are typically price columns
+        // Check if it's a price column (not a percentage column)
+        if ((columnKeyLower.includes("high") || columnKeyLower.includes("low") || 
+             columnKeyLower.includes("price") || columnKeyLower.includes("average")) && 
+            !columnKeyLower.includes("%") && !columnKeyLower.includes("percent") &&
+            !columnKeyLower.includes("change")) {
+          return <span className="text-slate-300">{formatCurrency(num)}</span>;
+        }
+        // Everything else is percentage
+        const colorClass = num > 0 ? "text-green-400" : num < 0 ? "text-red-400" : "text-slate-300";
+        return <span className={colorClass}>{formatPercentage(num)}</span>;
+      }
+    }
+    return <span className="text-slate-300">{value}</span>;
+  }
+
+  // 52W Price Action: Currency for first two, then Percentages
+  if (categoryLower.includes("52w price action") || categoryLower.includes("52w")) {
+    if (isNumeric) {
+      const num = parseNumeric(value);
+      if (num !== null) {
+        // First two columns are typically "52w High" and "52w Low"
+        if ((columnKeyLower.includes("52w high") || columnKeyLower.includes("52w low") || 
+             (columnKeyLower.includes("high") && columnKeyLower.includes("52")) ||
+             (columnKeyLower.includes("low") && columnKeyLower.includes("52"))) && 
+            !columnKeyLower.includes("%") && !columnKeyLower.includes("percent") &&
+            !columnKeyLower.includes("change")) {
+          return <span className="text-slate-300">{formatCurrency(num)}</span>;
+        }
+        // Everything else is percentage
+        const colorClass = num > 0 ? "text-green-400" : num < 0 ? "text-red-400" : "text-slate-300";
+        return <span className={colorClass}>{formatPercentage(num)}</span>;
+      }
+    }
+    return <span className="text-slate-300">{value}</span>;
+  }
+
+  // Fallback: Use original logic for uncategorized columns
   if (isNumeric) {
     const num = parseNumeric(value);
-    if (num === null) return value;
+    if (num === null) return <span className="text-slate-300">{value}</span>;
 
-    const isGainColumn = columnKey.toLowerCase().includes("gain") ||
-      columnKey.toLowerCase().includes("change") ||
-      columnKey.toLowerCase().includes("return") ||
-      columnKey.toLowerCase().includes("growth");
+    const isGainColumn = columnKeyLower.includes("gain") ||
+      columnKeyLower.includes("change") ||
+      columnKeyLower.includes("return") ||
+      columnKeyLower.includes("growth");
 
     if (isGainColumn) {
       const colorClass = num > 0 ? "text-green-400" : num < 0 ? "text-red-400" : "text-slate-300";
       return <span className={colorClass}>{formatPercentage(num)}</span>;
     }
 
-    if (columnKey.toLowerCase().includes("cap") || columnKey.toLowerCase().includes("revenue") ||
-        columnKey.toLowerCase().includes("ebitda") || columnKey.toLowerCase().includes("fcf")) {
+    // Market Cap and Enterprise Value should be in billions format
+    if (columnKeyLower.includes("market cap") || columnKeyLower.includes("enterprise value") || 
+        (columnKeyLower.includes("ev") && !columnKeyLower.includes("revenue"))) {
+      return <span className="text-slate-300">{formatCurrencyBillions(num)}</span>;
+    }
+
+    // Check for multiples (P/E, P/FCF, EV/, P/S, etc.)
+    if (columnKeyLower.includes("p/e") || columnKeyLower.includes("pe") || 
+        columnKeyLower.includes("p/fcf") || columnKeyLower.includes("pfcf") ||
+        columnKeyLower.includes("ev/") || columnKeyLower.includes("ev ") ||
+        columnKeyLower.includes("p/s") || columnKeyLower.includes("ps") ||
+        columnKeyLower.includes("multiple")) {
+      return <span className="text-slate-300">{formatMultiple(num)}</span>;
+    }
+
+    if (columnKeyLower.includes("revenue") || columnKeyLower.includes("ebitda") || 
+        columnKeyLower.includes("fcf") || columnKeyLower.includes("cap")) {
       return <span className="text-slate-300">{formatCurrency(num)}</span>;
     }
 
