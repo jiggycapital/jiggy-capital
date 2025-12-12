@@ -13,6 +13,22 @@ interface InteractivePieChartProps {
 }
 
 export function InteractivePieChart({ positionsData, logos, view, onViewChange }: InteractivePieChartProps) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [containerSize, setContainerSize] = useState({ width: 0, height: 0 });
+
+  useEffect(() => {
+    const updateSize = () => {
+      if (containerRef.current) {
+        const rect = containerRef.current.getBoundingClientRect();
+        setContainerSize({ width: rect.width, height: rect.height });
+      }
+    };
+    
+    updateSize();
+    window.addEventListener('resize', updateSize);
+    return () => window.removeEventListener('resize', updateSize);
+  }, []);
+
   const chartData = useMemo(() => {
     const totalValue = positionsData
       .map(row => parseNumeric(row["Market Value"] || row["Value"] || "0") || 0)
@@ -94,8 +110,50 @@ export function InteractivePieChart({ positionsData, logos, view, onViewChange }
     return COLORS[index % COLORS.length];
   };
 
-  // Filter items that should show callouts (weight > 2.95%)
-  const calloutItems = chartData.filter(item => item.value > 2.95);
+  // Calculate callout positions based on actual pie slice angles
+  const calloutPositions = useMemo(() => {
+    const weightThreshold = 2.95;
+    const calloutItems = chartData.filter(item => item.value > weightThreshold);
+    
+    if (calloutItems.length === 0 || containerSize.width === 0) {
+      return [];
+    }
+
+    const totalWeight = chartData.reduce((sum, item) => sum + item.value, 0);
+    const chartCenterX = containerSize.width / 2;
+    const chartCenterY = containerSize.height / 2;
+    const baseRadius = Math.min(chartCenterX, chartCenterY) * 0.6;
+    const baseCalloutRadius = Math.min(chartCenterX, chartCenterY) * 1.03;
+
+    return calloutItems.map((item) => {
+      const itemIndex = chartData.findIndex(d => d.id === item.id);
+      let sliceStartAngle = -90; // Start at top (-90 degrees)
+      
+      // Calculate cumulative angle up to this slice
+      for (let i = 0; i < itemIndex; i++) {
+        const sliceWeight = chartData[i].value;
+        const sliceAngle = (sliceWeight / totalWeight) * 360;
+        sliceStartAngle += sliceAngle;
+      }
+      
+      // Calculate the middle angle of this slice
+      const sliceWeight = item.value;
+      const sliceAngle = (sliceWeight / totalWeight) * 360;
+      const midAngle = sliceStartAngle + (sliceAngle / 2);
+      const angleRad = (midAngle * Math.PI) / 180;
+      
+      // Calculate callout position
+      const calloutX = chartCenterX + Math.cos(angleRad) * baseCalloutRadius;
+      const calloutY = chartCenterY + Math.sin(angleRad) * baseCalloutRadius;
+
+      return {
+        item,
+        x: calloutX,
+        y: calloutY,
+        angle: midAngle,
+      };
+    });
+  }, [chartData, containerSize]);
 
   return (
     <div className="relative">
@@ -120,7 +178,11 @@ export function InteractivePieChart({ positionsData, logos, view, onViewChange }
       </div>
 
       {/* Chart Container */}
-      <div className="relative w-full" style={{ height: "500px" }}>
+      <div 
+        ref={containerRef}
+        className="relative w-full" 
+        style={{ height: "500px" }}
+      >
         <ResponsivePie
           data={chartData}
           margin={{ top: 40, right: 80, bottom: 80, left: 80 }}
@@ -131,12 +193,8 @@ export function InteractivePieChart({ positionsData, logos, view, onViewChange }
           colors={getColor}
           borderWidth={2}
           borderColor={{ from: 'color', modifiers: [['darker', 0.2]] }}
-          arcLinkLabelsSkipAngle={10}
-          arcLinkLabelsTextColor="#94a3b8"
-          arcLinkLabelsThickness={2}
-          arcLinkLabelsColor={{ from: 'color' }}
-          arcLabelsSkipAngle={10}
-          arcLabelsTextColor={{ from: 'color', modifiers: [['darker', 2]] }}
+          arcLinkLabels={false}
+          arcLabels={false}
           tooltip={({ datum }) => (
             <div className="bg-slate-900 border border-slate-700 rounded-lg p-3 shadow-xl">
               <div className="text-slate-100 font-semibold">{datum.label}</div>
@@ -146,32 +204,22 @@ export function InteractivePieChart({ positionsData, logos, view, onViewChange }
           legends={[]}
         />
 
-        {/* Custom Callouts */}
-        {calloutItems.map((item, index) => {
-          // Calculate angle for positioning (simplified - Nivo handles this internally)
-          // For a more accurate implementation, we'd need to calculate based on pie slice angles
-          const angle = (360 / chartData.length) * chartData.findIndex(d => d.id === item.id) - 90;
-          const angleRad = (angle * Math.PI) / 180;
-          const radius = 180;
-          const calloutRadius = 220;
-          const centerX = 50; // percentage
-          const centerY = 50; // percentage
+        {/* Custom Callouts with Logos */}
+        {calloutPositions.map((position) => {
+          const { item, x, y } = position;
           
-          const x = centerX + Math.cos(angleRad) * (calloutRadius / 5);
-          const y = centerY + Math.sin(angleRad) * (calloutRadius / 5);
-
           return (
             <div
               key={item.id}
-              className="absolute pointer-events-none"
+              className="absolute pointer-events-auto"
               style={{
-                left: `${x}%`,
-                top: `${y}%`,
+                left: `${x}px`,
+                top: `${y}px`,
                 transform: 'translate(-50%, -50%)',
                 zIndex: 10,
               }}
             >
-              <div className="bg-white/95 border border-slate-300 rounded-lg p-2 shadow-lg flex flex-col items-center min-w-[56px] min-h-[56px] justify-center hover:scale-110 transition-transform">
+              <div className="bg-white/95 border border-slate-300 rounded-lg p-2 shadow-lg flex flex-col items-center min-w-[56px] min-h-[56px] justify-center hover:scale-110 transition-transform cursor-pointer">
                 {view === "company" && item.logo ? (
                   <>
                     <img
@@ -188,7 +236,7 @@ export function InteractivePieChart({ positionsData, logos, view, onViewChange }
                   </>
                 ) : (
                   <>
-                    <div className="text-xs font-semibold text-slate-700 mb-1">
+                    <div className="text-xs font-semibold text-slate-700 mb-1 text-center">
                       {item.label.length > 12 ? item.label.substring(0, 12) + "..." : item.label}
                     </div>
                     <div className="text-xs text-slate-600 font-semibold">
@@ -204,4 +252,3 @@ export function InteractivePieChart({ positionsData, logos, view, onViewChange }
     </div>
   );
 }
-
