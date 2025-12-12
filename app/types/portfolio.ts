@@ -1,7 +1,7 @@
 // TypeScript interfaces for portfolio data
 
 export interface PortfolioRow {
-  [key: string]: string | number | null;
+  [key: string]: string | number | null | undefined;
   Ticker?: string;
   Company?: string;
   Sector?: string;
