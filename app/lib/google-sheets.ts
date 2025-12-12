@@ -1,0 +1,176 @@
+// Google Sheets API integration
+// Since we're using public sheets, we can use the CSV export method
+
+const SHEET_IDS = {
+  positionsDetailed: "1xmD_h2_1I-kJkh-MsNUhxXMV7WDHrAlClj1Uq5jLcFE",
+  watchlistDetailed: "1xmD_h2_1I-kJkh-MsNUhxXMV7WDHrAlClj1Uq5jLcFE",
+} as const;
+
+const GIDS = {
+  positionsDetailed: "1134366200",
+  watchlistDetailed: "695255397",
+} as const;
+
+export type DatasetType = "positions" | "watchlist";
+
+export interface SheetConfig {
+  sheetId: string;
+  gid: string;
+}
+
+export const SHEET_CONFIGS: Record<DatasetType, SheetConfig> = {
+  positions: {
+    sheetId: SHEET_IDS.positionsDetailed,
+    gid: GIDS.positionsDetailed,
+  },
+  watchlist: {
+    sheetId: SHEET_IDS.watchlistDetailed,
+    gid: GIDS.watchlistDetailed,
+  },
+};
+
+export function getSheetUrl(config: SheetConfig): string {
+  return `https://docs.google.com/spreadsheets/d/${config.sheetId}/export?format=csv&gid=${config.gid}`;
+}
+
+// Simple in-memory cache
+const cache = new Map<string, { data: any; timestamp: number }>();
+const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+
+export async function fetchSheetData(dataset: DatasetType): Promise<string[][]> {
+  const cacheKey = `sheet-${dataset}`;
+  const cached = cache.get(cacheKey);
+  
+  if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
+    return cached.data;
+  }
+
+  const config = SHEET_CONFIGS[dataset];
+  const url = getSheetUrl(config);
+  
+  try {
+    const response = await fetch(url, {
+      next: { revalidate: 300 }, // Revalidate every 5 minutes
+    });
+    
+    if (!response.ok) {
+      throw new Error(`Failed to fetch sheet: ${response.statusText}`);
+    }
+    
+    const csvText = await response.text();
+    const rows = parseCSV(csvText);
+    
+    cache.set(cacheKey, { data: rows, timestamp: Date.now() });
+    return rows;
+  } catch (error) {
+    console.error(`Error fetching ${dataset} data:`, error);
+    throw error;
+  }
+}
+
+function parseCSV(csv: string): string[][] {
+  const lines = csv.split('\n').filter(line => line.trim());
+  const rows: string[][] = [];
+  
+  for (const line of lines) {
+    const values = parseCSVLine(line);
+    rows.push(values);
+  }
+  
+  return rows;
+}
+
+function parseCSVLine(line: string): string[] {
+  const values: string[] = [];
+  let current = '';
+  let inQuotes = false;
+  
+  for (let i = 0; i < line.length; i++) {
+    const char = line[i];
+    
+    if (char === '"') {
+      inQuotes = !inQuotes;
+    } else if (char === ',' && !inQuotes) {
+      values.push(current.trim());
+      current = '';
+    } else {
+      current += char;
+    }
+  }
+  values.push(current.trim());
+  
+  return values;
+}
+
+export function findHeaderRow(rows: string[][]): number {
+  for (let i = 0; i < Math.min(10, rows.length); i++) {
+    const firstCell = rows[i][0]?.toLowerCase() || '';
+    if (
+      firstCell.includes('ticker') ||
+      firstCell.includes('company') ||
+      firstCell.includes('symbol')
+    ) {
+      return i;
+    }
+  }
+  return 0;
+}
+
+export function findDataStartRow(rows: string[][], headerRow: number): number {
+  for (let i = headerRow + 1; i < Math.min(headerRow + 15, rows.length); i++) {
+    const firstCell = (rows[i][0] || '').trim().toLowerCase();
+    if (
+      !firstCell.includes('general') &&
+      !firstCell.includes('information') &&
+      !firstCell.includes('median') &&
+      !firstCell.includes('min') &&
+      !firstCell.includes('max') &&
+      !firstCell.includes('sum') &&
+      firstCell !== '' &&
+      firstCell.length < 10
+    ) {
+      return i;
+    }
+  }
+  return headerRow + 1;
+}
+
+export function parseSheetData(rows: string[][]): Record<string, string>[] {
+  const headerRowIndex = findHeaderRow(rows);
+  const headers = rows[headerRowIndex].map(h => h.trim().replace(/^"|"$/g, ''));
+  const dataStartRow = findDataStartRow(rows, headerRowIndex);
+  
+  const data: Record<string, string>[] = [];
+  
+  for (let i = dataStartRow; i < rows.length; i++) {
+    const row = rows[i];
+    const firstCell = (row[0] || '').trim().replace(/^"|"$/g, '');
+    
+    // Stop at summary rows
+    if (
+      firstCell.toLowerCase().includes('median') ||
+      firstCell.toLowerCase().includes('min') ||
+      firstCell.toLowerCase().includes('max') ||
+      firstCell.toLowerCase().includes('sum') ||
+      firstCell === ''
+    ) {
+      break;
+    }
+    
+    const record: Record<string, string> = {};
+    headers.forEach((header, index) => {
+      let value = (row[index] || '').trim().replace(/^"|"$/g, '');
+      if (value === '#N/A' || value === '#DIV/0!' || value === '#VALUE!' || value === '#REF!') {
+        value = '';
+      }
+      record[header] = value;
+    });
+    
+    if (record[headers[0]] && record[headers[0]].length > 0) {
+      data.push(record);
+    }
+  }
+  
+  return data;
+}
+
