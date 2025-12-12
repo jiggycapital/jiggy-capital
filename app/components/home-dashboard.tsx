@@ -42,10 +42,22 @@ export function HomeDashboard() {
       
       setPositionsData(dataWithColumnV);
       
-      // Load performance data - parse entire sheet
+      // Load performance data
+      // YTD Performance is in cell B3 (row 2, column 1 in 0-indexed)
       const performanceRows = await fetchSheetData("performance");
       const performanceParsed = parseSheetData(performanceRows);
-      setPerformanceData(performanceParsed);
+      
+      // Get YTD Performance from cell B3 (row 2, column 1)
+      let ytdPerformanceValue = null;
+      if (performanceRows.length > 2 && performanceRows[2].length > 1) {
+        ytdPerformanceValue = performanceRows[2][1]?.trim().replace(/^"|"$/g, '') || null;
+      }
+      
+      setPerformanceData({
+        parsed: performanceParsed,
+        ytdPerformance: ytdPerformanceValue,
+        rawRows: performanceRows,
+      });
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to load data");
     } finally {
@@ -64,9 +76,59 @@ export function HomeDashboard() {
 
   // Calculate comprehensive portfolio metrics (percentage-only)
   const portfolioMetrics = useMemo(() => {
-    // Get YTD performance from performance sheet
-    const ytdPerformance = performanceData?.[0]?.["Performance"] || performanceData?.[0]?.["YTD Performance"] || null;
+    // Get YTD performance from performance sheet (cell B3)
+    const ytdPerformance = performanceData?.ytdPerformance || null;
     const ytdPerformanceNum = ytdPerformance ? parseNumeric(ytdPerformance.toString().replace(/[+%]/g, '')) : null;
+    
+    // Get benchmark comparisons from parsed performance data
+    const performanceParsed = performanceData?.parsed || [];
+    let benchmarkComparisons = {
+      qqq: null as string | null,
+      igv: null as string | null,
+      smh: null as string | null,
+    };
+    
+    // Search through all rows for benchmark data
+    for (const row of performanceParsed) {
+      if (!benchmarkComparisons.qqq && (row["Performance vs QQQ"] || row["vs QQQ"])) {
+        benchmarkComparisons.qqq = row["Performance vs QQQ"] || row["vs QQQ"] || null;
+      }
+      if (!benchmarkComparisons.igv && (row["Performance vs IGV"] || row["vs IGV"])) {
+        benchmarkComparisons.igv = row["Performance vs IGV"] || row["vs IGV"] || null;
+      }
+      if (!benchmarkComparisons.smh && (row["Performance vs SMH"] || row["vs SMH"])) {
+        benchmarkComparisons.smh = row["Performance vs SMH"] || row["vs SMH"] || null;
+      }
+    }
+    
+    // Also check raw performance rows for benchmarks (in case they're in a different format)
+    if (performanceData?.rawRows) {
+      const rawRows = performanceData.rawRows;
+      const headerRowIndex = rawRows.findIndex((row: string[], idx: number) => {
+        const firstCell = (row[0] || '').toLowerCase();
+        return firstCell.includes('performance') || firstCell.includes('qqq') || firstCell.includes('igv') || firstCell.includes('smh');
+      });
+      
+      if (headerRowIndex >= 0) {
+        const headers = rawRows[headerRowIndex].map((h: string) => h.trim().replace(/^"|"$/g, ''));
+        const qqqIndex = headers.findIndex((h: string) => h.includes("QQQ") || h.includes("qqq"));
+        const igvIndex = headers.findIndex((h: string) => h.includes("IGV") || h.includes("igv"));
+        const smhIndex = headers.findIndex((h: string) => h.includes("SMH") || h.includes("smh"));
+        
+        if (qqqIndex >= 0 && rawRows.length > headerRowIndex + 1) {
+          const value = rawRows[headerRowIndex + 1]?.[qqqIndex]?.trim().replace(/^"|"$/g, '');
+          if (value && !benchmarkComparisons.qqq) benchmarkComparisons.qqq = value;
+        }
+        if (igvIndex >= 0 && rawRows.length > headerRowIndex + 1) {
+          const value = rawRows[headerRowIndex + 1]?.[igvIndex]?.trim().replace(/^"|"$/g, '');
+          if (value && !benchmarkComparisons.igv) benchmarkComparisons.igv = value;
+        }
+        if (smhIndex >= 0 && rawRows.length > headerRowIndex + 1) {
+          const value = rawRows[headerRowIndex + 1]?.[smhIndex]?.trim().replace(/^"|"$/g, '');
+          if (value && !benchmarkComparisons.smh) benchmarkComparisons.smh = value;
+        }
+      }
+    }
 
     // Calculate weighted average YTD gain
     const ytdGains = positionsData
@@ -133,6 +195,7 @@ export function HomeDashboard() {
       weightedDailyMove,
       topHoldings,
       holdingCount: positionsData.filter(row => row.Ticker && row.Ticker !== "").length,
+      benchmarkComparisons,
     };
   }, [positionsData, performanceData]);
 
@@ -236,24 +299,7 @@ export function HomeDashboard() {
               ) : (
                 <TrendingDown className="h-5 w-5 text-red-400" />
               )}
-              <span className="text-slate-400 text-sm">Weighted Average</span>
-            </div>
-          </CardHeader>
-        </Card>
-
-        <Card className="bg-gradient-to-br from-slate-900 via-green-900/20 to-slate-900 border-slate-700 shadow-xl hover:shadow-2xl transition-all duration-300">
-          <CardHeader className="pb-3">
-            <CardDescription className="text-slate-400 text-sm uppercase tracking-wider flex items-center gap-2">
-              <Activity className="h-4 w-4" />
-              Total Gain %
-            </CardDescription>
-            <CardTitle className={`text-3xl font-mono font-bold mt-2 ${
-              portfolioMetrics.weightedTotalGainPercent >= 0 ? 'text-green-400' : 'text-red-400'
-            }`}>
-              {formatPercentage(portfolioMetrics.weightedTotalGainPercent)}
-            </CardTitle>
-            <div className="text-slate-400 text-xs mt-2">
-              Weighted Average
+              <span className="text-slate-400 text-sm">From Performance Sheet</span>
             </div>
           </CardHeader>
         </Card>
@@ -275,6 +321,83 @@ export function HomeDashboard() {
           </CardHeader>
         </Card>
       </div>
+
+      {/* Benchmark Performance Comparison */}
+      {(portfolioMetrics.benchmarkComparisons.qqq || portfolioMetrics.benchmarkComparisons.igv || portfolioMetrics.benchmarkComparisons.smh) && (
+        <Card className="bg-slate-900/50 backdrop-blur-sm border-slate-800 shadow-xl">
+          <CardHeader>
+            <CardTitle className="text-xl font-bold text-slate-100 flex items-center gap-2">
+              <Activity className="h-5 w-5" />
+              Performance vs Benchmarks
+            </CardTitle>
+            <CardDescription className="text-slate-400">YTD Comparison</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {portfolioMetrics.benchmarkComparisons.qqq && (
+                <div className="flex items-center justify-between p-4 rounded-lg bg-slate-800/50 hover:bg-slate-800 transition-colors border border-slate-700">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-blue-500/20 flex items-center justify-center">
+                      <span className="text-blue-400 font-mono font-bold text-sm">QQQ</span>
+                    </div>
+                    <div>
+                      <div className="text-xs text-slate-400">vs QQQ</div>
+                    </div>
+                  </div>
+                  <div className={`text-lg font-mono font-bold ${
+                    (() => {
+                      const num = parseNumeric(portfolioMetrics.benchmarkComparisons.qqq.toString().replace(/[+%bp]/g, ''));
+                      return num !== null && num >= 0 ? 'text-green-400' : 'text-red-400';
+                    })()
+                  }`}>
+                    {portfolioMetrics.benchmarkComparisons.qqq}
+                  </div>
+                </div>
+              )}
+              {portfolioMetrics.benchmarkComparisons.igv && (
+                <div className="flex items-center justify-between p-4 rounded-lg bg-slate-800/50 hover:bg-slate-800 transition-colors border border-slate-700">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-purple-500/20 flex items-center justify-center">
+                      <span className="text-purple-400 font-mono font-bold text-sm">IGV</span>
+                    </div>
+                    <div>
+                      <div className="text-xs text-slate-400">vs IGV</div>
+                    </div>
+                  </div>
+                  <div className={`text-lg font-mono font-bold ${
+                    (() => {
+                      const num = parseNumeric(portfolioMetrics.benchmarkComparisons.igv.toString().replace(/[+%bp]/g, ''));
+                      return num !== null && num >= 0 ? 'text-green-400' : 'text-red-400';
+                    })()
+                  }`}>
+                    {portfolioMetrics.benchmarkComparisons.igv}
+                  </div>
+                </div>
+              )}
+              {portfolioMetrics.benchmarkComparisons.smh && (
+                <div className="flex items-center justify-between p-4 rounded-lg bg-slate-800/50 hover:bg-slate-800 transition-colors border border-slate-700">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-cyan-500/20 flex items-center justify-center">
+                      <span className="text-cyan-400 font-mono font-bold text-sm">SMH</span>
+                    </div>
+                    <div>
+                      <div className="text-xs text-slate-400">vs SMH</div>
+                    </div>
+                  </div>
+                  <div className={`text-lg font-mono font-bold ${
+                    (() => {
+                      const num = parseNumeric(portfolioMetrics.benchmarkComparisons.smh.toString().replace(/[+%bp]/g, ''));
+                      return num !== null && num >= 0 ? 'text-green-400' : 'text-red-400';
+                    })()
+                  }`}>
+                    {portfolioMetrics.benchmarkComparisons.smh}
+                  </div>
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Sector Allocation - Enhanced */}
