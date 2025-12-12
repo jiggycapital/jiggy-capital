@@ -22,6 +22,7 @@ export function formatCurrencyBillions(value: number | string | null | undefined
   if (value === null || value === undefined || value === "") return "-";
   const num = typeof value === "string" ? parseFloat(value) : value;
   if (isNaN(num)) return "-";
+  // Format zero as $0.0B, not as "-"
   return `$${(num / 1e9).toFixed(1)}B`;
 }
 
@@ -82,11 +83,28 @@ export function cleanColumnName(name: string): string {
 }
 
 export function parseNumeric(value: string | null | undefined): number | null {
-  if (!value || value === "" || value === "-" || value === "#N/A" || value === "#DIV/0!") {
+  if (value === null || value === undefined) {
     return null;
   }
-  const cleaned = value.toString().replace(/[,$%]/g, "");
-  const num = parseFloat(cleaned);
-  return isNaN(num) ? null : num;
+  
+  // Handle empty strings and error values
+  const trimmed = String(value).trim();
+  if (trimmed === "" || trimmed === "-" || trimmed === "#N/A" || trimmed === "#DIV/0!" || trimmed === "#VALUE!" || trimmed === "#REF!") {
+    return null;
+  }
+  
+  // Remove currency symbols, commas, spaces, and percentage signs
+  const cleaned = trimmed.replace(/[$,\s%]/g, "");
+  
+  // Handle negative values in parentheses: (100) = -100
+  const isNegative = cleaned.startsWith('(') && cleaned.endsWith(')');
+  const finalCleaned = isNegative ? cleaned.slice(1, -1) : cleaned;
+  
+  const num = parseFloat(finalCleaned);
+  if (isNaN(num)) {
+    return null;
+  }
+  
+  return isNegative ? -num : num;
 }
 

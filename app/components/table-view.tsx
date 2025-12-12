@@ -848,14 +848,17 @@ function formatCellValue(value: string, columnKey: string, isNumeric: boolean, c
   }
 
   // Forward Estimates: Currency in Billions
-  if (categoryLower.includes("forward estimates")) {
-    if (isNumeric) {
-      const num = parseNumeric(value);
-      if (num !== null) {
-        return <span className="text-slate-300">{formatCurrencyBillions(num)}</span>;
-      }
+  // Handle variations like "Forward Estimates (12/9)" or just "Forward Estimates"
+  if (categoryLower.includes("forward estimates") || 
+      (categoryLower.includes("forward") && categoryLower.includes("estimate") && !categoryLower.includes("growth"))) {
+    // Try to parse as numeric even if not initially detected as numeric
+    const num = parseNumeric(value);
+    if (num !== null) {
+      // Format zero values as well
+      return <span className="text-slate-300">{formatCurrencyBillions(num)}</span>;
     }
-    return <span className="text-slate-300">{value}</span>;
+    // If parsing fails, return the raw value
+    return <span className="text-slate-300">{value || "-"}</span>;
   }
 
   // Forward Growth Estimates: Percentages
