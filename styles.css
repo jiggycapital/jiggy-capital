@@ -1939,17 +1939,22 @@ body {
         box-sizing: border-box !important;
     }
     
-    /* Extend header background to cover full scrollable area on mobile */
-    .portfolio-grid .portfolio-item:first-child::before {
+    /* Ensure header background extends to cover full scrollable width */
+    .portfolio-grid .portfolio-item:first-child {
+        position: relative; /* Enable pseudo-element positioning */
+    }
+    
+    .portfolio-grid .portfolio-item:first-child::after {
         content: '';
         position: absolute;
-        left: -100vw;
-        right: -100vw;
+        left: 0;
+        right: 0;
         top: 0;
         bottom: 0;
         background: #f8fafc;
         z-index: -1;
-        pointer-events: none;
+        width: 100%;
+        min-width: 750px; /* Match header min-width */
     }
 
 
