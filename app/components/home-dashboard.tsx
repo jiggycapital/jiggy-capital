@@ -660,35 +660,6 @@ export function HomeDashboard() {
         </Card>
       </div>
 
-      {/* Additional Metrics Row */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4">
-        <Card className="bg-slate-900/50 backdrop-blur-sm border-slate-800 shadow-lg">
-          <CardHeader className="pb-2">
-            <CardDescription className="text-slate-400 text-xs uppercase">Sectors</CardDescription>
-            <CardTitle className="text-2xl font-mono text-slate-100">
-              {sectorData.length}
-            </CardTitle>
-          </CardHeader>
-        </Card>
-        <Card className="bg-slate-900/50 backdrop-blur-sm border-slate-800 shadow-lg">
-          <CardHeader className="pb-2">
-            <CardDescription className="text-slate-400 text-xs uppercase">Holdings</CardDescription>
-            <CardTitle className="text-2xl font-mono text-slate-100">
-              {portfolioMetrics.holdingCount}
-            </CardTitle>
-          </CardHeader>
-        </Card>
-        <Card className="bg-slate-900/50 backdrop-blur-sm border-slate-800 shadow-lg">
-          <CardHeader className="pb-2">
-            <CardDescription className="text-slate-400 text-xs uppercase">Avg YTD</CardDescription>
-            <CardTitle className={`text-2xl font-mono ${
-              portfolioMetrics.weightedYtd >= 0 ? 'text-green-400' : 'text-red-400'
-            }`}>
-              {formatPercentage(portfolioMetrics.weightedYtd)}
-            </CardTitle>
-          </CardHeader>
-        </Card>
-      </div>
     </div>
   );
 }
