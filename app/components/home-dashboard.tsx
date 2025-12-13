@@ -68,11 +68,24 @@ export function HomeDashboard() {
         lifetimeCagrValue = performanceRows[3][1]?.trim().replace(/^"|"$/g, '') || null;
       }
       
+      // Get YTD Benchmark data from cells A5-B7 (rows 4-6, 0-indexed)
+      const ytdBenchmarks: Array<{ name: string; value: string }> = [];
+      for (let i = 4; i <= 6; i++) {
+        if (performanceRows.length > i && performanceRows[i].length >= 2) {
+          const name = performanceRows[i][0]?.trim().replace(/^"|"$/g, '') || '';
+          const value = performanceRows[i][1]?.trim().replace(/^"|"$/g, '') || '';
+          if (name && value) {
+            ytdBenchmarks.push({ name, value });
+          }
+        }
+      }
+      
       setPerformanceData({
         parsed: performanceParsed,
         ytdPerformance: ytdPerformanceValue,
         lifetimeCagr: lifetimeCagrValue,
         rawRows: performanceRows,
+        ytdBenchmarks,
       });
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to load data");
