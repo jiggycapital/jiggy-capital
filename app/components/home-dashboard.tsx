@@ -440,8 +440,8 @@ export function HomeDashboard() {
 
       {/* Performance Analytics Section */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
-        {/* Benchmark Performance Comparison */}
-        {(portfolioMetrics.benchmarkComparisons.qqq || portfolioMetrics.benchmarkComparisons.igv || portfolioMetrics.benchmarkComparisons.smh) && (
+        {/* YTD Benchmark Performance */}
+        {performanceData?.ytdBenchmarks && performanceData.ytdBenchmarks.length > 0 && (
           <Card className="bg-slate-900/50 backdrop-blur-sm border-slate-800 shadow-xl">
             <CardHeader>
               <CardTitle className="text-xl font-bold text-slate-100 flex items-center gap-2">
@@ -451,51 +451,21 @@ export function HomeDashboard() {
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
-                {portfolioMetrics.benchmarkComparisons.qqq && (
-                  <div className="flex items-center justify-between p-3 rounded-lg bg-slate-800/50 hover:bg-slate-800 transition-colors">
-                    <div className="flex items-center gap-3">
-                      <span className="text-slate-100 font-semibold">QQQ</span>
+                {performanceData.ytdBenchmarks.map((benchmark: { name: string; value: string }, idx: number) => {
+                  const num = parseNumeric(benchmark.value.toString().replace(/[+%bp]/g, ''));
+                  return (
+                    <div key={idx} className="flex items-center justify-between p-3 rounded-lg bg-slate-800/50 hover:bg-slate-800 transition-colors">
+                      <div className="flex items-center gap-3">
+                        <span className="text-slate-100 font-semibold">{benchmark.name}</span>
+                      </div>
+                      <div className={`text-lg font-mono font-bold ${
+                        num !== null && num >= 0 ? 'text-green-400' : 'text-red-400'
+                      }`}>
+                        {benchmark.value}
+                      </div>
                     </div>
-                    <div className={`text-lg font-mono font-bold ${
-                      (() => {
-                        const num = parseNumeric(portfolioMetrics.benchmarkComparisons.qqq.toString().replace(/[+%bp]/g, ''));
-                        return num !== null && num >= 0 ? 'text-green-400' : 'text-red-400';
-                      })()
-                    }`}>
-                      {portfolioMetrics.benchmarkComparisons.qqq}
-                    </div>
-                  </div>
-                )}
-                {portfolioMetrics.benchmarkComparisons.igv && (
-                  <div className="flex items-center justify-between p-3 rounded-lg bg-slate-800/50 hover:bg-slate-800 transition-colors">
-                    <div className="flex items-center gap-3">
-                      <span className="text-slate-100 font-semibold">IGV</span>
-                    </div>
-                    <div className={`text-lg font-mono font-bold ${
-                      (() => {
-                        const num = parseNumeric(portfolioMetrics.benchmarkComparisons.igv.toString().replace(/[+%bp]/g, ''));
-                        return num !== null && num >= 0 ? 'text-green-400' : 'text-red-400';
-                      })()
-                    }`}>
-                      {portfolioMetrics.benchmarkComparisons.igv}
-                    </div>
-                  </div>
-                )}
-                {portfolioMetrics.benchmarkComparisons.smh && (
-                  <div className="flex items-center justify-between p-3 rounded-lg bg-slate-800/50 hover:bg-slate-800 transition-colors">
-                    <div className="flex items-center gap-3">
-                      <span className="text-slate-100 font-semibold">SMH</span>
-                    </div>
-                    <div className={`text-lg font-mono font-bold ${
-                      (() => {
-                        const num = parseNumeric(portfolioMetrics.benchmarkComparisons.smh.toString().replace(/[+%bp]/g, ''));
-                        return num !== null && num >= 0 ? 'text-green-400' : 'text-red-400';
-                      })()
-                    }`}>
-                      {portfolioMetrics.benchmarkComparisons.smh}
-                    </div>
-                  </div>
-                )}
+                  );
+                })}
               </div>
             </CardContent>
           </Card>
