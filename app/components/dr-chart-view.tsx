@@ -43,9 +43,19 @@ export function DRChartView() {
   const [quarterVisibility, setQuarterVisibility] = useState<Record<string, boolean>>({});
   const [showSettings, setShowSettings] = useState(true);
   const [showDataTable, setShowDataTable] = useState(false);
+  const [chartHeight, setChartHeight] = useState(600);
 
   useEffect(() => {
     loadData();
+  }, []);
+
+  useEffect(() => {
+    const updateHeight = () => {
+      setChartHeight(window.innerWidth < 768 ? 400 : 600);
+    };
+    updateHeight();
+    window.addEventListener('resize', updateHeight);
+    return () => window.removeEventListener('resize', updateHeight);
   }, []);
 
   async function loadData() {
@@ -576,7 +586,7 @@ export function DRChartView() {
                 </div>
               </div>
               <div className="bg-slate-950 rounded-lg border border-slate-800 p-6">
-                <ResponsiveContainer width="100%" height={600}>
+                <ResponsiveContainer width="100%" height={chartHeight}>
                 {chartType === "line" ? (
                   <LineChart data={chartData} margin={{ top: 10, right: 30, left: 20, bottom: 60 }}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#334155" opacity={0.5} />

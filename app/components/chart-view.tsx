@@ -33,6 +33,16 @@ export function ChartView() {
   const [xAxisColumn, setXAxisColumn] = useState<string | undefined>(undefined);
   const [yAxisColumns, setYAxisColumns] = useState<string[]>([]);
   const [showSettings, setShowSettings] = useState(false);
+  const [chartHeight, setChartHeight] = useState(500);
+  
+  useEffect(() => {
+    const updateHeight = () => {
+      setChartHeight(window.innerWidth < 768 ? 350 : 500);
+    };
+    updateHeight();
+    window.addEventListener('resize', updateHeight);
+    return () => window.removeEventListener('resize', updateHeight);
+  }, []);
 
   useEffect(() => {
     loadData();
@@ -289,7 +299,7 @@ export function ChartView() {
 
           {chartData.length > 0 && yAxisColumns.length > 0 ? (
             <div className="mt-6">
-              <ResponsiveContainer width="100%" height={500}>
+              <ResponsiveContainer width="100%" height={chartHeight}>
                 {chartType === "line" ? (
                   <LineChart data={chartData}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#475569" />

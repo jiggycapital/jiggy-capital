@@ -375,13 +375,13 @@ export function HomeDashboard() {
   }
 
   return (
-    <div className="space-y-6 pb-8">
+    <div className="space-y-4 md:space-y-6 pb-4 md:pb-8 px-4 md:px-6">
       {/* Hero Section - Three Performance Metrics */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4">
         <Card className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 border-slate-700 shadow-xl hover:shadow-2xl transition-all duration-300">
-          <CardHeader className="pb-3">
-            <CardDescription className="text-slate-400 text-sm uppercase tracking-wider">Daily Performance</CardDescription>
-            <CardTitle className={`text-4xl font-mono font-bold mt-2 ${
+          <CardHeader className="pb-2 md:pb-3">
+            <CardDescription className="text-slate-400 text-xs md:text-sm uppercase tracking-wider">Daily Performance</CardDescription>
+            <CardTitle className={`text-2xl md:text-4xl font-mono font-bold mt-1 md:mt-2 ${
               (() => {
                 const num = portfolioMetrics.dailyPerformance ? parseNumeric(portfolioMetrics.dailyPerformance.toString().replace(/[+%]/g, '')) : portfolioMetrics.weightedDailyMove;
                 return (num ?? 0) >= 0 ? 'text-green-400' : 'text-red-400';
@@ -393,9 +393,9 @@ export function HomeDashboard() {
         </Card>
 
         <Card className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 border-slate-700 shadow-xl hover:shadow-2xl transition-all duration-300">
-          <CardHeader className="pb-3">
-            <CardDescription className="text-slate-400 text-sm uppercase tracking-wider">YTD Performance</CardDescription>
-            <CardTitle className={`text-4xl font-mono font-bold mt-2 ${
+          <CardHeader className="pb-2 md:pb-3">
+            <CardDescription className="text-slate-400 text-xs md:text-sm uppercase tracking-wider">YTD Performance</CardDescription>
+            <CardTitle className={`text-2xl md:text-4xl font-mono font-bold mt-1 md:mt-2 ${
               (portfolioMetrics.ytdPerformanceNum ?? portfolioMetrics.weightedYtd) >= 0 
                 ? 'text-green-400' 
                 : 'text-red-400'
@@ -408,9 +408,9 @@ export function HomeDashboard() {
         </Card>
 
         <Card className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 border-slate-700 shadow-xl hover:shadow-2xl transition-all duration-300">
-          <CardHeader className="pb-3">
-            <CardDescription className="text-slate-400 text-sm uppercase tracking-wider">Lifetime CAGR</CardDescription>
-            <CardTitle className={`text-4xl font-mono font-bold mt-2 ${
+          <CardHeader className="pb-2 md:pb-3">
+            <CardDescription className="text-slate-400 text-xs md:text-sm uppercase tracking-wider">Lifetime CAGR</CardDescription>
+            <CardTitle className={`text-2xl md:text-4xl font-mono font-bold mt-1 md:mt-2 ${
               (() => {
                 const num = portfolioMetrics.lifetimeCagr ? parseNumeric(portfolioMetrics.lifetimeCagr.toString().replace(/[+%]/g, '')) : null;
                 return (num ?? 0) >= 0 ? 'text-green-400' : 'text-red-400';
@@ -426,7 +426,7 @@ export function HomeDashboard() {
       </div>
 
       {/* Performance Analytics Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
         {/* Benchmark Performance Comparison */}
         {(portfolioMetrics.benchmarkComparisons.qqq || portfolioMetrics.benchmarkComparisons.igv || portfolioMetrics.benchmarkComparisons.smh) && (
           <Card className="bg-slate-900/50 backdrop-blur-sm border-slate-800 shadow-xl">
@@ -527,7 +527,7 @@ export function HomeDashboard() {
         </Card>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
         {/* Interactive Pie Chart */}
         <Card className="bg-slate-900/50 backdrop-blur-sm border-slate-800 shadow-xl lg:col-span-2">
           <CardHeader>
@@ -597,7 +597,7 @@ export function HomeDashboard() {
       </div>
 
       {/* Top Movers - Enhanced */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
         <Card className="bg-gradient-to-br from-green-900/20 via-slate-900 to-slate-900 border-green-800/30 shadow-xl">
           <CardHeader>
             <CardTitle className="text-xl font-bold text-green-400 flex items-center gap-2">
@@ -678,7 +678,7 @@ export function HomeDashboard() {
       </div>
 
       {/* Additional Metrics Row */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4">
         <Card className="bg-slate-900/50 backdrop-blur-sm border-slate-800 shadow-lg">
           <CardHeader className="pb-2">
             <CardDescription className="text-slate-400 text-xs uppercase">Sectors</CardDescription>

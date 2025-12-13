@@ -459,15 +459,15 @@ export function TableView() {
   return (
     <div className="space-y-4">
       <Card className="bg-slate-900 border-slate-800">
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <CardTitle className="text-slate-100">Data Table</CardTitle>
-            <div className="flex items-center gap-2">
+        <CardHeader className="p-3 md:p-6">
+          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-3 md:gap-0">
+            <CardTitle className="text-slate-100 text-lg md:text-xl">Data Table</CardTitle>
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full md:w-auto">
               <Input
                 placeholder="Search..."
                 value={globalFilter}
                 onChange={(e) => setGlobalFilter(e.target.value)}
-                className="max-w-sm bg-slate-800 border-slate-700 text-slate-100"
+                className="w-full sm:max-w-sm bg-slate-800 border-slate-700 text-slate-100 text-sm md:text-base"
               />
               <DropdownMenu open={showTemplateMenu} onOpenChange={setShowTemplateMenu}>
                 <DropdownMenuTrigger asChild>
@@ -525,18 +525,21 @@ export function TableView() {
               <Button
                 variant="outline"
                 onClick={() => setShowColumnSelector(true)}
-                className="bg-slate-800 border-slate-700 text-slate-100"
+                className="bg-slate-800 border-slate-700 text-slate-100 text-xs md:text-sm"
+                size="sm"
               >
-                <Settings2 className="h-4 w-4 mr-2" />
-                Columns
+                <Settings2 className="h-3 w-3 md:h-4 md:w-4 mr-1 md:mr-2" />
+                <span className="hidden sm:inline">Columns</span>
+                <span className="sm:hidden">Cols</span>
               </Button>
               <Button
                 variant="outline"
                 onClick={handleExport}
-                className="bg-slate-800 border-slate-700 text-slate-100"
+                className="bg-slate-800 border-slate-700 text-slate-100 text-xs md:text-sm"
+                size="sm"
               >
-                <Download className="h-4 w-4 mr-2" />
-                Export
+                <Download className="h-3 w-3 md:h-4 md:w-4 mr-1 md:mr-2" />
+                <span className="hidden sm:inline">Export</span>
               </Button>
             </div>
           </div>
@@ -556,7 +559,7 @@ export function TableView() {
             </TabsList>
           </Tabs>
 
-          <div className="rounded-md border border-slate-800 mt-4 overflow-x-auto overflow-y-auto max-h-[calc(100vh-300px)]">
+          <div className="rounded-md border border-slate-800 mt-4 overflow-x-auto overflow-y-auto max-h-[calc(100vh-200px)] md:max-h-[calc(100vh-300px)] -mx-4 md:mx-0">
             <Table>
               <TableHeader className="sticky top-0 bg-slate-900 z-10">
                 {table.getHeaderGroups().map((headerGroup) => (
@@ -566,7 +569,7 @@ export function TableView() {
                       return (
                       <TableHead
                         key={header.id}
-                        className={`text-slate-300 font-mono text-xs cursor-pointer select-none whitespace-nowrap bg-slate-900 ${isCompanyColumn ? 'w-[150px] max-w-[150px]' : ''}`}
+                        className={`text-slate-300 font-mono text-[10px] md:text-xs cursor-pointer select-none whitespace-nowrap bg-slate-900 px-2 md:px-4 ${isCompanyColumn ? 'w-[120px] md:w-[150px] max-w-[120px] md:max-w-[150px]' : ''}`}
                         onClick={header.column.getToggleSortingHandler()}
                         style={isCompanyColumn ? { width: '150px', maxWidth: '150px' } : undefined}
                       >
@@ -596,7 +599,7 @@ export function TableView() {
                       {row.getVisibleCells().map((cell) => (
                         <TableCell
                           key={cell.id}
-                          className="font-mono text-xs text-slate-300 py-1 whitespace-nowrap"
+                          className="font-mono text-[10px] md:text-xs text-slate-300 py-1 md:py-2 whitespace-nowrap px-2 md:px-4"
                         >
                           {flexRender(cell.column.columnDef.cell, cell.getContext())}
                         </TableCell>
@@ -615,8 +618,8 @@ export function TableView() {
           </div>
 
           {usePagination && (
-            <div className="flex items-center justify-between mt-4">
-              <div className="text-sm text-slate-400">
+            <div className="flex flex-col sm:flex-row items-center justify-between mt-4 gap-2">
+              <div className="text-xs md:text-sm text-slate-400">
                 Showing {table.getState().pagination.pageIndex * table.getState().pagination.pageSize + 1} to{" "}
                 {Math.min(
                   (table.getState().pagination.pageIndex + 1) * table.getState().pagination.pageSize,
@@ -624,9 +627,10 @@ export function TableView() {
                 )}{" "}
                 of {table.getFilteredRowModel().rows.length} entries
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1 md:gap-2">
                 <Button
                   variant="outline"
+                  size="sm"
                   size="sm"
                   onClick={() => table.previousPage()}
                   disabled={!table.getCanPreviousPage()}

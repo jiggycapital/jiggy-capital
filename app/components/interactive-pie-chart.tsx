@@ -184,12 +184,11 @@ export function InteractivePieChart({ positionsData, logos, view, onViewChange }
       {/* Chart Container */}
       <div 
         ref={containerRef}
-        className="relative w-full" 
-        style={{ height: "600px" }}
+        className="relative w-full h-[400px] md:h-[600px]"
       >
         <ResponsivePie
           data={chartData}
-          margin={{ top: 60, right: 60, bottom: 60, left: 60 }}
+          margin={{ top: 40, right: 40, bottom: 40, left: 40 }}
           innerRadius={0.5}
           padAngle={2}
           cornerRadius={4}

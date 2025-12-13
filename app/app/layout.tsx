@@ -24,7 +24,7 @@ export default function RootLayout({
     <html lang="en" className="dark">
       <body className={`${jetbrainsMono.variable} antialiased terminal-bg`}>
         <Sidebar />
-        <main className="ml-64 min-h-screen">{children}</main>
+        <main className="ml-0 md:ml-64 min-h-screen transition-all duration-300">{children}</main>
         <Analytics />
       </body>
     </html>
