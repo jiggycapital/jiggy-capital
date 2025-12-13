@@ -631,7 +631,6 @@ export function TableView() {
                 <Button
                   variant="outline"
                   size="sm"
-                  size="sm"
                   onClick={() => table.previousPage()}
                   disabled={!table.getCanPreviousPage()}
                   className="bg-slate-800 border-slate-700 text-slate-100"
