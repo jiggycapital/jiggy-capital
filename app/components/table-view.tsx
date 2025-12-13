@@ -92,7 +92,7 @@ export function TableView() {
 
   // Get default template columns
   function getDefaultTemplateColumns(allCols: string[]): string[] {
-    const defaultCols = ['Ticker', 'Company', 'Market Cap', 'P/2026e FCF', '2026e P/E'];
+    const defaultCols = ['Ticker', 'Company', 'Market Cap', 'Change %', '25-27e Rev CAGR', 'P/2026e FCF', '2026e P/E'];
     // Try to find matching columns (case-insensitive, partial match)
     const found: string[] = [];
     defaultCols.forEach(defaultCol => {
