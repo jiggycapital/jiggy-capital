@@ -1,14 +1,6 @@
 {
   "events": [
     {
-      "ticker": "AVGO",
-      "date": "2025-12-11",
-      "name": "Earnings Report",
-      "companyName": "AVGO",
-      "url": "https://finnhub.io/calendar/earnings?symbol=AVGO",
-      "source": "Finnhub API"
-    },
-    {
       "ticker": "SEZL",
       "date": "2025-12-16",
       "name": "Conference",
@@ -25,7 +17,7 @@
       "source": "IR Page"
     }
   ],
-  "lastUpdated": "2025-12-08T01:30:06.314Z",
-  "totalEvents": 8,
-  "uniqueEvents": 8
+  "lastUpdated": "2025-12-15T01:32:56.320Z",
+  "totalEvents": 7,
+  "uniqueEvents": 7
 }
