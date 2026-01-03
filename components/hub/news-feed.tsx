@@ -73,7 +73,13 @@ export function NewsFeed({ portfolioData, logos, className }: NewsFeedProps) {
         const uniqueNews = Array.from(uniqueNewsMap.values());
 
         const filteredNews = uniqueNews.filter(n => {
-          if (n.url && n.url.toLowerCase().includes('fool.com')) return false;
+          const url = (n.url || "").toLowerCase();
+          const source = (n.source || "").toLowerCase();
+          
+          if (url.includes('fool.com')) return false;
+          if (url.includes('seekingalpha.com')) return false;
+          if (source.includes('seekingalpha')) return false;
+          if (source.includes('seeking alpha')) return false;
 
           const headline = (n.headline || "").toLowerCase();
           const ticker = (n.ticker || "").toLowerCase();
