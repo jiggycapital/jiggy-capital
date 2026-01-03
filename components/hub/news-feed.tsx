@@ -112,7 +112,7 @@ export function NewsFeed({ portfolioData, logos, className }: NewsFeedProps) {
         <CardTitle className="text-sm font-bold flex items-center justify-between text-slate-100 uppercase tracking-wider">
           <div className="flex items-center gap-2">
             <Newspaper className="w-4 h-4 text-emerald-400" />
-            Market Intel
+            Company News
           </div>
           <div className="flex items-center gap-1.5">
             <span className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />

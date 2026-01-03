@@ -510,7 +510,7 @@ export function HomeDashboard() {
         />
       </div>
 
-      {/* Movers and Hub Intel (News/Events) */}
+      {/* Movers and Company News (News/Events) */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6 lg:h-[850px] lg:overflow-hidden">
         {/* Left Column: Movers + Events */}
         <div className="flex flex-col gap-4 md:gap-6 h-full min-h-0">
