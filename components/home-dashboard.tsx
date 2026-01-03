@@ -8,7 +8,7 @@ import { PortfolioTanStackTable } from "@/components/hub/portfolio-tanstack-tabl
 import { NewsFeed } from "@/components/hub/news-feed";
 import { UpcomingEvents } from "@/components/hub/upcoming-events";
 import { formatPercentage, formatCurrency, parseNumeric } from "@/lib/utils";
-import { TrendingUp, TrendingDown, PieChart as PieChartIcon, Activity, Target, Percent, Twitter, BookOpen } from "lucide-react";
+import { TrendingUp, TrendingDown, PieChart as PieChartIcon, Activity, Target, Percent, Twitter } from "lucide-react";
 
 export function HomeDashboard() {
   const [positionsData, setPositionsData] = useState<any[]>([]);
@@ -422,8 +422,12 @@ export function HomeDashboard() {
             rel="noopener noreferrer"
             className="flex items-center gap-2 bg-orange-500/10 hover:bg-orange-500/20 text-orange-500 px-4 py-2 rounded-xl border border-orange-500/20 transition-all font-bold text-sm group"
           >
-            <BookOpen className="w-4 h-4 group-hover:scale-110 transition-transform" />
-            jiggy.substack.com
+            <img 
+              src="https://cdn.prod.website-files.com/6088303c28a7c75678aa21d8/611bf5975d252f60f5868aeb_Substack-Startapaidnewsletter.png" 
+              alt="Substack" 
+              className="w-4 h-4 object-contain group-hover:scale-110 transition-transform" 
+            />
+            Substack
           </a>
         </div>
       </div>
