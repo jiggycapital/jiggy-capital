@@ -1,0 +1,311 @@
+name: Update Portfolio Data Cache (Events)
+
+on:
+  schedule:
+    - cron: '0 0 */7 * *'  # Every 7 days at midnight UTC
+  workflow_dispatch:  # Allow manual trigger
+
+jobs:
+  update-events-cache:
+    runs-on: ubuntu-latest
+    name: Update Events Cache
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          
+      - name: Fetch Events Data
+        run: |
+          # Create the data fetching script
+          cat > fetch-events.js << 'EOF'
+          const https = require('https');
+          const fs = require('fs');
+          
+          const FINNHUB_API_KEY = 'd2l0fm1r01qqq9qsstfgd2l0fm1r01qqq9qsstg0';
+          const PORTFOLIO_TICKERS = [
+            'DDOG', 'NOW', 'HUBS', 'NVDA', 'AVGO', 'MRVL', 'TEAM', 'NTDOY', 
+            'AJG', 'MNDY', 'RDDT', 'SEZL', 'TOST', 'CRM', 'GTLB', 'AMZN', 
+            'GOOGL', 'TER', 'FIX'
+          ];
+          
+          // IR Page URLs for companies with working IR pages
+          const IR_PAGES = {
+            'HUBS': 'https://investors.hubspot.com/events-and-presentations',
+            'NVDA': 'https://investor.nvidia.com/events-and-presentations/',
+            'AVGO': 'https://investor.broadcom.com/events-and-presentations',
+            'MRVL': 'https://investor.marvell.com/events-and-presentations',
+            'TEAM': 'https://investors.atlassian.com/events-and-presentations',
+            'CRM': 'https://investor.salesforce.com/events-and-presentations',
+            'GTLB': 'https://ir.gitlab.com/events-and-presentations',
+            'AMZN': 'https://ir.aboutamazon.com/events-and-presentations',
+            'GOOGL': 'https://abc.xyz/investor/events-and-presentations/',
+            'DDOG': 'https://investors.datadoghq.com/events-and-presentations',
+            'NOW': 'https://investors.servicenow.com/events-and-presentations',
+            'AJG': 'https://investors.ajg.com/events-and-presentations',
+            'MNDY': 'https://investors.monday.com/events-and-presentations',
+            'RDDT': 'https://investors.redditinc.com/events-and-presentations',
+            'SEZL': 'https://investors.sezzle.com/events-and-presentations',
+            'TOST': 'https://investors.toasttab.com/events-and-presentations',
+            'TER': 'https://investors.teradyne.com/events-and-presentations',
+            'FIX': 'https://investors.comfortsystemsusa.com/events-and-presentations'
+          };
+          
+          async function fetchFinnhubData(symbol) {
+            return new Promise((resolve, reject) => {
+              const url = `https://finnhub.io/api/v1/calendar/earnings?from=2024-01-01&to=2025-12-31&symbol=${symbol}&token=${FINNHUB_API_KEY}`;
+              
+              https.get(url, (res) => {
+                let data = '';
+                res.on('data', (chunk) => data += chunk);
+                res.on('end', () => {
+                  try {
+                    const jsonData = JSON.parse(data);
+                    resolve(jsonData);
+                  } catch (error) {
+                    console.log(`Error parsing data for ${symbol}:`, error.message);
+                    resolve({ earningsCalendar: [] });
+                  }
+                });
+              }).on('error', (err) => {
+                console.log(`Error fetching data for ${symbol}:`, err.message);
+                resolve({ earningsCalendar: [] });
+              });
+            });
+          }
+          
+          async function scrapeIRPage(symbol, irUrl) {
+            return new Promise((resolve) => {
+              console.log(`Scraping IR page for ${symbol}: ${irUrl}`);
+              
+              https.get(irUrl, (res) => {
+                let data = '';
+                res.on('data', (chunk) => data += chunk);
+                res.on('end', () => {
+                  try {
+                    // Look for common event patterns in IR pages
+                    const events = [];
+                    const html = data.toLowerCase();
+                    
+                    console.log(`IR page for ${symbol} loaded, size: ${data.length} characters`);
+                    
+                    // Common event keywords to look for (expanded list)
+                    const eventKeywords = [
+                      'analyst day', 'investor day', 'earnings call', 'conference call',
+                      'annual meeting', 'shareholder meeting', 'presentation', 'webcast',
+                      'conference', 'summit', 'symposium', 'quarterly call', 'q&a',
+                      'earnings release', 'financial results', 'quarterly results',
+                      'annual results', 'investor conference', 'analyst conference'
+                    ];
+                    
+                    // Look for date patterns (expanded list)
+                    const datePatterns = [
+                      /(\d{1,2})\/(\d{1,2})\/(\d{4})/g,  // MM/DD/YYYY
+                      /(\d{1,2})-(\d{1,2})-(\d{4})/g,   // MM-DD-YYYY
+                      /(\d{4})-(\d{1,2})-(\d{1,2})/g,   // YYYY-MM-DD
+                      /(\w+)\s+(\d{1,2}),?\s+(\d{4})/g, // Month DD, YYYY
+                      /(\d{1,2})\s+(\w+)\s+(\d{4})/g,   // DD Month YYYY
+                      /(\w+)\s+(\d{1,2})\s+(\d{4})/g    // Month DD YYYY
+                    ];
+                    
+                    // Extract potential events with more flexible matching
+                    eventKeywords.forEach(keyword => {
+                      if (html.includes(keyword)) {
+                        console.log(`Found keyword "${keyword}" in ${symbol} IR page`);
+                        
+                        // Look for nearby dates in a larger window
+                        const keywordIndex = html.indexOf(keyword);
+                        const surroundingText = html.substring(Math.max(0, keywordIndex - 500), keywordIndex + 500);
+                        
+                        datePatterns.forEach(pattern => {
+                          const matches = surroundingText.match(pattern);
+                          if (matches) {
+                            console.log(`Found ${matches.length} date matches for "${keyword}" in ${symbol}`);
+                            matches.forEach(match => {
+                              try {
+                                const eventDate = new Date(match);
+                                const today = new Date();
+                                const thirtyDaysFromNow = new Date();
+                                thirtyDaysFromNow.setDate(today.getDate() + 30);
+                                
+                                if (eventDate >= today && eventDate <= thirtyDaysFromNow) {
+                                  console.log(`Valid event found for ${symbol}: ${keyword} on ${eventDate.toISOString().split('T')[0]}`);
+                                  events.push({
+                                    ticker: symbol,
+                                    date: eventDate.toISOString().split('T')[0],
+                                    name: keyword.charAt(0).toUpperCase() + keyword.slice(1),
+                                    companyName: symbol,
+                                    url: irUrl,
+                                    source: 'IR Page'
+                                  });
+                                }
+                              } catch (e) {
+                                console.log(`Invalid date format for ${symbol}: ${match}`);
+                              }
+                            });
+                          }
+                        });
+                      }
+                    });
+                    
+                    // Also look for any future dates that might be events
+                    const today = new Date();
+                    const thirtyDaysFromNow = new Date();
+                    thirtyDaysFromNow.setDate(today.getDate() + 30);
+                    
+                    datePatterns.forEach(pattern => {
+                      const matches = html.match(pattern);
+                      if (matches) {
+                        matches.forEach(match => {
+                          try {
+                            const eventDate = new Date(match);
+                            if (eventDate >= today && eventDate <= thirtyDaysFromNow) {
+                              // Check if this date is near any event-related text
+                              const dateIndex = html.indexOf(match.toLowerCase());
+                              const surroundingText = html.substring(Math.max(0, dateIndex - 300), dateIndex + 300);
+                              
+                              const hasEventContext = eventKeywords.some(keyword => 
+                                surroundingText.includes(keyword)
+                              );
+                              
+                              if (hasEventContext) {
+                                console.log(`Found event context for date ${match} in ${symbol}`);
+                                events.push({
+                                  ticker: symbol,
+                                  date: eventDate.toISOString().split('T')[0],
+                                  name: 'Upcoming Event',
+                                  companyName: symbol,
+                                  url: irUrl,
+                                  source: 'IR Page'
+                                });
+                              }
+                            }
+                          } catch (e) {
+                            // Skip invalid dates
+                          }
+                        });
+                      }
+                    });
+                    
+                    console.log(`Found ${events.length} events from IR page for ${symbol}`);
+                    resolve(events);
+                  } catch (error) {
+                    console.log(`Error scraping IR page for ${symbol}:`, error.message);
+                    resolve([]);
+                  }
+                });
+              }).on('error', (err) => {
+                console.log(`Error fetching IR page for ${symbol}:`, err.message);
+                resolve([]);
+              });
+            });
+          }
+          
+          async function fetchAllEvents() {
+            console.log('Starting to fetch events data...');
+            const allEvents = [];
+            
+            for (const ticker of PORTFOLIO_TICKERS) {
+              console.log(`Fetching events for ${ticker}...`);
+              
+              // Fetch from Finnhub API
+              const data = await fetchFinnhubData(ticker);
+              
+              if (data.earningsCalendar && Array.isArray(data.earningsCalendar)) {
+                data.earningsCalendar.forEach(event => {
+                  allEvents.push({
+                    ticker: ticker,
+                    date: event.date,
+                    name: 'Earnings Report',
+                    companyName: event.symbol,
+                    url: `https://finnhub.io/calendar/earnings?symbol=${ticker}`,
+                    source: 'Finnhub API'
+                  });
+                });
+              }
+              
+              // Scrape IR page if available
+              if (IR_PAGES[ticker]) {
+                console.log(`Scraping IR page for ${ticker}...`);
+                const irEvents = await scrapeIRPage(ticker, IR_PAGES[ticker]);
+                allEvents.push(...irEvents);
+                
+                // Add delay between IR page requests
+                await new Promise(resolve => setTimeout(resolve, 2000));
+              }
+              
+              // Add delay to avoid rate limiting
+              await new Promise(resolve => setTimeout(resolve, 1000));
+            }
+            
+            // Remove duplicates based on ticker, date, and name
+            const uniqueEvents = [];
+            const seen = new Set();
+            
+            allEvents.forEach(event => {
+              const key = `${event.ticker}-${event.date}-${event.name}`;
+              if (!seen.has(key)) {
+                seen.add(key);
+                uniqueEvents.push(event);
+              }
+            });
+            
+            // Sort by date
+            uniqueEvents.sort((a, b) => new Date(a.date) - new Date(b.date));
+            
+            // Filter to next 30 days
+            const today = new Date();
+            const thirtyDaysFromNow = new Date();
+            thirtyDaysFromNow.setDate(today.getDate() + 30);
+            
+            const filteredEvents = uniqueEvents.filter(event => {
+              const eventDate = new Date(event.date);
+              return eventDate >= today && eventDate <= thirtyDaysFromNow;
+            });
+            
+            console.log(`Found ${filteredEvents.length} unique events in next 30 days`);
+            console.log(`Events by source:`, filteredEvents.reduce((acc, event) => {
+              acc[event.source] = (acc[event.source] || 0) + 1;
+              return acc;
+            }, {}));
+            
+            // Log events by ticker for debugging
+            console.log(`Events by ticker:`, filteredEvents.reduce((acc, event) => {
+              acc[event.ticker] = (acc[event.ticker] || 0) + 1;
+              return acc;
+            }, {}));
+            
+            return {
+              events: filteredEvents,
+              lastUpdated: new Date().toISOString(),
+              totalEvents: allEvents.length,
+              uniqueEvents: uniqueEvents.length
+            };
+          }
+          
+          // Execute the fetch
+          fetchAllEvents().then(data => {
+            fs.writeFileSync('events-cache.json', JSON.stringify(data, null, 2));
+            console.log('Events cache updated successfully!');
+            console.log(`Cached ${data.events.length} events`);
+          }).catch(error => {
+            console.error('Error updating events cache:', error);
+            process.exit(1);
+          });
+          EOF
+          
+      - name: Run Events Fetch
+        run: node fetch-events.js
+        
+      - name: Commit and Push Changes
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add events-cache.json
+          git diff --quiet && git diff --staged --quiet || git commit -m "Update events cache - $(date)"
+          git pull origin master --rebase
+          git push origin master
