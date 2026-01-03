@@ -414,7 +414,7 @@ export function HomeDashboard() {
             className="flex items-center gap-2 bg-[#1DA1F2]/10 hover:bg-[#1DA1F2]/20 text-[#1DA1F2] px-4 py-2 rounded-xl border border-[#1DA1F2]/20 transition-all font-bold text-sm group"
           >
             <Twitter className="w-4 h-4 fill-current group-hover:scale-110 transition-transform" />
-            @jiggycapital
+            Twitter
           </a>
           <a 
             href="https://jiggy.substack.com" 
