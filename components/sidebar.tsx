@@ -89,7 +89,10 @@ export function Sidebar() {
         <div className="flex h-full flex-col">
           {/* Logo */}
           <div className="flex h-14 items-center justify-between border-b border-slate-800 px-6">
-            <h1 className="text-xl font-bold text-slate-100">Jiggy Capital</h1>
+            <Link href="/" className="flex items-center gap-3">
+              <img src="/logo.svg" alt="Jiggy Capital Logo" className="h-8 w-8 rounded-lg" />
+              <h1 className="text-xl font-bold text-slate-100 tracking-tight">Jiggy Capital</h1>
+            </Link>
             <Button
               variant="ghost"
               size="icon"
