@@ -137,51 +137,51 @@ export function NewsFeed({ portfolioData, logos, className }: NewsFeedProps) {
         ) : news.length === 0 ? (
           <div className="flex-1 flex items-center justify-center p-12 text-center text-slate-500 text-sm italic">No relevant news found for your holdings</div>
         ) : (
-          <div className="divide-y divide-slate-800/50 overflow-y-auto flex-1 custom-scrollbar">
-            {news.map((item) => (
-              <div key={item.id} className="p-5 hover:bg-slate-800/40 transition-all flex gap-5 group relative overflow-hidden">
-                <div className="shrink-0 flex flex-col items-center gap-3 relative z-10">
-                  <div className="w-12 h-12 rounded-xl bg-slate-800 flex items-center justify-center shrink-0 border border-slate-700 shadow-xl group-hover:border-emerald-500/30 transition-all transform group-hover:scale-105">
-                    {logos[item.ticker] ? (
-                      <img src={logos[item.ticker]} alt={item.ticker} className="w-8 h-8 object-contain" />
-                    ) : (
-                      <span className="text-xs font-black text-slate-500">{item.ticker}</span>
-                    )}
-                  </div>
-                  <div className="px-1.5 py-0.5 rounded bg-slate-800 border border-slate-700 text-[9px] font-black text-slate-400 font-mono tracking-tighter uppercase group-hover:bg-slate-700 group-hover:text-slate-200 transition-colors">
-                    {item.ticker}
-                  </div>
-                </div>
-                <div className="min-w-0 flex-1 relative z-10">
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="flex items-center gap-2">
-                      <span className="text-[10px] font-black text-emerald-400 bg-emerald-500/5 border border-emerald-500/10 px-2 py-0.5 rounded uppercase tracking-tighter">{item.source}</span>
-                      <span className="text-[10px] text-slate-500 font-medium flex items-center gap-1">
-                        <MessageSquare className="w-2.5 h-2.5" />
-                        {new Date(item.datetime * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                      </span>
-                    </div>
-                  </div>
-                  <h4 className="text-[15px] font-bold text-slate-100 leading-[1.3] mb-2 group-hover:text-emerald-50 transition-colors tracking-tight">
-                    {item.headline}
-                  </h4>
-                  <p className="text-[13px] text-slate-400 line-clamp-2 mb-3 leading-relaxed font-medium group-hover:text-slate-300 transition-colors">
-                    {item.summary}
-                  </p>
-                  <a 
-                    href={item.url} 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 text-[11px] font-black text-blue-400 hover:text-blue-300 transition-all transform group-hover:translate-x-1"
-                  >
-                    READ ANALYSIS <ExternalLink className="w-3 h-3" />
-                  </a>
-                </div>
-                {/* Subtle background decoration */}
-                <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/5 blur-[60px] rounded-full -translate-y-16 translate-x-16 pointer-events-none" />
-              </div>
-            ))}
-          </div>
+                 <div className="divide-y divide-slate-800/50 overflow-y-auto flex-1 custom-scrollbar">
+                   {news.map((item) => (
+                     <div key={item.id} className="p-3.5 hover:bg-slate-800/40 transition-all flex gap-4 group relative overflow-hidden">
+                       <div className="shrink-0 flex flex-col items-center gap-1.5 relative z-10">
+                         <div className="w-10 h-10 rounded-xl bg-slate-800 flex items-center justify-center shrink-0 border border-slate-700 shadow-xl group-hover:border-emerald-500/30 transition-all transform group-hover:scale-105">
+                           {logos[item.ticker] ? (
+                             <img src={logos[item.ticker]} alt={item.ticker} className="w-6 h-6 object-contain" />
+                           ) : (
+                             <span className="text-[10px] font-black text-slate-500">{item.ticker}</span>
+                           )}
+                         </div>
+                         <div className="px-1 py-0.5 rounded bg-slate-800 border border-slate-700 text-[8px] font-black text-slate-400 font-mono tracking-tighter uppercase group-hover:bg-slate-700 group-hover:text-slate-200 transition-colors">
+                           {item.ticker}
+                         </div>
+                       </div>
+                       <div className="min-w-0 flex-1 relative z-10">
+                         <div className="flex items-center justify-between mb-1">
+                           <div className="flex items-center gap-2">
+                             <span className="text-[9px] font-black text-emerald-400 bg-emerald-500/5 border border-emerald-500/10 px-1.5 py-0.5 rounded uppercase tracking-tighter">{item.source}</span>
+                             <span className="text-[10px] text-slate-500 font-medium flex items-center gap-1">
+                               <MessageSquare className="w-2.5 h-2.5" />
+                               {new Date(item.datetime * 1000).toLocaleDateString([], { month: 'short', day: 'numeric' })} • {new Date(item.datetime * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                             </span>
+                           </div>
+                         </div>
+                         <h4 className="text-[14px] font-bold text-slate-100 leading-[1.3] mb-1 group-hover:text-emerald-50 transition-colors tracking-tight">
+                           {item.headline}
+                         </h4>
+                         <p className="text-[12px] text-slate-400 line-clamp-2 mb-2 leading-relaxed font-medium group-hover:text-slate-300 transition-colors">
+                           {item.summary}
+                         </p>
+                         <a 
+                           href={item.url} 
+                           target="_blank" 
+                           rel="noopener noreferrer"
+                           className="inline-flex items-center gap-2 text-[10px] font-black text-blue-400 hover:text-blue-300 transition-all transform group-hover:translate-x-1"
+                         >
+                           READ ANALYSIS <ExternalLink className="w-2.5 h-2.5" />
+                         </a>
+                       </div>
+                       {/* Subtle background decoration */}
+                       <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/5 blur-[60px] rounded-full -translate-y-16 translate-x-16 pointer-events-none" />
+                     </div>
+                   ))}
+                 </div>
         )}
       </CardContent>
     </Card>
