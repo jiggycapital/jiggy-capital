@@ -8,7 +8,7 @@ import { PortfolioTanStackTable } from "@/components/hub/portfolio-tanstack-tabl
 import { NewsFeed } from "@/components/hub/news-feed";
 import { UpcomingEvents } from "@/components/hub/upcoming-events";
 import { formatPercentage, formatCurrency, parseNumeric } from "@/lib/utils";
-import { TrendingUp, TrendingDown, PieChart as PieChartIcon, Activity, Target, Percent } from "lucide-react";
+import { TrendingUp, TrendingDown, PieChart as PieChartIcon, Activity, Target, Percent, Twitter } from "lucide-react";
 
 export function HomeDashboard() {
   const [positionsData, setPositionsData] = useState<any[]>([]);
@@ -395,6 +395,30 @@ export function HomeDashboard() {
 
   return (
     <div className="space-y-4 md:space-y-6 pb-4 md:pb-8 px-4 md:px-6">
+      {/* Welcome Section */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-slate-900/40 border border-slate-800/60 p-4 md:p-6 rounded-2xl backdrop-blur-sm shadow-lg">
+        <div className="space-y-1">
+          <h2 className="text-xl md:text-2xl font-bold text-slate-100 tracking-tight">
+            Welcome to <span className="text-blue-400">Jiggy Capital</span>
+          </h2>
+          <p className="text-sm text-slate-400 max-w-2xl leading-relaxed">
+            Real-time insights and performance analytics of my active equity portfolio. 
+            I focus on high-conviction growth companies and market-leading technology.
+          </p>
+        </div>
+        <div className="flex items-center gap-3 shrink-0">
+          <a 
+            href="https://twitter.com/jiggycapital" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="flex items-center gap-2 bg-[#1DA1F2]/10 hover:bg-[#1DA1F2]/20 text-[#1DA1F2] px-4 py-2 rounded-xl border border-[#1DA1F2]/20 transition-all font-bold text-sm group"
+          >
+            <Twitter className="w-4 h-4 fill-current group-hover:scale-110 transition-transform" />
+            @jiggycapital
+          </a>
+        </div>
+      </div>
+
       {/* Hero Section - Three Performance Metrics */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4">
         <Card className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 border-slate-700 shadow-xl hover:shadow-2xl transition-all duration-300">
