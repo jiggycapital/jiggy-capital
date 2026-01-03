@@ -398,9 +398,9 @@ export function HomeDashboard() {
       {/* Hero Section - Three Performance Metrics */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4">
         <Card className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 border-slate-700 shadow-xl hover:shadow-2xl transition-all duration-300">
-          <CardHeader className="pb-2 md:pb-3">
-            <CardDescription className="text-slate-400 text-xs md:text-sm uppercase tracking-wider">Daily Performance</CardDescription>
-            <CardTitle className={`text-2xl md:text-4xl font-mono font-bold mt-1 md:mt-2 ${
+          <CardHeader className="py-2 md:py-3">
+            <CardDescription className="text-slate-400 text-[10px] md:text-xs uppercase tracking-wider">Daily Performance</CardDescription>
+            <CardTitle className={`text-xl md:text-3xl font-mono font-bold mt-0.5 md:mt-1 ${
               (() => {
                 const num = portfolioMetrics.dailyPerformance ? parseNumeric(portfolioMetrics.dailyPerformance.toString().replace(/[+%]/g, '')) : portfolioMetrics.weightedDailyMove;
                 return (num ?? 0) >= 0 ? 'text-green-400' : 'text-red-400';
@@ -412,9 +412,9 @@ export function HomeDashboard() {
         </Card>
 
         <Card className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 border-slate-700 shadow-xl hover:shadow-2xl transition-all duration-300">
-          <CardHeader className="pb-2 md:pb-3">
-            <CardDescription className="text-slate-400 text-xs md:text-sm uppercase tracking-wider">YTD Performance</CardDescription>
-            <CardTitle className={`text-2xl md:text-4xl font-mono font-bold mt-1 md:mt-2 ${
+          <CardHeader className="py-2 md:py-3">
+            <CardDescription className="text-slate-400 text-[10px] md:text-xs uppercase tracking-wider">YTD Performance</CardDescription>
+            <CardTitle className={`text-xl md:text-3xl font-mono font-bold mt-0.5 md:mt-1 ${
               (portfolioMetrics.ytdPerformanceNum ?? portfolioMetrics.weightedYtd) >= 0 
                 ? 'text-green-400' 
                 : 'text-red-400'
@@ -427,9 +427,9 @@ export function HomeDashboard() {
         </Card>
 
         <Card className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 border-slate-700 shadow-xl hover:shadow-2xl transition-all duration-300">
-          <CardHeader className="pb-2 md:pb-3">
-            <CardDescription className="text-slate-400 text-xs md:text-sm uppercase tracking-wider">Lifetime CAGR</CardDescription>
-            <CardTitle className={`text-2xl md:text-4xl font-mono font-bold mt-1 md:mt-2 ${
+          <CardHeader className="py-2 md:py-3">
+            <CardDescription className="text-slate-400 text-[10px] md:text-xs uppercase tracking-wider">Lifetime CAGR</CardDescription>
+            <CardTitle className={`text-xl md:text-3xl font-mono font-bold mt-0.5 md:mt-1 ${
               (() => {
                 const num = portfolioMetrics.lifetimeCagr ? parseNumeric(portfolioMetrics.lifetimeCagr.toString().replace(/[+%]/g, '')) : null;
                 return (num ?? 0) >= 0 ? 'text-green-400' : 'text-red-400';
@@ -437,7 +437,7 @@ export function HomeDashboard() {
             }`}>
               {portfolioMetrics.lifetimeCagr || "0%"}
             </CardTitle>
-            <div className="text-slate-400 text-xs mt-2">
+            <div className="text-slate-400 text-[9px] mt-1">
               Jan 29th, 2020 -
             </div>
           </CardHeader>
