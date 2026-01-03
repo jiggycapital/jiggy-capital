@@ -8,7 +8,7 @@ import { PortfolioTanStackTable } from "@/components/hub/portfolio-tanstack-tabl
 import { NewsFeed } from "@/components/hub/news-feed";
 import { UpcomingEvents } from "@/components/hub/upcoming-events";
 import { formatPercentage, formatCurrency, parseNumeric } from "@/lib/utils";
-import { TrendingUp, TrendingDown, PieChart as PieChartIcon, Activity, Target, Percent, Twitter } from "lucide-react";
+import { TrendingUp, TrendingDown, PieChart as PieChartIcon, Activity, Target, Percent, Twitter, BookOpen } from "lucide-react";
 
 export function HomeDashboard() {
   const [positionsData, setPositionsData] = useState<any[]>([]);
@@ -406,7 +406,7 @@ export function HomeDashboard() {
             I focus on high-conviction growth companies and market-leading technology.
           </p>
         </div>
-        <div className="flex items-center gap-3 shrink-0">
+        <div className="flex flex-col gap-2 shrink-0">
           <a 
             href="https://twitter.com/jiggycapital" 
             target="_blank" 
@@ -415,6 +415,15 @@ export function HomeDashboard() {
           >
             <Twitter className="w-4 h-4 fill-current group-hover:scale-110 transition-transform" />
             @jiggycapital
+          </a>
+          <a 
+            href="https://jiggy.substack.com" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="flex items-center gap-2 bg-orange-500/10 hover:bg-orange-500/20 text-orange-500 px-4 py-2 rounded-xl border border-orange-500/20 transition-all font-bold text-sm group"
+          >
+            <BookOpen className="w-4 h-4 group-hover:scale-110 transition-transform" />
+            jiggy.substack.com
           </a>
         </div>
       </div>
