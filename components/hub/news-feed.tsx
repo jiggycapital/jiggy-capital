@@ -73,19 +73,21 @@ export function NewsFeed({ portfolioData, logos, className }: NewsFeedProps) {
         const uniqueNews = Array.from(uniqueNewsMap.values());
 
         const filteredNews = uniqueNews.filter(n => {
+          const ticker = (n.ticker || "").toUpperCase();
           const url = (n.url || "").toLowerCase();
           const source = (n.source || "").toLowerCase();
           
+          if (ticker === 'TSLA') return false; // Filter out Tesla due to noise
           if (url.includes('fool.com')) return false;
           if (url.includes('seekingalpha.com')) return false;
           if (source.includes('seekingalpha')) return false;
           if (source.includes('seeking alpha')) return false;
 
           const headline = (n.headline || "").toLowerCase();
-          const ticker = (n.ticker || "").toLowerCase();
+          const tickerLower = (n.ticker || "").toLowerCase();
           const companyName = (n.companyName || "").toLowerCase();
           
-          const hasTicker = headline.includes(ticker);
+          const hasTicker = headline.includes(tickerLower);
           const companyWords = companyName.split(' ');
           const hasCompanyName = companyWords.some((word: string) => {
             if (word.length < 3) return false;
