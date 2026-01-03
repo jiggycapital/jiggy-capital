@@ -30,7 +30,7 @@ export function UpcomingEvents({ portfolioTickers, logos, irLinks, className }: 
         setLoading(true);
         
         // 0. Check Cache
-        const CACHE_KEY = "finnhub_upcoming_events_v2";
+        const CACHE_KEY = "finnhub_upcoming_events_v3"; // Updated cache key to force refresh for Nintendo fix
         const CACHE_EXPIRY = 24 * 60 * 60 * 1000; // 24 hours
         
         try {
@@ -68,9 +68,16 @@ export function UpcomingEvents({ portfolioTickers, logos, irLinks, className }: 
               const data = await resp.json();
               if (data.earningsCalendar && Array.isArray(data.earningsCalendar)) {
                 data.earningsCalendar.forEach((e: any) => {
+                  let tickerToUse = e.symbol;
+                  
+                  // Map Japanese Nintendo ticker to US ADR ticker
+                  if (tickerToUse === "7974.T") {
+                    tickerToUse = "NTDOY";
+                  }
+
                   allEvents.push({
-                    ticker: e.symbol,
-                    name: e.symbol,
+                    ticker: tickerToUse,
+                    name: tickerToUse,
                     date: e.date,
                     title: "Earnings Call",
                     type: "earnings" as const,
@@ -142,9 +149,6 @@ export function UpcomingEvents({ portfolioTickers, logos, irLinks, className }: 
                         <span className="text-[10px] font-bold text-slate-500">{event.ticker}</span>
                       )}
                     </div>
-                    {event.type === 'earnings' && (
-                      <div className="absolute -top-1 -right-1 w-3 h-3 bg-blue-500 rounded-full border-2 border-slate-900 shadow-sm animate-pulse" title="Earnings Season" />
-                    )}
                   </div>
                   <div className="min-w-0">
                     <div className="flex items-center gap-2 mb-0.5">
