@@ -169,7 +169,7 @@ export function extractColumnCategories(rows: string[][]): Record<string, string
     const categoryRow = rows[categoryRowIndex];
     const headerRow = rows[headerRowIndex];
     
-    let currentCategory = "Other";
+    let currentCategory = "General Info";
     
     // Process each column
     // Merged cells in CSV appear as empty strings, so we propagate the last seen category
@@ -190,12 +190,14 @@ export function extractColumnCategories(rows: string[][]): Record<string, string
   } else {
     // No category row, assign all columns to "Other"
     const headerRow = rows[headerRowIndex];
-    headerRow.forEach(header => {
-      const cleanHeader = header.trim().replace(/^"|"$/g, '');
-      if (cleanHeader) {
-        categoryMap[cleanHeader] = "Other";
-      }
-    });
+    if (headerRow) {
+      headerRow.forEach(header => {
+        const cleanHeader = header.trim().replace(/^"|"$/g, '');
+        if (cleanHeader) {
+          categoryMap[cleanHeader] = "Other";
+        }
+      });
+    }
   }
   
   return categoryMap;

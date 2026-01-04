@@ -139,7 +139,7 @@ const renderFiscalLabel = (props: any) => {
         >
           {payload.ticker || payload.label}
           <tspan fill="#9CA3AF" fontWeight="normal" dx={6} fontFamily="monospace">
-            {`${(percent * 100).toFixed(1)}%`}
+          {`${(percent * 100).toFixed(1)}%`}
           </tspan>
         </text>
       </g>

@@ -302,7 +302,7 @@ export function PortfolioTanStackTable({ positionsData, logos }: PortfolioTanSta
             </div>
           );
         }
-      },
+        },
       {
         accessorKey: "d200",
         header: ({ column }) => (

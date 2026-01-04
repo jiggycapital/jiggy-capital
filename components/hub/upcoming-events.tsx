@@ -34,14 +34,14 @@ export function UpcomingEvents({ portfolioTickers, logos, irLinks, className }: 
         const CACHE_EXPIRY = 24 * 60 * 60 * 1000; // 24 hours
         
         try {
-          const cached = localStorage.getItem(CACHE_KEY);
-          if (cached) {
-            const { timestamp, data } = JSON.parse(cached);
-            if (Date.now() - timestamp < CACHE_EXPIRY) {
-              setEvents(data);
-              setLoading(false);
-              return;
-            }
+        const cached = localStorage.getItem(CACHE_KEY);
+        if (cached) {
+          const { timestamp, data } = JSON.parse(cached);
+          if (Date.now() - timestamp < CACHE_EXPIRY) {
+            setEvents(data);
+            setLoading(false);
+            return;
+          }
           }
         } catch (e) {
           console.warn("Failed to read events cache:", e);

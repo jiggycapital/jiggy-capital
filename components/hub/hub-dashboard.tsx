@@ -203,7 +203,7 @@ export function HubDashboard() {
           </div>
 
           <TabsContent value="holdings" className="mt-0 outline-none">
-            <PortfolioTable positionsData={positionsData} logos={logos} />
+      <PortfolioTable positionsData={positionsData} logos={logos} />
           </TabsContent>
           
           <TabsContent value="watchlist" className="mt-0 outline-none">

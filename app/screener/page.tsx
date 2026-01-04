@@ -9,6 +9,8 @@ export default function ScreenerPage() {
   const [positionsData, setPositionsData] = useState<any[]>([]);
   const [watchlistData, setWatchlistData] = useState<any[]>([]);
   const [logos, setLogos] = useState<Record<string, string>>({});
+  const [rawPositionsRows, setRawPositionsRows] = useState<string[][]>([]);
+  const [rawWatchlistRows, setRawWatchlistRows] = useState<string[][]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -22,6 +24,8 @@ export default function ScreenerPage() {
           fetchLogos()
         ]);
         
+        setRawPositionsRows(portfolioRows);
+        setRawWatchlistRows(watchlistRows);
         setPositionsData(parseSheetData(portfolioRows));
         setWatchlistData(parseSheetData(watchlistRows));
         setLogos(logosData.logos);
@@ -59,6 +63,8 @@ export default function ScreenerPage() {
         positionsData={positionsData} 
         watchlistData={watchlistData} 
         logos={logos} 
+        rawPositionsRows={rawPositionsRows}
+        rawWatchlistRows={rawWatchlistRows}
       />
     </div>
   );

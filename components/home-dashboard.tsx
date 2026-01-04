@@ -543,10 +543,10 @@ export function HomeDashboard() {
           </div>
 
           <TabsContent value="holdings" className="mt-0 focus-visible:outline-none">
-            <PortfolioTanStackTable 
-              positionsData={positionsData} 
-              logos={logos} 
-            />
+        <PortfolioTanStackTable 
+          positionsData={positionsData} 
+          logos={logos} 
+        />
           </TabsContent>
           
           <TabsContent value="watchlist" className="mt-0 focus-visible:outline-none">
@@ -615,7 +615,7 @@ export function HomeDashboard() {
           <UpcomingEvents 
             portfolioTickers={positionsData.map(p => p.Ticker || p.Symbol).filter(Boolean)} 
             logos={logos} 
-            irLinks={irLinks}
+            irLinks={irLinks} 
             className="flex-1 min-h-0"
           />
         </div>
