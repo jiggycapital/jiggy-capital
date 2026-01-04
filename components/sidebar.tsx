@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { LayoutDashboard, Table2, BarChart3, TrendingUp, Database, Menu, X } from "lucide-react";
+import { LayoutDashboard, Table2, BarChart3, TrendingUp, Database, Menu, X, Filter } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/logo";
 
@@ -17,6 +17,11 @@ export function Sidebar() {
       title: "Dashboard",
       href: "/",
       icon: LayoutDashboard,
+    },
+    {
+      title: "Screener",
+      href: "/screener",
+      icon: Filter,
     },
     {
       title: "Table",
