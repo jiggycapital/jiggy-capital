@@ -207,7 +207,7 @@ export function WatchlistTanStackTable({ watchlistData, logos }: WatchlistTanSta
             className="flex items-center justify-end gap-1 cursor-pointer select-none hover:text-slate-200 transition-colors whitespace-normal leading-tight text-right max-w-[50px]"
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           >
-            26e P/FCF
+            2026e P/FCF
             {{
               asc: <ArrowUp className="h-3 w-3 shrink-0" />,
               desc: <ArrowDown className="h-3 w-3 shrink-0" />,
@@ -262,10 +262,10 @@ export function WatchlistTanStackTable({ watchlistData, logos }: WatchlistTanSta
   });
 
   return (
-    <div className="rounded-xl border border-slate-800 bg-slate-900/50 overflow-hidden">
-      <div className="max-h-[750px] overflow-auto custom-scrollbar">
+    <div className="rounded-xl border border-slate-800 bg-slate-900/50 overflow-hidden flex flex-col h-full max-h-[750px]">
+      <div className="overflow-auto custom-scrollbar flex-1 relative">
         <Table className="relative">
-          <TableHeader className="bg-slate-800/50 sticky top-0 z-20">
+          <TableHeader className="bg-slate-800/50 sticky top-0 z-20 shadow-md">
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id} className="border-slate-800 hover:bg-transparent">
                 {headerGroup.headers.map((header) => (

@@ -281,78 +281,6 @@ export function PortfolioTanStackTable({ positionsData, logos }: PortfolioTanSta
         },
       },
       {
-        accessorKey: "revCagr",
-        header: ({ column }) => (
-          <div 
-            className="flex items-center justify-end gap-1 cursor-pointer select-none hover:text-slate-200 transition-colors text-right whitespace-normal leading-tight max-w-[60px]"
-            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          >
-            Fwd Rev CAGR
-            {{
-              asc: <ArrowUp className="h-3 w-3 shrink-0" />,
-              desc: <ArrowDown className="h-3 w-3 shrink-0" />,
-            }[column.getIsSorted() as string] ?? <ArrowUpDown className="h-3 w-3 shrink-0 opacity-50" />}
-          </div>
-        ),
-        cell: ({ row }) => {
-          const { isCash, revCagr } = row.original as any;
-          if (isCash) return null;
-          return (
-            <div className="text-right font-mono text-[13px] text-slate-300">
-              {revCagr}
-            </div>
-          );
-        },
-      },
-      {
-        accessorKey: "fcfMultiple",
-        header: ({ column }) => (
-          <div 
-            className="flex items-center justify-end gap-1 cursor-pointer select-none hover:text-slate-200 transition-colors whitespace-normal leading-tight text-right max-w-[60px]"
-            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          >
-            P/2026e FCF
-            {{
-              asc: <ArrowUp className="h-3 w-3 shrink-0" />,
-              desc: <ArrowDown className="h-3 w-3 shrink-0" />,
-            }[column.getIsSorted() as string] ?? <ArrowUpDown className="h-3 w-3 shrink-0 opacity-50" />}
-          </div>
-        ),
-        cell: ({ row }) => {
-          const { isCash, fcfMultiple } = row.original as any;
-          if (isCash) return null;
-          return (
-            <div className="text-right font-mono text-[13px] text-slate-300">
-              {fcfMultiple}
-            </div>
-          );
-        },
-      },
-      {
-        accessorKey: "peMultiple",
-        header: ({ column }) => (
-          <div 
-            className="flex items-center justify-end gap-1 cursor-pointer select-none hover:text-slate-200 transition-colors text-right whitespace-normal leading-tight max-w-[60px]"
-            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          >
-            2026e P/E
-            {{
-              asc: <ArrowUp className="h-3 w-3 shrink-0" />,
-              desc: <ArrowDown className="h-3 w-3 shrink-0" />,
-            }[column.getIsSorted() as string] ?? <ArrowUpDown className="h-3 w-3 shrink-0 opacity-50" />}
-          </div>
-        ),
-        cell: ({ row }) => {
-          const { isCash, peMultiple } = row.original as any;
-          if (isCash) return null;
-          return (
-            <div className="text-right font-mono text-[13px] text-slate-300">
-              {peMultiple}
-            </div>
-          );
-        },
-      },
-      {
         accessorKey: "d50",
         header: ({ column }) => (
           <div 
@@ -399,6 +327,78 @@ export function PortfolioTanStackTable({ positionsData, logos }: PortfolioTanSta
         }
       },
       {
+        accessorKey: "revCagr",
+        header: ({ column }) => (
+          <div 
+            className="flex items-center justify-end gap-1 cursor-pointer select-none hover:text-slate-200 transition-colors text-right whitespace-normal leading-tight max-w-[60px]"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          >
+            Fwd Rev CAGR
+            {{
+              asc: <ArrowUp className="h-3 w-3 shrink-0" />,
+              desc: <ArrowDown className="h-3 w-3 shrink-0" />,
+            }[column.getIsSorted() as string] ?? <ArrowUpDown className="h-3 w-3 shrink-0 opacity-50" />}
+          </div>
+        ),
+        cell: ({ row }) => {
+          const { isCash, revCagr } = row.original as any;
+          if (isCash) return null;
+          return (
+            <div className="text-right font-mono text-[13px] text-slate-300">
+              {revCagr}
+            </div>
+          );
+        },
+      },
+      {
+        accessorKey: "fcfMultiple",
+        header: ({ column }) => (
+          <div 
+            className="flex items-center justify-end gap-1 cursor-pointer select-none hover:text-slate-200 transition-colors whitespace-normal leading-tight text-right max-w-[60px]"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          >
+            2026e P/FCF
+            {{
+              asc: <ArrowUp className="h-3 w-3 shrink-0" />,
+              desc: <ArrowDown className="h-3 w-3 shrink-0" />,
+            }[column.getIsSorted() as string] ?? <ArrowUpDown className="h-3 w-3 shrink-0 opacity-50" />}
+          </div>
+        ),
+        cell: ({ row }) => {
+          const { isCash, fcfMultiple } = row.original as any;
+          if (isCash) return null;
+          return (
+            <div className="text-right font-mono text-[13px] text-slate-300">
+              {fcfMultiple}
+            </div>
+          );
+        },
+      },
+      {
+        accessorKey: "peMultiple",
+        header: ({ column }) => (
+          <div 
+            className="flex items-center justify-end gap-1 cursor-pointer select-none hover:text-slate-200 transition-colors text-right whitespace-normal leading-tight max-w-[60px]"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          >
+            2026e P/E
+            {{
+              asc: <ArrowUp className="h-3 w-3 shrink-0" />,
+              desc: <ArrowDown className="h-3 w-3 shrink-0" />,
+            }[column.getIsSorted() as string] ?? <ArrowUpDown className="h-3 w-3 shrink-0 opacity-50" />}
+          </div>
+        ),
+        cell: ({ row }) => {
+          const { isCash, peMultiple } = row.original as any;
+          if (isCash) return null;
+          return (
+            <div className="text-right font-mono text-[13px] text-slate-300">
+              {peMultiple}
+            </div>
+          );
+        },
+      },
+      {
         accessorKey: "peg",
         header: ({ column }) => (
           <div 
@@ -430,10 +430,10 @@ export function PortfolioTanStackTable({ positionsData, logos }: PortfolioTanSta
   });
 
   return (
-    <div className="rounded-xl border border-slate-800 bg-slate-900/50 overflow-hidden">
-      <div className="max-h-[750px] overflow-auto custom-scrollbar">
+    <div className="rounded-xl border border-slate-800 bg-slate-900/50 overflow-hidden flex flex-col h-full max-h-[750px]">
+      <div className="overflow-auto custom-scrollbar flex-1 relative">
         <Table className="relative">
-          <TableHeader className="bg-slate-800/50 sticky top-0 z-20">
+          <TableHeader className="bg-slate-800/50 sticky top-0 z-20 shadow-md">
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id} className="border-slate-800 hover:bg-transparent">
                 {headerGroup.headers.map((header) => (
