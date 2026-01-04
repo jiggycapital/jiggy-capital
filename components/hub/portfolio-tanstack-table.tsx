@@ -30,12 +30,16 @@ interface PortfolioRow {
   name: string;
   price: number;
   weight: number;
+  firstBuy: string;
   dailyChange: number;
   ytdGain: number;
   revCagr: string;
   fcfMultiple: string;
   peMultiple: string;
   marketCap: string;
+  d50: string;
+  d200: string;
+  peg: string;
 }
 
 export function PortfolioTanStackTable({ positionsData, logos }: PortfolioTanStackTableProps) {
@@ -71,18 +75,26 @@ export function PortfolioTanStackTable({ positionsData, logos }: PortfolioTanSta
         const ytd = isCash ? 0 : (parseNumeric(p["YTD Gain"] || p[p._columnATHeader]) || 0);
         const change = isCash ? 0 : (parseNumeric(p["Change %"] || p[p._columnVHeader] || p["Daily PnL %"]) || 0);
         const revCagr = isCash ? "" : (p[p._columnAOHeader] || p["25-27e Rev CAGR"] || p["2024 - 27e Rev CAGR"] || p["Rev CAGR"] || "");
+        const firstBuy = isCash ? "" : (p[p._columnEHeader] || "");
+        const d50 = isCash ? "" : (p[p._columnAEHeader] || "");
+        const d200 = isCash ? "" : (p[p._columnAFHeader] || "");
+        const peg = isCash ? "" : (p[p._columnARHeader] || "");
         
         return {
           ticker: isCash ? "CASH" : ticker,
           name: isCash ? "Cash Position" : (p.Name || p.Company || ticker),
           price: isCash ? 0 : (parseNumeric(p.Price) || 0),
           weight,
+          firstBuy,
           dailyChange: change,
           ytdGain: ytd,
           marketCap: isCash ? "" : (p["Market Cap"] || ""),
           peMultiple: isCash ? "" : (p["2026e P/E"] || p["2026 P/E"] || p["P/E"] || ""),
           fcfMultiple: isCash ? "" : (p["P/2026e FCF"] || p["P/2026 FCF"] || p["P/FCF"] || ""),
           revCagr,
+          d50,
+          d200,
+          peg,
           isCash,
         } as PortfolioRow & { isCash: boolean };
       });
@@ -101,32 +113,32 @@ export function PortfolioTanStackTable({ positionsData, logos }: PortfolioTanSta
         accessorKey: "ticker",
         header: ({ column }) => (
           <div 
-            className="flex items-center gap-1 cursor-pointer select-none hover:text-slate-200 transition-colors"
+            className="flex items-center gap-1 cursor-pointer select-none hover:text-slate-200 transition-colors whitespace-normal leading-tight"
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           >
             Company
             {{
-              asc: <ArrowUp className="h-3 w-3" />,
-              desc: <ArrowDown className="h-3 w-3" />,
-            }[column.getIsSorted() as string] ?? <ArrowUpDown className="h-3 w-3 opacity-50" />}
+              asc: <ArrowUp className="h-3 w-3 shrink-0" />,
+              desc: <ArrowDown className="h-3 w-3 shrink-0" />,
+            }[column.getIsSorted() as string] ?? <ArrowUpDown className="h-3 w-3 shrink-0 opacity-50" />}
           </div>
         ),
         cell: ({ row }) => {
           const { ticker, name, isCash } = row.original as any;
           return (
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded bg-slate-800 flex items-center justify-center overflow-hidden shrink-0 border border-slate-700">
+            <div className="flex items-center gap-2">
+              <div className="w-7 h-7 rounded bg-slate-800 flex items-center justify-center overflow-hidden shrink-0 border border-slate-700">
                 {isCash ? (
-                  <Wallet className="w-4 h-4 text-emerald-400" />
+                  <Wallet className="w-3.5 h-3.5 text-emerald-400" />
                 ) : logos[ticker] ? (
-                  <img src={logos[ticker]} alt={ticker} className="w-6 h-6 object-contain" />
+                  <img src={logos[ticker]} alt={ticker} className="w-5 h-5 object-contain" />
                 ) : (
-                  <span className="text-[10px] font-bold text-slate-500">{ticker.substring(0, 3)}</span>
+                  <span className="text-[9px] font-bold text-slate-500">{ticker.substring(0, 3)}</span>
                 )}
               </div>
               <div className="flex flex-col min-w-0">
-                <span className="text-sm font-bold text-slate-100 truncate">{ticker}</span>
-                <span className="text-[10px] text-slate-500 truncate uppercase tracking-tight">{name}</span>
+                <span className="text-[13px] font-bold text-slate-100 truncate leading-tight">{ticker}</span>
+                <span className="text-[9px] text-slate-500 truncate uppercase tracking-tighter leading-tight">{name}</span>
               </div>
             </div>
           );
@@ -136,22 +148,46 @@ export function PortfolioTanStackTable({ positionsData, logos }: PortfolioTanSta
         accessorKey: "price",
         header: ({ column }) => (
           <div 
-            className="flex items-center justify-end gap-1 cursor-pointer select-none hover:text-slate-200 transition-colors"
+            className="flex items-center justify-end gap-1 cursor-pointer select-none hover:text-slate-200 transition-colors whitespace-normal leading-tight text-right"
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           >
             Price
             {{
-              asc: <ArrowUp className="h-3 w-3" />,
-              desc: <ArrowDown className="h-3 w-3" />,
-            }[column.getIsSorted() as string] ?? <ArrowUpDown className="h-3 w-3 opacity-50" />}
+              asc: <ArrowUp className="h-3 w-3 shrink-0" />,
+              desc: <ArrowDown className="h-3 w-3 shrink-0" />,
+            }[column.getIsSorted() as string] ?? <ArrowUpDown className="h-3 w-3 shrink-0 opacity-50" />}
           </div>
         ),
         cell: ({ row }) => {
           const { isCash, price } = row.original as any;
           if (isCash) return null;
           return (
-            <div className="text-right font-mono text-sm text-slate-300">
+            <div className="text-right font-mono text-[13px] text-slate-300">
               {formatCurrency(price)}
+            </div>
+          );
+        },
+      },
+      {
+        accessorKey: "marketCap",
+        header: ({ column }) => (
+          <div 
+            className="flex items-center justify-end gap-1 cursor-pointer select-none hover:text-slate-200 transition-colors whitespace-normal leading-tight text-right max-w-[50px]"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          >
+            Mkt Cap
+            {{
+              asc: <ArrowUp className="h-3 w-3 shrink-0" />,
+              desc: <ArrowDown className="h-3 w-3 shrink-0" />,
+            }[column.getIsSorted() as string] ?? <ArrowUpDown className="h-3 w-3 shrink-0 opacity-50" />}
+          </div>
+        ),
+        cell: ({ row }) => {
+          const { isCash, marketCap } = row.original as any;
+          if (isCash) return null;
+          return (
+            <div className="text-right font-mono text-[13px] text-slate-300">
+              {marketCap}
             </div>
           );
         },
@@ -160,19 +196,39 @@ export function PortfolioTanStackTable({ positionsData, logos }: PortfolioTanSta
         accessorKey: "weight",
         header: ({ column }) => (
           <div 
-            className="flex items-center justify-end gap-1 cursor-pointer select-none hover:text-slate-200 transition-colors"
+            className="flex items-center justify-end gap-1 cursor-pointer select-none hover:text-slate-200 transition-colors whitespace-normal leading-tight text-right"
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           >
             Weight
             {{
-              asc: <ArrowUp className="h-3 w-3" />,
-              desc: <ArrowDown className="h-3 w-3" />,
-            }[column.getIsSorted() as string] ?? <ArrowUpDown className="h-3 w-3 opacity-50" />}
+              asc: <ArrowUp className="h-3 w-3 shrink-0" />,
+              desc: <ArrowDown className="h-3 w-3 shrink-0" />,
+            }[column.getIsSorted() as string] ?? <ArrowUpDown className="h-3 w-3 shrink-0 opacity-50" />}
           </div>
         ),
         cell: ({ row }) => (
-          <div className="text-right font-mono text-sm font-bold text-blue-400">
+          <div className="text-right font-mono text-[13px] font-bold text-blue-400">
             {(row.getValue("weight") as number).toFixed(1)}%
+          </div>
+        ),
+      },
+      {
+        accessorKey: "firstBuy",
+        header: ({ column }) => (
+          <div 
+            className="flex items-center justify-end gap-1 cursor-pointer select-none hover:text-slate-200 transition-colors whitespace-normal leading-tight text-right max-w-[50px]"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          >
+            First Buy
+            {{
+              asc: <ArrowUp className="h-3 w-3 shrink-0" />,
+              desc: <ArrowDown className="h-3 w-3 shrink-0" />,
+            }[column.getIsSorted() as string] ?? <ArrowUpDown className="h-3 w-3 shrink-0 opacity-50" />}
+          </div>
+        ),
+        cell: ({ row }) => (
+          <div className="text-right font-mono text-[12px] text-slate-400">
+            {row.original.firstBuy}
           </div>
         ),
       },
@@ -180,21 +236,21 @@ export function PortfolioTanStackTable({ positionsData, logos }: PortfolioTanSta
         accessorKey: "dailyChange",
         header: ({ column }) => (
           <div 
-            className="flex items-center justify-end gap-1 cursor-pointer select-none hover:text-slate-200 transition-colors"
+            className="flex items-center justify-end gap-1 cursor-pointer select-none hover:text-slate-200 transition-colors whitespace-normal leading-tight text-right"
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           >
             Daily
             {{
-              asc: <ArrowUp className="h-3 w-3" />,
-              desc: <ArrowDown className="h-3 w-3" />,
-            }[column.getIsSorted() as string] ?? <ArrowUpDown className="h-3 w-3 opacity-50" />}
+              asc: <ArrowUp className="h-3 w-3 shrink-0" />,
+              desc: <ArrowDown className="h-3 w-3 shrink-0" />,
+            }[column.getIsSorted() as string] ?? <ArrowUpDown className="h-3 w-3 shrink-0 opacity-50" />}
           </div>
         ),
         cell: ({ row }) => {
           const { dailyChange, isCash } = row.original as any;
           if (isCash) return null;
           return (
-            <div className={`text-right font-mono text-sm font-bold ${dailyChange >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
+            <div className={`text-right font-mono text-[13px] font-bold ${dailyChange >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
               {dailyChange >= 0 ? '+' : ''}{dailyChange.toFixed(1)}%
             </div>
           );
@@ -204,46 +260,22 @@ export function PortfolioTanStackTable({ positionsData, logos }: PortfolioTanSta
         accessorKey: "ytdGain",
         header: ({ column }) => (
           <div 
-            className="flex items-center justify-end gap-1 cursor-pointer select-none hover:text-slate-200 transition-colors"
+            className="flex items-center justify-end gap-1 cursor-pointer select-none hover:text-slate-200 transition-colors whitespace-normal leading-tight text-right"
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           >
             YTD
             {{
-              asc: <ArrowUp className="h-3 w-3" />,
-              desc: <ArrowDown className="h-3 w-3" />,
-            }[column.getIsSorted() as string] ?? <ArrowUpDown className="h-3 w-3 opacity-50" />}
+              asc: <ArrowUp className="h-3 w-3 shrink-0" />,
+              desc: <ArrowDown className="h-3 w-3 shrink-0" />,
+            }[column.getIsSorted() as string] ?? <ArrowUpDown className="h-3 w-3 shrink-0 opacity-50" />}
           </div>
         ),
         cell: ({ row }) => {
           const { ytdGain, isCash } = row.original as any;
           if (isCash) return null;
           return (
-            <div className={`text-right font-mono text-sm font-bold ${ytdGain >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
+            <div className={`text-right font-mono text-[13px] font-bold ${ytdGain >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
               {ytdGain >= 0 ? '+' : ''}{ytdGain.toFixed(1)}%
-            </div>
-          );
-        },
-      },
-      {
-        accessorKey: "marketCap",
-        header: ({ column }) => (
-          <div 
-            className="flex items-center justify-end gap-1 cursor-pointer select-none hover:text-slate-200 transition-colors"
-            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          >
-            Market Cap
-            {{
-              asc: <ArrowUp className="h-3 w-3" />,
-              desc: <ArrowDown className="h-3 w-3" />,
-            }[column.getIsSorted() as string] ?? <ArrowUpDown className="h-3 w-3 opacity-50" />}
-          </div>
-        ),
-        cell: ({ row }) => {
-          const { isCash, marketCap } = row.original as any;
-          if (isCash) return null;
-          return (
-            <div className="text-right font-mono text-sm text-slate-300">
-              {marketCap}
             </div>
           );
         },
@@ -252,21 +284,21 @@ export function PortfolioTanStackTable({ positionsData, logos }: PortfolioTanSta
         accessorKey: "revCagr",
         header: ({ column }) => (
           <div 
-            className="flex items-center justify-end gap-1 cursor-pointer select-none hover:text-slate-200 transition-colors text-right"
+            className="flex items-center justify-end gap-1 cursor-pointer select-none hover:text-slate-200 transition-colors text-right whitespace-normal leading-tight max-w-[60px]"
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           >
             25-27e Rev CAGR
             {{
-              asc: <ArrowUp className="h-3 w-3" />,
-              desc: <ArrowDown className="h-3 w-3" />,
-            }[column.getIsSorted() as string] ?? <ArrowUpDown className="h-3 w-3 opacity-50" />}
+              asc: <ArrowUp className="h-3 w-3 shrink-0" />,
+              desc: <ArrowDown className="h-3 w-3 shrink-0" />,
+            }[column.getIsSorted() as string] ?? <ArrowUpDown className="h-3 w-3 shrink-0 opacity-50" />}
           </div>
         ),
         cell: ({ row }) => {
           const { isCash, revCagr } = row.original as any;
           if (isCash) return null;
           return (
-            <div className="text-right font-mono text-sm text-slate-300">
+            <div className="text-right font-mono text-[13px] text-slate-300">
               {revCagr}
             </div>
           );
@@ -276,21 +308,21 @@ export function PortfolioTanStackTable({ positionsData, logos }: PortfolioTanSta
         accessorKey: "fcfMultiple",
         header: ({ column }) => (
           <div 
-            className="flex items-center justify-end gap-1 cursor-pointer select-none hover:text-slate-200 transition-colors"
+            className="flex items-center justify-end gap-1 cursor-pointer select-none hover:text-slate-200 transition-colors whitespace-normal leading-tight text-right max-w-[60px]"
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           >
             P/2026e FCF
             {{
-              asc: <ArrowUp className="h-3 w-3" />,
-              desc: <ArrowDown className="h-3 w-3" />,
-            }[column.getIsSorted() as string] ?? <ArrowUpDown className="h-3 w-3 opacity-50" />}
+              asc: <ArrowUp className="h-3 w-3 shrink-0" />,
+              desc: <ArrowDown className="h-3 w-3 shrink-0" />,
+            }[column.getIsSorted() as string] ?? <ArrowUpDown className="h-3 w-3 shrink-0 opacity-50" />}
           </div>
         ),
         cell: ({ row }) => {
           const { isCash, fcfMultiple } = row.original as any;
           if (isCash) return null;
           return (
-            <div className="text-right font-mono text-sm text-slate-300">
+            <div className="text-right font-mono text-[13px] text-slate-300">
               {fcfMultiple}
             </div>
           );
@@ -300,25 +332,73 @@ export function PortfolioTanStackTable({ positionsData, logos }: PortfolioTanSta
         accessorKey: "peMultiple",
         header: ({ column }) => (
           <div 
-            className="flex items-center justify-end gap-1 cursor-pointer select-none hover:text-slate-200 transition-colors text-right"
+            className="flex items-center justify-end gap-1 cursor-pointer select-none hover:text-slate-200 transition-colors text-right whitespace-normal leading-tight max-w-[60px]"
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           >
             2026e P/E
             {{
-              asc: <ArrowUp className="h-3 w-3" />,
-              desc: <ArrowDown className="h-3 w-3" />,
-            }[column.getIsSorted() as string] ?? <ArrowUpDown className="h-3 w-3 opacity-50" />}
+              asc: <ArrowUp className="h-3 w-3 shrink-0" />,
+              desc: <ArrowDown className="h-3 w-3 shrink-0" />,
+            }[column.getIsSorted() as string] ?? <ArrowUpDown className="h-3 w-3 shrink-0 opacity-50" />}
           </div>
         ),
         cell: ({ row }) => {
           const { isCash, peMultiple } = row.original as any;
           if (isCash) return null;
           return (
-            <div className="text-right font-mono text-sm text-slate-300">
+            <div className="text-right font-mono text-[13px] text-slate-300">
               {peMultiple}
             </div>
           );
         },
+      },
+      {
+        accessorKey: "d50",
+        header: ({ column }) => (
+          <div 
+            className="flex items-center justify-end gap-1 cursor-pointer select-none hover:text-slate-200 transition-colors whitespace-normal leading-tight text-right"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          >
+            50D
+            {{
+              asc: <ArrowUp className="h-3 w-3 shrink-0" />,
+              desc: <ArrowDown className="h-3 w-3 shrink-0" />,
+            }[column.getIsSorted() as string] ?? <ArrowUpDown className="h-3 w-3 shrink-0 opacity-50" />}
+          </div>
+        ),
+        cell: ({ row }) => <div className="text-right font-mono text-[12px] text-slate-400">{row.original.d50}</div>
+      },
+      {
+        accessorKey: "d200",
+        header: ({ column }) => (
+          <div 
+            className="flex items-center justify-end gap-1 cursor-pointer select-none hover:text-slate-200 transition-colors whitespace-normal leading-tight text-right"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          >
+            200D
+            {{
+              asc: <ArrowUp className="h-3 w-3 shrink-0" />,
+              desc: <ArrowDown className="h-3 w-3 shrink-0" />,
+            }[column.getIsSorted() as string] ?? <ArrowUpDown className="h-3 w-3 shrink-0 opacity-50" />}
+          </div>
+        ),
+        cell: ({ row }) => <div className="text-right font-mono text-[12px] text-slate-400">{row.original.d200}</div>
+      },
+      {
+        accessorKey: "peg",
+        header: ({ column }) => (
+          <div 
+            className="flex items-center justify-end gap-1 cursor-pointer select-none hover:text-slate-200 transition-colors whitespace-normal leading-tight text-right"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          >
+            P/E/G
+            {{
+              asc: <ArrowUp className="h-3 w-3 shrink-0" />,
+              desc: <ArrowDown className="h-3 w-3 shrink-0" />,
+            }[column.getIsSorted() as string] ?? <ArrowUpDown className="h-3 w-3 shrink-0 opacity-50" />}
+          </div>
+        ),
+        cell: ({ row }) => <div className="text-right font-mono text-[12px] text-slate-400">{row.original.peg}</div>
       },
     ],
     [logos]

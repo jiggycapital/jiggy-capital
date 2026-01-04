@@ -46,6 +46,10 @@ export function HomeDashboard() {
       });
       const headerRow = headerRowIndex >= 0 ? portfolioRows[headerRowIndex] : [];
       const columnVHeader = headerRow.length > 21 ? headerRow[21]?.trim().replace(/^"|"$/g, '') : null;
+      const columnEHeader = headerRow.length > 4 ? headerRow[4]?.trim().replace(/^"|"$/g, '') : null;
+      const columnAEHeader = headerRow.length > 30 ? headerRow[30]?.trim().replace(/^"|"$/g, '') : null;
+      const columnAFHeader = headerRow.length > 31 ? headerRow[31]?.trim().replace(/^"|"$/g, '') : null;
+      const columnARHeader = headerRow.length > 43 ? headerRow[43]?.trim().replace(/^"|"$/g, '') : null;
       const columnAOHeader = headerRow.length > 40 ? headerRow[40]?.trim().replace(/^"|"$/g, '') : null;
       const columnATHeader = headerRow.length > 45 ? headerRow[45]?.trim().replace(/^"|"$/g, '') : null;
       const columnSHeader = headerRow.length > 18 ? headerRow[18]?.trim().replace(/^"|"$/g, '') : null;
@@ -54,6 +58,10 @@ export function HomeDashboard() {
       const dataWithColumns = portfolioData.map(row => ({
         ...row,
         _columnVHeader: columnVHeader,
+        _columnEHeader: columnEHeader,
+        _columnAEHeader: columnAEHeader,
+        _columnAFHeader: columnAFHeader,
+        _columnARHeader: columnARHeader,
         _columnAOHeader: columnAOHeader,
         _columnATHeader: columnATHeader,
         _columnSHeader: columnSHeader,

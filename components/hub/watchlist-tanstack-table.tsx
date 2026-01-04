@@ -32,10 +32,7 @@ interface WatchlistRow {
   marketCap: string;
   change: number;
   w1Change: number;
-  m1Change: number;
-  m3Change: number;
   ytdChange: number;
-  yr1Change: number;
   pe2026: string;
   fcf2026: string;
   revCagr: string;
@@ -56,10 +53,7 @@ export function WatchlistTanStackTable({ watchlistData, logos }: WatchlistTanSta
         marketCap: p["Market Cap"] || "-",
         change: parseNumeric(p["Change %"]) || 0,
         w1Change: parseNumeric(p["1W Change %"]) || 0,
-        m1Change: parseNumeric(p["1M Change %"]) || 0,
-        m3Change: parseNumeric(p["3M Change %"]) || 0,
         ytdChange: parseNumeric(p["YTD Change %"]) || 0,
-        yr1Change: parseNumeric(p["1YR Change %"]) || 0,
         pe2026: p["2026 P/E"] || "-",
         fcf2026: p["2026 P/FCF"] || "-",
         revCagr: p["Fwd Rev CAGR"] || "-",
@@ -77,30 +71,30 @@ export function WatchlistTanStackTable({ watchlistData, logos }: WatchlistTanSta
         accessorKey: "ticker",
         header: ({ column }) => (
           <div 
-            className="flex items-center gap-1 cursor-pointer select-none hover:text-slate-200 transition-colors"
+            className="flex items-center gap-1 cursor-pointer select-none hover:text-slate-200 transition-colors whitespace-normal leading-tight"
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           >
             Company
             {{
-              asc: <ArrowUp className="h-3 w-3" />,
-              desc: <ArrowDown className="h-3 w-3" />,
-            }[column.getIsSorted() as string] ?? <ArrowUpDown className="h-3 w-3 opacity-50" />}
+              asc: <ArrowUp className="h-3 w-3 shrink-0" />,
+              desc: <ArrowDown className="h-3 w-3 shrink-0" />,
+            }[column.getIsSorted() as string] ?? <ArrowUpDown className="h-3 w-3 shrink-0 opacity-50" />}
           </div>
         ),
         cell: ({ row }) => {
           const { ticker, name, logoUrl } = row.original;
           return (
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded bg-slate-800 flex items-center justify-center overflow-hidden shrink-0 border border-slate-700">
+            <div className="flex items-center gap-2">
+              <div className="w-7 h-7 rounded bg-slate-800 flex items-center justify-center overflow-hidden shrink-0 border border-slate-700">
                 {logoUrl ? (
-                  <img src={logoUrl} alt={ticker} className="w-6 h-6 object-contain" />
+                  <img src={logoUrl} alt={ticker} className="w-5 h-5 object-contain" />
                 ) : (
-                  <span className="text-[10px] font-bold text-slate-500">{ticker.substring(0, 3)}</span>
+                  <span className="text-[9px] font-bold text-slate-500">{ticker.substring(0, 3)}</span>
                 )}
               </div>
               <div className="flex flex-col min-w-0">
-                <span className="text-sm font-bold text-slate-100 truncate">{ticker}</span>
-                <span className="text-[10px] text-slate-500 truncate uppercase tracking-tight">{name}</span>
+                <span className="text-[13px] font-bold text-slate-100 truncate leading-tight">{ticker}</span>
+                <span className="text-[9px] text-slate-500 truncate uppercase tracking-tighter leading-tight">{name}</span>
               </div>
             </div>
           );
@@ -109,29 +103,151 @@ export function WatchlistTanStackTable({ watchlistData, logos }: WatchlistTanSta
       {
         accessorKey: "price",
         header: ({ column }) => (
-          <div className="text-right cursor-pointer select-none hover:text-slate-200" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}>Price</div>
+          <div 
+            className="flex items-center justify-end gap-1 cursor-pointer select-none hover:text-slate-200 transition-colors whitespace-normal leading-tight text-right" 
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          >
+            Price
+            {{
+              asc: <ArrowUp className="h-3 w-3 shrink-0" />,
+              desc: <ArrowDown className="h-3 w-3 shrink-0" />,
+            }[column.getIsSorted() as string] ?? <ArrowUpDown className="h-3 w-3 shrink-0 opacity-50" />}
+          </div>
         ),
-        cell: ({ row }) => <div className="text-right font-mono text-sm text-slate-300">{formatCurrency(row.original.price)}</div>
+        cell: ({ row }) => <div className="text-right font-mono text-[13px] text-slate-300">{formatCurrency(row.original.price)}</div>
+      },
+      {
+        accessorKey: "marketCap",
+        header: ({ column }) => (
+          <div 
+            className="flex items-center justify-end gap-1 cursor-pointer select-none hover:text-slate-200 transition-colors whitespace-normal leading-tight text-right max-w-[50px]"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          >
+            Mkt Cap
+            {{
+              asc: <ArrowUp className="h-3 w-3 shrink-0" />,
+              desc: <ArrowDown className="h-3 w-3 shrink-0" />,
+            }[column.getIsSorted() as string] ?? <ArrowUpDown className="h-3 w-3 shrink-0 opacity-50" />}
+          </div>
+        ),
+        cell: ({ row }) => <div className="text-right font-mono text-[13px] text-slate-400">{row.original.marketCap}</div>
       },
       {
         accessorKey: "change",
-        header: "Daily",
+        header: ({ column }) => (
+          <div 
+            className="flex items-center justify-end gap-1 cursor-pointer select-none hover:text-slate-200 transition-colors whitespace-normal leading-tight text-right"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          >
+            Daily
+            {{
+              asc: <ArrowUp className="h-3 w-3 shrink-0" />,
+              desc: <ArrowDown className="h-3 w-3 shrink-0" />,
+            }[column.getIsSorted() as string] ?? <ArrowUpDown className="h-3 w-3 shrink-0 opacity-50" />}
+          </div>
+        ),
         cell: ({ row }) => (
-          <div className={`text-right font-mono text-xs font-bold ${row.original.change >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
+          <div className={`text-right font-mono text-[13px] font-bold ${row.original.change >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
             {row.original.change >= 0 ? '+' : ''}{row.original.change.toFixed(1)}%
           </div>
         )
       },
-      { accessorKey: "w1Change", header: "1W", cell: ({ row }) => <div className={`text-right font-mono text-xs ${row.original.w1Change >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>{row.original.w1Change >= 0 ? '+' : ''}{row.original.w1Change.toFixed(1)}%</div> },
-      { accessorKey: "m1Change", header: "1M", cell: ({ row }) => <div className={`text-right font-mono text-xs ${row.original.m1Change >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>{row.original.m1Change >= 0 ? '+' : ''}{row.original.m1Change.toFixed(1)}%</div> },
-      { accessorKey: "m3Change", header: "3M", cell: ({ row }) => <div className={`text-right font-mono text-xs ${row.original.m3Change >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>{row.original.m3Change >= 0 ? '+' : ''}{row.original.m3Change.toFixed(1)}%</div> },
-      { accessorKey: "ytdChange", header: "YTD", cell: ({ row }) => <div className={`text-right font-mono text-xs font-bold ${row.original.ytdChange >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>{row.original.ytdChange >= 0 ? '+' : ''}{row.original.ytdChange.toFixed(1)}%</div> },
-      { accessorKey: "yr1Change", header: "1YR", cell: ({ row }) => <div className={`text-right font-mono text-xs ${row.original.yr1Change >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>{row.original.yr1Change >= 0 ? '+' : ''}{row.original.yr1Change.toFixed(1)}%</div> },
-      { accessorKey: "pe2026", header: "26e P/E", cell: ({ row }) => <div className="text-right font-mono text-xs text-slate-400">{row.original.pe2026}</div> },
-      { accessorKey: "fcf2026", header: "26e P/FCF", cell: ({ row }) => <div className="text-right font-mono text-xs text-slate-400">{row.original.fcf2026}</div> },
-      { accessorKey: "revCagr", header: "Rev CAGR", cell: ({ row }) => <div className="text-right font-mono text-xs text-slate-400">{row.original.revCagr}</div> },
-      { accessorKey: "peg", header: "PEG", cell: ({ row }) => <div className="text-right font-mono text-xs text-slate-400">{row.original.peg}</div> },
-      { accessorKey: "marketCap", header: "Mkt Cap", cell: ({ row }) => <div className="text-right font-mono text-xs text-slate-400">{row.original.marketCap}</div> },
+      { 
+        accessorKey: "w1Change", 
+        header: ({ column }) => (
+          <div 
+            className="flex items-center justify-end gap-1 cursor-pointer select-none hover:text-slate-200 transition-colors whitespace-normal leading-tight text-right"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          >
+            1W
+            {{
+              asc: <ArrowUp className="h-3 w-3 shrink-0" />,
+              desc: <ArrowDown className="h-3 w-3 shrink-0" />,
+            }[column.getIsSorted() as string] ?? <ArrowUpDown className="h-3 w-3 shrink-0 opacity-50" />}
+          </div>
+        ),
+        cell: ({ row }) => <div className={`text-right font-mono text-[13px] ${row.original.w1Change >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>{row.original.w1Change >= 0 ? '+' : ''}{row.original.w1Change.toFixed(1)}%</div> 
+      },
+      { 
+        accessorKey: "ytdChange", 
+        header: ({ column }) => (
+          <div 
+            className="flex items-center justify-end gap-1 cursor-pointer select-none hover:text-slate-200 transition-colors whitespace-normal leading-tight text-right"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          >
+            YTD
+            {{
+              asc: <ArrowUp className="h-3 w-3 shrink-0" />,
+              desc: <ArrowDown className="h-3 w-3 shrink-0" />,
+            }[column.getIsSorted() as string] ?? <ArrowUpDown className="h-3 w-3 shrink-0 opacity-50" />}
+          </div>
+        ),
+        cell: ({ row }) => <div className={`text-right font-mono text-[13px] font-bold ${row.original.ytdChange >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>{row.original.ytdChange >= 0 ? '+' : ''}{row.original.ytdChange.toFixed(1)}%</div> 
+      },
+      { 
+        accessorKey: "pe2026", 
+        header: ({ column }) => (
+          <div 
+            className="flex items-center justify-end gap-1 cursor-pointer select-none hover:text-slate-200 transition-colors whitespace-normal leading-tight text-right max-w-[50px]"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          >
+            26e P/E
+            {{
+              asc: <ArrowUp className="h-3 w-3 shrink-0" />,
+              desc: <ArrowDown className="h-3 w-3 shrink-0" />,
+            }[column.getIsSorted() as string] ?? <ArrowUpDown className="h-3 w-3 shrink-0 opacity-50" />}
+          </div>
+        ),
+        cell: ({ row }) => <div className="text-right font-mono text-[13px] text-slate-400">{row.original.pe2026}</div> 
+      },
+      { 
+        accessorKey: "fcf2026", 
+        header: ({ column }) => (
+          <div 
+            className="flex items-center justify-end gap-1 cursor-pointer select-none hover:text-slate-200 transition-colors whitespace-normal leading-tight text-right max-w-[50px]"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          >
+            26e P/FCF
+            {{
+              asc: <ArrowUp className="h-3 w-3 shrink-0" />,
+              desc: <ArrowDown className="h-3 w-3 shrink-0" />,
+            }[column.getIsSorted() as string] ?? <ArrowUpDown className="h-3 w-3 shrink-0 opacity-50" />}
+          </div>
+        ),
+        cell: ({ row }) => <div className="text-right font-mono text-[13px] text-slate-400">{row.original.fcf2026}</div> 
+      },
+      { 
+        accessorKey: "revCagr", 
+        header: ({ column }) => (
+          <div 
+            className="flex items-center justify-end gap-1 cursor-pointer select-none hover:text-slate-200 transition-colors text-right whitespace-normal leading-tight max-w-[60px]"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          >
+            Rev CAGR
+            {{
+              asc: <ArrowUp className="h-3 w-3 shrink-0" />,
+              desc: <ArrowDown className="h-3 w-3 shrink-0" />,
+            }[column.getIsSorted() as string] ?? <ArrowUpDown className="h-3 w-3 shrink-0 opacity-50" />}
+          </div>
+        ),
+        cell: ({ row }) => <div className="text-right font-mono text-[13px] text-slate-400">{row.original.revCagr}</div> 
+      },
+      { 
+        accessorKey: "peg", 
+        header: ({ column }) => (
+          <div 
+            className="flex items-center justify-end gap-1 cursor-pointer select-none hover:text-slate-200 transition-colors whitespace-normal leading-tight text-right max-w-[50px]"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          >
+            PEG
+            {{
+              asc: <ArrowUp className="h-3 w-3 shrink-0" />,
+              desc: <ArrowDown className="h-3 w-3 shrink-0" />,
+            }[column.getIsSorted() as string] ?? <ArrowUpDown className="h-3 w-3 shrink-0 opacity-50" />}
+          </div>
+        ),
+        cell: ({ row }) => <div className="text-right font-mono text-[13px] text-slate-400">{row.original.peg}</div> 
+      },
     ],
     [logos]
   );
@@ -156,7 +272,7 @@ export function WatchlistTanStackTable({ watchlistData, logos }: WatchlistTanSta
                   <TableHead 
                     key={header.id} 
                     className={`text-slate-400 font-bold py-4 px-2 ${
-                      header.id === 'ticker' ? 'sticky left-0 z-30 bg-slate-800 border-r border-slate-800/50' : 'bg-slate-800/50'
+                      header.id === 'ticker' ? 'sticky left-0 z-30 bg-slate-800 border-r border-slate-800/50 min-w-[140px]' : 'bg-slate-800/50'
                     }`}
                   >
                     {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
@@ -173,7 +289,7 @@ export function WatchlistTanStackTable({ watchlistData, logos }: WatchlistTanSta
                     <TableCell 
                       key={cell.id} 
                       className={`py-3 px-2 ${
-                        cell.column.id === 'ticker' ? 'sticky left-0 bg-slate-900 z-10 border-r border-slate-800/50' : ''
+                        cell.column.id === 'ticker' ? 'sticky left-0 bg-slate-900 z-10 border-r border-slate-800/50 min-w-[140px]' : ''
                       }`}
                     >
                       {flexRender(cell.column.columnDef.cell, cell.getContext())}
