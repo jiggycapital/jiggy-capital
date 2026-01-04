@@ -38,7 +38,7 @@ import { CriteriaPicker } from "@/components/criteria-picker";
 import { fetchSheetData, parseSheetData, fetchLogos, extractColumnCategories } from "@/lib/google-sheets";
 import { formatCurrency, formatCurrencyBillions, formatMultiple, formatNumber, formatPercentage, formatDate, parseNumeric } from "@/lib/utils";
 import { StockDetailSheet } from "@/components/stock-detail-sheet";
-import { Settings2, Download, Save, FolderOpen, Trash2, Wallet, Search, Layout } from "lucide-react";
+import { Settings2, Download, Save, FolderOpen, Trash2, Wallet, Search, Layout, ArrowUp, ArrowDown, ArrowUpDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export function TableView() {
