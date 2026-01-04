@@ -127,31 +127,20 @@ const renderFiscalLabel = (props: any) => {
 
       {/* TEXT GROUP */}
       <g>
-        {/* TICKER */}
         <text
           x={textX}
-          y={ey - 3}
+          y={ey}
           textAnchor={textAnchor}
           fill="#FFF"
-          fontSize={14}
+          fontSize={13}
           fontWeight="bold"
-          dominantBaseline="auto"
+          dominantBaseline="middle"
           className="tracking-tight"
         >
-          {payload.ticker || payload.name}
-        </text>
-
-        {/* PERCENTAGE */}
-        <text
-          x={textX}
-          y={ey + 14}
-          textAnchor={textAnchor}
-          fill="#9CA3AF"
-          fontSize={12}
-          dominantBaseline="auto"
-          fontFamily="monospace"
-        >
-          {`${(percent * 100).toFixed(1)}%`}
+          {payload.ticker || payload.label}
+          <tspan fill="#9CA3AF" fontWeight="normal" dx={6} fontFamily="monospace">
+            {`${(percent * 100).toFixed(1)}%`}
+          </tspan>
         </text>
       </g>
     </g>
