@@ -18,15 +18,15 @@ export default function ScreenerPage() {
     async function loadData() {
       try {
         setLoading(true);
-        const [portfolioRows, watchlistRows, logosData] = await Promise.all([
-          fetchSheetData("portfolio"),
+        const [positionsRows, watchlistRows, logosData] = await Promise.all([
+          fetchSheetData("positions"),
           fetchSheetData("watchlist"),
           fetchLogos()
         ]);
         
-        setRawPositionsRows(portfolioRows);
+        setRawPositionsRows(positionsRows);
         setRawWatchlistRows(watchlistRows);
-        setPositionsData(parseSheetData(portfolioRows));
+        setPositionsData(parseSheetData(positionsRows));
         setWatchlistData(parseSheetData(watchlistRows));
         setLogos(logosData.logos);
       } catch (err) {

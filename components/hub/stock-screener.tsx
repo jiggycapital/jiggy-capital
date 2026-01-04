@@ -34,9 +34,13 @@ import {
   X,
   ChevronDown,
   Settings2,
-  SlidersHorizontal
+  SlidersHorizontal,
+  Layout,
+  Globe,
+  Briefcase,
+  Target
 } from "lucide-react";
-import { parseNumeric, formatCurrency, formatPercentage } from "@/lib/utils";
+import { parseNumeric, formatCurrency, formatPercentage, formatCurrencyBillions, formatNumber, formatMultiple } from "@/lib/utils";
 import { 
   DropdownMenu, 
   DropdownMenuContent, 
@@ -61,7 +65,15 @@ interface StockScreenerProps {
 interface ScreenerRow {
   ticker: string;
   name: string;
+  isHolding: boolean;
   [key: string]: any;
+}
+
+interface ActiveFilter {
+  key: string;
+  min?: string;
+  max?: string;
+  search?: string;
 }
 
 interface FavoriteScreen {
@@ -69,7 +81,7 @@ interface FavoriteScreen {
   name: string;
   filters: ColumnFiltersState;
   sorting: SortingState;
-  criteria: string[];
+  activeFilters: ActiveFilter[];
 }
 
 export function StockScreener({ 
@@ -79,83 +91,58 @@ export function StockScreener({
   rawPositionsRows,
   rawWatchlistRows 
 }: StockScreenerProps) {
-  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
-  const [sorting, setSorting] = useState<SortingState>([]);
+  const [activeFilters, setActiveFilters] = useState<ActiveFilter[]>([
+    { key: "2026e P/E" },
+    { key: "25-27e Rev CAGR" },
+    { key: "Market Cap" }
+  ]);
+  const [sorting, setSorting] = useState<SortingState>([{ id: 'Market Cap', desc: true }]);
   const [favorites, setFavorites] = useState<FavoriteScreen[]>([]);
   const [newScreenName, setNewScreenName] = useState("");
   const [isSaving, setIsSaving] = useState(false);
   const [showCriteriaPicker, setShowCriteriaPicker] = useState(false);
-  
-  // Active criteria for screening
-  const [activeCriteria, setActiveCriteria] = useState<string[]>([
-    "2026e P/E", "25-27e Rev CAGR", "PEG", "Market Cap"
-  ]);
+  const [globalTickerSearch, setGlobalTickerSearch] = useState("");
+  const [selectedSector, setSelectedSector] = useState<string>("All Sectors");
 
-  // Load favorites from localStorage
+  // Load favorites
   useEffect(() => {
-    const saved = localStorage.getItem("jiggy_screener_favorites_v2");
+    const saved = localStorage.getItem("jiggy_screener_favorites_v3");
     if (saved) {
       try {
         setFavorites(JSON.parse(saved));
-      } catch (e) {
-        console.error("Failed to parse favorites", e);
-      }
+      } catch (e) {}
     }
   }, []);
 
   const saveFavorites = (newFavorites: FavoriteScreen[]) => {
     setFavorites(newFavorites);
-    localStorage.setItem("jiggy_screener_favorites_v2", JSON.stringify(newFavorites));
-  };
-
-  const handleSaveScreen = () => {
-    if (!newScreenName.trim()) return;
-    const newScreen: FavoriteScreen = {
-      id: Date.now().toString(),
-      name: newScreenName,
-      filters: columnFilters,
-      sorting: sorting,
-      criteria: activeCriteria,
-    };
-    saveFavorites([...favorites, newScreen]);
-    setNewScreenName("");
-    setIsSaving(false);
-  };
-
-  const handleDeleteScreen = (id: string, e: React.MouseEvent) => {
-    e.stopPropagation();
-    saveFavorites(favorites.filter(f => f.id !== id));
-  };
-
-  const handleApplyScreen = (screen: FavoriteScreen) => {
-    setActiveCriteria(screen.criteria);
-    setTimeout(() => {
-      setColumnFilters(screen.filters);
-      setSorting(screen.sorting);
-    }, 0);
+    localStorage.setItem("jiggy_screener_favorites_v3", JSON.stringify(newFavorites));
   };
 
   const criteriaCategories = useMemo(() => {
-    if (rawPositionsRows) {
-      return extractColumnCategories(rawPositionsRows);
-    }
-    return {};
-  }, [rawPositionsRows]);
+    const cats: Record<string, string> = {};
+    if (rawPositionsRows) Object.assign(cats, extractColumnCategories(rawPositionsRows));
+    if (rawWatchlistRows) Object.assign(cats, extractColumnCategories(rawWatchlistRows));
+    return cats;
+  }, [rawPositionsRows, rawWatchlistRows]);
 
   const allAvailableCriteria = useMemo(() => {
-    if (positionsData.length > 0) {
-      return Object.keys(positionsData[0]).filter(k => !k.startsWith('_'));
-    }
-    return [];
-  }, [positionsData]);
+    const keys = new Set<string>();
+    [...positionsData, ...watchlistData].forEach(row => {
+      Object.keys(row).forEach(k => {
+        if (!k.startsWith('_') && k !== 'ticker' && k !== 'name' && k !== 'isHolding') {
+          keys.add(k);
+        }
+      });
+    });
+    return Array.from(keys).sort();
+  }, [positionsData, watchlistData]);
 
   const tableData = useMemo(() => {
     const holdingsMap = new Map();
     positionsData.forEach(p => {
       const ticker = (p.Ticker || p.Symbol || "").toUpperCase();
-      if (ticker && ticker !== "CASH" && ticker !== "SUM") {
-        holdingsMap.set(ticker, p);
-      }
+      if (ticker && ticker !== "CASH" && ticker !== "SUM") holdingsMap.set(ticker, p);
     });
 
     const allTickers = new Set([
@@ -175,303 +162,410 @@ export function StockScreener({
         sector: source.Sector || "Other",
       };
 
-      // Map all available metrics
       allAvailableCriteria.forEach(key => {
         row[key] = source[key];
         const numVal = parseNumeric(source[key]);
-        if (numVal !== null) {
-          row[`${key}_num`] = numVal;
-        }
+        if (numVal !== null) row[`${key}_num`] = numVal;
       });
 
       return row;
     });
   }, [positionsData, watchlistData, allAvailableCriteria]);
 
-  const columns = useMemo<ColumnDef<ScreenerRow>[]>(
-    () => {
-      const baseCols: ColumnDef<ScreenerRow>[] = [
-        {
-          accessorKey: "ticker",
-          header: "Company",
-          cell: ({ row }) => (
-            <div className="flex items-center gap-2">
-              <div className="w-6 h-6 rounded bg-slate-800 flex items-center justify-center shrink-0 overflow-hidden border border-slate-700">
-                {logos[row.original.ticker] ? (
-                  <img src={logos[row.original.ticker]} alt="" className="w-4 h-4 object-contain" />
-                ) : (
-                  <span className="text-[8px] font-bold text-slate-500">{row.original.ticker.substring(0, 3)}</span>
-                )}
-              </div>
-              <div className="flex flex-col min-w-0">
-                <span className="text-sm font-bold text-slate-100 leading-tight truncate">{row.original.ticker}</span>
-                {row.original.isHolding && <span className="text-[8px] text-blue-400 font-bold uppercase tracking-tighter">Holding</span>}
-              </div>
+  // Apply custom filtering logic based on activeFilters state
+  const filteredData = useMemo(() => {
+    return tableData.filter(row => {
+      // 1. Ticker Search
+      if (globalTickerSearch && !row.ticker.toLowerCase().includes(globalTickerSearch.toLowerCase())) return false;
+      
+      // 2. Sector Filter
+      if (selectedSector !== "All Sectors" && row.sector !== selectedSector) return false;
+
+      // 3. Dynamic Criteria Filters
+      for (const filter of activeFilters) {
+        const val = row[filter.key];
+        const numVal = row[`${filter.key}_num`];
+
+        if (numVal !== undefined && numVal !== null) {
+          if (filter.min && numVal < parseFloat(filter.min)) return false;
+          if (filter.max && numVal > parseFloat(filter.max)) return false;
+        } else if (filter.search && val) {
+          if (!String(val).toLowerCase().includes(filter.search.toLowerCase())) return false;
+        }
+      }
+      return true;
+    });
+  }, [tableData, globalTickerSearch, selectedSector, activeFilters]);
+
+  const columns = useMemo<ColumnDef<ScreenerRow>[]>(() => {
+    const base: ColumnDef<ScreenerRow>[] = [
+      {
+        accessorKey: "ticker",
+        header: "Company",
+        cell: ({ row }) => (
+          <div className="flex items-center gap-2">
+            <div className="w-6 h-6 rounded bg-slate-800 flex items-center justify-center shrink-0 overflow-hidden border border-slate-700">
+              {logos[row.original.ticker] ? (
+                <img src={logos[row.original.ticker]} alt="" className="w-4 h-4 object-contain" />
+              ) : (
+                <span className="text-[8px] font-bold text-slate-500">{row.original.ticker.substring(0, 3)}</span>
+              )}
             </div>
-          ),
-        },
-      ];
+            <div className="flex flex-col min-w-0">
+              <span className="text-sm font-bold text-slate-100 leading-tight truncate">{row.original.ticker}</span>
+              {row.original.isHolding && <span className="text-[8px] text-blue-400 font-bold uppercase tracking-tighter">Holding</span>}
+            </div>
+          </div>
+        ),
+      },
+    ];
 
-      const dynamicCols: ColumnDef<ScreenerRow>[] = activeCriteria.map(key => ({
-        accessorKey: key,
-        header: key,
-        cell: ({ row }) => {
-          const val = row.getValue(key);
-          const numVal = (row.original as any)[`${key}_num`];
-          const cat = criteriaCategories[key]?.toLowerCase() || "";
-          
-          if (numVal !== null && numVal !== undefined) {
-            if (cat.includes("price action") || cat.includes("growth") || key.includes("%") || key.includes("Change")) {
-              return <div className={cn("font-mono font-bold", numVal >= 0 ? "text-emerald-400" : "text-rose-400")}>{formatPercentage(numVal)}</div>;
-            }
-            if (cat.includes("multiples") || key.includes("P/E") || key.includes("P/FCF") || key.includes("PEG")) {
-              return <div className="font-mono text-slate-300">{numVal.toFixed(1)}x</div>;
-            }
-            if (key.includes("Price")) return <div className="font-mono text-slate-300">{formatCurrency(numVal)}</div>;
-            return <div className="font-mono text-slate-300">{val as string}</div>;
+    const dynamic = activeFilters.map(f => ({
+      accessorKey: f.key,
+      header: f.key,
+      cell: ({ row }: any) => {
+        const val = row.original[f.key];
+        const numVal = row.original[`${f.key}_num`];
+        const cat = criteriaCategories[f.key]?.toLowerCase() || "";
+        
+        if (numVal !== null && numVal !== undefined) {
+          if (cat.includes("price action") || cat.includes("growth") || f.key.includes("%") || f.key.includes("Change")) {
+            return <div className={cn("font-mono font-bold", numVal >= 0 ? "text-emerald-400" : "text-rose-400")}>{formatPercentage(numVal)}</div>;
           }
-          return <div className="text-slate-400 text-xs">{(val as string) || "-"}</div>;
-        },
-        sortingFn: (rowA, rowB) => {
-          const a = (rowA.original as any)[`${key}_num`] ?? -Infinity;
-          const b = (rowB.original as any)[`${key}_num`] ?? -Infinity;
-          return a - b;
-        },
-        filterFn: 'includesString' as const,
-      }));
+          if (cat.includes("multiples") || f.key.includes("P/E") || f.key.includes("P/FCF") || f.key.includes("PEG")) {
+            return <div className="font-mono text-slate-300">{numVal.toFixed(1)}x</div>;
+          }
+          if (f.key.toLowerCase().includes("market cap") || f.key.toLowerCase().includes("ev")) {
+            return <div className="font-mono text-slate-300">{formatCurrencyBillions(numVal)}</div>;
+          }
+          if (f.key.toLowerCase().includes("price")) return <div className="font-mono text-slate-300">{formatCurrency(numVal)}</div>;
+          return <div className="font-mono text-slate-300">{val}</div>;
+        }
+        return <div className="text-slate-400 text-xs truncate max-w-[120px]">{val || "-"}</div>;
+      },
+      sortingFn: (rowA: any, rowB: any) => {
+        const a = rowA.original[`${f.key}_num`] ?? (typeof rowA.original[f.key] === 'string' ? rowA.original[f.key] : -Infinity);
+        const b = rowB.original[`${f.key}_num`] ?? (typeof rowB.original[f.key] === 'string' ? rowB.original[f.key] : -Infinity);
+        if (typeof a === 'number' && typeof b === 'number') return a - b;
+        return String(a).localeCompare(String(b));
+      },
+    }));
 
-      return [...baseCols, ...dynamicCols];
-    },
-    [logos, activeCriteria, criteriaCategories]
-  );
+    return [...base, ...dynamic];
+  }, [logos, activeFilters, criteriaCategories]);
 
   const table = useReactTable({
-    data: tableData,
+    data: filteredData,
     columns,
-    state: {
-      sorting,
-      columnFilters,
-    },
+    state: { sorting },
     onSortingChange: setSorting,
-    onColumnFiltersChange: setColumnFilters,
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
   });
 
+  const updateFilter = (key: string, updates: Partial<ActiveFilter>) => {
+    setActiveFilters(prev => prev.map(f => f.key === key ? { ...f, ...updates } : f));
+  };
+
+  const removeFilter = (key: string) => {
+    setActiveFilters(prev => prev.filter(f => f.key !== key));
+  };
+
+  const handleApplyCriteria = (selected: string[]) => {
+    // Keep existing filters if they are still selected, add new ones
+    setActiveFilters(prev => {
+      const existing = prev.filter(f => selected.includes(f.key));
+      const newKeys = selected.filter(s => !prev.find(f => f.key === s));
+      return [...existing, ...newKeys.map(k => ({ key: k }))];
+    });
+    setShowCriteriaPicker(false);
+  };
+
   return (
-    <div className="space-y-6">
-      {/* Header & Favorites */}
-      <div className="flex flex-col gap-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="p-2 rounded-xl bg-blue-600/10 border border-blue-600/20">
-              <SlidersHorizontal className="h-5 w-5 text-blue-400" />
-            </div>
-            <div>
-              <h1 className="text-2xl font-bold text-slate-100 tracking-tight">Stock Screener</h1>
-              <p className="text-sm text-slate-500">Unified universe of {tableData.length} companies</p>
-            </div>
+    <div className="space-y-8 max-w-[1600px] mx-auto pb-20">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-4">
+          <div className="p-3 rounded-2xl bg-blue-600 shadow-[0_0_20px_rgba(37,99,235,0.3)]">
+            <SlidersHorizontal className="h-6 w-6 text-white" />
           </div>
-
-          <div className="flex items-center gap-2">
-            <Button 
-              variant="outline" 
-              size="sm" 
-              className="bg-blue-600 hover:bg-blue-700 border-none text-white gap-2 font-bold"
-              onClick={() => setShowCriteriaPicker(true)}
-            >
-              <Plus className="h-4 w-4" />
-              Modify Screen
-            </Button>
-            
-            <Popover open={isSaving} onOpenChange={setIsSaving}>
-              <PopoverTrigger asChild>
-                <Button variant="outline" size="sm" className="bg-slate-900 border-slate-700 hover:bg-slate-800 text-slate-300 gap-2">
-                  <Star className="h-4 w-4" />
-                  Save View
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-64 bg-slate-900 border-slate-700 p-4 shadow-2xl">
-                <div className="space-y-3">
-                  <h4 className="font-bold text-sm text-slate-200">Save Current Screen</h4>
-                  <Input
-                    placeholder="Screen name..."
-                    value={newScreenName}
-                    onChange={(e) => setNewScreenName(e.target.value)}
-                    className="bg-slate-950 border-slate-800 h-9 text-sm"
-                  />
-                  <div className="flex justify-end gap-2">
-                    <Button variant="ghost" size="sm" onClick={() => setIsSaving(false)}>Cancel</Button>
-                    <Button size="sm" className="bg-blue-600 hover:bg-blue-700" onClick={handleSaveScreen}>Save</Button>
-                  </div>
-                </div>
-              </PopoverContent>
-            </Popover>
+          <div>
+            <h1 className="text-3xl font-black text-white tracking-tighter italic uppercase">Stock Screener</h1>
+            <p className="text-slate-500 font-medium">Custom screens across {tableData.length} global securities</p>
           </div>
-        </div>
-
-        {/* Favorites Bar */}
-        {favorites.length > 0 && (
-          <div className="flex items-center gap-2 overflow-x-auto pb-1 no-scrollbar">
-            <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mr-2 shrink-0">Favorites:</span>
-            {favorites.map((fav) => (
-              <div 
-                key={fav.id}
-                className="group flex items-center gap-1 pl-3 pr-1 py-1 rounded-full bg-slate-800/40 border border-slate-700 hover:border-blue-500/50 hover:bg-slate-800/60 transition-all cursor-pointer shrink-0"
-                onClick={() => handleApplyScreen(fav)}
-              >
-                <span className="text-xs font-medium text-slate-300">{fav.name}</span>
-                <Button 
-                  variant="ghost" 
-                  size="icon" 
-                  className="h-4 w-4 text-slate-500 hover:text-rose-400 opacity-0 group-hover:opacity-100 transition-opacity"
-                  onClick={(e) => handleDeleteScreen(fav.id, e)}
-                >
-                  <X className="h-2.5 w-2.5" />
-                </Button>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-
-      {/* Filter Controls Bar */}
-      <div className="flex flex-col gap-4 bg-slate-900/40 border border-slate-800/60 p-4 rounded-2xl">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
-            <Input
-              placeholder="Search Ticker..."
-              value={(table.getColumn("ticker")?.getFilterValue() as string) ?? ""}
-              onChange={(e) => table.getColumn("ticker")?.setFilterValue(e.target.value)}
-              className="pl-9 bg-slate-950 border-slate-800 focus:border-blue-500/50"
-            />
-          </div>
-
-          <div className="flex items-center gap-2">
-            <div className="text-[10px] font-bold text-slate-500 uppercase tracking-widest w-16">Sector:</div>
-            <select 
-              className="w-full h-9 bg-slate-950 border border-slate-800 rounded-md px-3 text-sm text-slate-300 focus:outline-none focus:border-blue-500/50"
-              onChange={(e) => table.getColumn("sector")?.setFilterValue(e.target.value || undefined)}
-            >
-              <option value="">All Sectors</option>
-              {Array.from(new Set(tableData.map(d => d.sector))).sort().map(s => (
-                <option key={s} value={s}>{s}</option>
-              ))}
-            </select>
-          </div>
-          
-          {/* Quick Filters for active criteria */}
-          {activeCriteria.slice(0, 2).map(key => (
-            <div key={key} className="flex items-center gap-2">
-              <div className="text-[10px] font-bold text-slate-500 uppercase tracking-wider truncate w-24">{key}:</div>
-              <Input
-                placeholder="Filter..."
-                className="bg-slate-950 border-slate-800 h-9 text-xs"
-                onChange={(e) => table.getColumn(key)?.setFilterValue(e.target.value)}
-              />
-            </div>
-          ))}
         </div>
         
-        <div className="flex justify-end gap-4">
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            className="text-[10px] font-bold text-slate-500 hover:text-slate-300 uppercase tracking-widest gap-2"
-            onClick={() => {
-              table.resetColumnFilters();
-              setSorting([]);
-            }}
-          >
-            <X className="h-3 w-3" />
-            Reset All
+        <div className="flex items-center gap-3">
+          {favorites.length > 0 && (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" className="bg-[#1e293b] border-slate-700 text-slate-300">
+                  <Star className="h-4 w-4 mr-2" />
+                  My Saved Screens
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="bg-[#1e293b] border-slate-700 text-white w-56">
+                {favorites.map(f => (
+                  <DropdownMenuItem key={f.id} onClick={() => {
+                    setActiveFilters(f.activeFilters);
+                    setSorting(f.sorting);
+                  }} className="flex items-center justify-between cursor-pointer">
+                    <span>{f.name}</span>
+                    <Trash2 className="h-3 w-3 text-rose-400 opacity-0 group-hover:opacity-100" onClick={(e) => {
+                      e.stopPropagation();
+                      saveFavorites(favorites.filter(x => x.id !== f.id));
+                    }} />
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
+          <Button onClick={() => setIsSaving(true)} variant="outline" className="bg-slate-900 border-slate-700 text-slate-400 hover:text-white">
+            <Star className="h-4 w-4 mr-2" />
+            Save View
           </Button>
         </div>
       </div>
 
-      {/* Main Table */}
-      <div className="rounded-xl border border-slate-800 bg-slate-900/50 overflow-hidden shadow-2xl">
-        <div className="overflow-x-auto relative">
-          <Table>
-            <TableHeader className="bg-slate-800/50">
-              {table.getHeaderGroups().map((headerGroup) => (
-                <TableRow key={headerGroup.id} className="border-slate-800 hover:bg-transparent">
-                  {headerGroup.headers.map((header) => (
-                    <TableHead key={header.id} className="text-slate-400 font-bold py-4">
-                      {header.isPlaceholder ? null : (
-                        <div 
-                          className={cn(
-                            "flex items-center gap-1 cursor-pointer select-none hover:text-slate-200 transition-colors",
-                            header.id !== 'ticker' && "justify-end"
-                          )}
-                          onClick={header.column.getCanSort() ? header.column.getToggleSortingHandler() : undefined}
-                        >
-                          <span className="whitespace-normal leading-tight max-w-[100px] text-xs">
-                            {flexRender(header.column.columnDef.header, header.getContext())}
-                          </span>
-                          {header.column.getIsSorted() ? (
-                            header.column.getIsSorted() === "asc" ? <ArrowUp className="h-3 w-3" /> : <ArrowDown className="h-3 w-3" />
-                          ) : (
-                            header.column.getCanSort() && <ArrowUpDown className="h-3 w-3 opacity-30" />
-                          )}
-                        </div>
-                      )}
-                    </TableHead>
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        {/* Creation perspective - Sidebar-style filters */}
+        <div className="lg:col-span-4 space-y-6">
+          {/* STEP 1: Universe */}
+          <div className="space-y-4">
+            <div className="flex items-center gap-2">
+              <div className="flex items-center justify-center w-6 h-6 rounded-full bg-blue-600 text-[10px] font-bold text-white">1</div>
+              <h2 className="text-sm font-bold text-slate-200 uppercase tracking-widest">Define your universe</h2>
+            </div>
+            
+            <div className="bg-[#0f172a] border border-slate-800 rounded-2xl p-5 space-y-4 shadow-xl">
+              <div className="space-y-2">
+                <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest px-1">Ticker Search</label>
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
+                  <Input 
+                    placeholder="Filter by symbols..." 
+                    className="pl-10 bg-[#0a0f1d] border-slate-800 h-11 focus:border-blue-500/50 transition-all"
+                    value={globalTickerSearch}
+                    onChange={(e) => setGlobalTickerSearch(e.target.value)}
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest px-1">Sector / Industry</label>
+                <select 
+                  className="w-full h-11 bg-[#0a0f1d] border border-slate-800 rounded-xl px-4 text-sm text-slate-300 focus:outline-none focus:border-blue-500/50 appearance-none cursor-pointer"
+                  value={selectedSector}
+                  onChange={(e) => setSelectedSector(e.target.value)}
+                >
+                  <option value="All Sectors">All Sectors</option>
+                  {Array.from(new Set(tableData.map(d => d.sector))).sort().map(s => (
+                    <option key={s} value={s}>{s}</option>
                   ))}
-                </TableRow>
-              ))}
-            </TableHeader>
-            <TableBody>
-              {table.getRowModel().rows?.length ? (
-                table.getRowModel().rows.map((row) => (
-                  <TableRow
-                    key={row.id}
-                    className="border-slate-800 hover:bg-slate-800/30 transition-colors group"
-                  >
-                    {row.getVisibleCells().map((cell) => (
-                      <TableCell 
-                        key={cell.id} 
-                        className={cn(
-                          "py-3",
-                          cell.column.id !== 'ticker' && "text-right"
-                        )}
-                      >
-                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                </select>
+              </div>
+            </div>
+          </div>
+
+          {/* STEP 2: Criteria */}
+          <div className="space-y-4">
+            <div className="flex items-center gap-2">
+              <div className="flex items-center justify-center w-6 h-6 rounded-full bg-blue-600 text-[10px] font-bold text-white">2</div>
+              <h2 className="text-sm font-bold text-slate-200 uppercase tracking-widest">Filter Results</h2>
+            </div>
+
+            <div className="bg-[#0f172a] border border-slate-800 rounded-2xl p-2 space-y-1 shadow-xl overflow-hidden">
+              <div className="max-h-[500px] overflow-y-auto p-3 space-y-3 custom-scrollbar">
+                {activeFilters.map((filter) => {
+                  const isNumeric = rowHasNumericVal(tableData, filter.key);
+                  return (
+                    <div key={filter.key} className="bg-[#0a0f1d] border border-slate-800/50 rounded-xl p-4 space-y-3 relative group">
+                      <div className="flex items-center justify-between">
+                        <div className="space-y-0.5">
+                          <div className="text-[10px] font-bold text-blue-500 uppercase tracking-tighter truncate max-w-[180px]">
+                            {criteriaCategories[filter.key] || "General"}
+                          </div>
+                          <div className="text-xs font-bold text-slate-200">{filter.key}</div>
+                        </div>
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          className="h-6 w-6 text-slate-600 hover:text-rose-400 hover:bg-rose-400/10"
+                          onClick={() => removeFilter(filter.key)}
+                        >
+                          <X className="h-3.5 w-3.5" />
+                        </Button>
+                      </div>
+
+                      {isNumeric ? (
+                        <div className="grid grid-cols-2 gap-3">
+                          <div className="space-y-1">
+                            <span className="text-[9px] text-slate-500 font-bold uppercase">Min</span>
+                            <Input 
+                              type="number" 
+                              placeholder="Any" 
+                              className="h-8 bg-[#1e293b] border-none text-xs"
+                              value={filter.min || ""}
+                              onChange={(e) => updateFilter(filter.key, { min: e.target.value })}
+                            />
+                          </div>
+                          <div className="space-y-1">
+                            <span className="text-[9px] text-slate-500 font-bold uppercase">Max</span>
+                            <Input 
+                              type="number" 
+                              placeholder="Any" 
+                              className="h-8 bg-[#1e293b] border-none text-xs"
+                              value={filter.max || ""}
+                              onChange={(e) => updateFilter(filter.key, { max: e.target.value })}
+                            />
+                          </div>
+                        </div>
+                      ) : (
+                        <Input 
+                          placeholder="Search text..." 
+                          className="h-8 bg-[#1e293b] border-none text-xs"
+                          value={filter.search || ""}
+                          onChange={(e) => updateFilter(filter.key, { search: e.target.value })}
+                        />
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+
+              <Button 
+                variant="ghost" 
+                className="w-full py-6 text-blue-400 hover:bg-blue-400/5 hover:text-blue-300 font-bold gap-2 border-t border-slate-800 rounded-none"
+                onClick={() => setShowCriteriaPicker(true)}
+              >
+                <Plus className="h-4 w-4" />
+                Add Filter Criteria
+              </Button>
+            </div>
+          </div>
+          
+          <div className="flex justify-end">
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className="text-[10px] font-bold text-slate-500 hover:text-rose-400 uppercase tracking-widest gap-2"
+              onClick={() => {
+                setActiveFilters([]);
+                setSelectedSector("All Sectors");
+                setGlobalTickerSearch("");
+              }}
+            >
+              <Trash2 className="h-3 w-3" />
+              Reset All Filters
+            </Button>
+          </div>
+        </div>
+
+        {/* Results Section */}
+        <div className="lg:col-span-8 space-y-4">
+          <div className="flex items-center justify-between px-2">
+            <div className="flex items-center gap-4">
+              <h2 className="text-sm font-bold text-slate-400 uppercase tracking-widest italic">Screener Results</h2>
+              <Badge variant="outline" className="bg-blue-600/10 border-blue-600/20 text-blue-400 font-mono text-[10px]">
+                {filteredData.length} Matches
+              </Badge>
+            </div>
+          </div>
+
+          <div className="rounded-2xl border border-slate-800 bg-[#0f172a] overflow-hidden shadow-2xl">
+            <div className="overflow-x-auto relative">
+              <Table>
+                <TableHeader className="bg-slate-900/50 sticky top-0 z-10">
+                  {table.getHeaderGroups().map((headerGroup) => (
+                    <TableRow key={headerGroup.id} className="border-slate-800 hover:bg-transparent">
+                      {headerGroup.headers.map((header) => (
+                        <TableHead key={header.id} className="text-slate-400 font-bold py-4">
+                          <div 
+                            className={cn(
+                              "flex items-center gap-1 cursor-pointer select-none hover:text-slate-200 transition-colors",
+                              header.id !== 'ticker' && "justify-end"
+                            )}
+                            onClick={header.column.getToggleSortingHandler()}
+                          >
+                            <span className="whitespace-normal leading-tight max-w-[100px] text-[10px] uppercase tracking-widest">
+                              {flexRender(header.column.columnDef.header, header.getContext())}
+                            </span>
+                            {header.column.getIsSorted() ? (
+                              header.column.getIsSorted() === "asc" ? <ArrowUp className="h-3 w-3" /> : <ArrowDown className="h-3 w-3" />
+                            ) : (
+                              <ArrowUpDown className="h-3 w-3 opacity-20" />
+                            )}
+                          </div>
+                        </TableHead>
+                      ))}
+                    </TableRow>
+                  ))}
+                </TableHeader>
+                <TableBody>
+                  {table.getRowModel().rows?.length ? (
+                    table.getRowModel().rows.map((row) => (
+                      <TableRow key={row.id} className="border-slate-800 hover:bg-slate-800/30 transition-colors group">
+                        {row.getVisibleCells().map((cell) => (
+                          <TableCell key={cell.id} className={cn("py-3", cell.column.id !== 'ticker' && "text-right")}>
+                            {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                          </TableCell>
+                        ))}
+                      </TableRow>
+                    ))
+                  ) : (
+                    <TableRow>
+                      <TableCell colSpan={columns.length} className="h-64 text-center text-slate-500">
+                        <div className="flex flex-col items-center justify-center gap-2">
+                          <Search className="h-8 w-8 opacity-20 mb-2" />
+                          <p className="font-bold text-slate-400">No companies found</p>
+                          <p className="text-xs">Try loosening your criteria or searching for another ticker</p>
+                        </div>
                       </TableCell>
-                    ))}
-                  </TableRow>
-                ))
-              ) : (
-                <TableRow>
-                  <TableCell colSpan={columns.length} className="h-32 text-center text-slate-500">
-                    No results found. Try adjusting your filters.
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
+            </div>
+          </div>
         </div>
       </div>
 
-      <div className="flex items-center justify-between px-2 text-[10px] text-slate-500 uppercase font-bold tracking-widest">
-        <div>Total Universe: {tableData.length} Companies</div>
-        <div>Matches: {table.getFilteredRowModel().rows.length}</div>
-      </div>
+      {/* Save Dialog */}
+      <Dialog open={isSaving} onOpenChange={setIsSaving}>
+        <DialogContent className="bg-[#0f172a] border-slate-800 text-white">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-bold italic uppercase tracking-tighter">Save Current Screen</DialogTitle>
+          </DialogHeader>
+          <div className="py-6 space-y-4">
+            <p className="text-sm text-slate-400">This will save your universe filters, criteria, and sorting order.</p>
+            <Input 
+              placeholder="Screen name (e.g. High Growth Tech)" 
+              className="bg-slate-900 border-slate-800"
+              value={newScreenName}
+              onChange={(e) => setNewScreenName(e.target.value)}
+            />
+          </div>
+          <div className="flex justify-end gap-3">
+            <Button variant="ghost" onClick={() => setIsSaving(false)}>Cancel</Button>
+            <Button onClick={handleSaveScreen} className="bg-blue-600 hover:bg-blue-700 font-bold px-8">Save Screen</Button>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {showCriteriaPicker && (
         <CriteriaPicker
+          title="Add Filter Criteria"
           allCriteria={allAvailableCriteria}
-          selectedCriteria={activeCriteria}
+          selectedCriteria={activeFilters.map(f => f.key)}
           criteriaCategories={criteriaCategories}
           onClose={() => setShowCriteriaPicker(false)}
-          onSave={(criteria) => {
-            setActiveCriteria(criteria);
-            setShowCriteriaPicker(false);
-          }}
+          onSave={handleApplyCriteria}
         />
       )}
     </div>
   );
+}
+
+function rowHasNumericVal(data: any[], key: string): boolean {
+  return data.some(row => row[`${key}_num`] !== undefined);
 }
