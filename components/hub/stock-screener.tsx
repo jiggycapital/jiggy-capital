@@ -212,12 +212,12 @@ export function StockScreener({
         },
       ];
 
-      const dynamicCols = activeCriteria.map(key => ({
+      const dynamicCols: ColumnDef<ScreenerRow>[] = activeCriteria.map(key => ({
         accessorKey: key,
         header: key,
-        cell: ({ row }: any) => {
-          const val = row.original[key];
-          const numVal = row.original[`${key}_num`];
+        cell: ({ row }) => {
+          const val = row.getValue(key);
+          const numVal = (row.original as any)[`${key}_num`];
           const cat = criteriaCategories[key]?.toLowerCase() || "";
           
           if (numVal !== null && numVal !== undefined) {
@@ -228,16 +228,16 @@ export function StockScreener({
               return <div className="font-mono text-slate-300">{numVal.toFixed(1)}x</div>;
             }
             if (key.includes("Price")) return <div className="font-mono text-slate-300">{formatCurrency(numVal)}</div>;
-            return <div className="font-mono text-slate-300">{val}</div>;
+            return <div className="font-mono text-slate-300">{val as string}</div>;
           }
-          return <div className="text-slate-400 text-xs">{val || "-"}</div>;
+          return <div className="text-slate-400 text-xs">{(val as string) || "-"}</div>;
         },
-        sortingFn: (rowA: any, rowB: any) => {
-          const a = rowA.original[`${key}_num`] ?? -Infinity;
-          const b = rowB.original[`${key}_num`] ?? -Infinity;
+        sortingFn: (rowA, rowB) => {
+          const a = (rowA.original as any)[`${key}_num`] ?? -Infinity;
+          const b = (rowB.original as any)[`${key}_num`] ?? -Infinity;
           return a - b;
         },
-        filterFn: "includesString",
+        filterFn: 'includesString' as const,
       }));
 
       return [...baseCols, ...dynamicCols];
