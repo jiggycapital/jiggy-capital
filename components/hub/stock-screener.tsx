@@ -225,11 +225,19 @@ export function StockScreener({
         const val = row[filter.key];
         const numVal = row[`${filter.key}_num`];
 
-        if (numVal !== undefined && numVal !== null) {
-          if (filter.min && numVal < parseFloat(filter.min)) return false;
-          if (filter.max && numVal > parseFloat(filter.max)) return false;
-        } else if (filter.search && val) {
-          if (!String(val).toLowerCase().includes(filter.search.toLowerCase())) return false;
+        // Check if numeric filter is being used (min or max has a value)
+        const hasMin = filter.min && filter.min.trim() !== "";
+        const hasMax = filter.max && filter.max.trim() !== "";
+
+        if (hasMin || hasMax) {
+          // If we have a numeric filter but no numeric value, exclude this row
+          if (numVal === undefined || numVal === null) return false;
+          
+          if (hasMin && numVal < parseFloat(filter.min!)) return false;
+          if (hasMax && numVal > parseFloat(filter.max!)) return false;
+        } else if (filter.search && filter.search.trim() !== "") {
+          // Text search filter
+          if (!val || !String(val).toLowerCase().includes(filter.search.toLowerCase())) return false;
         }
       }
       return true;

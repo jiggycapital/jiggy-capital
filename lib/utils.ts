@@ -89,7 +89,18 @@ export function parseNumeric(value: string | null | undefined): number | null {
   
   // Handle empty strings and error values
   const trimmed = String(value).trim();
-  if (trimmed === "" || trimmed === "-" || trimmed === "#N/A" || trimmed === "#DIV/0!" || trimmed === "#VALUE!" || trimmed === "#REF!") {
+  const upper = trimmed.toUpperCase();
+  if (
+    trimmed === "" || 
+    trimmed === "-" || 
+    upper === "NM" || 
+    upper === "N/A" || 
+    upper === "NA" ||
+    trimmed === "#N/A" || 
+    trimmed === "#DIV/0!" || 
+    trimmed === "#VALUE!" || 
+    trimmed === "#REF!"
+  ) {
     return null;
   }
   
