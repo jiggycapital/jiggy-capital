@@ -40,6 +40,7 @@ interface PortfolioRow {
   d50: number | string;
   d200: number | string;
   peg: number | string;
+  isCash: boolean;
 }
 
 export function PortfolioTanStackTable({ positionsData, logos }: PortfolioTanStackTableProps) {
@@ -132,7 +133,7 @@ export function PortfolioTanStackTable({ positionsData, logos }: PortfolioTanSta
           </div>
         ),
         cell: ({ row }) => {
-          const { ticker, name, isCash } = row.original as any;
+          const { ticker, name, isCash } = row.original;
           return (
             <div className="flex items-center gap-2">
               <div className="w-7 h-7 rounded bg-slate-800 flex items-center justify-center overflow-hidden shrink-0 border border-slate-700">
@@ -167,7 +168,7 @@ export function PortfolioTanStackTable({ positionsData, logos }: PortfolioTanSta
           </div>
         ),
         cell: ({ row }) => {
-          const { isCash, price } = row.original as any;
+          const { isCash, price } = row.original;
           if (isCash) return null;
           return (
             <div className="text-right font-mono text-[13px] text-slate-300">
@@ -191,7 +192,7 @@ export function PortfolioTanStackTable({ positionsData, logos }: PortfolioTanSta
           </div>
         ),
         cell: ({ row }) => {
-          const { isCash, marketCap } = row.original as any;
+          const { isCash, marketCap } = row.original;
           if (isCash || !marketCap) return null;
           return (
             <div className="text-right font-mono text-[13px] text-slate-300">
@@ -255,7 +256,7 @@ export function PortfolioTanStackTable({ positionsData, logos }: PortfolioTanSta
           </div>
         ),
         cell: ({ row }) => {
-          const { dailyChange, isCash } = row.original as any;
+          const { dailyChange, isCash } = row.original;
           if (isCash) return null;
           return (
             <div className={`text-right font-mono text-[13px] font-bold ${dailyChange >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
@@ -279,7 +280,7 @@ export function PortfolioTanStackTable({ positionsData, logos }: PortfolioTanSta
           </div>
         ),
         cell: ({ row }) => {
-          const { ytdGain, isCash } = row.original as any;
+          const { ytdGain, isCash } = row.original;
           if (isCash) return null;
           return (
             <div className={`text-right font-mono text-[13px] font-bold ${ytdGain >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
