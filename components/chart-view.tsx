@@ -108,7 +108,15 @@ export function ChartView() {
     return currentData.map(row => {
       const dataPoint: any = { name: String(row[xAxisColumn] || "") };
       yAxisColumns.forEach(col => {
-        const val = parseNumeric(String(row[col] || ""));
+        let val = parseNumeric(String(row[col] || ""));
+        
+        // Normalize Market Cap to Billions if it's in Millions
+        if (val !== null && (col.toLowerCase().includes("market cap") || col.toLowerCase().includes("ev"))) {
+          if (val > 5000) {
+            val = val / 1000;
+          }
+        }
+        
         dataPoint[col] = val !== null ? val : 0;
       });
       return dataPoint;

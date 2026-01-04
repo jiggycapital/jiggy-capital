@@ -29,14 +29,14 @@ interface WatchlistRow {
   ticker: string;
   name: string;
   price: number;
-  marketCap: string;
+  marketCap: number;
   change: number;
   w1Change: number;
   ytdChange: number;
-  pe2026: string;
-  fcf2026: string;
-  revCagr: string;
-  peg: string;
+  pe2026: number | string;
+  fcf2026: number | string;
+  revCagr: number | string;
+  peg: number | string;
   logoUrl: string;
 }
 
@@ -46,18 +46,24 @@ export function WatchlistTanStackTable({ watchlistData, logos }: WatchlistTanSta
       const ticker = p.Ticker || p.Symbol || "";
       const logoUrl = p["Logo URL"] || logos[ticker] || "";
       
+      const mCapRaw = p["Market Cap"] || "";
+      let mCapNum = parseNumeric(mCapRaw);
+      if (mCapNum !== null && mCapNum > 5000) {
+        mCapNum = mCapNum / 1000;
+      }
+      
       return {
         ticker,
         name: p.Name || p.Company || ticker,
         price: parseNumeric(p.Price) || 0,
-        marketCap: p["Market Cap"] || "-",
+        marketCap: mCapNum || 0,
         change: parseNumeric(p["Change %"]) || 0,
         w1Change: parseNumeric(p["1W Change %"]) || 0,
         ytdChange: parseNumeric(p["YTD Change %"]) || 0,
-        pe2026: p["2026 P/E"] || "-",
-        fcf2026: p["2026 P/FCF"] || "-",
-        revCagr: p["Fwd Rev CAGR"] || "-",
-        peg: p["PEG"] || "-",
+        pe2026: parseNumeric(p["2026 P/E"] || p["26e P/E"]) ?? (p["2026 P/E"] || p["26e P/E"] || "-"),
+        fcf2026: parseNumeric(p["2026 P/FCF"] || p["26e P/FCF"]) ?? (p["2026 P/FCF"] || p["26e P/FCF"] || "-"),
+        revCagr: parseNumeric(p["Fwd Rev CAGR"] || p["Rev CAGR"]) ?? (p["Fwd Rev CAGR"] || p["Rev CAGR"] || "-"),
+        peg: parseNumeric(p["PEG"]) ?? (p["PEG"] || "-"),
         logoUrl
       };
     });
@@ -130,7 +136,15 @@ export function WatchlistTanStackTable({ watchlistData, logos }: WatchlistTanSta
             }[column.getIsSorted() as string] ?? <ArrowUpDown className="h-3 w-3 shrink-0 opacity-50" />}
           </div>
         ),
-        cell: ({ row }) => <div className="text-right font-mono text-[13px] text-slate-400">{row.original.marketCap}</div>
+        cell: ({ row }) => {
+          const { marketCap } = row.original;
+          if (!marketCap) return null;
+          return (
+            <div className="text-right font-mono text-[13px] text-slate-400">
+              ${(marketCap as number).toFixed(1)}B
+            </div>
+          );
+        }
       },
       {
         accessorKey: "change",
@@ -198,7 +212,10 @@ export function WatchlistTanStackTable({ watchlistData, logos }: WatchlistTanSta
             }[column.getIsSorted() as string] ?? <ArrowUpDown className="h-3 w-3 shrink-0 opacity-50" />}
           </div>
         ),
-        cell: ({ row }) => <div className="text-right font-mono text-[13px] text-slate-400">{row.original.pe2026}</div> 
+        cell: ({ row }) => {
+          const val = row.original.pe2026;
+          return <div className="text-right font-mono text-[13px] text-slate-400">{typeof val === 'number' ? `${val.toFixed(1)}x` : (val || "-")}</div>;
+        }
       },
       { 
         accessorKey: "fcf2026", 
@@ -214,7 +231,10 @@ export function WatchlistTanStackTable({ watchlistData, logos }: WatchlistTanSta
             }[column.getIsSorted() as string] ?? <ArrowUpDown className="h-3 w-3 shrink-0 opacity-50" />}
           </div>
         ),
-        cell: ({ row }) => <div className="text-right font-mono text-[13px] text-slate-400">{row.original.fcf2026}</div> 
+        cell: ({ row }) => {
+          const val = row.original.fcf2026;
+          return <div className="text-right font-mono text-[13px] text-slate-400">{typeof val === 'number' ? `${val.toFixed(1)}x` : (val || "-")}</div>;
+        }
       },
       { 
         accessorKey: "revCagr", 
@@ -230,7 +250,10 @@ export function WatchlistTanStackTable({ watchlistData, logos }: WatchlistTanSta
             }[column.getIsSorted() as string] ?? <ArrowUpDown className="h-3 w-3 shrink-0 opacity-50" />}
           </div>
         ),
-        cell: ({ row }) => <div className="text-right font-mono text-[13px] text-slate-400">{row.original.revCagr}</div> 
+        cell: ({ row }) => {
+          const val = row.original.revCagr;
+          return <div className="text-right font-mono text-[13px] text-slate-400">{typeof val === 'number' ? formatPercentage(val) : (val || "-")}</div>;
+        }
       },
       { 
         accessorKey: "peg", 
@@ -246,7 +269,10 @@ export function WatchlistTanStackTable({ watchlistData, logos }: WatchlistTanSta
             }[column.getIsSorted() as string] ?? <ArrowUpDown className="h-3 w-3 shrink-0 opacity-50" />}
           </div>
         ),
-        cell: ({ row }) => <div className="text-right font-mono text-[13px] text-slate-400">{row.original.peg}</div> 
+        cell: ({ row }) => {
+          const val = row.original.peg;
+          return <div className="text-right font-mono text-[13px] text-slate-400">{typeof val === 'number' ? val.toFixed(2) : (val || "-")}</div>;
+        }
       },
     ],
     [logos]

@@ -151,6 +151,7 @@ export function TableView() {
   const columns = useMemo<ColumnDef<any>[]>(() => {
     return visibleColumns.map(key => {
       const isTicker = key.toLowerCase() === 'ticker' || key.toLowerCase() === 'symbol';
+      const isMarketCap = key.toLowerCase().includes("market cap") || key.toLowerCase().includes("ev");
       
       return {
         accessorKey: key,
@@ -172,12 +173,21 @@ export function TableView() {
               </div>
             );
           }
-          const numVal = parseNumeric(String(value || ""));
-          return formatCellValue(String(value || ""), key, numVal !== null, columnCategories[key]);
+          let numVal = parseNumeric(String(value || ""));
+          if (isMarketCap && numVal !== null && numVal > 5000) {
+            numVal = numVal / 1000;
+          }
+          return formatCellValue(isMarketCap && numVal !== null ? `${numVal}` : String(value || ""), key, numVal !== null, columnCategories[key]);
         },
         sortingFn: (rowA, rowB) => {
-          const a = parseNumeric(String(rowA.getValue(key) || "")) ?? -Infinity;
-          const b = parseNumeric(String(rowB.getValue(key) || "")) ?? -Infinity;
+          let a = parseNumeric(String(rowA.getValue(key) || "")) ?? -Infinity;
+          let b = parseNumeric(String(rowB.getValue(key) || "")) ?? -Infinity;
+          
+          if (isMarketCap) {
+            if (a > 5000) a = a / 1000;
+            if (b > 5000) b = b / 1000;
+          }
+          
           return a - b;
         },
       };
@@ -387,7 +397,7 @@ function formatCellValue(value: string, columnKey: string, isNumeric: boolean, c
     if (cat.includes("multiples") || col.includes("p/e") || col.includes("p/fcf") || col.includes("peg")) {
       return <span className="font-mono text-slate-300">{num.toFixed(1)}x</span>;
     }
-    if (col.includes("market cap") || col.includes("ev")) return <span className="font-mono text-slate-300">{formatCurrencyBillions(num)}</span>;
+    if (col.includes("market cap") || col.includes("ev")) return <span className="font-mono text-slate-300">${num.toFixed(1)}B</span>;
     if (col.includes("price")) return <span className="font-mono text-slate-300">{formatCurrency(num)}</span>;
     return <span className="font-mono text-slate-300">{formatNumber(num)}</span>;
   }

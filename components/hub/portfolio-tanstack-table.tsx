@@ -33,13 +33,13 @@ interface PortfolioRow {
   firstBuy: string;
   dailyChange: number;
   ytdGain: number;
-  revCagr: string;
-  fcfMultiple: string;
-  peMultiple: string;
-  marketCap: string;
-  d50: string;
-  d200: string;
-  peg: string;
+  revCagr: number | string;
+  fcfMultiple: number | string;
+  peMultiple: number | string;
+  marketCap: number;
+  d50: number | string;
+  d200: number | string;
+  peg: number | string;
 }
 
 export function PortfolioTanStackTable({ positionsData, logos }: PortfolioTanStackTableProps) {
@@ -74,27 +74,35 @@ export function PortfolioTanStackTable({ positionsData, logos }: PortfolioTanSta
         // Use column AT/V/AO headers if available from positionsData mapping
         const ytd = isCash ? 0 : (parseNumeric(p["YTD Gain"] || p[p._columnATHeader]) || 0);
         const change = isCash ? 0 : (parseNumeric(p["Change %"] || p[p._columnVHeader] || p["Daily PnL %"]) || 0);
+        
+        const mCapRaw = p["Market Cap"] || "";
+        let mCapNum = parseNumeric(mCapRaw);
+        if (mCapNum !== null && mCapNum > 5000) {
+          mCapNum = mCapNum / 1000;
+        }
+
         const revCagr = isCash ? "" : (p[p._columnAOHeader] || p["25-27e Rev CAGR"] || p["2024 - 27e Rev CAGR"] || p["Rev CAGR"] || "");
-        const firstBuy = isCash ? "" : (p[p._columnEHeader] || "");
-        const d50 = isCash ? "" : (p[p._columnAEHeader] || "");
-        const d200 = isCash ? "" : (p[p._columnAFHeader] || "");
-        const peg = isCash ? "" : (p[p._columnARHeader] || "");
+        const pe = isCash ? "" : (p["2026e P/E"] || p["2026 P/E"] || p["P/E"] || "");
+        const fcf = isCash ? "" : (p["P/2026e FCF"] || p["P/2026 FCF"] || p["P/FCF"] || "");
+        const d50 = isCash ? "" : (p[p._columnAEHeader] || p["50D"]);
+        const d200 = isCash ? "" : (p[p._columnAFHeader] || p["200D"]);
+        const peg = isCash ? "" : (p[p._columnARHeader] || p["P/E/G"] || p["PEG"]);
         
         return {
           ticker: isCash ? "CASH" : ticker,
           name: isCash ? "Cash Position" : (p.Name || p.Company || ticker),
           price: isCash ? 0 : (parseNumeric(p.Price) || 0),
           weight,
-          firstBuy,
+          firstBuy: isCash ? "" : (p[p._columnEHeader] || ""),
           dailyChange: change,
           ytdGain: ytd,
-          marketCap: isCash ? "" : (p["Market Cap"] || ""),
-          peMultiple: isCash ? "" : (p["2026e P/E"] || p["2026 P/E"] || p["P/E"] || ""),
-          fcfMultiple: isCash ? "" : (p["P/2026e FCF"] || p["P/2026 FCF"] || p["P/FCF"] || ""),
-          revCagr,
-          d50,
-          d200,
-          peg,
+          marketCap: isCash ? 0 : (mCapNum || 0),
+          peMultiple: parseNumeric(pe) ?? pe,
+          fcfMultiple: parseNumeric(fcf) ?? fcf,
+          revCagr: parseNumeric(revCagr) ?? revCagr,
+          d50: parseNumeric(d50) ?? d50,
+          d200: parseNumeric(d200) ?? d200,
+          peg: parseNumeric(peg) ?? peg,
           isCash,
         } as PortfolioRow & { isCash: boolean };
       });
@@ -184,10 +192,10 @@ export function PortfolioTanStackTable({ positionsData, logos }: PortfolioTanSta
         ),
         cell: ({ row }) => {
           const { isCash, marketCap } = row.original as any;
-          if (isCash) return null;
+          if (isCash || !marketCap) return null;
           return (
             <div className="text-right font-mono text-[13px] text-slate-300">
-              {marketCap}
+              ${(marketCap as number).toFixed(1)}B
             </div>
           );
         },
@@ -295,10 +303,11 @@ export function PortfolioTanStackTable({ positionsData, logos }: PortfolioTanSta
           </div>
         ),
         cell: ({ row }) => {
-          const val = parseNumeric(row.original.d50);
+          const val = row.original.d50;
+          const numVal = typeof val === 'number' ? val : null;
           return (
-            <div className={`text-right font-mono text-[12px] font-bold ${val !== null ? (val >= 0 ? 'text-emerald-400' : 'text-rose-400') : 'text-slate-400'}`}>
-              {row.original.d50}
+            <div className={`text-right font-mono text-[12px] font-bold ${numVal !== null ? (numVal >= 0 ? 'text-emerald-400' : 'text-rose-400') : 'text-slate-400'}`}>
+              {numVal !== null ? formatPercentage(numVal) : (val || "-")}
             </div>
           );
         }
@@ -318,10 +327,11 @@ export function PortfolioTanStackTable({ positionsData, logos }: PortfolioTanSta
           </div>
         ),
         cell: ({ row }) => {
-          const val = parseNumeric(row.original.d200);
+          const val = row.original.d200;
+          const numVal = typeof val === 'number' ? val : null;
           return (
-            <div className={`text-right font-mono text-[12px] font-bold ${val !== null ? (val >= 0 ? 'text-emerald-400' : 'text-rose-400') : 'text-slate-400'}`}>
-              {row.original.d200}
+            <div className={`text-right font-mono text-[12px] font-bold ${numVal !== null ? (numVal >= 0 ? 'text-emerald-400' : 'text-rose-400') : 'text-slate-400'}`}>
+              {numVal !== null ? formatPercentage(numVal) : (val || "-")}
             </div>
           );
         }
@@ -341,11 +351,11 @@ export function PortfolioTanStackTable({ positionsData, logos }: PortfolioTanSta
           </div>
         ),
         cell: ({ row }) => {
-          const { isCash, revCagr } = row.original as any;
+          const { isCash, revCagr } = row.original;
           if (isCash) return null;
           return (
             <div className="text-right font-mono text-[13px] text-slate-300">
-              {revCagr}
+              {typeof revCagr === 'number' ? formatPercentage(revCagr) : (revCagr || "-")}
             </div>
           );
         },
@@ -365,11 +375,11 @@ export function PortfolioTanStackTable({ positionsData, logos }: PortfolioTanSta
           </div>
         ),
         cell: ({ row }) => {
-          const { isCash, fcfMultiple } = row.original as any;
+          const { isCash, fcfMultiple } = row.original;
           if (isCash) return null;
           return (
             <div className="text-right font-mono text-[13px] text-slate-300">
-              {fcfMultiple}
+              {typeof fcfMultiple === 'number' ? `${fcfMultiple.toFixed(1)}x` : (fcfMultiple || "-")}
             </div>
           );
         },
@@ -389,11 +399,11 @@ export function PortfolioTanStackTable({ positionsData, logos }: PortfolioTanSta
           </div>
         ),
         cell: ({ row }) => {
-          const { isCash, peMultiple } = row.original as any;
+          const { isCash, peMultiple } = row.original;
           if (isCash) return null;
           return (
             <div className="text-right font-mono text-[13px] text-slate-300">
-              {peMultiple}
+              {typeof peMultiple === 'number' ? `${peMultiple.toFixed(1)}x` : (peMultiple || "-")}
             </div>
           );
         },
@@ -412,7 +422,14 @@ export function PortfolioTanStackTable({ positionsData, logos }: PortfolioTanSta
             }[column.getIsSorted() as string] ?? <ArrowUpDown className="h-3 w-3 shrink-0 opacity-50" />}
           </div>
         ),
-        cell: ({ row }) => <div className="text-right font-mono text-[12px] text-slate-400">{row.original.peg}</div>
+        cell: ({ row }) => {
+          const { peg } = row.original;
+          return (
+            <div className="text-right font-mono text-[12px] text-slate-400">
+              {typeof peg === 'number' ? peg.toFixed(2) : (peg || "-")}
+            </div>
+          );
+        }
       },
     ],
     [logos]

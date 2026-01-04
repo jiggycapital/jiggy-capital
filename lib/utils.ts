@@ -93,8 +93,8 @@ export function parseNumeric(value: string | null | undefined): number | null {
     return null;
   }
   
-  // Remove currency symbols, commas, spaces, and percentage signs
-  const cleaned = trimmed.replace(/[$,\s%]/g, "");
+  // Remove currency symbols, commas, spaces, percentage signs, and "x" suffix
+  const cleaned = trimmed.replace(/[$,\s%xX]/g, "");
   
   // Handle negative values in parentheses: (100) = -100
   const isNegative = cleaned.startsWith('(') && cleaned.endsWith(')');
