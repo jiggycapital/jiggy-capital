@@ -8,7 +8,7 @@ const SHEET_IDS = {
 
 const GIDS = {
   positionsDetailed: "1134366200",
-  watchlistDetailed: "695255397",
+  watchlistDetailed: "842475955",
   logosPt2: "1789448141",
   portfolio: "1871140253",
   performance: "721839254",

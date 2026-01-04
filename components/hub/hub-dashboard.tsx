@@ -7,12 +7,15 @@ import { PerformanceStats } from "./performance-stats";
 import { PortfolioAllocation } from "./portfolio-allocation";
 import { PerformanceAnalytics } from "./performance-analytics";
 import { PortfolioTable } from "./portfolio-table";
+import { WatchlistTable } from "./watchlist-table";
 import { UpcomingEvents } from "./upcoming-events";
 import { NewsFeed } from "./news-feed";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export function HubDashboard() {
   const [positionsData, setPositionsData] = useState<any[]>([]);
+  const [watchlistData, setWatchlistData] = useState<any[]>([]);
   const [performanceData, setPerformanceData] = useState<any>(null);
   const [logos, setLogos] = useState<Record<string, string>>({});
   const [irLinks, setIrLinks] = useState<Record<string, string>>({});
@@ -28,8 +31,9 @@ export function HubDashboard() {
       setLoading(true);
       
       // Load all data in parallel
-      const [portfolioRows, performanceRows, logosData, logosPt2Rows] = await Promise.all([
+      const [portfolioRows, watchlistRows, performanceRows, logosData, logosPt2Rows] = await Promise.all([
         fetchSheetData("portfolio"),
+        fetchSheetData("watchlist"),
         fetchSheetData("performance"),
         fetchLogos(),
         fetchSheetData("logosPt2")
@@ -57,6 +61,10 @@ export function HubDashboard() {
       
       setPositionsData(dataWithHeaders);
       setLogos(logosData.logos);
+
+      // Parse Watchlist Data
+      const parsedWatchlist = parseSheetData(watchlistRows);
+      setWatchlistData(parsedWatchlist);
 
       // Parse IR Links from Logos Pt2
       const irMap: Record<string, string> = { ...logosData.irLinks };
@@ -170,8 +178,39 @@ export function HubDashboard() {
         </div>
       </div>
 
-      {/* Main Table */}
-      <PortfolioTable positionsData={positionsData} logos={logos} />
+      {/* Main Table Section */}
+      <div className="space-y-4">
+        <Tabs defaultValue="holdings" className="w-full">
+          <div className="flex items-center justify-between mb-2">
+            <TabsList className="bg-slate-900/50 border border-slate-800 p-1">
+              <TabsTrigger 
+                value="holdings" 
+                className="data-[state=active]:bg-blue-600 data-[state=active]:text-white text-xs font-bold"
+              >
+                My Holdings
+              </TabsTrigger>
+              <TabsTrigger 
+                value="watchlist"
+                className="data-[state=active]:bg-blue-600 data-[state=active]:text-white text-xs font-bold"
+              >
+                Watchlist
+              </TabsTrigger>
+            </TabsList>
+            
+            <div className="text-[10px] font-medium text-slate-500 uppercase tracking-wider">
+              {new Date().toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' })}
+            </div>
+          </div>
+
+          <TabsContent value="holdings" className="mt-0 outline-none">
+            <PortfolioTable positionsData={positionsData} logos={logos} />
+          </TabsContent>
+          
+          <TabsContent value="watchlist" className="mt-0 outline-none">
+            <WatchlistTable watchlistData={watchlistData} logos={logos} />
+          </TabsContent>
+        </Tabs>
+      </div>
 
       {/* Bottom Hub Section */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

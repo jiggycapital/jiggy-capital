@@ -5,13 +5,16 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { fetchSheetData, parseSheetData, fetchLogos, type DatasetType } from "@/lib/google-sheets";
 import { InteractivePieChart } from "@/components/interactive-pie-chart";
 import { PortfolioTanStackTable } from "@/components/hub/portfolio-tanstack-table";
+import { WatchlistTanStackTable } from "@/components/hub/watchlist-tanstack-table";
 import { NewsFeed } from "@/components/hub/news-feed";
 import { UpcomingEvents } from "@/components/hub/upcoming-events";
 import { formatPercentage, formatCurrency, parseNumeric } from "@/lib/utils";
 import { TrendingUp, TrendingDown, PieChart as PieChartIcon, Activity, Target, Percent, Twitter } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export function HomeDashboard() {
   const [positionsData, setPositionsData] = useState<any[]>([]);
+  const [watchlistData, setWatchlistData] = useState<any[]>([]);
   const [performanceData, setPerformanceData] = useState<any>(null);
   const [logos, setLogos] = useState<Record<string, string>>({});
   const [irLinks, setIrLinks] = useState<Record<string, string>>({});
@@ -27,8 +30,14 @@ export function HomeDashboard() {
     try {
       setLoading(true);
       // Load portfolio data
-      const portfolioRows = await fetchSheetData("portfolio");
+      const [portfolioRows, watchlistRows] = await Promise.all([
+        fetchSheetData("portfolio"),
+        fetchSheetData("watchlist")
+      ]);
+      
       const portfolioData = parseSheetData(portfolioRows);
+      const watchlistDataParsed = parseSheetData(watchlistRows);
+      setWatchlistData(watchlistDataParsed);
       
       // Find headers for specific columns (V=21, AO=40, AT=45) from raw rows
       const headerRowIndex = portfolioRows.findIndex((row, idx) => {
@@ -504,10 +513,41 @@ export function HomeDashboard() {
 
       {/* Portfolio Table - Full Width */}
       <div className="w-full">
-        <PortfolioTanStackTable 
-          positionsData={positionsData} 
-          logos={logos} 
-        />
+        <Tabs defaultValue="holdings" className="w-full">
+          <div className="flex items-center justify-between mb-4">
+            <TabsList className="bg-slate-900/50 border border-slate-800 p-1">
+              <TabsTrigger 
+                value="holdings" 
+                className="data-[state=active]:bg-blue-600 data-[state=active]:text-white text-xs font-bold px-6"
+              >
+                My Holdings
+              </TabsTrigger>
+              <TabsTrigger 
+                value="watchlist"
+                className="data-[state=active]:bg-blue-600 data-[state=active]:text-white text-xs font-bold px-6"
+              >
+                Watchlist
+              </TabsTrigger>
+            </TabsList>
+            <div className="hidden md:block text-[10px] font-medium text-slate-500 uppercase tracking-widest bg-slate-900/30 px-3 py-1 rounded-full border border-slate-800/50">
+              {new Date().toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' })}
+            </div>
+          </div>
+
+          <TabsContent value="holdings" className="mt-0 focus-visible:outline-none">
+            <PortfolioTanStackTable 
+              positionsData={positionsData} 
+              logos={logos} 
+            />
+          </TabsContent>
+          
+          <TabsContent value="watchlist" className="mt-0 focus-visible:outline-none">
+            <WatchlistTanStackTable 
+              watchlistData={watchlistData} 
+              logos={logos} 
+            />
+          </TabsContent>
+        </Tabs>
       </div>
 
       {/* Movers and Company News (News/Events) */}
