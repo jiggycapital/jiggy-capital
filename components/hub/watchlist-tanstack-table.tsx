@@ -17,7 +17,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { parseNumeric, formatCurrency } from "@/lib/utils";
+import { parseNumeric, formatCurrency, formatPercentage } from "@/lib/utils";
 import { ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
 
 interface WatchlistTanStackTableProps {
