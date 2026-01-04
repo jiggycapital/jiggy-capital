@@ -125,6 +125,30 @@ export function StockScreener({
     localStorage.setItem("jiggy_screener_favorites_v3", JSON.stringify(newFavorites));
   };
 
+  const handleSaveScreen = () => {
+    if (!newScreenName.trim()) return;
+    const newScreen: FavoriteScreen = {
+      id: Date.now().toString(),
+      name: newScreenName,
+      filters: [],
+      sorting: sorting,
+      activeFilters: activeFilters,
+    };
+    saveFavorites([...favorites, newScreen]);
+    setNewScreenName("");
+    setIsSaving(false);
+  };
+
+  const handleDeleteScreen = (id: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    saveFavorites(favorites.filter(f => f.id !== id));
+  };
+
+  const handleApplyScreen = (screen: FavoriteScreen) => {
+    setActiveFilters(screen.activeFilters);
+    setSorting(screen.sorting);
+  };
+
   const criteriaCategories = useMemo(() => {
     const cats: Record<string, string> = {};
     if (rawPositionsRows) Object.assign(cats, extractColumnCategories(rawPositionsRows));
@@ -312,15 +336,9 @@ export function StockScreener({
               </DropdownMenuTrigger>
               <DropdownMenuContent className="bg-[#1e293b] border-slate-700 text-white w-56">
                 {favorites.map(f => (
-                  <DropdownMenuItem key={f.id} onClick={() => {
-                    setActiveFilters(f.activeFilters);
-                    setSorting(f.sorting);
-                  }} className="flex items-center justify-between cursor-pointer">
+                  <DropdownMenuItem key={f.id} onClick={() => handleApplyScreen(f)} className="flex items-center justify-between cursor-pointer group">
                     <span>{f.name}</span>
-                    <Trash2 className="h-3 w-3 text-rose-400 opacity-0 group-hover:opacity-100" onClick={(e) => {
-                      e.stopPropagation();
-                      saveFavorites(favorites.filter(x => x.id !== f.id));
-                    }} />
+                    <Trash2 className="h-3 w-3 text-rose-400 opacity-0 group-hover:opacity-100 transition-opacity" onClick={(e) => handleDeleteScreen(f.id, e)} />
                   </DropdownMenuItem>
                 ))}
               </DropdownMenuContent>
