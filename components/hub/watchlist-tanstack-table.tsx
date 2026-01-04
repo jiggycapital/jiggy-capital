@@ -223,7 +223,7 @@ export function WatchlistTanStackTable({ watchlistData, logos }: WatchlistTanSta
             className="flex items-center justify-end gap-1 cursor-pointer select-none hover:text-slate-200 transition-colors text-right whitespace-normal leading-tight max-w-[60px]"
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           >
-            Rev CAGR
+            Fwd Rev CAGR
             {{
               asc: <ArrowUp className="h-3 w-3 shrink-0" />,
               desc: <ArrowDown className="h-3 w-3 shrink-0" />,

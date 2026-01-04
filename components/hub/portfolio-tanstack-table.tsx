@@ -287,7 +287,7 @@ export function PortfolioTanStackTable({ positionsData, logos }: PortfolioTanSta
             className="flex items-center justify-end gap-1 cursor-pointer select-none hover:text-slate-200 transition-colors text-right whitespace-normal leading-tight max-w-[60px]"
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           >
-            25-27e Rev CAGR
+            Fwd Rev CAGR
             {{
               asc: <ArrowUp className="h-3 w-3 shrink-0" />,
               desc: <ArrowDown className="h-3 w-3 shrink-0" />,
@@ -366,7 +366,14 @@ export function PortfolioTanStackTable({ positionsData, logos }: PortfolioTanSta
             }[column.getIsSorted() as string] ?? <ArrowUpDown className="h-3 w-3 shrink-0 opacity-50" />}
           </div>
         ),
-        cell: ({ row }) => <div className="text-right font-mono text-[12px] text-slate-400">{row.original.d50}</div>
+        cell: ({ row }) => {
+          const val = parseNumeric(row.original.d50);
+          return (
+            <div className={`text-right font-mono text-[12px] font-bold ${val !== null ? (val >= 0 ? 'text-emerald-400' : 'text-rose-400') : 'text-slate-400'}`}>
+              {row.original.d50}
+            </div>
+          );
+        }
       },
       {
         accessorKey: "d200",
@@ -382,7 +389,14 @@ export function PortfolioTanStackTable({ positionsData, logos }: PortfolioTanSta
             }[column.getIsSorted() as string] ?? <ArrowUpDown className="h-3 w-3 shrink-0 opacity-50" />}
           </div>
         ),
-        cell: ({ row }) => <div className="text-right font-mono text-[12px] text-slate-400">{row.original.d200}</div>
+        cell: ({ row }) => {
+          const val = parseNumeric(row.original.d200);
+          return (
+            <div className={`text-right font-mono text-[12px] font-bold ${val !== null ? (val >= 0 ? 'text-emerald-400' : 'text-rose-400') : 'text-slate-400'}`}>
+              {row.original.d200}
+            </div>
+          );
+        }
       },
       {
         accessorKey: "peg",
