@@ -8,13 +8,14 @@ const SHEET_IDS = {
 
 const GIDS = {
   positionsDetailed: "1134366200",
-  watchlistDetailed: "842475955",
+  watchlistDetailed: "695255397",
+  watchlistDashboard: "842475955",
   logosPt2: "1789448141",
   portfolio: "1871140253",
   performance: "721839254",
 } as const;
 
-export type DatasetType = "positions" | "watchlist" | "portfolio" | "performance" | "logosPt2";
+export type DatasetType = "positions" | "watchlist" | "watchlistDashboard" | "portfolio" | "performance" | "logosPt2";
 
 export interface SheetConfig {
   sheetId: string;
@@ -29,6 +30,10 @@ export const SHEET_CONFIGS: Record<DatasetType, SheetConfig> = {
   watchlist: {
     sheetId: SHEET_IDS.watchlistDetailed,
     gid: GIDS.watchlistDetailed,
+  },
+  watchlistDashboard: {
+    sheetId: SHEET_IDS.watchlistDetailed,
+    gid: GIDS.watchlistDashboard,
   },
   portfolio: {
     sheetId: SHEET_IDS.positionsDetailed,

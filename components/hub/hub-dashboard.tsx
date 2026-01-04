@@ -6,8 +6,8 @@ import { parseNumeric } from "@/lib/utils";
 import { PerformanceStats } from "./performance-stats";
 import { PortfolioAllocation } from "./portfolio-allocation";
 import { PerformanceAnalytics } from "./performance-analytics";
-import { PortfolioTable } from "./portfolio-table";
-import { WatchlistTable } from "./watchlist-table";
+import { PortfolioTanStackTable as PortfolioTable } from "./portfolio-tanstack-table";
+import { WatchlistTanStackTable as WatchlistTable } from "./watchlist-tanstack-table";
 import { UpcomingEvents } from "./upcoming-events";
 import { NewsFeed } from "./news-feed";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -33,7 +33,7 @@ export function HubDashboard() {
       // Load all data in parallel
       const [portfolioRows, watchlistRows, performanceRows, logosData, logosPt2Rows] = await Promise.all([
         fetchSheetData("portfolio"),
-        fetchSheetData("watchlist"),
+        fetchSheetData("watchlistDashboard"),
         fetchSheetData("performance"),
         fetchLogos(),
         fetchSheetData("logosPt2")
