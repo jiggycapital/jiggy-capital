@@ -75,3 +75,21 @@ body {
   background: hsl(222.2 84% 4.9%);
   color: hsl(210 40% 98%);
 }
+
+/* Kill all focus outlines and tap highlights for charts */
+.recharts-wrapper,
+.recharts-surface,
+.recharts-sector,
+.recharts-curve,
+.recharts-dot,
+svg {
+  outline: none !important;
+  user-select: none !important;
+  -webkit-tap-highlight-color: transparent !important;
+}
+
+.recharts-wrapper:focus,
+.recharts-surface:focus,
+svg:focus {
+  outline: none !important;
+}

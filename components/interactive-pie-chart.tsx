@@ -314,6 +314,7 @@ export function InteractivePieChart({ positionsData, logos, view, onViewChange }
           <PieChart 
             margin={{ top: 0, left: 50, right: 50, bottom: 0 }}
             style={{ outline: 'none' }}
+            tabIndex={-1}
           >
             <Pie
               {...({
@@ -337,7 +338,8 @@ export function InteractivePieChart({ positionsData, logos, view, onViewChange }
                 animationDuration: 400,
                 startAngle: 90,
                 endAngle: -270,
-                isAnimationActive: false // Disable animation to prevent layout jumps on tap
+                isAnimationActive: false,
+                tabIndex: -1 // Disable focus on pie slices
               } as any)}
             >
               {chartData.map((entry, index) => (
