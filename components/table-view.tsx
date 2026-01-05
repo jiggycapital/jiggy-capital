@@ -141,11 +141,20 @@ export function TableView() {
   }, [currentData]);
 
   const visibleColumns = useMemo(() => {
+    let cols: string[] = [];
     if (columnOrder.length === 0) {
-      const defaults = ['Ticker', 'Company', 'Market Cap', 'Change %', '2026e P/E', 'PEG'];
-      return allColumns.filter(c => defaults.some(d => c.toLowerCase().includes(d.toLowerCase()))).slice(0, 10);
+      const defaults = ['Ticker', 'Market Cap', 'Change %', '2026e P/E', 'PEG'];
+      cols = allColumns.filter(c => defaults.some(d => c.toLowerCase().includes(d.toLowerCase()))).slice(0, 10);
+    } else {
+      cols = columnOrder.filter(col => columnVisibility[col] !== false);
     }
-    return columnOrder.filter(col => columnVisibility[col] !== false);
+    
+    // Remove "Company" or "Name" from visible columns if "Ticker" or "Symbol" is present
+    const hasTicker = cols.some(c => c.toLowerCase() === 'ticker' || c.toLowerCase() === 'symbol');
+    if (hasTicker) {
+      return cols.filter(c => c.toLowerCase() !== 'company' && c.toLowerCase() !== 'name');
+    }
+    return cols;
   }, [columnOrder, columnVisibility, allColumns]);
 
   const columns = useMemo<ColumnDef<any>[]>(() => {
@@ -155,7 +164,7 @@ export function TableView() {
       
       return {
         accessorKey: key,
-        header: key,
+        header: isTicker ? "Company" : key,
         cell: ({ row }) => {
           const value = row.getValue(key);
           if (isTicker) {
@@ -195,7 +204,7 @@ export function TableView() {
             const a = String(valA || "").toLowerCase();
             const b = String(valB || "").toLowerCase();
             
-            // Try numeric sort first if they look like numbers but parseNumeric failed (e.g. string with extra chars)
+            // Try numeric sort first if they look like numbers but parseNumeric failed
             const numA = parseNumeric(a);
             const numB = parseNumeric(b);
             
@@ -338,26 +347,35 @@ export function TableView() {
               <TableHeader className="bg-[#0f172a] sticky top-0 z-10 shadow-xl">
                 {table.getHeaderGroups().map((headerGroup) => (
                   <TableRow key={headerGroup.id} className="border-slate-800 hover:bg-transparent">
-                    {headerGroup.headers.map((header) => (
-                      <TableHead key={header.id} className="text-slate-400 font-bold py-4">
-                        <div 
+                    {headerGroup.headers.map((header) => {
+                      const isCompany = header.column.columnDef.header === "Company";
+                      return (
+                        <TableHead 
+                          key={header.id} 
                           className={cn(
-                            "flex items-center gap-1 cursor-pointer select-none hover:text-slate-200 transition-colors",
-                            header.id !== 'ticker' && "justify-end"
+                            "text-slate-400 font-bold py-4",
+                            isCompany && "min-w-[160px]"
                           )}
-                          onClick={header.column.getToggleSortingHandler()}
                         >
-                          <span className="whitespace-normal leading-tight max-w-[100px] text-[11px] uppercase tracking-wider">
-                            {flexRender(header.column.columnDef.header, header.getContext())}
-                          </span>
-                          {header.column.getIsSorted() ? (
-                            header.column.getIsSorted() === "asc" ? <ArrowUp className="h-3 w-3" /> : <ArrowDown className="h-3 w-3" />
-                          ) : (
-                            <ArrowUpDown className="h-3 w-3 opacity-20" />
-                          )}
-                        </div>
-                      </TableHead>
-                    ))}
+                          <div 
+                            className={cn(
+                              "flex items-center gap-1 cursor-pointer select-none hover:text-slate-200 transition-colors",
+                              !isCompany && "justify-end text-right"
+                            )}
+                            onClick={header.column.getToggleSortingHandler()}
+                          >
+                            <span className="whitespace-normal leading-tight max-w-[100px] text-[10px] uppercase tracking-widest">
+                              {flexRender(header.column.columnDef.header, header.getContext())}
+                            </span>
+                            {header.column.getIsSorted() ? (
+                              header.column.getIsSorted() === "asc" ? <ArrowUp className="h-3 w-3" /> : <ArrowDown className="h-3 w-3" />
+                            ) : (
+                              <ArrowUpDown className="h-3 w-3 opacity-20" />
+                            )}
+                          </div>
+                        </TableHead>
+                      );
+                    })}
                   </TableRow>
                 ))}
               </TableHeader>
@@ -365,11 +383,14 @@ export function TableView() {
                 {table.getRowModel().rows?.length ? (
                   table.getRowModel().rows.map((row) => (
                     <TableRow key={row.id} className="border-slate-800 hover:bg-slate-800/30 transition-colors cursor-pointer" onClick={() => setSelectedStock(row.original)}>
-                      {row.getVisibleCells().map((cell) => (
-                        <TableCell key={cell.id} className={cn("py-3", cell.column.id !== 'ticker' && "text-right")}>
-                          {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                        </TableCell>
-                      ))}
+                      {row.getVisibleCells().map((cell) => {
+                        const isCompany = cell.column.columnDef.header === "Company";
+                        return (
+                          <TableCell key={cell.id} className={cn("py-3", !isCompany && "text-right")}>
+                            {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                          </TableCell>
+                        );
+                      })}
                     </TableRow>
                   ))
                 ) : (
