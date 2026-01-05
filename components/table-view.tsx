@@ -436,7 +436,11 @@ function formatCellValue(value: string, columnKey: string, isNumeric: boolean, c
     if (cat.includes("multiples") || col.includes("p/e") || col.includes("p/fcf") || col.includes("peg")) {
       return <span className="font-mono text-slate-300">{num.toFixed(1)}x</span>;
     }
-    if (col.includes("market cap") || col.includes("ev")) return <span className="font-mono text-slate-300">${num.toFixed(1)}B</span>;
+    if (col.includes("market cap") || col.includes("ev")) {
+      let normalizedNum = num;
+      if (normalizedNum > 10000) normalizedNum = normalizedNum / 1000;
+      return <span className="font-mono text-slate-300">{formatCurrencyBillions(normalizedNum)}</span>;
+    }
     if (col.includes("price")) return <span className="font-mono text-slate-300">{formatCurrency(num)}</span>;
     return <span className="font-mono text-slate-300">{formatNumber(num)}</span>;
   }

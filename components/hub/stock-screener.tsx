@@ -280,7 +280,9 @@ export function StockScreener({
             return <div className="font-mono text-slate-300">{numVal.toFixed(1)}x</div>;
           }
           if (key.toLowerCase().includes("market cap") || key.toLowerCase().includes("ev")) {
-            return <div className="font-mono text-slate-300">${numVal.toFixed(1)}B</div>;
+            let normalizedNum = numVal;
+            if (normalizedNum > 10000) normalizedNum = normalizedNum / 1000;
+            return <div className="font-mono text-slate-300">{formatCurrencyBillions(normalizedNum)}</div>;
           }
           if (key.toLowerCase().includes("price")) return <div className="font-mono text-slate-300">{formatCurrency(numVal)}</div>;
           return <div className="font-mono text-slate-300">{val}</div>;

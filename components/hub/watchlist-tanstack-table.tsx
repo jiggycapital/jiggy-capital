@@ -17,7 +17,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { parseNumeric, formatCurrency, formatPercentage } from "@/lib/utils";
+import { parseNumeric, formatCurrency, formatPercentage, formatCurrencyBillions } from "@/lib/utils";
 import { ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
 
 interface WatchlistTanStackTableProps {
@@ -48,6 +48,7 @@ export function WatchlistTanStackTable({ watchlistData, logos }: WatchlistTanSta
       
       const mCapRaw = p["Market Cap"] || "";
       let mCapNum = parseNumeric(mCapRaw);
+      if (mCapNum && mCapNum > 10000) mCapNum = mCapNum / 1000;
       
       return {
         ticker,
@@ -138,7 +139,7 @@ export function WatchlistTanStackTable({ watchlistData, logos }: WatchlistTanSta
           if (!marketCap) return null;
           return (
             <div className="text-right font-mono text-[13px] text-slate-400">
-              ${(marketCap as number).toFixed(1)}B
+              {formatCurrencyBillions(marketCap)}
             </div>
           );
         }

@@ -17,7 +17,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { parseNumeric, formatCurrency, formatPercentage } from "@/lib/utils";
+import { parseNumeric, formatCurrency, formatPercentage, formatCurrencyBillions } from "@/lib/utils";
 import { ArrowUpDown, ArrowUp, ArrowDown, Wallet } from "lucide-react";
 
 interface PortfolioTanStackTableProps {
@@ -78,7 +78,8 @@ export function PortfolioTanStackTable({ positionsData, logos }: PortfolioTanSta
         
         const mCapRaw = p["Market Cap"] || "";
         let mCapNum = parseNumeric(mCapRaw);
-
+        if (mCapNum && mCapNum > 10000) mCapNum = mCapNum / 1000;
+        
         const revCagr = isCash ? "" : (p[p._columnAOHeader] || p["25-27e Rev CAGR"] || p["2024 - 27e Rev CAGR"] || p["Rev CAGR"] || "");
         const pe = isCash ? "" : (p["2026e P/E"] || p["2026 P/E"] || p["P/E"] || "");
         const fcf = isCash ? "" : (p["P/2026e FCF"] || p["P/2026 FCF"] || p["P/FCF"] || "");
@@ -193,7 +194,7 @@ export function PortfolioTanStackTable({ positionsData, logos }: PortfolioTanSta
           if (isCash || !marketCap) return null;
           return (
             <div className="text-right font-mono text-[13px] text-slate-300">
-              ${(marketCap as number).toFixed(1)}B
+              {formatCurrencyBillions(marketCap)}
             </div>
           );
         },

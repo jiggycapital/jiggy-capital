@@ -110,6 +110,11 @@ export function ChartView() {
       yAxisColumns.forEach(col => {
         let val = parseNumeric(String(row[col] || ""));
         
+        // Normalize Market Cap and EV to Billions if they are in Millions
+        if (val !== null && (col.toLowerCase().includes("market cap") || col.toLowerCase().includes("ev"))) {
+          if (val > 10000) val = val / 1000;
+        }
+        
         dataPoint[col] = val !== null ? val : 0;
       });
       return dataPoint;

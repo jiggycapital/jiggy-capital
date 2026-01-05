@@ -24,7 +24,14 @@ export function formatCurrencyBillions(value: number | string | null | undefined
   if (isNaN(num)) return "-";
   // Format zero as $0.0B, not as "-"
   if (num === 0) return "$0.0B";
-  return `$${num.toFixed(1)}B`;
+  
+  // Use toLocaleString for commas
+  const formatted = num.toLocaleString(undefined, {
+    minimumFractionDigits: 1,
+    maximumFractionDigits: 1,
+  });
+  
+  return `$${formatted}B`;
 }
 
 // Format as multiple with "x" suffix (e.g., "28.5x")
