@@ -35,14 +35,9 @@ export function Sidebar() {
       icon: BarChart3,
     },
     {
-      title: "DR Table",
-      href: "/dr-table",
+      title: "Deep Research",
+      href: "/deep-research",
       icon: Database,
-    },
-    {
-      title: "DR Chart",
-      href: "/dr-chart",
-      icon: TrendingUp,
     },
   ];
 
