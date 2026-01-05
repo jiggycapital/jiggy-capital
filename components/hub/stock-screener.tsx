@@ -542,7 +542,13 @@ export function StockScreener({
                   {table.getHeaderGroups().map((headerGroup) => (
                     <TableRow key={headerGroup.id} className="border-slate-800 hover:bg-transparent">
                       {headerGroup.headers.map((header) => (
-                        <TableHead key={header.id} className="text-slate-400 font-bold py-4">
+                        <TableHead 
+                          key={header.id} 
+                          className={cn(
+                            "text-slate-400 font-bold py-4",
+                            header.id === 'ticker' && "sticky left-0 z-30 bg-slate-800 border-r border-slate-800/50 min-w-[120px] max-w-[150px] md:min-w-[180px]"
+                          )}
+                        >
                           <div 
                             className={cn(
                               "flex items-center gap-1 cursor-pointer select-none hover:text-slate-200 transition-colors",
@@ -569,7 +575,14 @@ export function StockScreener({
                     table.getRowModel().rows.map((row) => (
                       <TableRow key={row.id} className="border-slate-800 hover:bg-slate-800/30 transition-colors group">
                         {row.getVisibleCells().map((cell) => (
-                          <TableCell key={cell.id} className={cn("py-3", cell.column.id !== 'ticker' && "text-right")}>
+                          <TableCell 
+                            key={cell.id} 
+                            className={cn(
+                              "py-3", 
+                              cell.column.id !== 'ticker' && "text-right",
+                              cell.column.id === 'ticker' && "sticky left-0 bg-slate-900 z-10 border-r border-slate-800/50 min-w-[120px] max-w-[150px] md:min-w-[180px]"
+                            )}
+                          >
                             {flexRender(cell.column.columnDef.cell, cell.getContext())}
                           </TableCell>
                         ))}

@@ -456,7 +456,9 @@ export function PortfolioTanStackTable({ positionsData, logos }: PortfolioTanSta
                   <TableHead 
                     key={header.id} 
                     className={`text-slate-400 font-bold py-4 ${
-                      header.id === 'ticker' ? 'sticky left-0 z-30 bg-slate-800 border-r border-slate-800/50' : 'bg-slate-800/50'
+                      header.id === 'ticker' 
+                        ? 'sticky left-0 z-30 bg-slate-800 border-r border-slate-800/50 min-w-[120px] max-w-[150px] md:min-w-[180px]' 
+                        : 'bg-slate-800/50'
                     }`}
                   >
                     {header.isPlaceholder
@@ -482,7 +484,9 @@ export function PortfolioTanStackTable({ positionsData, logos }: PortfolioTanSta
                     <TableCell 
                       key={cell.id} 
                       className={`py-3 ${
-                        cell.column.id === 'ticker' ? 'sticky left-0 bg-slate-900 z-10 border-r border-slate-800/50' : ''
+                        cell.column.id === 'ticker' 
+                          ? 'sticky left-0 bg-slate-900 z-10 border-r border-slate-800/50 min-w-[120px] max-w-[150px] md:min-w-[180px]' 
+                          : ''
                       }`}
                     >
                       {flexRender(cell.column.columnDef.cell, cell.getContext())}

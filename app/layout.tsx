@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import { JetBrains_Mono } from "next/font/google";
 import "./globals.css";
-import { Sidebar } from "@/components/sidebar";
+import { SidebarProvider } from "@/components/sidebar-provider";
+import { MainLayout } from "@/components/main-layout";
 import { Analytics } from "@vercel/analytics/next";
 
 const jetbrainsMono = JetBrains_Mono({
@@ -23,8 +24,9 @@ export default function RootLayout({
   return (
     <html lang="en" className="dark">
       <body className={`${jetbrainsMono.variable} antialiased terminal-bg`}>
-        <Sidebar />
-        <main className="ml-0 md:ml-64 min-h-screen transition-all duration-300">{children}</main>
+        <SidebarProvider>
+          <MainLayout>{children}</MainLayout>
+        </SidebarProvider>
         <Analytics />
       </body>
     </html>

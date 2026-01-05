@@ -346,7 +346,7 @@ export function TableView() {
                           key={header.id} 
                           className={cn(
                             "text-slate-400 font-bold py-4",
-                            isCompany && "min-w-[160px]"
+                            isCompany && "min-w-[120px] max-w-[150px] md:min-w-[180px] sticky left-0 z-30 bg-slate-800 border-r border-slate-800/50"
                           )}
                         >
                           <div 
@@ -378,7 +378,14 @@ export function TableView() {
                       {row.getVisibleCells().map((cell) => {
                         const isCompany = cell.column.columnDef.header === "Company";
                         return (
-                          <TableCell key={cell.id} className={cn("py-3", !isCompany && "text-right")}>
+                          <TableCell 
+                            key={cell.id} 
+                            className={cn(
+                              "py-3", 
+                              !isCompany && "text-right",
+                              isCompany && "sticky left-0 bg-slate-900 z-10 border-r border-slate-800/50 min-w-[120px] max-w-[150px] md:min-w-[180px]"
+                            )}
+                          >
                             {flexRender(cell.column.columnDef.cell, cell.getContext())}
                           </TableCell>
                         );
