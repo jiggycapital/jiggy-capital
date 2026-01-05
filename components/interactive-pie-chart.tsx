@@ -309,9 +309,12 @@ export function InteractivePieChart({ positionsData, logos, view, onViewChange }
       </div>
 
       {/* Chart Container */}
-      <div className="w-full h-[500px] md:h-[800px] -mt-8 flex items-center justify-center min-h-0 min-w-0">
+      <div className="w-full h-[500px] md:h-[800px] -mt-8 flex items-center justify-center min-h-0 min-w-0 outline-none select-none touch-none" style={{ WebkitTapHighlightColor: 'transparent' }}>
         <ResponsiveContainer width="100%" height="100%" minHeight={0}>
-          <PieChart margin={{ top: 0, left: 50, right: 50, bottom: 0 }}>
+          <PieChart 
+            margin={{ top: 0, left: 50, right: 50, bottom: 0 }}
+            style={{ outline: 'none' }}
+          >
             <Pie
               {...({
                 activeIndex,
@@ -333,14 +336,16 @@ export function InteractivePieChart({ positionsData, logos, view, onViewChange }
                 animationBegin: 0,
                 animationDuration: 400,
                 startAngle: 90,
-                endAngle: -270
+                endAngle: -270,
+                isAnimationActive: false // Disable animation to prevent layout jumps on tap
               } as any)}
             >
               {chartData.map((entry, index) => (
                 <Cell 
                   key={`cell-${index}`} 
                   fill={view === "sector" ? (SECTOR_COLORS[entry.id] || COLORS[index % COLORS.length]) : COLORS[index % COLORS.length]} 
-                  className="transition-all duration-200 cursor-pointer focus:outline-none"
+                  className="transition-all duration-200 cursor-pointer outline-none border-none focus:ring-0 focus:outline-none active:outline-none"
+                  style={{ outline: 'none' }}
                 />
               ))}
             </Pie>
