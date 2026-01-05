@@ -160,16 +160,24 @@ export function TableView() {
           const value = row.getValue(key);
           if (isTicker) {
             const ticker = String(value).toUpperCase();
+            const name = row.original.Name || row.original.Company || "";
             return (
               <div className="flex items-center gap-2">
-                <div className="w-6 h-6 rounded bg-slate-800 flex items-center justify-center shrink-0 border border-slate-700">
+                <div className="w-7 h-7 rounded bg-slate-800 flex items-center justify-center shrink-0 border border-slate-700 overflow-hidden">
                   {logos[ticker] ? (
-                    <img src={logos[ticker]} alt="" className="w-4 h-4 object-contain" />
+                    <img src={logos[ticker]} alt="" className="w-5 h-5 object-contain" />
                   ) : (
-                    <span className="text-[8px] font-bold text-slate-500">{ticker.substring(0, 3)}</span>
+                    <span className="text-[9px] font-bold text-slate-500">{ticker.substring(0, 3)}</span>
                   )}
                 </div>
-                <span className="font-bold text-slate-100">{ticker}</span>
+                <div className="flex flex-col min-w-0">
+                  <span className="text-[13px] font-bold text-slate-100 leading-tight truncate">{ticker}</span>
+                  {name && (
+                    <span className="text-[9px] text-slate-500 truncate uppercase tracking-tighter leading-tight">
+                      {name}
+                    </span>
+                  )}
+                </div>
               </div>
             );
           }
@@ -180,8 +188,26 @@ export function TableView() {
           return formatCellValue(isMarketCap && numVal !== null ? `${numVal}` : String(value || ""), key, numVal !== null, columnCategories[key]);
         },
         sortingFn: (rowA, rowB) => {
-          let a = parseNumeric(String(rowA.getValue(key) || "")) ?? -Infinity;
-          let b = parseNumeric(String(rowB.getValue(key) || "")) ?? -Infinity;
+          const valA = rowA.getValue(key);
+          const valB = rowB.getValue(key);
+          
+          if (isTicker || typeof valA === 'string') {
+            const a = String(valA || "").toLowerCase();
+            const b = String(valB || "").toLowerCase();
+            
+            // Try numeric sort first if they look like numbers but parseNumeric failed (e.g. string with extra chars)
+            const numA = parseNumeric(a);
+            const numB = parseNumeric(b);
+            
+            if (numA !== null && numB !== null) {
+              return numA - numB;
+            }
+            
+            return a.localeCompare(b);
+          }
+
+          let a = parseNumeric(String(valA || "")) ?? -Infinity;
+          let b = parseNumeric(String(valB || "")) ?? -Infinity;
           
           if (isMarketCap) {
             if (a > 5000) a = a / 1000;
