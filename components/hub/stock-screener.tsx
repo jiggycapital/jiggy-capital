@@ -88,6 +88,7 @@ interface FavoriteScreen {
   filters: ColumnFiltersState;
   sorting: SortingState;
   activeFilters: ActiveFilter[];
+  tableColumns?: string[];
 }
 
 export function StockScreener({ 
@@ -102,11 +103,13 @@ export function StockScreener({
     { key: "25-27e Rev CAGR" },
     { key: "Market Cap" }
   ]);
+  const [tableColumns, setTableColumns] = useState<string[]>(["Market Cap", "2026e P/E", "25-27e Rev CAGR", "PEG"]);
   const [sorting, setSorting] = useState<SortingState>([{ id: 'Market Cap', desc: true }]);
   const [favorites, setFavorites] = useState<FavoriteScreen[]>([]);
   const [newScreenName, setNewScreenName] = useState("");
   const [isSaving, setIsSaving] = useState(false);
   const [showCriteriaPicker, setShowCriteriaPicker] = useState(false);
+  const [pickerMode, setPickerMode] = useState<'filter' | 'column'>('filter');
   const [globalTickerSearch, setGlobalTickerSearch] = useState("");
   const [selectedSector, setSelectedSector] = useState<string>("All Sectors");
 
@@ -133,6 +136,7 @@ export function StockScreener({
       filters: [],
       sorting: sorting,
       activeFilters: activeFilters,
+      tableColumns: tableColumns,
     };
     saveFavorites([...favorites, newScreen]);
     setNewScreenName("");
@@ -147,6 +151,7 @@ export function StockScreener({
   const handleApplyScreen = (screen: FavoriteScreen) => {
     setActiveFilters(screen.activeFilters);
     setSorting(screen.sorting);
+    if (screen.tableColumns) setTableColumns(screen.tableColumns);
   };
 
   const criteriaCategories = useMemo(() => {
@@ -267,39 +272,39 @@ export function StockScreener({
       },
     ];
 
-    const dynamic = activeFilters.map(f => ({
-      accessorKey: f.key,
-      header: f.key,
+    const dynamic = tableColumns.map(key => ({
+      accessorKey: key,
+      header: key,
       cell: ({ row }: any) => {
-        const val = row.original[f.key];
-        const numVal = row.original[`${f.key}_num`];
-        const cat = criteriaCategories[f.key]?.toLowerCase() || "";
+        const val = row.original[key];
+        const numVal = row.original[`${key}_num`];
+        const cat = criteriaCategories[key]?.toLowerCase() || "";
         
         if (numVal !== null && numVal !== undefined) {
-          if (cat.includes("price action") || cat.includes("growth") || f.key.includes("%") || f.key.includes("Change")) {
+          if (cat.includes("price action") || cat.includes("growth") || key.includes("%") || key.includes("Change")) {
             return <div className={cn("font-mono font-bold", numVal >= 0 ? "text-emerald-400" : "text-rose-400")}>{formatPercentage(numVal)}</div>;
           }
-          if (cat.includes("multiples") || f.key.includes("P/E") || f.key.includes("P/FCF") || f.key.includes("PEG")) {
+          if (cat.includes("multiples") || key.includes("P/E") || key.includes("P/FCF") || key.includes("PEG")) {
             return <div className="font-mono text-slate-300">{numVal.toFixed(1)}x</div>;
           }
-          if (f.key.toLowerCase().includes("market cap") || f.key.toLowerCase().includes("ev")) {
+          if (key.toLowerCase().includes("market cap") || key.toLowerCase().includes("ev")) {
             return <div className="font-mono text-slate-300">${numVal.toFixed(1)}B</div>;
           }
-          if (f.key.toLowerCase().includes("price")) return <div className="font-mono text-slate-300">{formatCurrency(numVal)}</div>;
+          if (key.toLowerCase().includes("price")) return <div className="font-mono text-slate-300">{formatCurrency(numVal)}</div>;
           return <div className="font-mono text-slate-300">{val}</div>;
         }
-        return <div className="text-slate-400 text-xs truncate max-w-[120px]">{val || "-"}</div>;
+        return <div className="text-slate-400 text-xs truncate max-w-[120px] font-mono">{val || "-"}</div>;
       },
       sortingFn: (rowA: any, rowB: any) => {
-        const a = rowA.original[`${f.key}_num`] ?? (typeof rowA.original[f.key] === 'string' ? rowA.original[f.key] : -Infinity);
-        const b = rowB.original[`${f.key}_num`] ?? (typeof rowB.original[f.key] === 'string' ? rowB.original[f.key] : -Infinity);
+        const a = rowA.original[`${key}_num`] ?? (typeof rowA.original[key] === 'string' ? rowA.original[key] : -Infinity);
+        const b = rowB.original[`${key}_num`] ?? (typeof rowB.original[key] === 'string' ? rowB.original[key] : -Infinity);
         if (typeof a === 'number' && typeof b === 'number') return a - b;
         return String(a).localeCompare(String(b));
       },
     }));
 
     return [...base, ...dynamic];
-  }, [logos, activeFilters, criteriaCategories]);
+  }, [logos, tableColumns, criteriaCategories]);
 
   const table = useReactTable({
     data: filteredData,
@@ -319,12 +324,20 @@ export function StockScreener({
   };
 
   const handleApplyCriteria = (selected: string[]) => {
-    // Keep existing filters if they are still selected, add new ones
-    setActiveFilters(prev => {
-      const existing = prev.filter(f => selected.includes(f.key));
-      const newKeys = selected.filter(s => !prev.find(f => f.key === s));
-      return [...existing, ...newKeys.map(k => ({ key: k }))];
-    });
+    if (pickerMode === 'filter') {
+      setActiveFilters(prev => {
+        const existing = prev.filter(f => selected.includes(f.key));
+        const newKeys = selected.filter(s => !prev.find(f => f.key === s));
+        return [...existing, ...newKeys.map(k => ({ key: k }))];
+      });
+      // Also add any new filters to the table columns automatically for visibility
+      setTableColumns(prev => {
+        const newCols = selected.filter(s => !prev.includes(s));
+        return [...prev, ...newCols];
+      });
+    } else {
+      setTableColumns(selected);
+    }
     setShowCriteriaPicker(false);
   };
 
@@ -474,44 +487,59 @@ export function StockScreener({
                 })}
               </div>
 
-              <Button 
-                variant="ghost" 
-                className="w-full py-6 text-blue-400 hover:bg-blue-400/5 hover:text-blue-300 font-bold gap-2 border-t border-slate-800 rounded-none"
-                onClick={() => setShowCriteriaPicker(true)}
-              >
-                <Plus className="h-4 w-4" />
-                Add Filter Criteria
-              </Button>
-            </div>
-          </div>
-          
-          <div className="flex justify-end">
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              className="text-[10px] font-bold text-slate-500 hover:text-rose-400 uppercase tracking-widest gap-2"
-              onClick={() => {
-                setActiveFilters([]);
-                setSelectedSector("All Sectors");
-                setGlobalTickerSearch("");
-              }}
-            >
-              <Trash2 className="h-3 w-3" />
-              Reset All Filters
-            </Button>
-          </div>
+          <Button 
+            variant="ghost" 
+            className="w-full py-6 text-blue-400 hover:bg-blue-400/5 hover:text-blue-300 font-bold gap-2 border-t border-slate-800 rounded-none"
+            onClick={() => {
+              setPickerMode('filter');
+              setShowCriteriaPicker(true);
+            }}
+          >
+            <Plus className="h-4 w-4" />
+            Add Filter Criteria
+          </Button>
         </div>
+      </div>
+      
+      <div className="flex justify-end">
+        <Button 
+          variant="ghost" 
+          size="sm" 
+          className="text-[10px] font-bold text-slate-500 hover:text-rose-400 uppercase tracking-widest gap-2"
+          onClick={() => {
+            setActiveFilters([]);
+            setSelectedSector("All Sectors");
+            setGlobalTickerSearch("");
+          }}
+        >
+          <Trash2 className="h-3 w-3" />
+          Reset All Filters
+        </Button>
+      </div>
+    </div>
 
-        {/* Results Section */}
-        <div className="lg:col-span-8 space-y-4">
-          <div className="flex items-center justify-between px-2">
-            <div className="flex items-center gap-4">
-              <h2 className="text-sm font-bold text-slate-400 uppercase tracking-widest italic">Screener Results</h2>
-              <Badge variant="outline" className="bg-blue-600/10 border-blue-600/20 text-blue-400 font-mono text-[10px]">
-                {filteredData.length} Matches
-              </Badge>
-            </div>
-          </div>
+    {/* Results Section */}
+    <div className="lg:col-span-8 space-y-4">
+      <div className="flex items-center justify-between px-2">
+        <div className="flex items-center gap-4">
+          <h2 className="text-sm font-bold text-slate-400 uppercase tracking-widest italic">Screener Results</h2>
+          <Badge variant="outline" className="bg-blue-600/10 border-blue-600/20 text-blue-400 font-mono text-[10px]">
+            {filteredData.length} Matches
+          </Badge>
+        </div>
+        <Button 
+          variant="ghost" 
+          size="sm"
+          className="text-[10px] font-bold text-blue-400 hover:bg-blue-400/10 uppercase tracking-widest gap-2"
+          onClick={() => {
+            setPickerMode('column');
+            setShowCriteriaPicker(true);
+          }}
+        >
+          <Settings2 className="h-3.5 w-3.5" />
+          Modify Columns
+        </Button>
+      </div>
 
           <div className="rounded-2xl border border-slate-800 bg-[#0f172a] overflow-hidden shadow-2xl">
             <div className="overflow-x-auto relative">
@@ -595,9 +623,9 @@ export function StockScreener({
 
       {showCriteriaPicker && (
         <CriteriaPicker
-          title="Add Filter Criteria"
+          title={pickerMode === 'filter' ? "Add Filter Criteria" : "Modify Table Columns"}
           allCriteria={allAvailableCriteria}
-          selectedCriteria={activeFilters.map(f => f.key)}
+          selectedCriteria={pickerMode === 'filter' ? activeFilters.map(f => f.key) : tableColumns}
           criteriaCategories={criteriaCategories}
           onClose={() => setShowCriteriaPicker(false)}
           onSave={handleApplyCriteria}
