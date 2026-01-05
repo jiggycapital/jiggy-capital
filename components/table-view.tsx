@@ -191,9 +191,6 @@ export function TableView() {
             );
           }
           let numVal = parseNumeric(String(value || ""));
-          if (isMarketCap && numVal !== null && numVal > 5000) {
-            numVal = numVal / 1000;
-          }
           return formatCellValue(isMarketCap && numVal !== null ? `${numVal}` : String(value || ""), key, numVal !== null, columnCategories[key]);
         },
         sortingFn: (rowA, rowB) => {
@@ -217,11 +214,6 @@ export function TableView() {
 
           let a = parseNumeric(String(valA || "")) ?? -Infinity;
           let b = parseNumeric(String(valB || "")) ?? -Infinity;
-          
-          if (isMarketCap) {
-            if (a > 5000) a = a / 1000;
-            if (b > 5000) b = b / 1000;
-          }
           
           return a - b;
         },

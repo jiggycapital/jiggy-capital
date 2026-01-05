@@ -201,14 +201,6 @@ export function StockScreener({
         row[key] = source[key];
         let numVal = parseNumeric(source[key]);
         
-        // Normalize Market Cap to Billions if it's in Millions
-        // Assuming if it's > 5000 and the column is Market Cap, it's likely Millions
-        if (numVal !== null && (key.toLowerCase().includes("market cap") || key.toLowerCase().includes("ev"))) {
-          if (numVal > 5000) {
-            numVal = numVal / 1000;
-          }
-        }
-        
         if (numVal !== null) row[`${key}_num`] = numVal;
       });
 

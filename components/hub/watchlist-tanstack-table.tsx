@@ -48,9 +48,6 @@ export function WatchlistTanStackTable({ watchlistData, logos }: WatchlistTanSta
       
       const mCapRaw = p["Market Cap"] || "";
       let mCapNum = parseNumeric(mCapRaw);
-      if (mCapNum !== null && mCapNum > 5000) {
-        mCapNum = mCapNum / 1000;
-      }
       
       return {
         ticker,

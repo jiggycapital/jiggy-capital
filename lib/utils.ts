@@ -23,7 +23,8 @@ export function formatCurrencyBillions(value: number | string | null | undefined
   const num = typeof value === "string" ? parseFloat(value) : value;
   if (isNaN(num)) return "-";
   // Format zero as $0.0B, not as "-"
-  return `$${(num / 1e9).toFixed(1)}B`;
+  if (num === 0) return "$0.0B";
+  return `$${num.toFixed(1)}B`;
 }
 
 // Format as multiple with "x" suffix (e.g., "28.5x")
