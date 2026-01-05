@@ -10,7 +10,7 @@ import {
   Tooltip
 } from "recharts";
 import { Button } from "@/components/ui/button";
-import { parseNumeric } from "@/lib/utils";
+import { parseNumeric, cn } from "@/lib/utils";
 
 interface InteractivePieChartProps {
   positionsData: any[];
