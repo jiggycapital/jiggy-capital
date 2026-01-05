@@ -382,16 +382,3 @@ function formatName(name: string): string {
   }).join(' ');
   return formatted.trim();
 }
-  );
-}
-
-function formatName(name: string): string {
-  const acronyms = ['EBITDA', 'FCF', 'GP', 'PE', 'P/E', 'EV', 'ROE', 'ROA', 'ROIC', 'EPS', 'DPS', 'CAGR', 'YTD', 'TTM', 'LTM', 'NOPAT', 'WACC', 'DCF', 'NPV', 'IRR'];
-  let formatted = name.replace(/_/g, " ").replace(/\s*\/\s*/g, "/");
-  formatted = formatted.split(' ').map(word => {
-    const upper = word.toUpperCase();
-    if (acronyms.includes(upper)) return upper;
-    return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
-  }).join(' ');
-  return formatted.trim();
-}
