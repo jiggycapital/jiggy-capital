@@ -142,11 +142,8 @@ export function CriteriaPicker({
   return (
     <Dialog open={true} onOpenChange={onClose}>
       <DialogContent className="max-w-[1000px] h-[80vh] bg-[#0f172a] border-slate-800 p-0 flex flex-col overflow-hidden gap-0">
-        <DialogHeader className="p-6 border-b border-slate-800 flex flex-row items-center justify-between shrink-0">
+        <DialogHeader className="p-6 border-b border-slate-800 shrink-0">
           <DialogTitle className="text-xl font-bold text-slate-100">{title}</DialogTitle>
-          <Button variant="ghost" size="icon" onClick={onClose} className="text-slate-400 hover:text-slate-100">
-            <X className="h-5 w-5" />
-          </Button>
         </DialogHeader>
 
         <div className="flex flex-1 min-h-0">
