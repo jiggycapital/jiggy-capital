@@ -289,12 +289,15 @@ export function InteractivePieChart({ positionsData, logos, view, onViewChange }
   return (
     <div className="relative w-full">
       {/* Toggle Buttons */}
-      <div className="flex gap-2 mb-4 justify-center">
+      <div className="flex gap-2 mb-4 justify-center relative z-20">
         <Button
           variant={view === "company" ? "default" : "outline"}
           size="sm"
           onClick={() => onViewChange("company")}
-          className={view === "company" ? "bg-blue-600 hover:bg-blue-700" : "border-slate-700 text-slate-400"}
+          className={cn(
+            "relative",
+            view === "company" ? "bg-blue-600 hover:bg-blue-700" : "border-slate-700 text-slate-400"
+          )}
         >
           Holdings
         </Button>
@@ -302,14 +305,17 @@ export function InteractivePieChart({ positionsData, logos, view, onViewChange }
           variant={view === "sector" ? "default" : "outline"}
           size="sm"
           onClick={() => onViewChange("sector")}
-          className={view === "sector" ? "bg-blue-600 hover:bg-blue-700" : "border-slate-700 text-slate-400"}
+          className={cn(
+            "relative",
+            view === "sector" ? "bg-blue-600 hover:bg-blue-700" : "border-slate-700 text-slate-400"
+          )}
         >
           Sector
         </Button>
       </div>
 
       {/* Chart Container */}
-      <div className="w-full h-[500px] md:h-[800px] -mt-8 flex items-center justify-center min-h-0 min-w-0 outline-none select-none touch-none" style={{ WebkitTapHighlightColor: 'transparent' }}>
+      <div className="w-full h-[500px] md:h-[800px] flex items-center justify-center min-h-0 min-w-0 outline-none select-none touch-none relative z-10" style={{ WebkitTapHighlightColor: 'transparent' }}>
         <ResponsiveContainer width="100%" height="100%" minHeight={0}>
           <PieChart 
             margin={{ top: 0, left: 50, right: 50, bottom: 0 }}
