@@ -34,11 +34,11 @@ export function HomeDashboard() {
         fetchSheetData("portfolio"),
         fetchSheetData("watchlist")
       ]);
-      
+
       const portfolioData = parseSheetData(portfolioRows);
       const watchlistDataParsed = parseSheetData(watchlistRows);
       setWatchlistData(watchlistDataParsed);
-      
+
       // Find headers for specific columns (V=21, AO=40, AT=45) from raw rows
       const headerRowIndex = portfolioRows.findIndex((row, idx) => {
         const firstCell = (row[0] || '').toLowerCase();
@@ -53,7 +53,7 @@ export function HomeDashboard() {
       const columnAOHeader = headerRow.length > 40 ? headerRow[40]?.trim().replace(/^"|"$/g, '') : null;
       const columnATHeader = headerRow.length > 45 ? headerRow[45]?.trim().replace(/^"|"$/g, '') : null;
       const columnSHeader = headerRow.length > 18 ? headerRow[18]?.trim().replace(/^"|"$/g, '') : null;
-      
+
       // Store column headers for later use
       const dataWithColumns = portfolioData.map(row => ({
         ...row,
@@ -66,31 +66,31 @@ export function HomeDashboard() {
         _columnATHeader: columnATHeader,
         _columnSHeader: columnSHeader,
       }));
-      
+
       setPositionsData(dataWithColumns);
-      
+
       // Load logos and IR links
       const { logos: logosData, irLinks: irLinksData } = await fetchLogos();
       setLogos(logosData);
       setIrLinks(irLinksData);
-      
+
       // Load performance data
       // YTD Performance is in cell B3 (row 2, column 1 in 0-indexed)
       const performanceRows = await fetchSheetData("performance");
       const performanceParsed = parseSheetData(performanceRows);
-      
+
       // Get YTD Performance from cell B3 (row 2, column 1)
       let ytdPerformanceValue = null;
       if (performanceRows.length > 2 && performanceRows[2].length > 1) {
         ytdPerformanceValue = performanceRows[2][1]?.trim().replace(/^"|"$/g, '') || null;
       }
-      
+
       // Get Lifetime CAGR from cell B4 (row 3, column 1)
       let lifetimeCagrValue = null;
       if (performanceRows.length > 3 && performanceRows[3].length > 1) {
         lifetimeCagrValue = performanceRows[3][1]?.trim().replace(/^"|"$/g, '') || null;
       }
-      
+
       // Get YTD Benchmark data from cells A5-B7 (rows 4-6, 0-indexed)
       const ytdBenchmarks: Array<{ name: string; value: string }> = [];
       for (let i = 4; i <= 6; i++) {
@@ -102,7 +102,7 @@ export function HomeDashboard() {
           }
         }
       }
-      
+
       setPerformanceData({
         parsed: performanceParsed,
         ytdPerformance: ytdPerformanceValue,
@@ -139,23 +139,23 @@ export function HomeDashboard() {
   const portfolioMetrics = useMemo(() => {
     // Get performance metrics from performance sheet
     const performanceParsed = performanceData?.parsed || [];
-    const dailyPerformance = performanceParsed.find((row: any) => row["Day Performance"] || row["Daily Performance"])?.["Day Performance"] || 
-                             performanceParsed.find((row: any) => row["Daily Performance"])?.["Daily Performance"] ||
-                             performanceParsed[0]?.["Day Performance"] || 
-                             performanceParsed[0]?.["Daily Performance"] || null;
-    
+    const dailyPerformance = performanceParsed.find((row: any) => row["Day Performance"] || row["Daily Performance"])?.["Day Performance"] ||
+      performanceParsed.find((row: any) => row["Daily Performance"])?.["Daily Performance"] ||
+      performanceParsed[0]?.["Day Performance"] ||
+      performanceParsed[0]?.["Daily Performance"] || null;
+
     const ytdPerformance = performanceData?.ytdPerformance || null;
     const ytdPerformanceNum = ytdPerformance ? parseNumeric(ytdPerformance.toString().replace(/[+%]/g, '')) : null;
-    
+
     const lifetimeCagr = performanceData?.lifetimeCagr || null;
-    
+
     // Get benchmark comparisons from parsed performance data
     let benchmarkComparisons = {
       qqq: null as string | null,
       igv: null as string | null,
       smh: null as string | null,
     };
-    
+
     // Search through all rows for benchmark data
     for (const row of performanceParsed) {
       if (!benchmarkComparisons.qqq && (row["Performance vs QQQ"] || row["vs QQQ"])) {
@@ -168,7 +168,7 @@ export function HomeDashboard() {
         benchmarkComparisons.smh = row["Performance vs SMH"] || row["vs SMH"] || null;
       }
     }
-    
+
     // Also check raw performance rows for benchmarks (in case they're in a different format)
     if (performanceData?.rawRows) {
       const rawRows = performanceData.rawRows;
@@ -176,13 +176,13 @@ export function HomeDashboard() {
         const firstCell = (row[0] || '').toLowerCase();
         return firstCell.includes('performance') || firstCell.includes('qqq') || firstCell.includes('igv') || firstCell.includes('smh');
       });
-      
+
       if (headerRowIndex >= 0) {
         const headers = rawRows[headerRowIndex].map((h: string) => h.trim().replace(/^"|"$/g, ''));
         const qqqIndex = headers.findIndex((h: string) => h.includes("QQQ") || h.includes("qqq"));
         const igvIndex = headers.findIndex((h: string) => h.includes("IGV") || h.includes("igv"));
         const smhIndex = headers.findIndex((h: string) => h.includes("SMH") || h.includes("smh"));
-        
+
         if (qqqIndex >= 0 && rawRows.length > headerRowIndex + 1) {
           const value = rawRows[headerRowIndex + 1]?.[qqqIndex]?.trim().replace(/^"|"$/g, '');
           if (value && !benchmarkComparisons.qqq) benchmarkComparisons.qqq = value;
@@ -346,8 +346,8 @@ export function HomeDashboard() {
     });
 
     return Array.from(sectorMap.entries())
-      .map(([name, data]) => ({ 
-        name, 
+      .map(([name, data]) => ({
+        name,
         count: data.count,
         percentage: totalValue > 0 ? (data.totalValue / totalValue) * 100 : 0,
         value: data.totalValue, // Keep for pie chart sizing
@@ -419,30 +419,30 @@ export function HomeDashboard() {
             Welcome to <span className="text-blue-400">Jiggy Capital</span>
           </h2>
           <p className="text-sm text-slate-400 max-w-2xl leading-relaxed">
-            Real-time insights and performance analytics of my active equity portfolio. 
+            Real-time insights and performance analytics of my active equity portfolio.
             I focus on high-conviction growth companies and market-leading technology.
           </p>
         </div>
         <div className="flex flex-col gap-2 shrink-0">
-          <a 
-            href="https://twitter.com/jiggycapital" 
-            target="_blank" 
+          <a
+            href="https://twitter.com/jiggycapital"
+            target="_blank"
             rel="noopener noreferrer"
             className="flex items-center gap-2 bg-[#1DA1F2]/10 hover:bg-[#1DA1F2]/20 text-[#1DA1F2] px-4 py-2 rounded-xl border border-[#1DA1F2]/20 transition-all font-bold text-sm group"
           >
             <Twitter className="w-4 h-4 fill-current group-hover:scale-110 transition-transform" />
             Twitter
           </a>
-          <a 
-            href="https://jiggy.substack.com" 
-            target="_blank" 
+          <a
+            href="https://jiggy.substack.com"
+            target="_blank"
             rel="noopener noreferrer"
             className="flex items-center gap-2 bg-orange-500/10 hover:bg-orange-500/20 text-orange-500 px-4 py-2 rounded-xl border border-orange-500/20 transition-all font-bold text-sm group"
           >
-            <img 
-              src="https://cdn.prod.website-files.com/6088303c28a7c75678aa21d8/611bf5975d252f60f5868aeb_Substack-Startapaidnewsletter.png" 
-              alt="Substack" 
-              className="w-4 h-4 object-contain group-hover:scale-110 transition-transform" 
+            <img
+              src="https://cdn.prod.website-files.com/6088303c28a7c75678aa21d8/611bf5975d252f60f5868aeb_Substack-Startapaidnewsletter.png"
+              alt="Substack"
+              className="w-4 h-4 object-contain group-hover:scale-110 transition-transform"
             />
             Substack
           </a>
@@ -454,12 +454,11 @@ export function HomeDashboard() {
         <Card className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 border-slate-700 shadow-xl hover:shadow-2xl transition-all duration-300">
           <CardHeader className="py-2 md:py-3">
             <CardDescription className="text-slate-400 text-[10px] md:text-xs uppercase tracking-wider">Daily Performance</CardDescription>
-            <CardTitle className={`text-xl md:text-3xl font-mono font-bold mt-0.5 md:mt-1 ${
-              (() => {
+            <CardTitle className={`text-xl md:text-3xl font-mono font-bold mt-0.5 md:mt-1 ${(() => {
                 const num = portfolioMetrics.dailyPerformance ? parseNumeric(portfolioMetrics.dailyPerformance.toString().replace(/[+%]/g, '')) : portfolioMetrics.weightedDailyMove;
                 return (num ?? 0) >= 0 ? 'text-green-400' : 'text-red-400';
               })()
-            }`}>
+              }`}>
               {portfolioMetrics.dailyPerformance || formatPercentage(portfolioMetrics.weightedDailyMove)}
             </CardTitle>
           </CardHeader>
@@ -468,13 +467,12 @@ export function HomeDashboard() {
         <Card className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 border-slate-700 shadow-xl hover:shadow-2xl transition-all duration-300">
           <CardHeader className="py-2 md:py-3">
             <CardDescription className="text-slate-400 text-[10px] md:text-xs uppercase tracking-wider">YTD Performance</CardDescription>
-            <CardTitle className={`text-xl md:text-3xl font-mono font-bold mt-0.5 md:mt-1 ${
-              (portfolioMetrics.ytdPerformanceNum ?? portfolioMetrics.weightedYtd) >= 0 
-                ? 'text-green-400' 
+            <CardTitle className={`text-xl md:text-3xl font-mono font-bold mt-0.5 md:mt-1 ${(portfolioMetrics.ytdPerformanceNum ?? portfolioMetrics.weightedYtd) >= 0
+                ? 'text-green-400'
                 : 'text-red-400'
-            }`}>
-              {portfolioMetrics.ytdPerformance 
-                ? portfolioMetrics.ytdPerformance 
+              }`}>
+              {portfolioMetrics.ytdPerformance
+                ? portfolioMetrics.ytdPerformance
                 : formatPercentage(portfolioMetrics.weightedYtd)}
             </CardTitle>
           </CardHeader>
@@ -483,12 +481,11 @@ export function HomeDashboard() {
         <Card className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 border-slate-700 shadow-xl hover:shadow-2xl transition-all duration-300">
           <CardHeader className="py-2 md:py-3">
             <CardDescription className="text-slate-400 text-[10px] md:text-xs uppercase tracking-wider">Lifetime CAGR</CardDescription>
-            <CardTitle className={`text-xl md:text-3xl font-mono font-bold mt-0.5 md:mt-1 ${
-              (() => {
+            <CardTitle className={`text-xl md:text-3xl font-mono font-bold mt-0.5 md:mt-1 ${(() => {
                 const num = portfolioMetrics.lifetimeCagr ? parseNumeric(portfolioMetrics.lifetimeCagr.toString().replace(/[+%]/g, '')) : null;
                 return (num ?? 0) >= 0 ? 'text-green-400' : 'text-red-400';
               })()
-            }`}>
+              }`}>
               {portfolioMetrics.lifetimeCagr || "0%"}
             </CardTitle>
             <div className="text-slate-400 text-[9px] mt-1">
@@ -524,13 +521,13 @@ export function HomeDashboard() {
         <Tabs defaultValue="holdings" className="w-full">
           <div className="flex items-center justify-between mb-4">
             <TabsList className="bg-slate-900/50 border border-slate-800 p-1">
-              <TabsTrigger 
-                value="holdings" 
+              <TabsTrigger
+                value="holdings"
                 className="data-[state=active]:bg-blue-600 data-[state=active]:text-white text-xs font-bold px-6"
               >
                 My Holdings
               </TabsTrigger>
-              <TabsTrigger 
+              <TabsTrigger
                 value="watchlist"
                 className="data-[state=active]:bg-blue-600 data-[state=active]:text-white text-xs font-bold px-6"
               >
@@ -543,16 +540,16 @@ export function HomeDashboard() {
           </div>
 
           <TabsContent value="holdings" className="mt-0 focus-visible:outline-none">
-        <PortfolioTanStackTable 
-          positionsData={positionsData} 
-          logos={logos} 
-        />
+            <PortfolioTanStackTable
+              positionsData={positionsData}
+              logos={logos}
+            />
           </TabsContent>
-          
+
           <TabsContent value="watchlist" className="mt-0 focus-visible:outline-none">
-            <WatchlistTanStackTable 
-              watchlistData={watchlistData} 
-              logos={logos} 
+            <WatchlistTanStackTable
+              watchlistData={watchlistData}
+              logos={logos}
             />
           </TabsContent>
         </Tabs>
@@ -562,68 +559,88 @@ export function HomeDashboard() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6 lg:h-[850px] lg:overflow-hidden">
         {/* Left Column: Movers + Events */}
         <div className="flex flex-col gap-4 md:gap-6 h-full min-h-0">
-          <Card className="bg-gradient-to-br from-green-900/10 via-slate-900 to-slate-900 border-slate-800 shadow-xl overflow-hidden shrink-0 h-[180px]">
-            <div className="absolute top-0 left-0 w-1 h-full bg-green-500/50"></div>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-lg font-bold text-green-400 flex items-center gap-2">
-                <TrendingUp className="h-4 w-4" />
-                Top Gainers
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                {topGainers.map((item, idx) => (
-                  <div key={idx} className="flex items-center justify-between p-2 rounded bg-slate-800/40 border border-slate-800/50">
-                    <div className="flex items-center gap-2">
-                      <div className="w-6 h-6 rounded bg-slate-900 flex items-center justify-center p-1 border border-slate-800">
-                        <img src={logos[item.ticker]} alt="" className="w-full h-full object-contain" onError={(e) => (e.target as any).style.display='none'} />
+          {/* Daily Movers - Compact Horizontal Design */}
+          <Card className="bg-slate-900/50 backdrop-blur-sm border-slate-800 shadow-xl shrink-0">
+            <CardContent className="p-4 space-y-3">
+              {/* Top Gainers Row */}
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <TrendingUp className="h-4 w-4 text-emerald-400" />
+                  <span className="text-xs font-bold text-emerald-400 uppercase tracking-wider">Top Gainers</span>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {topGainers.map((item, idx) => (
+                    <div
+                      key={idx}
+                      className="flex items-center gap-2 px-3 py-2 rounded-full bg-emerald-500/10 border border-emerald-500/20 hover:bg-emerald-500/15 transition-colors"
+                    >
+                      <div className="w-5 h-5 rounded-full bg-slate-800 flex items-center justify-center overflow-hidden border border-slate-700">
+                        {logos[item.ticker] ? (
+                          <img
+                            src={logos[item.ticker]}
+                            alt=""
+                            className="w-4 h-4 object-contain"
+                            onError={(e) => (e.target as any).style.display = 'none'}
+                          />
+                        ) : (
+                          <span className="text-[8px] font-bold text-slate-500">{item.ticker.substring(0, 2)}</span>
+                        )}
                       </div>
                       <span className="text-xs font-bold text-slate-200">{item.ticker}</span>
+                      <span className="text-xs font-mono font-bold text-emerald-400">+{item.gain.toFixed(1)}%</span>
                     </div>
-                    <span className="text-xs font-mono font-bold text-green-400">+{item.gain.toFixed(1)}%</span>
-                  </div>
-                ))}
+                  ))}
+                </div>
+              </div>
+
+              {/* Divider */}
+              <div className="border-t border-slate-800"></div>
+
+              {/* Top Losers Row */}
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <TrendingDown className="h-4 w-4 text-rose-400" />
+                  <span className="text-xs font-bold text-rose-400 uppercase tracking-wider">Top Losers</span>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {topLosers.map((item, idx) => (
+                    <div
+                      key={idx}
+                      className="flex items-center gap-2 px-3 py-2 rounded-full bg-rose-500/10 border border-rose-500/20 hover:bg-rose-500/15 transition-colors"
+                    >
+                      <div className="w-5 h-5 rounded-full bg-slate-800 flex items-center justify-center overflow-hidden border border-slate-700">
+                        {logos[item.ticker] ? (
+                          <img
+                            src={logos[item.ticker]}
+                            alt=""
+                            className="w-4 h-4 object-contain"
+                            onError={(e) => (e.target as any).style.display = 'none'}
+                          />
+                        ) : (
+                          <span className="text-[8px] font-bold text-slate-500">{item.ticker.substring(0, 2)}</span>
+                        )}
+                      </div>
+                      <span className="text-xs font-bold text-slate-200">{item.ticker}</span>
+                      <span className="text-xs font-mono font-bold text-rose-400">{item.gain.toFixed(1)}%</span>
+                    </div>
+                  ))}
+                </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="bg-gradient-to-br from-red-900/10 via-slate-900 to-slate-900 border-slate-800 shadow-xl overflow-hidden shrink-0 h-[180px]">
-            <div className="absolute top-0 left-0 w-1 h-full bg-red-500/50"></div>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-lg font-bold text-red-400 flex items-center gap-2">
-                <TrendingDown className="h-4 w-4" />
-                Top Losers
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                {topLosers.map((item, idx) => (
-                  <div key={idx} className="flex items-center justify-between p-2 rounded bg-slate-800/40 border border-slate-800/50">
-                    <div className="flex items-center gap-2">
-                      <div className="w-6 h-6 rounded bg-slate-900 flex items-center justify-center p-1 border border-slate-800">
-                        <img src={logos[item.ticker]} alt="" className="w-full h-full object-contain" onError={(e) => (e.target as any).style.display='none'} />
-                      </div>
-                      <span className="text-xs font-bold text-slate-200">{item.ticker}</span>
-                    </div>
-                    <span className="text-xs font-mono font-bold text-red-400">{item.gain.toFixed(1)}%</span>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-
-          <UpcomingEvents 
-            portfolioTickers={positionsData.map(p => p.Ticker || p.Symbol).filter(Boolean)} 
-            logos={logos} 
-            irLinks={irLinks} 
+          <UpcomingEvents
+            portfolioTickers={positionsData.map(p => p.Ticker || p.Symbol).filter(Boolean)}
+            logos={logos}
+            irLinks={irLinks}
             className="flex-1 min-h-0"
           />
         </div>
 
         {/* Right Column: News Feed */}
-        <NewsFeed 
-          portfolioData={positionsData} 
-          logos={logos} 
+        <NewsFeed
+          portfolioData={positionsData}
+          logos={logos}
           className="h-full min-h-0"
         />
       </div>
@@ -646,9 +663,8 @@ export function HomeDashboard() {
                   return (
                     <div key={idx} className="p-3 rounded-lg bg-slate-800/50 border border-slate-800 flex flex-col items-center justify-center gap-1">
                       <span className="text-[10px] text-slate-500 uppercase font-bold tracking-widest">{benchmark.name}</span>
-                      <span className={`text-xl font-mono font-bold ${
-                        num !== null && num >= 0 ? 'text-green-400' : 'text-red-400'
-                      }`}>
+                      <span className={`text-xl font-mono font-bold ${num !== null && num >= 0 ? 'text-green-400' : 'text-red-400'
+                        }`}>
                         {benchmark.value}
                       </span>
                     </div>
