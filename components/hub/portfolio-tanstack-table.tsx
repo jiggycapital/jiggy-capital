@@ -288,6 +288,13 @@ export function PortfolioTanStackTable({ positionsData, logos }: PortfolioTanSta
       },
       {
         accessorKey: "d50",
+        sortingFn: (rowA, rowB, columnId) => {
+          const a = rowA.original.d50;
+          const b = rowB.original.d50;
+          const numA = typeof a === 'number' ? a : 0;
+          const numB = typeof b === 'number' ? b : 0;
+          return numA - numB;
+        },
         header: ({ column }) => (
           <div
             className="flex items-center justify-end gap-1 cursor-pointer select-none hover:text-slate-200 transition-colors whitespace-normal leading-tight text-right"
@@ -312,6 +319,13 @@ export function PortfolioTanStackTable({ positionsData, logos }: PortfolioTanSta
       },
       {
         accessorKey: "d200",
+        sortingFn: (rowA, rowB, columnId) => {
+          const a = rowA.original.d200;
+          const b = rowB.original.d200;
+          const numA = typeof a === 'number' ? a : 0;
+          const numB = typeof b === 'number' ? b : 0;
+          return numA - numB;
+        },
         header: ({ column }) => (
           <div
             className="flex items-center justify-end gap-1 cursor-pointer select-none hover:text-slate-200 transition-colors whitespace-normal leading-tight text-right"
