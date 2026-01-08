@@ -95,6 +95,16 @@ body {
   background: #475569;
 }
 
+/* Hide sidebar scrollbar completely */
+aside nav {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+
+aside nav::-webkit-scrollbar {
+  display: none;  /* Chrome, Safari and Opera */
+}
+
 /* Kill all focus outlines and tap highlights for charts */
 .recharts-wrapper,
 .recharts-surface,
