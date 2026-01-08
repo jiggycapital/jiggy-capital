@@ -4,6 +4,67 @@ import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Newspaper, ExternalLink, MessageSquare } from "lucide-react";
 
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+
+/**
+ * Advanced headline relevance checker to filter out "clout-chasing" news.
+ * Targets headlines like "SmallCo Launches on Google Marketplace" where Google is secondary noise.
+ */
+function isHeadlineRelevant(headline: string, ticker: string, companyName: string): boolean {
+  const h = headline.toLowerCase();
+  const t = ticker.toLowerCase();
+  const n = companyName.toLowerCase().replace(/ (inc|corp|ltd|plc|class [ab])$/i, "").trim();
+
+  // Basic check: must contain ticker or name
+  if (!h.includes(t) && !h.includes(n)) return false;
+
+  // Pattern 1: Platform Noise (X launches on [Company])
+  const platformKeywords = [
+    "launches on", "available on", "now on", "integrated with",
+    "integration with", "listed on", "marketplace", "app store",
+    "play store", "on aws", "on azure", "on google cloud",
+    "partnership with", "support for", "using google", "using microsoft",
+    "powered by", "built on", "hosted on"
+  ];
+
+  for (const phrase of platformKeywords) {
+    if (h.includes(phrase)) {
+      const phraseIdx = h.indexOf(phrase);
+      const companyIdx = h.includes(t) ? h.indexOf(t) : h.indexOf(n);
+
+      // If company is mentioned AFTER the platform/launch phrase, it's likely secondary
+      if (companyIdx > phraseIdx) {
+        // Exception: If the company is ALSO at the start (Subject), it might be legit
+        const first15 = h.substring(0, 15);
+        if (first15.includes(t) || first15.includes(n)) return true;
+        return false;
+      }
+    }
+  }
+
+  // Pattern 2: Subject-Detail analysis (Colon/Dash)
+  // Headlines like "SmallCo News: launches on Google" are usually noise for Google.
+  if (h.includes(":") || h.includes(" - ")) {
+    const separator = h.includes(":") ? ":" : " - ";
+    const parts = h.split(separator);
+    const subject = parts[0].trim();
+    const details = parts.slice(1).join(separator).trim();
+
+    const inSubject = subject.includes(t) || subject.includes(n);
+    const inDetails = details.includes(t) || details.includes(n);
+
+    if (inDetails && !inSubject) {
+      // If in details but not subject, only allow if high-value financial keywords are present
+      const financeKeywords = ["shares", "stock", "earnings", "dividend", "revenue", "profit", "outlook", "guidance", "buyback"];
+      if (!financeKeywords.some(k => details.includes(k))) {
+        return false;
+      }
+    }
+  }
+
+  return true;
+}
+
 interface NewsItem {
   id: string;
   ticker: string;
@@ -40,15 +101,15 @@ export function NewsFeed({ portfolioData, logos, className }: NewsFeedProps) {
             name: p.Name || p.Company || p.Ticker || p.Symbol || ""
           }))
           .filter(t => t.ticker && t.ticker !== "CASH" && t.ticker !== "SUM");
-        
+
         const allFetchedNews: any[] = [];
         const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
-        
+
         for (const item of tickers) {
           try {
             const resp = await fetch(`/api/finnhub?endpoint=company-news&symbol=${item.ticker}&from=${fromDate}&to=${toDate}`);
-            if (!resp.ok) continue; 
-            
+            if (!resp.ok) continue;
+
             const data = await resp.json();
             if (Array.isArray(data)) {
               const taggedNews = data.map((newsItem: any) => ({
@@ -74,27 +135,18 @@ export function NewsFeed({ portfolioData, logos, className }: NewsFeedProps) {
 
         const filteredNews = uniqueNews.filter(n => {
           const ticker = (n.ticker || "").toUpperCase();
+          const headline = n.headline || "";
+          const companyName = n.companyName || "";
           const url = (n.url || "").toLowerCase();
           const source = (n.source || "").toLowerCase();
-          
+
           if (ticker === 'TSLA') return false; // Filter out Tesla due to noise
           if (url.includes('fool.com')) return false;
           if (url.includes('seekingalpha.com')) return false;
           if (source.includes('seekingalpha')) return false;
           if (source.includes('seeking alpha')) return false;
 
-          const headline = (n.headline || "").toLowerCase();
-          const tickerLower = (n.ticker || "").toLowerCase();
-          const companyName = (n.companyName || "").toLowerCase();
-          
-          const hasTicker = headline.includes(tickerLower);
-          const companyWords = companyName.split(' ');
-          const hasCompanyName = companyWords.some((word: string) => {
-            if (word.length < 3) return false;
-            return headline.includes(word);
-          });
-
-          return hasTicker || hasCompanyName;
+          return isHeadlineRelevant(headline, ticker, companyName);
         });
 
         const sortedNews = filteredNews
@@ -141,42 +193,42 @@ export function NewsFeed({ portfolioData, logos, className }: NewsFeedProps) {
         ) : (
           <div className="divide-y divide-slate-800/50 overflow-y-auto flex-1 custom-scrollbar">
             {news.map((item) => (
-                     <div key={item.id} className="p-3.5 hover:bg-slate-800/40 transition-all flex gap-4 group relative overflow-hidden">
-                       <div className="shrink-0 flex flex-col items-center gap-1.5 relative z-10">
-                         <div className="w-10 h-10 rounded-xl bg-slate-800 flex items-center justify-center shrink-0 border border-slate-700 shadow-xl group-hover:border-emerald-500/30 transition-all transform group-hover:scale-105">
+              <div key={item.id} className="p-3.5 hover:bg-slate-800/40 transition-all flex gap-4 group relative overflow-hidden">
+                <div className="shrink-0 flex flex-col items-center gap-1.5 relative z-10">
+                  <div className="w-10 h-10 rounded-xl bg-slate-800 flex items-center justify-center shrink-0 border border-slate-700 shadow-xl group-hover:border-emerald-500/30 transition-all transform group-hover:scale-105">
                     {logos[item.ticker] ? (
-                             <img src={logos[item.ticker]} alt={item.ticker} className="w-6 h-6 object-contain" />
+                      <img src={logos[item.ticker]} alt={item.ticker} className="w-6 h-6 object-contain" />
                     ) : (
-                             <span className="text-[10px] font-black text-slate-500">{item.ticker}</span>
+                      <span className="text-[10px] font-black text-slate-500">{item.ticker}</span>
                     )}
                   </div>
-                         <div className="px-1 py-0.5 rounded bg-slate-800 border border-slate-700 text-[8px] font-black text-slate-400 font-mono tracking-tighter uppercase group-hover:bg-slate-700 group-hover:text-slate-200 transition-colors">
+                  <div className="px-1 py-0.5 rounded bg-slate-800 border border-slate-700 text-[8px] font-black text-slate-400 font-mono tracking-tighter uppercase group-hover:bg-slate-700 group-hover:text-slate-200 transition-colors">
                     {item.ticker}
                   </div>
                 </div>
                 <div className="min-w-0 flex-1 relative z-10">
-                         <div className="flex items-center justify-between mb-1">
+                  <div className="flex items-center justify-between mb-1">
                     <div className="flex items-center gap-2">
-                             <span className="text-[9px] font-black text-emerald-400 bg-emerald-500/5 border border-emerald-500/10 px-1.5 py-0.5 rounded uppercase tracking-tighter">{item.source}</span>
+                      <span className="text-[9px] font-black text-emerald-400 bg-emerald-500/5 border border-emerald-500/10 px-1.5 py-0.5 rounded uppercase tracking-tighter">{item.source}</span>
                       <span className="text-[10px] text-slate-500 font-medium flex items-center gap-1">
                         <MessageSquare className="w-2.5 h-2.5" />
-                               {new Date(item.datetime * 1000).toLocaleDateString([], { month: 'short', day: 'numeric' })} • {new Date(item.datetime * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                        {new Date(item.datetime * 1000).toLocaleDateString([], { month: 'short', day: 'numeric' })} • {new Date(item.datetime * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                       </span>
                     </div>
                   </div>
-                         <h4 className="text-[14px] font-bold text-slate-100 leading-[1.3] mb-1 group-hover:text-emerald-50 transition-colors tracking-tight">
+                  <h4 className="text-[14px] font-bold text-slate-100 leading-[1.3] mb-1 group-hover:text-emerald-50 transition-colors tracking-tight">
                     {item.headline}
                   </h4>
-                         <p className="text-[12px] text-slate-400 line-clamp-2 mb-2 leading-relaxed font-medium group-hover:text-slate-300 transition-colors">
+                  <p className="text-[12px] text-slate-400 line-clamp-2 mb-2 leading-relaxed font-medium group-hover:text-slate-300 transition-colors">
                     {item.summary}
                   </p>
-                  <a 
-                    href={item.url} 
-                    target="_blank" 
+                  <a
+                    href={item.url}
+                    target="_blank"
                     rel="noopener noreferrer"
-                           className="inline-flex items-center gap-2 text-[10px] font-black text-blue-400 hover:text-blue-300 transition-all transform group-hover:translate-x-1"
+                    className="inline-flex items-center gap-2 text-[10px] font-black text-blue-400 hover:text-blue-300 transition-all transform group-hover:translate-x-1"
                   >
-                           READ ANALYSIS <ExternalLink className="w-2.5 h-2.5" />
+                    READ ANALYSIS <ExternalLink className="w-2.5 h-2.5" />
                   </a>
                 </div>
                 {/* Subtle background decoration */}
