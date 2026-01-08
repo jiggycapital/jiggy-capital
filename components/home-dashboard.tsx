@@ -367,7 +367,7 @@ export function HomeDashboard() {
         return ticker && ticker !== "" && ticker !== "CASH";
       })
       .sort((a, b) => b.gain - a.gain)
-      .slice(0, 5);
+      .slice(0, 8);
   }, [positionsData]);
 
   const topLosers = useMemo(() => {
@@ -382,7 +382,7 @@ export function HomeDashboard() {
         return ticker && ticker !== "" && ticker !== "CASH";
       })
       .sort((a, b) => a.gain - b.gain)
-      .slice(0, 5);
+      .slice(0, 8);
   }, [positionsData]);
 
   const COLORS = [
@@ -455,9 +455,9 @@ export function HomeDashboard() {
           <CardHeader className="py-2 md:py-3">
             <CardDescription className="text-slate-400 text-[10px] md:text-xs uppercase tracking-wider">Daily Performance</CardDescription>
             <CardTitle className={`text-xl md:text-3xl font-mono font-bold mt-0.5 md:mt-1 ${(() => {
-                const num = portfolioMetrics.dailyPerformance ? parseNumeric(portfolioMetrics.dailyPerformance.toString().replace(/[+%]/g, '')) : portfolioMetrics.weightedDailyMove;
-                return (num ?? 0) >= 0 ? 'text-green-400' : 'text-red-400';
-              })()
+              const num = portfolioMetrics.dailyPerformance ? parseNumeric(portfolioMetrics.dailyPerformance.toString().replace(/[+%]/g, '')) : portfolioMetrics.weightedDailyMove;
+              return (num ?? 0) >= 0 ? 'text-green-400' : 'text-red-400';
+            })()
               }`}>
               {portfolioMetrics.dailyPerformance || formatPercentage(portfolioMetrics.weightedDailyMove)}
             </CardTitle>
@@ -468,8 +468,8 @@ export function HomeDashboard() {
           <CardHeader className="py-2 md:py-3">
             <CardDescription className="text-slate-400 text-[10px] md:text-xs uppercase tracking-wider">YTD Performance</CardDescription>
             <CardTitle className={`text-xl md:text-3xl font-mono font-bold mt-0.5 md:mt-1 ${(portfolioMetrics.ytdPerformanceNum ?? portfolioMetrics.weightedYtd) >= 0
-                ? 'text-green-400'
-                : 'text-red-400'
+              ? 'text-green-400'
+              : 'text-red-400'
               }`}>
               {portfolioMetrics.ytdPerformance
                 ? portfolioMetrics.ytdPerformance
@@ -482,9 +482,9 @@ export function HomeDashboard() {
           <CardHeader className="py-2 md:py-3">
             <CardDescription className="text-slate-400 text-[10px] md:text-xs uppercase tracking-wider">Lifetime CAGR</CardDescription>
             <CardTitle className={`text-xl md:text-3xl font-mono font-bold mt-0.5 md:mt-1 ${(() => {
-                const num = portfolioMetrics.lifetimeCagr ? parseNumeric(portfolioMetrics.lifetimeCagr.toString().replace(/[+%]/g, '')) : null;
-                return (num ?? 0) >= 0 ? 'text-green-400' : 'text-red-400';
-              })()
+              const num = portfolioMetrics.lifetimeCagr ? parseNumeric(portfolioMetrics.lifetimeCagr.toString().replace(/[+%]/g, '')) : null;
+              return (num ?? 0) >= 0 ? 'text-green-400' : 'text-red-400';
+            })()
               }`}>
               {portfolioMetrics.lifetimeCagr || "0%"}
             </CardTitle>
