@@ -17,7 +17,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { parseNumeric, formatCurrency, formatPercentage, formatCurrencyBillions } from "@/lib/utils";
+import { parseNumeric, parseMarketCap, formatCurrency, formatPercentage, formatCurrencyBillions } from "@/lib/utils";
 import { ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
 
 interface WatchlistTanStackTableProps {
@@ -45,11 +45,10 @@ export function WatchlistTanStackTable({ watchlistData, logos }: WatchlistTanSta
     return watchlistData.map(p => {
       const ticker = p.Ticker || p.Symbol || "";
       const logoUrl = p["Logo URL"] || logos[ticker] || "";
-      
+
       const mCapRaw = p["Market Cap"] || "";
-      let mCapNum = parseNumeric(mCapRaw);
-      if (mCapNum && mCapNum > 10000) mCapNum = mCapNum / 1000;
-      
+      const mCapNum = parseMarketCap(mCapRaw);
+
       return {
         ticker,
         name: p.Name || p.Company || ticker,
@@ -74,7 +73,7 @@ export function WatchlistTanStackTable({ watchlistData, logos }: WatchlistTanSta
       {
         accessorKey: "ticker",
         header: ({ column }) => (
-          <div 
+          <div
             className="flex items-center gap-1 cursor-pointer select-none hover:text-slate-200 transition-colors whitespace-normal leading-tight"
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           >
@@ -107,8 +106,8 @@ export function WatchlistTanStackTable({ watchlistData, logos }: WatchlistTanSta
       {
         accessorKey: "price",
         header: ({ column }) => (
-          <div 
-            className="flex items-center justify-end gap-1 cursor-pointer select-none hover:text-slate-200 transition-colors whitespace-normal leading-tight text-right" 
+          <div
+            className="flex items-center justify-end gap-1 cursor-pointer select-none hover:text-slate-200 transition-colors whitespace-normal leading-tight text-right"
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           >
             Price
@@ -123,7 +122,7 @@ export function WatchlistTanStackTable({ watchlistData, logos }: WatchlistTanSta
       {
         accessorKey: "marketCap",
         header: ({ column }) => (
-          <div 
+          <div
             className="flex items-center justify-end gap-1 cursor-pointer select-none hover:text-slate-200 transition-colors whitespace-normal leading-tight text-right max-w-[50px]"
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           >
@@ -147,7 +146,7 @@ export function WatchlistTanStackTable({ watchlistData, logos }: WatchlistTanSta
       {
         accessorKey: "change",
         header: ({ column }) => (
-          <div 
+          <div
             className="flex items-center justify-end gap-1 cursor-pointer select-none hover:text-slate-200 transition-colors whitespace-normal leading-tight text-right"
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           >
@@ -164,10 +163,10 @@ export function WatchlistTanStackTable({ watchlistData, logos }: WatchlistTanSta
           </div>
         )
       },
-      { 
-        accessorKey: "w1Change", 
+      {
+        accessorKey: "w1Change",
         header: ({ column }) => (
-          <div 
+          <div
             className="flex items-center justify-end gap-1 cursor-pointer select-none hover:text-slate-200 transition-colors whitespace-normal leading-tight text-right"
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           >
@@ -178,12 +177,12 @@ export function WatchlistTanStackTable({ watchlistData, logos }: WatchlistTanSta
             }[column.getIsSorted() as string] ?? <ArrowUpDown className="h-3 w-3 shrink-0 opacity-50" />}
           </div>
         ),
-        cell: ({ row }) => <div className={`text-right font-mono text-[13px] ${row.original.w1Change >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>{row.original.w1Change >= 0 ? '+' : ''}{row.original.w1Change.toFixed(1)}%</div> 
+        cell: ({ row }) => <div className={`text-right font-mono text-[13px] ${row.original.w1Change >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>{row.original.w1Change >= 0 ? '+' : ''}{row.original.w1Change.toFixed(1)}%</div>
       },
-      { 
-        accessorKey: "ytdChange", 
+      {
+        accessorKey: "ytdChange",
         header: ({ column }) => (
-          <div 
+          <div
             className="flex items-center justify-end gap-1 cursor-pointer select-none hover:text-slate-200 transition-colors whitespace-normal leading-tight text-right"
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           >
@@ -194,12 +193,12 @@ export function WatchlistTanStackTable({ watchlistData, logos }: WatchlistTanSta
             }[column.getIsSorted() as string] ?? <ArrowUpDown className="h-3 w-3 shrink-0 opacity-50" />}
           </div>
         ),
-        cell: ({ row }) => <div className={`text-right font-mono text-[13px] font-bold ${row.original.ytdChange >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>{row.original.ytdChange >= 0 ? '+' : ''}{row.original.ytdChange.toFixed(1)}%</div> 
+        cell: ({ row }) => <div className={`text-right font-mono text-[13px] font-bold ${row.original.ytdChange >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>{row.original.ytdChange >= 0 ? '+' : ''}{row.original.ytdChange.toFixed(1)}%</div>
       },
-      { 
-        accessorKey: "pe2026", 
+      {
+        accessorKey: "pe2026",
         header: ({ column }) => (
-          <div 
+          <div
             className="flex items-center justify-end gap-1 cursor-pointer select-none hover:text-slate-200 transition-colors whitespace-normal leading-tight text-right max-w-[50px]"
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           >
@@ -215,10 +214,10 @@ export function WatchlistTanStackTable({ watchlistData, logos }: WatchlistTanSta
           return <div className="text-right font-mono text-[13px] text-slate-400">{typeof val === 'number' ? `${val.toFixed(1)}x` : (val || "-")}</div>;
         }
       },
-      { 
-        accessorKey: "fcf2026", 
+      {
+        accessorKey: "fcf2026",
         header: ({ column }) => (
-          <div 
+          <div
             className="flex items-center justify-end gap-1 cursor-pointer select-none hover:text-slate-200 transition-colors whitespace-normal leading-tight text-right max-w-[50px]"
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           >
@@ -234,10 +233,10 @@ export function WatchlistTanStackTable({ watchlistData, logos }: WatchlistTanSta
           return <div className="text-right font-mono text-[13px] text-slate-400">{typeof val === 'number' ? `${val.toFixed(1)}x` : (val || "-")}</div>;
         }
       },
-      { 
-        accessorKey: "revCagr", 
+      {
+        accessorKey: "revCagr",
         header: ({ column }) => (
-          <div 
+          <div
             className="flex items-center justify-end gap-1 cursor-pointer select-none hover:text-slate-200 transition-colors text-right whitespace-normal leading-tight max-w-[60px]"
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           >
@@ -253,10 +252,10 @@ export function WatchlistTanStackTable({ watchlistData, logos }: WatchlistTanSta
           return <div className="text-right font-mono text-[13px] text-slate-400">{typeof val === 'number' ? formatPercentage(val) : (val || "-")}</div>;
         }
       },
-      { 
-        accessorKey: "peg", 
+      {
+        accessorKey: "peg",
         header: ({ column }) => (
-          <div 
+          <div
             className="flex items-center justify-end gap-1 cursor-pointer select-none hover:text-slate-200 transition-colors whitespace-normal leading-tight text-right max-w-[50px]"
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           >
@@ -293,13 +292,12 @@ export function WatchlistTanStackTable({ watchlistData, logos }: WatchlistTanSta
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id} className="border-slate-800 hover:bg-transparent">
                 {headerGroup.headers.map((header) => (
-                  <TableHead 
-                    key={header.id} 
-                    className={`text-slate-400 font-bold py-4 px-2 ${
-                      header.id === 'ticker' 
-                        ? 'sticky left-0 z-30 bg-slate-800 border-r border-slate-800/50 min-w-[120px] max-w-[150px] md:min-w-[180px]' 
-                        : 'bg-slate-800/50'
-                    }`}
+                  <TableHead
+                    key={header.id}
+                    className={`text-slate-400 font-bold py-4 px-2 ${header.id === 'ticker'
+                      ? 'sticky left-0 z-30 bg-slate-800 border-r border-slate-800/50 min-w-[120px] max-w-[150px] md:min-w-[180px]'
+                      : 'bg-slate-800/50'
+                      }`}
                   >
                     {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
                   </TableHead>
@@ -312,13 +310,12 @@ export function WatchlistTanStackTable({ watchlistData, logos }: WatchlistTanSta
               table.getRowModel().rows.map((row) => (
                 <TableRow key={row.id} className="border-slate-800 hover:bg-slate-800/30 transition-colors">
                   {row.getVisibleCells().map((cell) => (
-                    <TableCell 
-                      key={cell.id} 
-                      className={`py-3 px-2 ${
-                        cell.column.id === 'ticker' 
-                          ? 'sticky left-0 bg-slate-900 z-10 border-r border-slate-800/50 min-w-[120px] max-w-[150px] md:min-w-[180px]' 
-                          : ''
-                      }`}
+                    <TableCell
+                      key={cell.id}
+                      className={`py-3 px-2 ${cell.column.id === 'ticker'
+                        ? 'sticky left-0 bg-slate-900 z-10 border-r border-slate-800/50 min-w-[120px] max-w-[150px] md:min-w-[180px]'
+                        : ''
+                        }`}
                     >
                       {flexRender(cell.column.columnDef.cell, cell.getContext())}
                     </TableCell>

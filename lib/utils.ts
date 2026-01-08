@@ -9,7 +9,7 @@ export function formatCurrency(value: number | string | null | undefined): strin
   if (value === null || value === undefined || value === "") return "-";
   const num = typeof value === "string" ? parseFloat(value) : value;
   if (isNaN(num)) return "-";
-  
+
   if (Math.abs(num) >= 1e12) return `$${(num / 1e12).toFixed(1)}T`;
   if (Math.abs(num) >= 1e9) return `$${(num / 1e9).toFixed(1)}B`;
   if (Math.abs(num) >= 1e6) return `$${(num / 1e6).toFixed(1)}M`;
@@ -24,13 +24,13 @@ export function formatCurrencyBillions(value: number | string | null | undefined
   if (isNaN(num)) return "-";
   // Format zero as $0.0B, not as "-"
   if (num === 0) return "$0.0B";
-  
+
   // Use toLocaleString for commas
   const formatted = num.toLocaleString(undefined, {
     minimumFractionDigits: 1,
     maximumFractionDigits: 1,
   });
-  
+
   return `$${formatted}B`;
 }
 
@@ -46,7 +46,7 @@ export function formatNumber(value: number | string | null | undefined): string 
   if (value === null || value === undefined || value === "") return "-";
   const num = typeof value === "string" ? parseFloat(value) : value;
   if (isNaN(num)) return "-";
-  
+
   if (Math.abs(num) >= 1e12) return `${(num / 1e12).toFixed(1)}T`;
   if (Math.abs(num) >= 1e9) return `${(num / 1e9).toFixed(1)}B`;
   if (Math.abs(num) >= 1e6) return `${(num / 1e6).toFixed(1)}M`;
@@ -65,7 +65,7 @@ export function formatPercentage(value: number | string | null | undefined): str
 // Format date as MM/DD (e.g., "12/12")
 export function formatDate(value: string | null | undefined): string {
   if (!value || value === "" || value === "-") return "-";
-  
+
   // Try to parse various date formats
   const date = new Date(value);
   if (isNaN(date.getTime())) {
@@ -76,7 +76,7 @@ export function formatDate(value: string | null | undefined): string {
     }
     return value; // Return as-is if can't parse
   }
-  
+
   const month = (date.getMonth() + 1).toString().padStart(2, '0');
   const day = date.getDate().toString().padStart(2, '0');
   return `${month}/${day}`;
@@ -94,36 +94,79 @@ export function parseNumeric(value: string | null | undefined): number | null {
   if (value === null || value === undefined) {
     return null;
   }
-  
+
   // Handle empty strings and error values
   const trimmed = String(value).trim();
   const upper = trimmed.toUpperCase();
   if (
-    trimmed === "" || 
-    trimmed === "-" || 
-    upper === "NM" || 
-    upper === "N/A" || 
+    trimmed === "" ||
+    trimmed === "-" ||
+    upper === "NM" ||
+    upper === "N/A" ||
     upper === "NA" ||
-    trimmed === "#N/A" || 
-    trimmed === "#DIV/0!" || 
-    trimmed === "#VALUE!" || 
+    trimmed === "#N/A" ||
+    trimmed === "#DIV/0!" ||
+    trimmed === "#VALUE!" ||
     trimmed === "#REF!"
   ) {
     return null;
   }
-  
+
   // Remove currency symbols, commas, spaces, percentage signs, and "x" suffix
   const cleaned = trimmed.replace(/[$,\s%xX]/g, "");
-  
+
   // Handle negative values in parentheses: (100) = -100
   const isNegative = cleaned.startsWith('(') && cleaned.endsWith(')');
   const finalCleaned = isNegative ? cleaned.slice(1, -1) : cleaned;
-  
+
   const num = parseFloat(finalCleaned);
   if (isNaN(num)) {
     return null;
   }
-  
+
   return isNegative ? -num : num;
+}
+
+// Parse market cap values and normalize to billions
+// Handles B/M/K/T suffixes and raw numeric values
+export function parseMarketCap(value: string | null | undefined): number | null {
+  if (value === null || value === undefined) {
+    return null;
+  }
+
+  const trimmed = String(value).trim();
+  const upper = trimmed.toUpperCase();
+
+  if (trimmed === "" || trimmed === "-" || upper === "NM" || upper === "N/A" || upper === "NA") {
+    return null;
+  }
+
+  // Check for B/M/K/T suffixes to determine unit
+  const suffixMatch = upper.match(/([BMKT])$/);
+
+  // Remove currency symbols, commas, spaces, and suffixes
+  const cleaned = trimmed.replace(/[$,\s]/g, "").replace(/[BMKTbmkt]$/g, "");
+  const num = parseFloat(cleaned);
+
+  if (isNaN(num)) {
+    return null;
+  }
+
+  if (suffixMatch) {
+    const suffix = suffixMatch[1];
+    if (suffix === 'T') return num * 1000; // Trillions -> Billions
+    if (suffix === 'B') return num; // Already in Billions
+    if (suffix === 'M') return num / 1000; // Millions -> Billions
+    if (suffix === 'K') return num / 1000000; // Thousands -> Billions
+  }
+
+  // No suffix - assume raw number is in millions if > 100, otherwise in billions
+  // Rationale: A market cap of "1717" without suffix is more likely 1717M ($1.717B)
+  // than 1717B ($1.717T) for most stocks
+  if (num > 100) {
+    return num / 1000; // Convert millions to billions
+  }
+
+  return num; // Already in billions
 }
 

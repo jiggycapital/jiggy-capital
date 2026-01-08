@@ -17,7 +17,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { parseNumeric, formatCurrency, formatPercentage, formatCurrencyBillions } from "@/lib/utils";
+import { parseNumeric, parseMarketCap, formatCurrency, formatPercentage, formatCurrencyBillions } from "@/lib/utils";
 import { ArrowUpDown, ArrowUp, ArrowDown, Wallet } from "lucide-react";
 
 interface PortfolioTanStackTableProps {
@@ -65,28 +65,27 @@ export function PortfolioTanStackTable({ positionsData, logos }: PortfolioTanSta
         const rawTicker = (p.Ticker || p.Symbol || "");
         const ticker = rawTicker.toUpperCase();
         const isCash = ticker === "CASH";
-        
-        const mktVal = isCash 
+
+        const mktVal = isCash
           ? (parseNumeric(p["Cash Position"] || p[p._columnSHeader]) || parseNumeric(p["Market Value"] || p["Value"]) || 0)
           : (parseNumeric(p["Market Value"] || p["Value"]) || 0);
-        
+
         const weight = totalValue > 0 ? (mktVal / totalValue) * 100 : 0;
-        
+
         // Use column AT/V/AO headers if available from positionsData mapping
         const ytd = isCash ? 0 : (parseNumeric(p["YTD Gain"] || p[p._columnATHeader]) || 0);
         const change = isCash ? 0 : (parseNumeric(p["Change %"] || p[p._columnVHeader] || p["Daily PnL %"]) || 0);
-        
+
         const mCapRaw = p["Market Cap"] || "";
-        let mCapNum = parseNumeric(mCapRaw);
-        if (mCapNum && mCapNum > 10000) mCapNum = mCapNum / 1000;
-        
+        const mCapNum = parseMarketCap(mCapRaw);
+
         const revCagr = isCash ? "" : (p[p._columnAOHeader] || p["25-27e Rev CAGR"] || p["2024 - 27e Rev CAGR"] || p["Rev CAGR"] || "");
         const pe = isCash ? "" : (p["2026e P/E"] || p["2026 P/E"] || p["P/E"] || "");
         const fcf = isCash ? "" : (p["P/2026e FCF"] || p["P/2026 FCF"] || p["P/FCF"] || "");
         const d50 = isCash ? "" : (p[p._columnAEHeader] || p["50D"]);
         const d200 = isCash ? "" : (p[p._columnAFHeader] || p["200D"]);
         const peg = isCash ? "" : (p[p._columnARHeader] || p["P/E/G"] || p["PEG"]);
-        
+
         return {
           ticker: isCash ? "CASH" : ticker,
           name: isCash ? "Cash Position" : (p.Name || p.Company || ticker),
@@ -119,7 +118,7 @@ export function PortfolioTanStackTable({ positionsData, logos }: PortfolioTanSta
       {
         accessorKey: "ticker",
         header: ({ column }) => (
-          <div 
+          <div
             className="flex items-center gap-1 cursor-pointer select-none hover:text-slate-200 transition-colors whitespace-normal leading-tight"
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           >
@@ -154,7 +153,7 @@ export function PortfolioTanStackTable({ positionsData, logos }: PortfolioTanSta
       {
         accessorKey: "price",
         header: ({ column }) => (
-          <div 
+          <div
             className="flex items-center justify-end gap-1 cursor-pointer select-none hover:text-slate-200 transition-colors whitespace-normal leading-tight text-right"
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           >
@@ -178,7 +177,7 @@ export function PortfolioTanStackTable({ positionsData, logos }: PortfolioTanSta
       {
         accessorKey: "marketCap",
         header: ({ column }) => (
-          <div 
+          <div
             className="flex items-center justify-end gap-1 cursor-pointer select-none hover:text-slate-200 transition-colors whitespace-normal leading-tight text-right max-w-[50px]"
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           >
@@ -202,7 +201,7 @@ export function PortfolioTanStackTable({ positionsData, logos }: PortfolioTanSta
       {
         accessorKey: "weight",
         header: ({ column }) => (
-          <div 
+          <div
             className="flex items-center justify-end gap-1 cursor-pointer select-none hover:text-slate-200 transition-colors whitespace-normal leading-tight text-right"
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           >
@@ -222,7 +221,7 @@ export function PortfolioTanStackTable({ positionsData, logos }: PortfolioTanSta
       {
         accessorKey: "firstBuy",
         header: ({ column }) => (
-          <div 
+          <div
             className="flex items-center justify-end gap-1 cursor-pointer select-none hover:text-slate-200 transition-colors whitespace-normal leading-tight text-right max-w-[50px]"
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           >
@@ -242,7 +241,7 @@ export function PortfolioTanStackTable({ positionsData, logos }: PortfolioTanSta
       {
         accessorKey: "dailyChange",
         header: ({ column }) => (
-          <div 
+          <div
             className="flex items-center justify-end gap-1 cursor-pointer select-none hover:text-slate-200 transition-colors whitespace-normal leading-tight text-right"
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           >
@@ -266,7 +265,7 @@ export function PortfolioTanStackTable({ positionsData, logos }: PortfolioTanSta
       {
         accessorKey: "ytdGain",
         header: ({ column }) => (
-          <div 
+          <div
             className="flex items-center justify-end gap-1 cursor-pointer select-none hover:text-slate-200 transition-colors whitespace-normal leading-tight text-right"
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           >
@@ -290,7 +289,7 @@ export function PortfolioTanStackTable({ positionsData, logos }: PortfolioTanSta
       {
         accessorKey: "d50",
         header: ({ column }) => (
-          <div 
+          <div
             className="flex items-center justify-end gap-1 cursor-pointer select-none hover:text-slate-200 transition-colors whitespace-normal leading-tight text-right"
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           >
@@ -310,11 +309,11 @@ export function PortfolioTanStackTable({ positionsData, logos }: PortfolioTanSta
             </div>
           );
         }
-        },
+      },
       {
         accessorKey: "d200",
         header: ({ column }) => (
-          <div 
+          <div
             className="flex items-center justify-end gap-1 cursor-pointer select-none hover:text-slate-200 transition-colors whitespace-normal leading-tight text-right"
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           >
@@ -338,7 +337,7 @@ export function PortfolioTanStackTable({ positionsData, logos }: PortfolioTanSta
       {
         accessorKey: "revCagr",
         header: ({ column }) => (
-          <div 
+          <div
             className="flex items-center justify-end gap-1 cursor-pointer select-none hover:text-slate-200 transition-colors text-right whitespace-normal leading-tight max-w-[60px]"
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           >
@@ -362,7 +361,7 @@ export function PortfolioTanStackTable({ positionsData, logos }: PortfolioTanSta
       {
         accessorKey: "fcfMultiple",
         header: ({ column }) => (
-          <div 
+          <div
             className="flex items-center justify-end gap-1 cursor-pointer select-none hover:text-slate-200 transition-colors whitespace-normal leading-tight text-right max-w-[60px]"
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           >
@@ -386,7 +385,7 @@ export function PortfolioTanStackTable({ positionsData, logos }: PortfolioTanSta
       {
         accessorKey: "peMultiple",
         header: ({ column }) => (
-          <div 
+          <div
             className="flex items-center justify-end gap-1 cursor-pointer select-none hover:text-slate-200 transition-colors text-right whitespace-normal leading-tight max-w-[60px]"
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           >
@@ -410,7 +409,7 @@ export function PortfolioTanStackTable({ positionsData, logos }: PortfolioTanSta
       {
         accessorKey: "peg",
         header: ({ column }) => (
-          <div 
+          <div
             className="flex items-center justify-end gap-1 cursor-pointer select-none hover:text-slate-200 transition-colors whitespace-normal leading-tight text-right"
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           >
@@ -453,20 +452,19 @@ export function PortfolioTanStackTable({ positionsData, logos }: PortfolioTanSta
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id} className="border-slate-800 hover:bg-transparent">
                 {headerGroup.headers.map((header) => (
-                  <TableHead 
-                    key={header.id} 
-                    className={`text-slate-400 font-bold py-4 ${
-                      header.id === 'ticker' 
-                        ? 'sticky left-0 z-30 bg-slate-800 border-r border-slate-800/50 min-w-[120px] max-w-[150px] md:min-w-[180px]' 
-                        : 'bg-slate-800/50'
-                    }`}
+                  <TableHead
+                    key={header.id}
+                    className={`text-slate-400 font-bold py-4 ${header.id === 'ticker'
+                      ? 'sticky left-0 z-30 bg-slate-800 border-r border-slate-800/50 min-w-[120px] max-w-[150px] md:min-w-[180px]'
+                      : 'bg-slate-800/50'
+                      }`}
                   >
                     {header.isPlaceholder
                       ? null
                       : flexRender(
-                          header.column.columnDef.header,
-                          header.getContext()
-                        )}
+                        header.column.columnDef.header,
+                        header.getContext()
+                      )}
                   </TableHead>
                 ))}
               </TableRow>
@@ -481,13 +479,12 @@ export function PortfolioTanStackTable({ positionsData, logos }: PortfolioTanSta
                   className="border-slate-800 hover:bg-slate-800/30 transition-colors"
                 >
                   {row.getVisibleCells().map((cell) => (
-                    <TableCell 
-                      key={cell.id} 
-                      className={`py-3 ${
-                        cell.column.id === 'ticker' 
-                          ? 'sticky left-0 bg-slate-900 z-10 border-r border-slate-800/50 min-w-[120px] max-w-[150px] md:min-w-[180px]' 
-                          : ''
-                      }`}
+                    <TableCell
+                      key={cell.id}
+                      className={`py-3 ${cell.column.id === 'ticker'
+                        ? 'sticky left-0 bg-slate-900 z-10 border-r border-slate-800/50 min-w-[120px] max-w-[150px] md:min-w-[180px]'
+                        : ''
+                        }`}
                     >
                       {flexRender(cell.column.columnDef.cell, cell.getContext())}
                     </TableCell>
