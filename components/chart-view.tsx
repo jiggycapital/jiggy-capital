@@ -34,7 +34,9 @@ export function ChartView() {
   const [showCriteriaPicker, setShowCriteriaPicker] = useState(false);
   const [chartHeight, setChartHeight] = useState(500);
   const [columnCategories, setColumnCategories] = useState<Record<string, string>>({});
-  
+  const [logos, setLogos] = useState<Record<string, string>>({});
+  const [irLinks, setIrLinks] = useState<Record<string, string>>({});
+
   useEffect(() => {
     const updateHeight = () => setChartHeight(window.innerWidth < 768 ? 350 : 600);
     updateHeight();
@@ -53,12 +55,17 @@ export function ChartView() {
         fetchSheetData("positions"),
         fetchSheetData("watchlist"),
       ]);
-      
+
       const categories = extractColumnCategories(positionsRows);
       setColumnCategories(categories);
-      
+
       setPositionsData(parseSheetData(positionsRows));
       setWatchlistData(parseSheetData(watchlistRows));
+
+      // Load logos and IR links
+      const { logos: logosData, irLinks: irLinksData } = await fetchLogos();
+      setLogos(logosData);
+      setIrLinks(irLinksData);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to load data");
     } finally {
@@ -104,22 +111,62 @@ export function ChartView() {
 
   const chartData = useMemo(() => {
     if (!xAxisColumn || yAxisColumns.length === 0 || currentData.length === 0) return [];
-    
+
     return currentData.map(row => {
       const dataPoint: any = { name: String(row[xAxisColumn] || "") };
       yAxisColumns.forEach(col => {
         let val = parseNumeric(String(row[col] || ""));
-        
+
         // Normalize Market Cap and EV to Billions if they are in Millions
         if (val !== null && (col.toLowerCase().includes("market cap") || col.toLowerCase().includes("ev"))) {
           if (val > 10000) val = val / 1000;
         }
-        
+
         dataPoint[col] = val !== null ? val : 0;
       });
       return dataPoint;
     }).filter(p => p.name && p.name !== "SUM" && p.name !== "CASH");
   }, [currentData, xAxisColumn, yAxisColumns]);
+
+  const CustomTooltip = ({ active, payload, label }: any) => {
+    if (active && payload && payload.length) {
+      const ticker = label;
+      const logoUrl = logos[ticker];
+
+      return (
+        <div className="bg-[#0f172a] border border-slate-700/50 rounded-xl p-4 shadow-2xl backdrop-blur-xl ring-1 ring-white/10">
+          <div className="flex items-center justify-between gap-6 mb-3">
+            <span className="text-slate-100 font-black text-sm tracking-tight uppercase">{ticker}</span>
+            {logoUrl && (
+              <div className="w-8 h-8 rounded-lg bg-slate-900 p-1.5 border border-slate-700 shadow-inner">
+                <img src={logoUrl} alt="" className="w-full h-full object-contain" />
+              </div>
+            )}
+          </div>
+          <div className="space-y-2">
+            {payload.map((entry: any, index: number) => {
+              const isMarketCap = entry.name.toLowerCase().includes('market cap') || entry.name.toLowerCase().includes('ev');
+              const displayVal = isMarketCap
+                ? (entry.value >= 1000 ? `${(entry.value / 1000).toFixed(2)}T` : `${entry.value.toFixed(1)}B`)
+                : entry.name.toLowerCase().includes('percent') || entry.name.toLowerCase().includes('%')
+                  ? `${entry.value.toFixed(2)}%`
+                  : entry.value.toLocaleString(undefined, { maximumFractionDigits: 2 });
+
+              return (
+                <div key={index} className="flex items-center justify-between gap-8">
+                  <span className="text-slate-500 text-[9px] uppercase font-black tracking-widest">{entry.name}</span>
+                  <span className="text-blue-400 font-mono text-xs font-black">
+                    {displayVal}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      );
+    }
+    return null;
+  };
 
   const COLORS = ["#3b82f6", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6", "#06b6d4", "#f97316", "#ec4899", "#84cc16", "#6366f1"];
 
@@ -140,20 +187,20 @@ export function ChartView() {
                 <p className="text-xs text-slate-500 mt-1">Analyze {currentData.length} companies across metrics</p>
               </div>
             </div>
-            
+
             <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
               <div className="flex bg-[#1e293b] rounded-lg p-1 border border-slate-700">
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
+                <Button
+                  variant="ghost"
+                  size="sm"
                   className={cn("px-3 h-8 text-[10px] font-bold uppercase tracking-widest transition-all", chartType === "line" ? "bg-blue-600 text-white" : "text-slate-400 hover:text-slate-200")}
                   onClick={() => setChartType("line")}
                 >
                   Line
                 </Button>
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
+                <Button
+                  variant="ghost"
+                  size="sm"
                   className={cn("px-3 h-8 text-[10px] font-bold uppercase tracking-widest transition-all", chartType === "bar" ? "bg-blue-600 text-white" : "text-slate-400 hover:text-slate-200")}
                   onClick={() => setChartType("bar")}
                 >
@@ -175,9 +222,9 @@ export function ChartView() {
                 </Select>
               </div>
 
-              <Button 
-                variant="outline" 
-                size="sm" 
+              <Button
+                variant="outline"
+                size="sm"
                 className="bg-blue-600 hover:bg-blue-700 border-none text-white font-bold"
                 onClick={() => setShowCriteriaPicker(true)}
               >
@@ -187,7 +234,7 @@ export function ChartView() {
             </div>
           </div>
         </CardHeader>
-        
+
         <CardContent className="p-0">
           <div className="px-6 py-4 bg-[#0a0f1d] border-b border-slate-800 flex items-center justify-between">
             <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as any)} className="w-auto">
@@ -197,7 +244,7 @@ export function ChartView() {
                 <TabsTrigger value="combined" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white text-xs font-bold px-4">Combined</TabsTrigger>
               </TabsList>
             </Tabs>
-            
+
             <div className="flex items-center gap-2 overflow-x-auto max-w-[500px] no-scrollbar">
               {yAxisColumns.map((col, idx) => (
                 <div key={col} className="flex items-center gap-2 px-3 py-1 rounded-full bg-slate-800 border border-slate-700 group shrink-0">
@@ -218,8 +265,8 @@ export function ChartView() {
                   <LineChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 60 }}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" vertical={false} />
                     <XAxis dataKey="name" stroke="#475569" fontSize={10} tickMargin={15} angle={-45} textAnchor="end" />
-                    <YAxis stroke="#475569" fontSize={10} tickFormatter={(val) => val > 1000 ? `${(val/1000).toFixed(1)}k` : val} />
-                    <Tooltip contentStyle={{ backgroundColor: "#0f172a", border: "1px solid #1e293b", borderRadius: "12px", boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.5)" }} />
+                    <YAxis stroke="#475569" fontSize={10} tickFormatter={(val) => val > 1000 ? `${(val / 1000).toFixed(1)}k` : val} />
+                    <Tooltip content={<CustomTooltip />} />
                     {yAxisColumns.map((col, index) => (
                       <Line key={col} type="monotone" dataKey={col} stroke={COLORS[index % COLORS.length]} strokeWidth={3} dot={{ r: 4, strokeWidth: 2, fill: "#0f172a" }} activeDot={{ r: 6 }} animationDuration={1000} />
                     ))}
@@ -228,8 +275,8 @@ export function ChartView() {
                   <BarChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 60 }}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" vertical={false} />
                     <XAxis dataKey="name" stroke="#475569" fontSize={10} tickMargin={15} angle={-45} textAnchor="end" />
-                    <YAxis stroke="#475569" fontSize={10} tickFormatter={(val) => val > 1000 ? `${(val/1000).toFixed(1)}k` : val} />
-                    <Tooltip cursor={{ fill: "rgba(59, 130, 246, 0.1)" }} contentStyle={{ backgroundColor: "#0f172a", border: "1px solid #1e293b", borderRadius: "12px" }} />
+                    <YAxis stroke="#475569" fontSize={10} tickFormatter={(val) => val > 1000 ? `${(val / 1000).toFixed(1)}k` : val} />
+                    <Tooltip cursor={{ fill: "rgba(59, 130, 246, 0.1)" }} content={<CustomTooltip />} />
                     {yAxisColumns.map((col, index) => (
                       <Bar key={col} dataKey={col} fill={COLORS[index % COLORS.length]} radius={[4, 4, 0, 0]} animationDuration={1000} />
                     ))}
@@ -246,6 +293,66 @@ export function ChartView() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Data Summary Table */}
+      {chartData.length > 0 && (
+        <Card className="bg-[#0f172a] border-slate-800 shadow-2xl overflow-hidden">
+          <CardHeader className="px-6 py-4 border-b border-slate-800/50 bg-[#0a0f1d]">
+            <CardTitle className="text-slate-100 text-sm font-bold flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <TrendingUp className="h-4 w-4 text-emerald-400" />
+                Data Summary
+              </div>
+              <span className="text-[10px] text-slate-500 font-normal italic lowercase tracking-wider">showing {chartData.length} entries</span>
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-0 overflow-x-auto custom-scrollbar">
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="bg-slate-800/20">
+                  <th className="px-6 py-4 text-[10px] font-black text-slate-500 uppercase tracking-widest border-b border-slate-800">Company</th>
+                  {yAxisColumns.map((col) => (
+                    <th key={col} className="px-6 py-4 text-[10px] font-black text-slate-500 uppercase tracking-widest border-b border-slate-800 text-right">{col}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-800/50">
+                {chartData.map((row, idx) => (
+                  <tr key={idx} className="hover:bg-slate-800/40 transition-colors group">
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-lg bg-slate-900 flex items-center justify-center p-1.5 border border-slate-800 group-hover:border-blue-500/30 transition-all">
+                          {logos[row.name] ? (
+                            <img src={logos[row.name]} alt="" className="w-full h-full object-contain" onError={(e) => (e.target as any).style.display = 'none'} />
+                          ) : (
+                            <span className="text-[10px] font-bold text-slate-600">{row.name.substring(0, 2)}</span>
+                          )}
+                        </div>
+                        <span className="text-sm font-bold text-slate-200">{row.name}</span>
+                      </div>
+                    </td>
+                    {yAxisColumns.map((col) => {
+                      const isMarketCap = col.toLowerCase().includes('market cap') || col.toLowerCase().includes('ev');
+                      const val = row[col];
+                      const displayVal = isMarketCap
+                        ? (val >= 1000 ? `${(val / 1000).toFixed(2)}T` : `${val.toFixed(1)}B`)
+                        : col.toLowerCase().includes('percent') || col.toLowerCase().includes('%')
+                          ? `${val.toFixed(2)}%`
+                          : val.toLocaleString(undefined, { maximumFractionDigits: 2 });
+
+                      return (
+                        <td key={col} className="px-6 py-4 whitespace-nowrap text-right text-xs font-mono font-bold text-blue-400/80 group-hover:text-blue-400 transition-colors">
+                          {displayVal}
+                        </td>
+                      );
+                    })}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </CardContent>
+        </Card>
+      )}
 
       {showCriteriaPicker && (
         <CriteriaPicker
