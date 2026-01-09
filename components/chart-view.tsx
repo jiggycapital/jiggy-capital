@@ -112,7 +112,7 @@ export function ChartView() {
   const chartData = useMemo(() => {
     if (!xAxisColumn || yAxisColumns.length === 0 || currentData.length === 0) return [];
 
-    return currentData.map(row => {
+    const data = currentData.map(row => {
       const dataPoint: any = { name: String(row[xAxisColumn] || "") };
       yAxisColumns.forEach(col => {
         let val = parseNumeric(String(row[col] || ""));
@@ -126,6 +126,10 @@ export function ChartView() {
       });
       return dataPoint;
     }).filter(p => p.name && p.name !== "SUM" && p.name !== "CASH");
+
+    // Sort descending by the first Y-axis metric
+    const sortField = yAxisColumns[0];
+    return data.sort((a, b) => (b[sortField] || 0) - (a[sortField] || 0));
   }, [currentData, xAxisColumn, yAxisColumns]);
 
   const CustomTooltip = ({ active, payload, label }: any) => {
@@ -296,39 +300,58 @@ export function ChartView() {
 
       {/* Data Summary Table */}
       {chartData.length > 0 && (
-        <Card className="bg-[#0f172a] border-slate-800 shadow-2xl overflow-hidden">
-          <CardHeader className="px-6 py-4 border-b border-slate-800/50 bg-[#0a0f1d]">
-            <CardTitle className="text-slate-100 text-sm font-bold flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <TrendingUp className="h-4 w-4 text-emerald-400" />
-                Data Summary
+        <Card className="bg-[#0f172a] border-slate-800 shadow-2xl overflow-hidden mb-8">
+          <CardHeader className="px-6 py-5 border-b border-slate-800/50 bg-[#0a0f1d]/50">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-lg bg-emerald-500/10 border border-emerald-500/20">
+                  <TrendingUp className="h-4 w-4 text-emerald-400" />
+                </div>
+                <div>
+                  <CardTitle className="text-slate-100 text-base font-bold tracking-tight">Data Rankings</CardTitle>
+                  <p className="text-[10px] text-slate-500 font-medium uppercase tracking-wider mt-0.5">Performance Summary</p>
+                </div>
               </div>
-              <span className="text-[10px] text-slate-500 font-normal italic lowercase tracking-wider">showing {chartData.length} entries</span>
-            </CardTitle>
+              <div className="px-3 py-1 rounded-full bg-slate-800/50 border border-slate-700/50">
+                <span className="text-[10px] text-slate-400 font-bold tracking-widest uppercase italic">{chartData.length} Companies Analyzed</span>
+              </div>
+            </div>
           </CardHeader>
-          <CardContent className="p-0 overflow-x-auto custom-scrollbar">
+          <CardContent className="p-0 overflow-x-auto no-scrollbar">
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="bg-slate-800/20">
-                  <th className="px-6 py-4 text-[10px] font-black text-slate-500 uppercase tracking-widest border-b border-slate-800">Company</th>
+                <tr className="bg-slate-900/50">
+                  <th className="px-6 py-4 text-[11px] font-black text-slate-500 uppercase tracking-[0.2em] border-b border-slate-800/80 w-16">Rank</th>
+                  <th className="px-6 py-4 text-[11px] font-black text-slate-500 uppercase tracking-[0.2em] border-b border-slate-800/80">Company</th>
                   {yAxisColumns.map((col) => (
-                    <th key={col} className="px-6 py-4 text-[10px] font-black text-slate-500 uppercase tracking-widest border-b border-slate-800 text-right">{col}</th>
+                    <th key={col} className="px-6 py-4 text-[11px] font-black text-slate-500 uppercase tracking-[0.2em] border-b border-slate-800/80 text-right">{col}</th>
                   ))}
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-800/50">
+              <tbody className="divide-y divide-slate-800/30 bg-[#0f172a]">
                 {chartData.map((row, idx) => (
-                  <tr key={idx} className="hover:bg-slate-800/40 transition-colors group">
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-lg bg-slate-900 flex items-center justify-center p-1.5 border border-slate-800 group-hover:border-blue-500/30 transition-all">
-                          {logos[row.name] ? (
-                            <img src={logos[row.name]} alt="" className="w-full h-full object-contain" onError={(e) => (e.target as any).style.display = 'none'} />
-                          ) : (
-                            <span className="text-[10px] font-bold text-slate-600">{row.name.substring(0, 2)}</span>
-                          )}
+                  <tr key={idx} className="hover:bg-blue-600/[0.03] transition-colors group">
+                    <td className="px-6 py-5 whitespace-nowrap">
+                      <div className="flex items-center justify-center w-7 h-7 rounded-full bg-slate-800/30 border border-slate-700/50 group-hover:border-blue-500/30 transition-all">
+                        <span className="text-[11px] font-black text-slate-400 group-hover:text-blue-400 leading-none">#{idx + 1}</span>
+                      </div>
+                    </td>
+                    <td className="px-6 py-5 whitespace-nowrap">
+                      <div className="flex items-center gap-4">
+                        <div className="relative">
+                          <div className="absolute inset-0 bg-blue-500/10 blur-xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                          <div className="relative w-10 h-10 rounded-xl bg-slate-900 flex items-center justify-center p-2 border border-slate-800 group-hover:border-blue-500/50 transition-all shadow-inner overflow-hidden">
+                            {logos[row.name] ? (
+                              <img src={logos[row.name]} alt="" className="w-full h-full object-contain filter grayscale group-hover:grayscale-0 transition-all duration-500 scale-90 group-hover:scale-100" onError={(e) => (e.target as any).style.display = 'none'} />
+                            ) : (
+                              <span className="text-[11px] font-black text-slate-600 group-hover:text-blue-400">{row.name.substring(0, 2)}</span>
+                            )}
+                          </div>
                         </div>
-                        <span className="text-sm font-bold text-slate-200">{row.name}</span>
+                        <div className="flex flex-col">
+                          <span className="text-sm font-black text-slate-200 group-hover:text-white transition-colors">{row.name}</span>
+                          <span className="text-[10px] font-bold text-slate-500 group-hover:text-blue-400/70 transition-colors uppercase tracking-widest">{irLinks[row.name] ? 'Public Equity' : 'Holding'}</span>
+                        </div>
                       </div>
                     </td>
                     {yAxisColumns.map((col) => {
@@ -341,8 +364,18 @@ export function ChartView() {
                           : val.toLocaleString(undefined, { maximumFractionDigits: 2 });
 
                       return (
-                        <td key={col} className="px-6 py-4 whitespace-nowrap text-right text-xs font-mono font-bold text-blue-400/80 group-hover:text-blue-400 transition-colors">
-                          {displayVal}
+                        <td key={col} className="px-6 py-5 whitespace-nowrap text-right">
+                          <div className="flex flex-col items-end">
+                            <span className="text-xs font-mono font-black text-blue-400/90 group-hover:text-blue-400 transition-colors">
+                              {displayVal}
+                            </span>
+                            <div className="w-12 h-[2px] bg-slate-800 rounded-full mt-1.5 overflow-hidden">
+                              <div
+                                className="h-full bg-blue-500 opacity-30 group-hover:opacity-100 transition-all duration-1000"
+                                style={{ width: `${Math.min(100, (val / (chartData[0][col] || 1)) * 100)}%` }}
+                              ></div>
+                            </div>
+                          </div>
                         </td>
                       );
                     })}
