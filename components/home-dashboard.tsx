@@ -412,39 +412,43 @@ export function HomeDashboard() {
 
   return (
     <div className="space-y-4 md:space-y-6 pb-4 md:pb-8 px-4 md:px-6">
-      {/* Welcome Section */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-slate-900/40 border border-slate-800/60 p-4 md:p-6 rounded-2xl backdrop-blur-sm shadow-lg">
-        <div className="space-y-1">
-          <h2 className="text-xl md:text-2xl font-bold text-slate-100 tracking-tight">
-            Welcome to <span className="text-blue-400">Jiggy Capital</span>
+      {/* Header Bar */}
+      <div className="flex items-center justify-between bg-slate-900/40 border border-slate-800/60 px-4 md:px-5 py-3 rounded-xl backdrop-blur-sm">
+        <div className="flex items-center gap-3">
+          <h2 className="text-lg font-black text-slate-100 tracking-tight">
+            Jiggy Capital
           </h2>
-          <p className="text-sm text-slate-400 max-w-2xl leading-relaxed">
-            Real-time insights and performance analytics of my active equity portfolio.
-            I focus on high-conviction growth companies and market-leading technology.
-          </p>
+          <div className="hidden md:flex items-center gap-2">
+            <span className="text-[9px] font-bold text-slate-500 uppercase tracking-widest bg-slate-800/60 px-2 py-0.5 rounded-full border border-slate-700/50">
+              {portfolioMetrics.holdingCount} holdings
+            </span>
+            <span className="text-[9px] font-bold text-slate-600 uppercase tracking-widest">
+              {new Date().toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })}
+            </span>
+          </div>
         </div>
-        <div className="flex flex-col gap-2 shrink-0">
+        <div className="flex items-center gap-2">
           <a
             href="https://twitter.com/jiggycapital"
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-2 bg-[#1DA1F2]/10 hover:bg-[#1DA1F2]/20 text-[#1DA1F2] px-4 py-2 rounded-xl border border-[#1DA1F2]/20 transition-all font-bold text-sm group"
+            className="flex items-center gap-1.5 bg-slate-800/60 hover:bg-[#1DA1F2]/15 text-slate-400 hover:text-[#1DA1F2] px-3 py-1.5 rounded-lg border border-slate-700/50 hover:border-[#1DA1F2]/30 transition-all text-xs font-bold"
           >
-            <Twitter className="w-4 h-4 fill-current group-hover:scale-110 transition-transform" />
-            Twitter
+            <Twitter className="w-3.5 h-3.5 fill-current" />
+            <span className="hidden sm:inline">Twitter</span>
           </a>
           <a
             href="https://jiggy.substack.com"
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-2 bg-orange-500/10 hover:bg-orange-500/20 text-orange-500 px-4 py-2 rounded-xl border border-orange-500/20 transition-all font-bold text-sm group"
+            className="flex items-center gap-1.5 bg-slate-800/60 hover:bg-orange-500/15 text-slate-400 hover:text-orange-400 px-3 py-1.5 rounded-lg border border-slate-700/50 hover:border-orange-500/30 transition-all text-xs font-bold"
           >
             <img
               src="https://cdn.prod.website-files.com/6088303c28a7c75678aa21d8/611bf5975d252f60f5868aeb_Substack-Startapaidnewsletter.png"
               alt="Substack"
-              className="w-4 h-4 object-contain group-hover:scale-110 transition-transform"
+              className="w-3.5 h-3.5 object-contain"
             />
-            Substack
+            <span className="hidden sm:inline">Substack</span>
           </a>
         </div>
       </div>
