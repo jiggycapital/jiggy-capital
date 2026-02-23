@@ -55,13 +55,29 @@ html {
 }
 
 body {
-  background: radial-gradient(circle at top left, #05152A, #030D1A, #020810);
+  background: linear-gradient(-45deg, #18091d, #0f1c3f, #072a38, #1f0b2e);
+  background-size: 400% 400%;
+  animation: auroraBG 20s ease infinite;
   background-attachment: fixed;
   color: hsl(210 40% 98%);
   font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
   font-feature-settings: "rlig" 1, "calt" 1;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+@keyframes auroraBG {
+  0% {
+    background-position: 0% 50%;
+  }
+
+  50% {
+    background-position: 100% 50%;
+  }
+
+  100% {
+    background-position: 0% 50%;
+  }
 }
 
 /* Monospaced font for financial numbers */
