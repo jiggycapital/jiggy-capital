@@ -116,8 +116,8 @@ export function UpcomingEvents({ portfolioTickers, logos, irLinks, className }: 
   }, [portfolioTickers, irLinks]);
 
   return (
-    <Card className={`bg-[#111D33]/50 border-[#1E2D47] overflow-hidden flex flex-col shadow-2xl ${className || 'h-[750px]'}`}>
-      <CardHeader className="py-4 border-b border-[#1E2D47] shrink-0">
+    <Card className={`bg-[#151536]/50 border-[#2A2A61] overflow-hidden flex flex-col shadow-2xl ${className || 'h-[750px]'}`}>
+      <CardHeader className="py-4 border-b border-[#2A2A61] shrink-0">
         <CardTitle className="text-sm font-bold flex items-center justify-between text-slate-100 uppercase tracking-wider">
           <div className="flex items-center gap-2">
             <Calendar className="w-4 h-4 text-amber-400" />
@@ -137,12 +137,12 @@ export function UpcomingEvents({ portfolioTickers, logos, irLinks, className }: 
         ) : events.length === 0 ? (
           <div className="flex-1 flex items-center justify-center p-12 text-center text-slate-500 text-sm italic">No upcoming events scheduled</div>
         ) : (
-          <div className="divide-y divide-[#1E2D47]/50 overflow-y-auto flex-1 custom-scrollbar">
+          <div className="divide-y divide-[#2A2A61]/50 overflow-y-auto flex-1 custom-scrollbar">
             {events.map((event, i) => (
-              <div key={`${event.ticker}-${i}`} className="p-4 hover:bg-[#111D33]/60 transition-all flex items-center justify-between group">
+              <div key={`${event.ticker}-${i}`} className="p-4 hover:bg-[#151536]/60 transition-all flex items-center justify-between group">
                 <div className="flex items-center gap-4 min-w-0">
                   <div className="relative">
-                    <div className="w-11 h-11 rounded-lg bg-[#0A1628] flex items-center justify-center shrink-0 border border-[#1E2D47] shadow-inner group-hover:border-amber-500/30 transition-colors">
+                    <div className="w-11 h-11 rounded-lg bg-[#0A0A1A] flex items-center justify-center shrink-0 border border-[#2A2A61] shadow-inner group-hover:border-amber-500/30 transition-colors">
                       {logos[event.ticker] ? (
                         <img src={logos[event.ticker]} alt={event.ticker} className="w-7 h-7 object-contain" />
                       ) : (
@@ -161,7 +161,7 @@ export function UpcomingEvents({ portfolioTickers, logos, irLinks, className }: 
                   </div>
                 </div>
                 <div className="text-right shrink-0">
-                  <div className="bg-[#0A1628] px-2 py-1 rounded border border-[#1E2D47] group-hover:border-[#2A3F5F] transition-all">
+                  <div className="bg-[#0A0A1A] px-2 py-1 rounded border border-[#2A2A61] group-hover:border-[#38387A] transition-all">
                     <div className="text-[11px] font-mono font-bold text-slate-200 flex items-center gap-1.5 justify-end">
                       <Clock className="w-3 h-3 text-slate-500" />
                       {new Date(event.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }).toUpperCase()}

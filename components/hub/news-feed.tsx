@@ -187,8 +187,8 @@ export function NewsFeed({ portfolioData, logos, className }: NewsFeedProps) {
   }, [portfolioData]);
 
   return (
-    <Card className={`bg-[#111D33]/50 border-[#1E2D47] overflow-hidden flex flex-col shadow-2xl ${className || 'h-[750px]'}`}>
-      <CardHeader className="py-4 border-b border-[#1E2D47] shrink-0">
+    <Card className={`bg-[#151536]/50 border-[#2A2A61] overflow-hidden flex flex-col shadow-2xl ${className || 'h-[750px]'}`}>
+      <CardHeader className="py-4 border-b border-[#2A2A61] shrink-0">
         <CardTitle className="text-sm font-bold flex items-center justify-between text-slate-100 uppercase tracking-wider">
           <div className="flex items-center gap-2">
             <Newspaper className="w-4 h-4 text-amber-400" />
@@ -213,18 +213,18 @@ export function NewsFeed({ portfolioData, logos, className }: NewsFeedProps) {
         ) : news.length === 0 ? (
           <div className="flex-1 flex items-center justify-center p-12 text-center text-slate-500 text-sm italic">No relevant news found for your holdings</div>
         ) : (
-          <div className="divide-y divide-[#1E2D47]/50 overflow-y-auto flex-1 custom-scrollbar">
+          <div className="divide-y divide-[#2A2A61]/50 overflow-y-auto flex-1 custom-scrollbar">
             {news.map((item) => (
-              <div key={item.id} className="p-3.5 hover:bg-[#111D33]/60 transition-all flex gap-4 group relative overflow-hidden">
+              <div key={item.id} className="p-3.5 hover:bg-[#151536]/60 transition-all flex gap-4 group relative overflow-hidden">
                 <div className="shrink-0 flex flex-col items-center gap-1.5 relative z-10">
-                  <div className="w-10 h-10 rounded-xl bg-[#0A1628] flex items-center justify-center shrink-0 border border-[#1E2D47] shadow-xl group-hover:border-amber-500/30 transition-all transform group-hover:scale-105">
+                  <div className="w-10 h-10 rounded-xl bg-[#0A0A1A] flex items-center justify-center shrink-0 border border-[#2A2A61] shadow-xl group-hover:border-amber-500/30 transition-all transform group-hover:scale-105">
                     {logos[item.ticker] ? (
                       <img src={logos[item.ticker]} alt={item.ticker} className="w-7 h-7 object-contain" />
                     ) : (
                       <span className="text-[10px] font-black text-slate-500">{item.ticker}</span>
                     )}
                   </div>
-                  <div className="px-1 py-0.5 rounded bg-[#0A1628] border border-[#1E2D47] text-[8px] font-black text-slate-500 font-mono tracking-tighter uppercase group-hover:text-slate-300 transition-colors">
+                  <div className="px-1 py-0.5 rounded bg-[#0A0A1A] border border-[#2A2A61] text-[8px] font-black text-slate-500 font-mono tracking-tighter uppercase group-hover:text-slate-300 transition-colors">
                     {item.ticker}
                   </div>
                 </div>

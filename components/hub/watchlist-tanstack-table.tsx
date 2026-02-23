@@ -88,7 +88,7 @@ export function WatchlistTanStackTable({ watchlistData, logos }: WatchlistTanSta
           const { ticker, name, logoUrl } = row.original;
           return (
             <div className="flex items-center gap-2.5">
-              <div className="w-9 h-9 rounded-lg bg-[#111D33] flex items-center justify-center overflow-hidden shrink-0 border border-[#1E2D47]">
+              <div className="w-9 h-9 rounded-lg bg-[#151536] flex items-center justify-center overflow-hidden shrink-0 border border-[#2A2A61]">
                 {logoUrl ? (
                   <img src={logoUrl} alt={ticker} className="w-7 h-7 object-contain" />
                 ) : (
@@ -311,18 +311,18 @@ export function WatchlistTanStackTable({ watchlistData, logos }: WatchlistTanSta
   });
 
   return (
-    <div className="rounded-xl border border-[#1E2D47] bg-[#111D33]/50 overflow-hidden flex flex-col h-full max-h-[750px]">
+    <div className="rounded-xl border border-[#2A2A61] bg-[#151536]/50 overflow-hidden flex flex-col h-full max-h-[750px]">
       <div className="overflow-auto custom-scrollbar flex-1 relative">
         <Table className="relative">
-          <TableHeader className="bg-[#0D1A2E] sticky top-0 z-20 shadow-md">
+          <TableHeader className="bg-[#1A1A40] sticky top-0 z-20 shadow-md">
             {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id} className="border-[#1E2D47] hover:bg-transparent">
+              <TableRow key={headerGroup.id} className="border-[#2A2A61] hover:bg-transparent">
                 {headerGroup.headers.map((header) => (
                   <TableHead
                     key={header.id}
                     className={`text-slate-400 font-bold py-4 px-2 ${header.id === 'ticker'
-                      ? 'sticky left-0 z-30 bg-[#0D1A2E] border-r border-[#1E2D47]/50 min-w-[140px] max-w-[170px] md:min-w-[200px]'
-                      : 'bg-[#0D1A2E]'
+                      ? 'sticky left-0 z-30 bg-[#1A1A40] border-r border-[#2A2A61]/50 min-w-[140px] max-w-[170px] md:min-w-[200px]'
+                      : 'bg-[#1A1A40]'
                       }`}
                   >
                     {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
@@ -334,12 +334,12 @@ export function WatchlistTanStackTable({ watchlistData, logos }: WatchlistTanSta
           <TableBody>
             {table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => (
-                <TableRow key={row.id} className="border-[#1E2D47] hover:bg-[#111D33]/60 transition-colors">
+                <TableRow key={row.id} className="border-[#2A2A61] hover:bg-[#151536]/60 transition-colors">
                   {row.getVisibleCells().map((cell) => (
                     <TableCell
                       key={cell.id}
                       className={`py-3 px-2 ${cell.column.id === 'ticker'
-                        ? 'sticky left-0 bg-[#0A1628] z-10 border-r border-[#1E2D47]/50 min-w-[140px] max-w-[170px] md:min-w-[200px]'
+                        ? 'sticky left-0 bg-[#0A0A1A] z-10 border-r border-[#2A2A61]/50 min-w-[140px] max-w-[170px] md:min-w-[200px]'
                         : ''
                         }`}
                     >

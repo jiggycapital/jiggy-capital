@@ -418,7 +418,7 @@ export function HomeDashboard() {
           <h2 className="text-base font-extrabold text-slate-100 tracking-tight">
             Dashboard
           </h2>
-          <span className="text-[9px] font-bold text-slate-600 uppercase tracking-widest bg-[#111D33] px-2 py-0.5 rounded-full border border-[#1E2D47]">
+          <span className="text-[9px] font-bold text-slate-600 uppercase tracking-widest bg-[#151536] px-2 py-0.5 rounded-full border border-[#2A2A61]">
             {portfolioMetrics.holdingCount} holdings
           </span>
           <span className="hidden md:inline text-[9px] font-semibold text-slate-600 uppercase tracking-widest">
@@ -430,7 +430,7 @@ export function HomeDashboard() {
             href="https://twitter.com/jiggycapital"
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-1.5 bg-[#111D33] hover:bg-[#1DA1F2]/15 text-slate-500 hover:text-[#1DA1F2] px-2.5 py-1.5 rounded-lg border border-[#1E2D47] hover:border-[#1DA1F2]/30 transition-all text-xs font-bold"
+            className="flex items-center gap-1.5 bg-[#151536] hover:bg-[#1DA1F2]/15 text-slate-500 hover:text-[#1DA1F2] px-2.5 py-1.5 rounded-lg border border-[#2A2A61] hover:border-[#1DA1F2]/30 transition-all text-xs font-bold"
           >
             <Twitter className="w-3.5 h-3.5 fill-current" />
             <span className="hidden sm:inline">Twitter</span>
@@ -439,7 +439,7 @@ export function HomeDashboard() {
             href="https://jiggy.substack.com"
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-1.5 bg-[#111D33] hover:bg-orange-500/15 text-slate-500 hover:text-orange-400 px-2.5 py-1.5 rounded-lg border border-[#1E2D47] hover:border-orange-500/30 transition-all text-xs font-bold"
+            className="flex items-center gap-1.5 bg-[#151536] hover:bg-orange-500/15 text-slate-500 hover:text-orange-400 px-2.5 py-1.5 rounded-lg border border-[#2A2A61] hover:border-orange-500/30 transition-all text-xs font-bold"
           >
             <img
               src="https://cdn.prod.website-files.com/6088303c28a7c75678aa21d8/611bf5975d252f60f5868aeb_Substack-Startapaidnewsletter.png"
@@ -454,7 +454,7 @@ export function HomeDashboard() {
       {/* Compact Metric Strip */}
       <div className="grid grid-cols-3 md:grid-cols-6 gap-2 stagger-children">
         {/* Daily */}
-        <div className="bg-[#111D33] border border-[#1E2D47] rounded-xl px-3 py-2.5 hover:border-[#2A3F5F] transition-all card-hover">
+        <div className="bg-[#151536] border border-[#2A2A61] rounded-xl px-3 py-2.5 hover:border-[#38387A] transition-all card-hover">
           <div className="text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-0.5">Daily</div>
           <div className={`text-lg font-mono font-black tabular-nums ${(() => {
             const num = portfolioMetrics.dailyPerformance ? parseNumeric(portfolioMetrics.dailyPerformance.toString().replace(/[+%]/g, '')) : portfolioMetrics.weightedDailyMove;
@@ -465,7 +465,7 @@ export function HomeDashboard() {
         </div>
 
         {/* YTD */}
-        <div className="bg-[#111D33] border border-[#1E2D47] rounded-xl px-3 py-2.5 hover:border-[#2A3F5F] transition-all card-hover">
+        <div className="bg-[#151536] border border-[#2A2A61] rounded-xl px-3 py-2.5 hover:border-[#38387A] transition-all card-hover">
           <div className="text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-0.5">YTD</div>
           <div className={`text-lg font-mono font-black tabular-nums ${(portfolioMetrics.ytdPerformanceNum ?? portfolioMetrics.weightedYtd) >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
             {portfolioMetrics.ytdPerformance || formatPercentage(portfolioMetrics.weightedYtd)}
@@ -473,7 +473,7 @@ export function HomeDashboard() {
         </div>
 
         {/* CAGR */}
-        <div className="bg-[#111D33] border border-[#1E2D47] rounded-xl px-3 py-2.5 hover:border-[#2A3F5F] transition-all card-hover">
+        <div className="bg-[#151536] border border-[#2A2A61] rounded-xl px-3 py-2.5 hover:border-[#38387A] transition-all card-hover">
           <div className="text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-0.5">CAGR</div>
           <div className={`text-lg font-mono font-black tabular-nums ${(() => {
             const num = portfolioMetrics.lifetimeCagr ? parseNumeric(portfolioMetrics.lifetimeCagr.toString().replace(/[+%]/g, '')) : null;
@@ -485,7 +485,7 @@ export function HomeDashboard() {
         </div>
 
         {/* P/FCF */}
-        <div className="bg-[#111D33] border border-[#1E2D47] rounded-xl px-3 py-2.5 hover:border-[#2A3F5F] transition-all card-hover">
+        <div className="bg-[#151536] border border-[#2A2A61] rounded-xl px-3 py-2.5 hover:border-[#38387A] transition-all card-hover">
           <div className="text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-0.5">26e P/FCF</div>
           <div className="text-lg font-mono font-black text-amber-400 tabular-nums">
             {portfolioMetrics.portfolioMultiples.fcf2026 ? `${portfolioMetrics.portfolioMultiples.fcf2026.toFixed(1)}x` : '—'}
@@ -493,7 +493,7 @@ export function HomeDashboard() {
         </div>
 
         {/* P/E */}
-        <div className="bg-[#111D33] border border-[#1E2D47] rounded-xl px-3 py-2.5 hover:border-[#2A3F5F] transition-all card-hover">
+        <div className="bg-[#151536] border border-[#2A2A61] rounded-xl px-3 py-2.5 hover:border-[#38387A] transition-all card-hover">
           <div className="text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-0.5">26e P/E</div>
           <div className="text-lg font-mono font-black text-amber-400 tabular-nums">
             {portfolioMetrics.portfolioMultiples.pe2026 ? `${portfolioMetrics.portfolioMultiples.pe2026.toFixed(1)}x` : '—'}
@@ -501,7 +501,7 @@ export function HomeDashboard() {
         </div>
 
         {/* PEG */}
-        <div className="bg-[#111D33] border border-[#1E2D47] rounded-xl px-3 py-2.5 hover:border-[#2A3F5F] transition-all card-hover">
+        <div className="bg-[#151536] border border-[#2A2A61] rounded-xl px-3 py-2.5 hover:border-[#38387A] transition-all card-hover">
           <div className="text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-0.5">PEG</div>
           <div className="text-lg font-mono font-black text-amber-400 tabular-nums">
             {portfolioMetrics.portfolioMultiples.peg ? `${portfolioMetrics.portfolioMultiples.peg.toFixed(2)}x` : '—'}
@@ -512,7 +512,7 @@ export function HomeDashboard() {
       {/* Allocation - FIRST Section (Full Width) */}
       <div className="w-full">
         {/* Interactive Pie Chart */}
-        <Card className="bg-[#111D33]/50 backdrop-blur-sm border-[#1E2D47] shadow-xl">
+        <Card className="bg-[#151536]/50 backdrop-blur-sm border-[#2A2A61] shadow-xl">
           <CardHeader className="pb-2">
             <CardTitle className="text-xl font-bold text-slate-100 flex items-center gap-2">
               <PieChartIcon className="h-5 w-5 text-amber-400" />
@@ -534,7 +534,7 @@ export function HomeDashboard() {
       <div className="w-full">
         <Tabs defaultValue="holdings" className="w-full">
           <div className="flex items-center justify-between mb-4">
-            <TabsList className="bg-[#111D33] border border-[#1E2D47] p-1">
+            <TabsList className="bg-[#151536] border border-[#2A2A61] p-1">
               <TabsTrigger
                 value="holdings"
                 className="data-[state=active]:bg-amber-500 data-[state=active]:text-black text-xs font-bold px-6"
@@ -548,7 +548,7 @@ export function HomeDashboard() {
                 Watchlist
               </TabsTrigger>
             </TabsList>
-            <div className="hidden md:block text-[10px] font-medium text-slate-600 uppercase tracking-widest bg-[#111D33] px-3 py-1 rounded-full border border-[#1E2D47]">
+            <div className="hidden md:block text-[10px] font-medium text-slate-600 uppercase tracking-widest bg-[#151536] px-3 py-1 rounded-full border border-[#2A2A61]">
               {new Date().toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' })}
             </div>
           </div>
@@ -574,7 +574,7 @@ export function HomeDashboard() {
         {/* Left Column: Movers + Events */}
         <div className="flex flex-col gap-4 md:gap-6 h-full min-h-0">
           {/* Daily Movers - Compact Horizontal Design */}
-          <Card className="bg-[#111D33]/50 backdrop-blur-sm border-[#1E2D47] shadow-xl shrink-0">
+          <Card className="bg-[#151536]/50 backdrop-blur-sm border-[#2A2A61] shadow-xl shrink-0">
             <CardContent className="p-4 space-y-3">
               {/* Top Gainers Row */}
               <div className="space-y-2">
@@ -588,7 +588,7 @@ export function HomeDashboard() {
                       key={idx}
                       className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-emerald-500/8 border border-emerald-500/15 hover:bg-emerald-500/15 transition-colors"
                     >
-                      <div className="w-8 h-8 rounded-lg bg-[#0A1628] flex items-center justify-center overflow-hidden border border-[#1E2D47]">
+                      <div className="w-8 h-8 rounded-lg bg-[#0A0A1A] flex items-center justify-center overflow-hidden border border-[#2A2A61]">
                         {logos[item.ticker] ? (
                           <img
                             src={logos[item.ticker]}
@@ -610,7 +610,7 @@ export function HomeDashboard() {
               </div>
 
               {/* Divider */}
-              <div className="border-t border-[#1E2D47]"></div>
+              <div className="border-t border-[#2A2A61]"></div>
 
               {/* Top Losers Row */}
               <div className="space-y-2">
@@ -624,7 +624,7 @@ export function HomeDashboard() {
                       key={idx}
                       className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-rose-500/8 border border-rose-500/15 hover:bg-rose-500/15 transition-colors"
                     >
-                      <div className="w-8 h-8 rounded-lg bg-[#0A1628] flex items-center justify-center overflow-hidden border border-[#1E2D47]">
+                      <div className="w-8 h-8 rounded-lg bg-[#0A0A1A] flex items-center justify-center overflow-hidden border border-[#2A2A61]">
                         {logos[item.ticker] ? (
                           <img
                             src={logos[item.ticker]}
@@ -667,7 +667,7 @@ export function HomeDashboard() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
         {/* YTD Benchmark Performance */}
         {performanceData?.ytdBenchmarks && performanceData.ytdBenchmarks.length > 0 && (
-          <Card className="bg-[#111D33]/50 backdrop-blur-sm border-[#1E2D47] shadow-xl">
+          <Card className="bg-[#151536]/50 backdrop-blur-sm border-[#2A2A61] shadow-xl">
             <CardHeader className="pb-3">
               <CardTitle className="text-lg font-bold text-slate-100 flex items-center gap-2">
                 <Activity className="h-4 w-4 text-emerald-400" />
@@ -679,7 +679,7 @@ export function HomeDashboard() {
                 {performanceData.ytdBenchmarks.map((benchmark: { name: string; value: string }, idx: number) => {
                   const num = parseNumeric(benchmark.value.toString().replace(/[+%bp]/g, ''));
                   return (
-                    <div key={idx} className="p-3 rounded-lg bg-[#0A1628] border border-[#1E2D47] flex flex-col items-center justify-center gap-1">
+                    <div key={idx} className="p-3 rounded-lg bg-[#0A0A1A] border border-[#2A2A61] flex flex-col items-center justify-center gap-1">
                       <span className="text-[10px] text-slate-500 uppercase font-bold tracking-widest">{benchmark.name}</span>
                       <span className={`text-xl font-mono font-bold ${num !== null && num >= 0 ? 'text-emerald-400' : 'text-rose-400'
                         }`}>
@@ -694,7 +694,7 @@ export function HomeDashboard() {
         )}
 
         {/* Portfolio Multiples */}
-        <Card className="bg-[#111D33]/50 backdrop-blur-sm border-[#1E2D47] shadow-xl">
+        <Card className="bg-[#151536]/50 backdrop-blur-sm border-[#2A2A61] shadow-xl">
           <CardHeader className="pb-3">
             <CardTitle className="text-lg font-bold text-slate-100 flex items-center gap-2">
               <Target className="h-4 w-4 text-amber-400" />
@@ -703,19 +703,19 @@ export function HomeDashboard() {
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-3 gap-3">
-              <div className="p-3 rounded-lg bg-[#0A1628] border border-[#1E2D47] flex flex-col items-center justify-center gap-1">
+              <div className="p-3 rounded-lg bg-[#0A0A1A] border border-[#2A2A61] flex flex-col items-center justify-center gap-1">
                 <span className="text-[10px] text-slate-500 uppercase font-bold tracking-widest text-center">26e FCF</span>
                 <span className="text-xl font-mono font-bold text-amber-400">
                   {portfolioMetrics.portfolioMultiples.fcf2026 ? `${portfolioMetrics.portfolioMultiples.fcf2026.toFixed(1)}x` : '-'}
                 </span>
               </div>
-              <div className="p-3 rounded-lg bg-[#0A1628] border border-[#1E2D47] flex flex-col items-center justify-center gap-1">
+              <div className="p-3 rounded-lg bg-[#0A0A1A] border border-[#2A2A61] flex flex-col items-center justify-center gap-1">
                 <span className="text-[10px] text-slate-500 uppercase font-bold tracking-widest text-center">26e P/E</span>
                 <span className="text-xl font-mono font-bold text-amber-400">
                   {portfolioMetrics.portfolioMultiples.pe2026 ? `${portfolioMetrics.portfolioMultiples.pe2026.toFixed(1)}x` : '-'}
                 </span>
               </div>
-              <div className="p-3 rounded-lg bg-[#0A1628] border border-[#1E2D47] flex flex-col items-center justify-center gap-1">
+              <div className="p-3 rounded-lg bg-[#0A0A1A] border border-[#2A2A61] flex flex-col items-center justify-center gap-1">
                 <span className="text-[10px] text-slate-500 uppercase font-bold tracking-widest text-center">PEG</span>
                 <span className="text-xl font-mono font-bold text-amber-400">
                   {portfolioMetrics.portfolioMultiples.peg ? `${portfolioMetrics.portfolioMultiples.peg.toFixed(2)}x` : '-'}

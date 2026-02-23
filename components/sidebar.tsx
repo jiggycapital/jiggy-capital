@@ -83,7 +83,7 @@ export function Sidebar() {
           variant="ghost"
           size="icon"
           onClick={() => setIsMobileOpen(!isMobileOpen)}
-          className="bg-[#111D33] border border-[#1E2D47] text-slate-100 hover:bg-[#162340]"
+          className="bg-[#151536] border border-[#2A2A61] text-slate-100 hover:bg-[#222252]"
         >
           {isMobileOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
         </Button>
@@ -100,7 +100,7 @@ export function Sidebar() {
       {/* Sidebar */}
       <aside
         className={cn(
-          "fixed left-0 top-0 z-50 h-screen border-r border-[#1E2D47] bg-[#080F1E] transition-all duration-300 ease-in-out",
+          "fixed left-0 top-0 z-50 h-screen border-r border-[#2A2A61] bg-[#0F0F26] transition-all duration-300 ease-in-out",
           isCollapsed ? "w-20" : "w-56",
           "md:translate-x-0",
           isMobileOpen ? "translate-x-0 w-56" : "-translate-x-full"
@@ -110,14 +110,14 @@ export function Sidebar() {
           {/* Collapse Toggle Button (Desktop only) */}
           <button
             onClick={toggleSidebar}
-            className="absolute -right-3 top-20 hidden md:flex h-6 w-6 items-center justify-center rounded-full border border-[#1E2D47] bg-[#111D33] text-slate-400 hover:text-amber-400 shadow-xl z-[60] transition-colors"
+            className="absolute -right-3 top-20 hidden md:flex h-6 w-6 items-center justify-center rounded-full border border-[#2A2A61] bg-[#151536] text-slate-400 hover:text-amber-400 shadow-xl z-[60] transition-colors"
           >
             {isCollapsed ? <ChevronRight className="h-3.5 w-3.5" /> : <ChevronLeft className="h-3.5 w-3.5" />}
           </button>
 
           {/* Logo */}
           <div className={cn(
-            "flex h-14 items-center border-b border-[#1E2D47] px-5",
+            "flex h-14 items-center border-b border-[#2A2A61] px-5",
             isCollapsed ? "justify-center px-0" : "justify-between"
           )}>
             <Link href="/" className="flex items-center gap-2.5 group/logo min-w-0 overflow-hidden">
@@ -151,7 +151,7 @@ export function Sidebar() {
                   </div>
                 )}
                 {isCollapsed && si > 0 && (
-                  <div className="mx-3 mb-2 border-t border-[#1E2D47]" />
+                  <div className="mx-3 mb-2 border-t border-[#2A2A61]" />
                 )}
 
                 {/* Section Items */}
@@ -169,7 +169,7 @@ export function Sidebar() {
                           isCollapsed ? "justify-center p-2.5" : "px-3 py-2",
                           isActive
                             ? "bg-amber-500/10 text-amber-400 border border-amber-500/20"
-                            : "text-slate-400 hover:bg-[#111D33] hover:text-slate-200 border border-transparent"
+                            : "text-slate-400 hover:bg-[#151536] hover:text-slate-200 border border-transparent"
                         )}
                       >
                         <Icon className={cn(
@@ -193,12 +193,12 @@ export function Sidebar() {
           </nav>
 
           {/* Bottom Actions */}
-          <div className="border-t border-[#1E2D47] p-3">
+          <div className="border-t border-[#2A2A61] p-3">
             <Button
               variant="ghost"
               size="sm"
               className={cn(
-                "w-full flex items-center gap-2.5 text-slate-500 hover:text-slate-300 hover:bg-[#111D33]",
+                "w-full flex items-center gap-2.5 text-slate-500 hover:text-slate-300 hover:bg-[#151536]",
                 isCollapsed ? "justify-center" : "justify-start px-3"
               )}
               onClick={() => setIsHidden(true)}

@@ -55,7 +55,7 @@ html {
 }
 
 body {
-  background: #0A1628;
+  background: #0A0A1A;
   color: hsl(210 40% 98%);
   font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
   font-feature-settings: "rlig" 1, "calt" 1;
@@ -83,7 +83,7 @@ body {
 
 /* Jiggy Navy background */
 .terminal-bg {
-  background: #0A1628;
+  background: #0A0A1A;
   color: hsl(210 40% 98%);
 }
 
@@ -106,15 +106,15 @@ body {
 
 /* Navy surface levels */
 .bg-jiggy-surface {
-  background-color: #111D33;
+  background-color: #151536;
 }
 
 .bg-jiggy-surface-2 {
-  background-color: #162340;
+  background-color: #222252;
 }
 
 .border-jiggy-border {
-  border-color: #1E2D47;
+  border-color: #2A2A61;
 }
 
 /* Professional Scrollbar — navy theme */
@@ -128,12 +128,12 @@ body {
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: #1E2D47;
+  background: #2A2A61;
   border-radius: 10px;
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: #2A3F5F;
+  background: #38387A;
 }
 
 /* Hide sidebar scrollbar completely */
@@ -265,7 +265,7 @@ div:focus {
 }
 
 .shimmer-loading {
-  background: linear-gradient(90deg, #111D33 25%, #1E2D47 50%, #111D33 75%);
+  background: linear-gradient(90deg, #151536 25%, #2A2A61 50%, #151536 75%);
   background-size: 200% 100%;
   animation: shimmer 1.5s infinite;
   border-radius: 0.5rem;
