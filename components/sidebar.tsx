@@ -5,7 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useSidebar } from "./sidebar-provider";
 import { cn } from "@/lib/utils";
-import { LayoutDashboard, Table2, BarChart3, TrendingUp, Database, Menu, X, Filter, ChevronLeft, ChevronRight, EyeOff } from "lucide-react";
+import { LayoutDashboard, Table2, BarChart3, TrendingUp, Database, Menu, X, Filter, ChevronLeft, ChevronRight, EyeOff, Mic } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/logo";
 
@@ -33,6 +33,11 @@ export function Sidebar() {
       title: "Chart",
       href: "/chart",
       icon: BarChart3,
+    },
+    {
+      title: "Earnings",
+      href: "/earnings",
+      icon: Mic,
     },
     {
       title: "Deep Research",
