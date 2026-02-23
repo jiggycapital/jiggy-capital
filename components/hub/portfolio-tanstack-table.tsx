@@ -502,7 +502,7 @@ export function PortfolioTanStackTable({ positionsData, logos }: PortfolioTanSta
                     <TableCell
                       key={cell.id}
                       className={`py-3 ${cell.column.id === 'ticker'
-                        ? 'sticky left-0 bg-[#0A0A1A] z-10 border-r border-[#2A2A61]/50 min-w-[140px] max-w-[170px] md:min-w-[200px]'
+                        ? 'sticky left-0 bg-[#030D1A] z-10 border-r border-[#2A2A61]/50 min-w-[140px] max-w-[170px] md:min-w-[200px]'
                         : ''
                         }`}
                     >

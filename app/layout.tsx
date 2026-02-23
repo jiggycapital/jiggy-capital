@@ -29,7 +29,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="dark">
-      <body className={`${inter.variable} ${jetbrainsMono.variable} font-sans antialiased terminal-bg`}>
+      <body className={`${inter.variable} ${jetbrainsMono.variable} font-sans antialiased text-slate-100`}>
         <SidebarProvider>
           <MainLayout>{children}</MainLayout>
         </SidebarProvider>

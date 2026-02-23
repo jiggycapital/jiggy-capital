@@ -217,14 +217,14 @@ export function NewsFeed({ portfolioData, logos, className }: NewsFeedProps) {
             {news.map((item) => (
               <div key={item.id} className="p-3.5 hover:bg-[#151536]/60 transition-all flex gap-4 group relative overflow-hidden">
                 <div className="shrink-0 flex flex-col items-center gap-1.5 relative z-10">
-                  <div className="w-10 h-10 rounded-xl bg-[#0A0A1A] flex items-center justify-center shrink-0 border border-[#2A2A61] shadow-xl group-hover:border-amber-500/30 transition-all transform group-hover:scale-105">
+                  <div className="w-10 h-10 rounded-xl bg-[#030D1A] flex items-center justify-center shrink-0 border border-[#2A2A61] shadow-xl group-hover:border-amber-500/30 transition-all transform group-hover:scale-105">
                     {logos[item.ticker] ? (
                       <img src={logos[item.ticker]} alt={item.ticker} className="w-7 h-7 object-contain" />
                     ) : (
                       <span className="text-[10px] font-black text-slate-500">{item.ticker}</span>
                     )}
                   </div>
-                  <div className="px-1 py-0.5 rounded bg-[#0A0A1A] border border-[#2A2A61] text-[8px] font-black text-slate-500 font-mono tracking-tighter uppercase group-hover:text-slate-300 transition-colors">
+                  <div className="px-1 py-0.5 rounded bg-[#030D1A] border border-[#2A2A61] text-[8px] font-black text-slate-500 font-mono tracking-tighter uppercase group-hover:text-slate-300 transition-colors">
                     {item.ticker}
                   </div>
                 </div>

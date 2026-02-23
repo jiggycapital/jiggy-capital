@@ -588,7 +588,7 @@ export function HomeDashboard() {
                       key={idx}
                       className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-emerald-500/8 border border-emerald-500/15 hover:bg-emerald-500/15 transition-colors"
                     >
-                      <div className="w-8 h-8 rounded-lg bg-[#0A0A1A] flex items-center justify-center overflow-hidden border border-[#2A2A61]">
+                      <div className="w-8 h-8 rounded-lg bg-[#030D1A] flex items-center justify-center overflow-hidden border border-[#2A2A61]">
                         {logos[item.ticker] ? (
                           <img
                             src={logos[item.ticker]}
@@ -624,7 +624,7 @@ export function HomeDashboard() {
                       key={idx}
                       className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-rose-500/8 border border-rose-500/15 hover:bg-rose-500/15 transition-colors"
                     >
-                      <div className="w-8 h-8 rounded-lg bg-[#0A0A1A] flex items-center justify-center overflow-hidden border border-[#2A2A61]">
+                      <div className="w-8 h-8 rounded-lg bg-[#030D1A] flex items-center justify-center overflow-hidden border border-[#2A2A61]">
                         {logos[item.ticker] ? (
                           <img
                             src={logos[item.ticker]}
@@ -679,7 +679,7 @@ export function HomeDashboard() {
                 {performanceData.ytdBenchmarks.map((benchmark: { name: string; value: string }, idx: number) => {
                   const num = parseNumeric(benchmark.value.toString().replace(/[+%bp]/g, ''));
                   return (
-                    <div key={idx} className="p-3 rounded-lg bg-[#0A0A1A] border border-[#2A2A61] flex flex-col items-center justify-center gap-1">
+                    <div key={idx} className="p-3 rounded-lg bg-[#030D1A] border border-[#2A2A61] flex flex-col items-center justify-center gap-1">
                       <span className="text-[10px] text-slate-500 uppercase font-bold tracking-widest">{benchmark.name}</span>
                       <span className={`text-xl font-mono font-bold ${num !== null && num >= 0 ? 'text-emerald-400' : 'text-rose-400'
                         }`}>
@@ -703,19 +703,19 @@ export function HomeDashboard() {
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-3 gap-3">
-              <div className="p-3 rounded-lg bg-[#0A0A1A] border border-[#2A2A61] flex flex-col items-center justify-center gap-1">
+              <div className="p-3 rounded-lg bg-[#030D1A] border border-[#2A2A61] flex flex-col items-center justify-center gap-1">
                 <span className="text-[10px] text-slate-500 uppercase font-bold tracking-widest text-center">26e FCF</span>
                 <span className="text-xl font-mono font-bold text-amber-400">
                   {portfolioMetrics.portfolioMultiples.fcf2026 ? `${portfolioMetrics.portfolioMultiples.fcf2026.toFixed(1)}x` : '-'}
                 </span>
               </div>
-              <div className="p-3 rounded-lg bg-[#0A0A1A] border border-[#2A2A61] flex flex-col items-center justify-center gap-1">
+              <div className="p-3 rounded-lg bg-[#030D1A] border border-[#2A2A61] flex flex-col items-center justify-center gap-1">
                 <span className="text-[10px] text-slate-500 uppercase font-bold tracking-widest text-center">26e P/E</span>
                 <span className="text-xl font-mono font-bold text-amber-400">
                   {portfolioMetrics.portfolioMultiples.pe2026 ? `${portfolioMetrics.portfolioMultiples.pe2026.toFixed(1)}x` : '-'}
                 </span>
               </div>
-              <div className="p-3 rounded-lg bg-[#0A0A1A] border border-[#2A2A61] flex flex-col items-center justify-center gap-1">
+              <div className="p-3 rounded-lg bg-[#030D1A] border border-[#2A2A61] flex flex-col items-center justify-center gap-1">
                 <span className="text-[10px] text-slate-500 uppercase font-bold tracking-widest text-center">PEG</span>
                 <span className="text-xl font-mono font-bold text-amber-400">
                   {portfolioMetrics.portfolioMultiples.peg ? `${portfolioMetrics.portfolioMultiples.peg.toFixed(2)}x` : '-'}

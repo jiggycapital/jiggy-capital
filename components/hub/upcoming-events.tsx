@@ -142,7 +142,7 @@ export function UpcomingEvents({ portfolioTickers, logos, irLinks, className }: 
               <div key={`${event.ticker}-${i}`} className="p-4 hover:bg-[#151536]/60 transition-all flex items-center justify-between group">
                 <div className="flex items-center gap-4 min-w-0">
                   <div className="relative">
-                    <div className="w-11 h-11 rounded-lg bg-[#0A0A1A] flex items-center justify-center shrink-0 border border-[#2A2A61] shadow-inner group-hover:border-amber-500/30 transition-colors">
+                    <div className="w-11 h-11 rounded-lg bg-[#030D1A] flex items-center justify-center shrink-0 border border-[#2A2A61] shadow-inner group-hover:border-amber-500/30 transition-colors">
                       {logos[event.ticker] ? (
                         <img src={logos[event.ticker]} alt={event.ticker} className="w-7 h-7 object-contain" />
                       ) : (
@@ -161,7 +161,7 @@ export function UpcomingEvents({ portfolioTickers, logos, irLinks, className }: 
                   </div>
                 </div>
                 <div className="text-right shrink-0">
-                  <div className="bg-[#0A0A1A] px-2 py-1 rounded border border-[#2A2A61] group-hover:border-[#38387A] transition-all">
+                  <div className="bg-[#030D1A] px-2 py-1 rounded border border-[#2A2A61] group-hover:border-[#38387A] transition-all">
                     <div className="text-[11px] font-mono font-bold text-slate-200 flex items-center gap-1.5 justify-end">
                       <Clock className="w-3 h-3 text-slate-500" />
                       {new Date(event.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }).toUpperCase()}
