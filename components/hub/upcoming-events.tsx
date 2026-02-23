@@ -28,20 +28,20 @@ export function UpcomingEvents({ portfolioTickers, logos, irLinks, className }: 
     async function fetchEvents() {
       try {
         setLoading(true);
-        
+
         // 0. Check Cache
         const CACHE_KEY = "finnhub_upcoming_events_v3"; // Updated cache key to force refresh for Nintendo fix
         const CACHE_EXPIRY = 24 * 60 * 60 * 1000; // 24 hours
-        
+
         try {
-        const cached = localStorage.getItem(CACHE_KEY);
-        if (cached) {
-          const { timestamp, data } = JSON.parse(cached);
-          if (Date.now() - timestamp < CACHE_EXPIRY) {
-            setEvents(data);
-            setLoading(false);
-            return;
-          }
+          const cached = localStorage.getItem(CACHE_KEY);
+          if (cached) {
+            const { timestamp, data } = JSON.parse(cached);
+            if (Date.now() - timestamp < CACHE_EXPIRY) {
+              setEvents(data);
+              setLoading(false);
+              return;
+            }
           }
         } catch (e) {
           console.warn("Failed to read events cache:", e);
@@ -63,13 +63,13 @@ export function UpcomingEvents({ portfolioTickers, logos, irLinks, className }: 
             const fromDate = today.toISOString().split('T')[0];
             const toDate = new Date(today.getTime() + 90 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
             const resp = await fetch(`/api/finnhub?endpoint=calendar/earnings&symbol=${ticker}&from=${fromDate}&to=${toDate}`);
-            
+
             if (resp.ok) {
               const data = await resp.json();
               if (data.earningsCalendar && Array.isArray(data.earningsCalendar)) {
                 data.earningsCalendar.forEach((e: any) => {
                   let tickerToUse = e.symbol;
-                  
+
                   // Map Japanese Nintendo ticker to US ADR ticker
                   if (tickerToUse === "7974.T") {
                     tickerToUse = "NTDOY";
@@ -116,33 +116,33 @@ export function UpcomingEvents({ portfolioTickers, logos, irLinks, className }: 
   }, [portfolioTickers, irLinks]);
 
   return (
-    <Card className={`bg-slate-900/50 border-slate-800 overflow-hidden flex flex-col shadow-2xl ${className || 'h-[750px]'}`}>
-      <CardHeader className="py-4 border-b border-slate-800 shrink-0">
+    <Card className={`bg-[#111D33]/50 border-[#1E2D47] overflow-hidden flex flex-col shadow-2xl ${className || 'h-[750px]'}`}>
+      <CardHeader className="py-4 border-b border-[#1E2D47] shrink-0">
         <CardTitle className="text-sm font-bold flex items-center justify-between text-slate-100 uppercase tracking-wider">
           <div className="flex items-center gap-2">
-            <Calendar className="w-4 h-4 text-purple-400" />
+            <Calendar className="w-4 h-4 text-amber-400" />
             Upcoming Events
           </div>
-          <span className="text-[10px] text-slate-500 lowercase font-normal italic">Updated every 24h</span>
+          <span className="text-[10px] text-slate-600 lowercase font-semibold">updated 24h</span>
         </CardTitle>
       </CardHeader>
       <CardContent className="p-0 flex-1 overflow-hidden flex flex-col">
         {loading ? (
           <div className="flex-1 flex flex-col items-center justify-center p-12 text-center space-y-4">
             <div className="flex justify-center">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-400"></div>
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-amber-400"></div>
             </div>
             <p className="text-slate-500 text-sm">Synchronizing calendars...</p>
           </div>
         ) : events.length === 0 ? (
           <div className="flex-1 flex items-center justify-center p-12 text-center text-slate-500 text-sm italic">No upcoming events scheduled</div>
         ) : (
-          <div className="divide-y divide-slate-800/50 overflow-y-auto flex-1 custom-scrollbar">
+          <div className="divide-y divide-[#1E2D47]/50 overflow-y-auto flex-1 custom-scrollbar">
             {events.map((event, i) => (
-              <div key={`${event.ticker}-${i}`} className="p-4 hover:bg-slate-800/40 transition-all flex items-center justify-between group">
+              <div key={`${event.ticker}-${i}`} className="p-4 hover:bg-[#111D33]/60 transition-all flex items-center justify-between group">
                 <div className="flex items-center gap-4 min-w-0">
                   <div className="relative">
-                    <div className="w-11 h-11 rounded-lg bg-slate-800 flex items-center justify-center shrink-0 border border-slate-700 shadow-inner group-hover:border-purple-500/50 transition-colors">
+                    <div className="w-11 h-11 rounded-lg bg-[#0A1628] flex items-center justify-center shrink-0 border border-[#1E2D47] shadow-inner group-hover:border-amber-500/30 transition-colors">
                       {logos[event.ticker] ? (
                         <img src={logos[event.ticker]} alt={event.ticker} className="w-7 h-7 object-contain" />
                       ) : (
@@ -152,8 +152,8 @@ export function UpcomingEvents({ portfolioTickers, logos, irLinks, className }: 
                   </div>
                   <div className="min-w-0">
                     <div className="flex items-center gap-2 mb-0.5">
-                      <span className="text-sm font-bold text-slate-100 group-hover:text-purple-300 transition-colors">{event.ticker}</span>
-                      <span className="text-[9px] font-black px-1.5 py-0.5 rounded tracking-tighter uppercase border bg-blue-500/10 text-blue-400 border-blue-500/20">
+                      <span className="text-sm font-bold text-slate-100 group-hover:text-amber-300 transition-colors">{event.ticker}</span>
+                      <span className="text-[9px] font-black px-1.5 py-0.5 rounded tracking-tighter uppercase border bg-amber-500/10 text-amber-400 border-amber-500/20">
                         {event.type}
                       </span>
                     </div>
@@ -161,18 +161,18 @@ export function UpcomingEvents({ portfolioTickers, logos, irLinks, className }: 
                   </div>
                 </div>
                 <div className="text-right shrink-0">
-                  <div className="bg-slate-800/80 px-2 py-1 rounded border border-slate-700/50 group-hover:bg-slate-800 group-hover:border-slate-600 transition-all">
+                  <div className="bg-[#0A1628] px-2 py-1 rounded border border-[#1E2D47] group-hover:border-[#2A3F5F] transition-all">
                     <div className="text-[11px] font-mono font-bold text-slate-200 flex items-center gap-1.5 justify-end">
                       <Clock className="w-3 h-3 text-slate-500" />
                       {new Date(event.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }).toUpperCase()}
                     </div>
                   </div>
                   {event.link && (
-                    <a 
-                      href={event.link} 
-                      target="_blank" 
+                    <a
+                      href={event.link}
+                      target="_blank"
                       rel="noopener noreferrer"
-                      className="text-[10px] font-bold text-blue-400 hover:text-blue-300 flex items-center gap-1 justify-end mt-1.5 tracking-wide uppercase opacity-0 group-hover:opacity-100 transform translate-y-1 group-hover:translate-y-0 transition-all"
+                      className="text-[10px] font-bold text-amber-400 hover:text-amber-300 flex items-center gap-1 justify-end mt-1.5 tracking-wide uppercase opacity-0 group-hover:opacity-100 transform translate-y-1 group-hover:translate-y-0 transition-all"
                     >
                       Resource <ExternalLink className="w-2.5 h-2.5" />
                     </a>

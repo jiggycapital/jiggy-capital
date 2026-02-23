@@ -12,7 +12,7 @@ export function MainLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex min-h-screen">
       {!isHidden && <Sidebar />}
-      
+
       {/* Floating button to show sidebar when hidden */}
       {isHidden && (
         <div className="fixed top-4 left-4 z-[100] group">
@@ -20,7 +20,7 @@ export function MainLayout({ children }: { children: React.ReactNode }) {
             variant="ghost"
             size="icon"
             onClick={() => setIsHidden(false)}
-            className="bg-slate-900/50 backdrop-blur border border-slate-700 text-slate-400 hover:text-slate-100 hover:bg-slate-800 shadow-2xl transition-all"
+            className="bg-[#111D33] backdrop-blur border border-[#1E2D47] text-slate-400 hover:text-amber-400 hover:bg-[#162340] shadow-2xl transition-all"
             title="Show Sidebar"
           >
             <PanelLeftOpen className="h-5 w-5" />
@@ -28,7 +28,7 @@ export function MainLayout({ children }: { children: React.ReactNode }) {
         </div>
       )}
 
-      <main 
+      <main
         className={cn(
           "flex-1 min-h-screen transition-all duration-300 ease-in-out relative",
           isHidden ? "ml-0" : (isCollapsed ? "md:ml-20" : "md:ml-64"),

@@ -87,12 +87,12 @@ export function WatchlistTanStackTable({ watchlistData, logos }: WatchlistTanSta
         cell: ({ row }) => {
           const { ticker, name, logoUrl } = row.original;
           return (
-            <div className="flex items-center gap-2">
-              <div className="w-7 h-7 rounded bg-slate-800 flex items-center justify-center overflow-hidden shrink-0 border border-slate-700">
+            <div className="flex items-center gap-2.5">
+              <div className="w-9 h-9 rounded-lg bg-[#111D33] flex items-center justify-center overflow-hidden shrink-0 border border-[#1E2D47]">
                 {logoUrl ? (
-                  <img src={logoUrl} alt={ticker} className="w-5 h-5 object-contain" />
+                  <img src={logoUrl} alt={ticker} className="w-7 h-7 object-contain" />
                 ) : (
-                  <span className="text-[9px] font-bold text-slate-500">{ticker.substring(0, 3)}</span>
+                  <span className="text-[10px] font-extrabold text-slate-500">{ticker.substring(0, 3)}</span>
                 )}
               </div>
               <div className="flex flex-col min-w-0">
@@ -157,11 +157,17 @@ export function WatchlistTanStackTable({ watchlistData, logos }: WatchlistTanSta
             }[column.getIsSorted() as string] ?? <ArrowUpDown className="h-3 w-3 shrink-0 opacity-50" />}
           </div>
         ),
-        cell: ({ row }) => (
-          <div className={`text-right font-mono text-[13px] font-bold ${row.original.change >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
-            {row.original.change >= 0 ? '+' : ''}{row.original.change.toFixed(1)}%
-          </div>
-        )
+        cell: ({ row }) => {
+          const val = row.original.change;
+          const bg = val >= 0
+            ? val > 2 ? 'bg-emerald-500/15' : val > 0.5 ? 'bg-emerald-500/8' : ''
+            : val < -2 ? 'bg-rose-500/15' : val < -0.5 ? 'bg-rose-500/8' : '';
+          return (
+            <div className={`text-right font-mono text-[13px] font-bold px-2 py-0.5 rounded ${bg} ${val >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
+              {val >= 0 ? '+' : ''}{val.toFixed(1)}%
+            </div>
+          );
+        }
       },
       {
         accessorKey: "w1Change",
@@ -177,7 +183,17 @@ export function WatchlistTanStackTable({ watchlistData, logos }: WatchlistTanSta
             }[column.getIsSorted() as string] ?? <ArrowUpDown className="h-3 w-3 shrink-0 opacity-50" />}
           </div>
         ),
-        cell: ({ row }) => <div className={`text-right font-mono text-[13px] ${row.original.w1Change >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>{row.original.w1Change >= 0 ? '+' : ''}{row.original.w1Change.toFixed(1)}%</div>
+        cell: ({ row }) => {
+          const val = row.original.w1Change;
+          const bg = val >= 0
+            ? val > 3 ? 'bg-emerald-500/15' : val > 1 ? 'bg-emerald-500/8' : ''
+            : val < -3 ? 'bg-rose-500/15' : val < -1 ? 'bg-rose-500/8' : '';
+          return (
+            <div className={`text-right font-mono text-[13px] px-2 py-0.5 rounded ${bg} ${val >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
+              {val >= 0 ? '+' : ''}{val.toFixed(1)}%
+            </div>
+          );
+        }
       },
       {
         accessorKey: "ytdChange",
@@ -193,7 +209,17 @@ export function WatchlistTanStackTable({ watchlistData, logos }: WatchlistTanSta
             }[column.getIsSorted() as string] ?? <ArrowUpDown className="h-3 w-3 shrink-0 opacity-50" />}
           </div>
         ),
-        cell: ({ row }) => <div className={`text-right font-mono text-[13px] font-bold ${row.original.ytdChange >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>{row.original.ytdChange >= 0 ? '+' : ''}{row.original.ytdChange.toFixed(1)}%</div>
+        cell: ({ row }) => {
+          const val = row.original.ytdChange;
+          const bg = val >= 0
+            ? val > 10 ? 'bg-emerald-500/15' : val > 3 ? 'bg-emerald-500/8' : ''
+            : val < -10 ? 'bg-rose-500/15' : val < -3 ? 'bg-rose-500/8' : '';
+          return (
+            <div className={`text-right font-mono text-[13px] font-bold px-2 py-0.5 rounded ${bg} ${val >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
+              {val >= 0 ? '+' : ''}{val.toFixed(1)}%
+            </div>
+          );
+        }
       },
       {
         accessorKey: "pe2026",
@@ -285,18 +311,18 @@ export function WatchlistTanStackTable({ watchlistData, logos }: WatchlistTanSta
   });
 
   return (
-    <div className="rounded-xl border border-slate-800 bg-slate-900/50 overflow-hidden flex flex-col h-full max-h-[750px]">
+    <div className="rounded-xl border border-[#1E2D47] bg-[#111D33]/50 overflow-hidden flex flex-col h-full max-h-[750px]">
       <div className="overflow-auto custom-scrollbar flex-1 relative">
         <Table className="relative">
-          <TableHeader className="bg-slate-800/50 sticky top-0 z-20 shadow-md">
+          <TableHeader className="bg-[#0D1A2E] sticky top-0 z-20 shadow-md">
             {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id} className="border-slate-800 hover:bg-transparent">
+              <TableRow key={headerGroup.id} className="border-[#1E2D47] hover:bg-transparent">
                 {headerGroup.headers.map((header) => (
                   <TableHead
                     key={header.id}
                     className={`text-slate-400 font-bold py-4 px-2 ${header.id === 'ticker'
-                      ? 'sticky left-0 z-30 bg-slate-800 border-r border-slate-800/50 min-w-[120px] max-w-[150px] md:min-w-[180px]'
-                      : 'bg-slate-800/50'
+                      ? 'sticky left-0 z-30 bg-[#0D1A2E] border-r border-[#1E2D47]/50 min-w-[140px] max-w-[170px] md:min-w-[200px]'
+                      : 'bg-[#0D1A2E]'
                       }`}
                   >
                     {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
@@ -308,12 +334,12 @@ export function WatchlistTanStackTable({ watchlistData, logos }: WatchlistTanSta
           <TableBody>
             {table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => (
-                <TableRow key={row.id} className="border-slate-800 hover:bg-slate-800/30 transition-colors">
+                <TableRow key={row.id} className="border-[#1E2D47] hover:bg-[#111D33]/60 transition-colors">
                   {row.getVisibleCells().map((cell) => (
                     <TableCell
                       key={cell.id}
                       className={`py-3 px-2 ${cell.column.id === 'ticker'
-                        ? 'sticky left-0 bg-slate-900 z-10 border-r border-slate-800/50 min-w-[120px] max-w-[150px] md:min-w-[180px]'
+                        ? 'sticky left-0 bg-[#0A1628] z-10 border-r border-[#1E2D47]/50 min-w-[140px] max-w-[170px] md:min-w-[200px]'
                         : ''
                         }`}
                     >
