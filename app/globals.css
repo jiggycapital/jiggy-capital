@@ -88,15 +88,34 @@ body {
 }
 
 /* Gold accent utilities */
-.text-jiggy-gold { color: #F59E0B; }
-.bg-jiggy-gold { background-color: #F59E0B; }
-.border-jiggy-gold { border-color: #F59E0B; }
-.text-jiggy-gold\/20 { color: rgba(245, 158, 11, 0.2); }
+.text-jiggy-gold {
+  color: #F59E0B;
+}
+
+.bg-jiggy-gold {
+  background-color: #F59E0B;
+}
+
+.border-jiggy-gold {
+  border-color: #F59E0B;
+}
+
+.text-jiggy-gold\/20 {
+  color: rgba(245, 158, 11, 0.2);
+}
 
 /* Navy surface levels */
-.bg-jiggy-surface { background-color: #111D33; }
-.bg-jiggy-surface-2 { background-color: #162340; }
-.border-jiggy-border { border-color: #1E2D47; }
+.bg-jiggy-surface {
+  background-color: #111D33;
+}
+
+.bg-jiggy-surface-2 {
+  background-color: #162340;
+}
+
+.border-jiggy-border {
+  border-color: #1E2D47;
+}
 
 /* Professional Scrollbar — navy theme */
 .custom-scrollbar::-webkit-scrollbar {
@@ -155,4 +174,192 @@ aside:focus,
 nav:focus,
 div:focus {
   outline: none !important;
+}
+
+/* ===== SPRINT 5: MICRO-ANIMATIONS ===== */
+
+/* Fade-in-up for page sections */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 0.4s ease-out forwards;
+}
+
+/* Staggered fade-in for children */
+.stagger-children>* {
+  opacity: 0;
+  animation: fadeInUp 0.35s ease-out forwards;
+}
+
+.stagger-children>*:nth-child(1) {
+  animation-delay: 0ms;
+}
+
+.stagger-children>*:nth-child(2) {
+  animation-delay: 50ms;
+}
+
+.stagger-children>*:nth-child(3) {
+  animation-delay: 100ms;
+}
+
+.stagger-children>*:nth-child(4) {
+  animation-delay: 150ms;
+}
+
+.stagger-children>*:nth-child(5) {
+  animation-delay: 200ms;
+}
+
+.stagger-children>*:nth-child(6) {
+  animation-delay: 250ms;
+}
+
+/* Subtle glow pulse for live indicators */
+@keyframes glowPulse {
+
+  0%,
+  100% {
+    box-shadow: 0 0 4px rgba(16, 185, 129, 0.4);
+  }
+
+  50% {
+    box-shadow: 0 0 12px rgba(16, 185, 129, 0.7);
+  }
+}
+
+.glow-pulse {
+  animation: glowPulse 2s ease-in-out infinite;
+}
+
+/* Card hover lift */
+.card-hover {
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+  will-change: transform;
+}
+
+.card-hover:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+}
+
+/* Metric strip number shimmer on load */
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.shimmer-loading {
+  background: linear-gradient(90deg, #111D33 25%, #1E2D47 50%, #111D33 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 0.5rem;
+}
+
+/* Smooth number transition (for when values update) */
+.number-transition {
+  transition: color 0.3s ease;
+}
+
+/* Interactive row highlight bar */
+.row-highlight {
+  position: relative;
+  transition: background-color 0.15s ease;
+}
+
+.row-highlight::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: #F59E0B;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+
+.row-highlight:hover::before {
+  opacity: 1;
+}
+
+/* Logo container subtle scale on hover */
+.logo-hover {
+  transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.logo-hover:hover {
+  transform: scale(1.08);
+  border-color: #F59E0B40;
+}
+
+/* Smooth sidebar link underline reveal */
+.nav-link-underline {
+  position: relative;
+}
+
+.nav-link-underline::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 12px;
+  right: 12px;
+  height: 1px;
+  background: #F59E0B;
+  transform: scaleX(0);
+  transition: transform 0.2s ease;
+  transform-origin: left;
+}
+
+.nav-link-underline:hover::after {
+  transform: scaleX(1);
+}
+
+/* Mobile-first responsive adjustments */
+@media (max-width: 768px) {
+  .mobile-compact {
+    padding: 0.5rem;
+  }
+
+  /* Make metric strip scrollable on mobile */
+  .metric-strip-mobile {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scroll-snap-type: x mandatory;
+  }
+
+  .metric-strip-mobile>* {
+    scroll-snap-align: start;
+    flex-shrink: 0;
+  }
+}
+
+/* Reduce motion for accessibility */
+@media (prefers-reduced-motion: reduce) {
+
+  .animate-fade-in-up,
+  .stagger-children>*,
+  .glow-pulse,
+  .card-hover,
+  .logo-hover,
+  .shimmer-loading {
+    animation: none !important;
+    transition: none !important;
+    transform: none !important;
+  }
 }

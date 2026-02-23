@@ -411,7 +411,7 @@ export function HomeDashboard() {
   }
 
   return (
-    <div className="space-y-4 md:space-y-6 pb-4 md:pb-8 px-4 md:px-6">
+    <div className="space-y-4 md:space-y-6 pb-4 md:pb-8 px-4 md:px-6 animate-fade-in-up">
       {/* Header Bar */}
       <div className="flex items-center justify-between px-1 py-2">
         <div className="flex items-center gap-3">
@@ -452,9 +452,9 @@ export function HomeDashboard() {
       </div>
 
       {/* Compact Metric Strip */}
-      <div className="grid grid-cols-3 md:grid-cols-6 gap-2">
+      <div className="grid grid-cols-3 md:grid-cols-6 gap-2 stagger-children">
         {/* Daily */}
-        <div className="bg-[#111D33] border border-[#1E2D47] rounded-xl px-3 py-2.5 hover:border-[#2A3F5F] transition-colors">
+        <div className="bg-[#111D33] border border-[#1E2D47] rounded-xl px-3 py-2.5 hover:border-[#2A3F5F] transition-all card-hover">
           <div className="text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-0.5">Daily</div>
           <div className={`text-lg font-mono font-black tabular-nums ${(() => {
             const num = portfolioMetrics.dailyPerformance ? parseNumeric(portfolioMetrics.dailyPerformance.toString().replace(/[+%]/g, '')) : portfolioMetrics.weightedDailyMove;
@@ -465,7 +465,7 @@ export function HomeDashboard() {
         </div>
 
         {/* YTD */}
-        <div className="bg-[#111D33] border border-[#1E2D47] rounded-xl px-3 py-2.5 hover:border-[#2A3F5F] transition-colors">
+        <div className="bg-[#111D33] border border-[#1E2D47] rounded-xl px-3 py-2.5 hover:border-[#2A3F5F] transition-all card-hover">
           <div className="text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-0.5">YTD</div>
           <div className={`text-lg font-mono font-black tabular-nums ${(portfolioMetrics.ytdPerformanceNum ?? portfolioMetrics.weightedYtd) >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
             {portfolioMetrics.ytdPerformance || formatPercentage(portfolioMetrics.weightedYtd)}
@@ -473,7 +473,7 @@ export function HomeDashboard() {
         </div>
 
         {/* CAGR */}
-        <div className="bg-[#111D33] border border-[#1E2D47] rounded-xl px-3 py-2.5 hover:border-[#2A3F5F] transition-colors">
+        <div className="bg-[#111D33] border border-[#1E2D47] rounded-xl px-3 py-2.5 hover:border-[#2A3F5F] transition-all card-hover">
           <div className="text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-0.5">CAGR</div>
           <div className={`text-lg font-mono font-black tabular-nums ${(() => {
             const num = portfolioMetrics.lifetimeCagr ? parseNumeric(portfolioMetrics.lifetimeCagr.toString().replace(/[+%]/g, '')) : null;
@@ -485,7 +485,7 @@ export function HomeDashboard() {
         </div>
 
         {/* P/FCF */}
-        <div className="bg-[#111D33] border border-[#1E2D47] rounded-xl px-3 py-2.5 hover:border-[#2A3F5F] transition-colors">
+        <div className="bg-[#111D33] border border-[#1E2D47] rounded-xl px-3 py-2.5 hover:border-[#2A3F5F] transition-all card-hover">
           <div className="text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-0.5">26e P/FCF</div>
           <div className="text-lg font-mono font-black text-amber-400 tabular-nums">
             {portfolioMetrics.portfolioMultiples.fcf2026 ? `${portfolioMetrics.portfolioMultiples.fcf2026.toFixed(1)}x` : '—'}
@@ -493,7 +493,7 @@ export function HomeDashboard() {
         </div>
 
         {/* P/E */}
-        <div className="bg-[#111D33] border border-[#1E2D47] rounded-xl px-3 py-2.5 hover:border-[#2A3F5F] transition-colors">
+        <div className="bg-[#111D33] border border-[#1E2D47] rounded-xl px-3 py-2.5 hover:border-[#2A3F5F] transition-all card-hover">
           <div className="text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-0.5">26e P/E</div>
           <div className="text-lg font-mono font-black text-amber-400 tabular-nums">
             {portfolioMetrics.portfolioMultiples.pe2026 ? `${portfolioMetrics.portfolioMultiples.pe2026.toFixed(1)}x` : '—'}
@@ -501,7 +501,7 @@ export function HomeDashboard() {
         </div>
 
         {/* PEG */}
-        <div className="bg-[#111D33] border border-[#1E2D47] rounded-xl px-3 py-2.5 hover:border-[#2A3F5F] transition-colors">
+        <div className="bg-[#111D33] border border-[#1E2D47] rounded-xl px-3 py-2.5 hover:border-[#2A3F5F] transition-all card-hover">
           <div className="text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-0.5">PEG</div>
           <div className="text-lg font-mono font-black text-amber-400 tabular-nums">
             {portfolioMetrics.portfolioMultiples.peg ? `${portfolioMetrics.portfolioMultiples.peg.toFixed(2)}x` : '—'}
