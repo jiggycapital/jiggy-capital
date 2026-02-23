@@ -1,9 +1,15 @@
 import type { Metadata } from "next";
-import { JetBrains_Mono } from "next/font/google";
+import { Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { SidebarProvider } from "@/components/sidebar-provider";
 import { MainLayout } from "@/components/main-layout";
 import { Analytics } from "@vercel/analytics/next";
+
+const inter = Inter({
+  variable: "--font-sans",
+  subsets: ["latin"],
+  display: "swap",
+});
 
 const jetbrainsMono = JetBrains_Mono({
   variable: "--font-mono",
@@ -23,7 +29,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="dark">
-      <body className={`${jetbrainsMono.variable} antialiased terminal-bg`}>
+      <body className={`${inter.variable} ${jetbrainsMono.variable} font-sans antialiased terminal-bg`}>
         <SidebarProvider>
           <MainLayout>{children}</MainLayout>
         </SidebarProvider>

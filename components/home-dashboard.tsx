@@ -413,26 +413,24 @@ export function HomeDashboard() {
   return (
     <div className="space-y-4 md:space-y-6 pb-4 md:pb-8 px-4 md:px-6">
       {/* Header Bar */}
-      <div className="flex items-center justify-between bg-slate-900/40 border border-slate-800/60 px-4 md:px-5 py-3 rounded-xl backdrop-blur-sm">
+      <div className="flex items-center justify-between px-1 py-2">
         <div className="flex items-center gap-3">
-          <h2 className="text-lg font-black text-slate-100 tracking-tight">
-            Jiggy Capital
+          <h2 className="text-base font-extrabold text-slate-100 tracking-tight">
+            Dashboard
           </h2>
-          <div className="hidden md:flex items-center gap-2">
-            <span className="text-[9px] font-bold text-slate-500 uppercase tracking-widest bg-slate-800/60 px-2 py-0.5 rounded-full border border-slate-700/50">
-              {portfolioMetrics.holdingCount} holdings
-            </span>
-            <span className="text-[9px] font-bold text-slate-600 uppercase tracking-widest">
-              {new Date().toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })}
-            </span>
-          </div>
+          <span className="text-[9px] font-bold text-slate-600 uppercase tracking-widest bg-[#111D33] px-2 py-0.5 rounded-full border border-[#1E2D47]">
+            {portfolioMetrics.holdingCount} holdings
+          </span>
+          <span className="hidden md:inline text-[9px] font-semibold text-slate-600 uppercase tracking-widest">
+            {new Date().toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })}
+          </span>
         </div>
         <div className="flex items-center gap-2">
           <a
             href="https://twitter.com/jiggycapital"
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-1.5 bg-slate-800/60 hover:bg-[#1DA1F2]/15 text-slate-400 hover:text-[#1DA1F2] px-3 py-1.5 rounded-lg border border-slate-700/50 hover:border-[#1DA1F2]/30 transition-all text-xs font-bold"
+            className="flex items-center gap-1.5 bg-[#111D33] hover:bg-[#1DA1F2]/15 text-slate-500 hover:text-[#1DA1F2] px-2.5 py-1.5 rounded-lg border border-[#1E2D47] hover:border-[#1DA1F2]/30 transition-all text-xs font-bold"
           >
             <Twitter className="w-3.5 h-3.5 fill-current" />
             <span className="hidden sm:inline">Twitter</span>
@@ -441,7 +439,7 @@ export function HomeDashboard() {
             href="https://jiggy.substack.com"
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-1.5 bg-slate-800/60 hover:bg-orange-500/15 text-slate-400 hover:text-orange-400 px-3 py-1.5 rounded-lg border border-slate-700/50 hover:border-orange-500/30 transition-all text-xs font-bold"
+            className="flex items-center gap-1.5 bg-[#111D33] hover:bg-orange-500/15 text-slate-500 hover:text-orange-400 px-2.5 py-1.5 rounded-lg border border-[#1E2D47] hover:border-orange-500/30 transition-all text-xs font-bold"
           >
             <img
               src="https://cdn.prod.website-files.com/6088303c28a7c75678aa21d8/611bf5975d252f60f5868aeb_Substack-Startapaidnewsletter.png"
@@ -453,50 +451,62 @@ export function HomeDashboard() {
         </div>
       </div>
 
-      {/* Hero Section - Three Performance Metrics */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4">
-        <Card className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 border-slate-700 shadow-xl hover:shadow-2xl transition-all duration-300">
-          <CardHeader className="py-2 md:py-3">
-            <CardDescription className="text-slate-400 text-[10px] md:text-xs uppercase tracking-wider">Daily Performance</CardDescription>
-            <CardTitle className={`text-xl md:text-3xl font-mono font-bold mt-0.5 md:mt-1 ${(() => {
-              const num = portfolioMetrics.dailyPerformance ? parseNumeric(portfolioMetrics.dailyPerformance.toString().replace(/[+%]/g, '')) : portfolioMetrics.weightedDailyMove;
-              return (num ?? 0) >= 0 ? 'text-green-400' : 'text-red-400';
-            })()
-              }`}>
-              {portfolioMetrics.dailyPerformance || formatPercentage(portfolioMetrics.weightedDailyMove)}
-            </CardTitle>
-          </CardHeader>
-        </Card>
+      {/* Compact Metric Strip */}
+      <div className="grid grid-cols-3 md:grid-cols-6 gap-2">
+        {/* Daily */}
+        <div className="bg-[#111D33] border border-[#1E2D47] rounded-xl px-3 py-2.5 hover:border-[#2A3F5F] transition-colors">
+          <div className="text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-0.5">Daily</div>
+          <div className={`text-lg font-mono font-black tabular-nums ${(() => {
+            const num = portfolioMetrics.dailyPerformance ? parseNumeric(portfolioMetrics.dailyPerformance.toString().replace(/[+%]/g, '')) : portfolioMetrics.weightedDailyMove;
+            return (num ?? 0) >= 0 ? 'text-emerald-400' : 'text-rose-400';
+          })()}`}>
+            {portfolioMetrics.dailyPerformance || formatPercentage(portfolioMetrics.weightedDailyMove)}
+          </div>
+        </div>
 
-        <Card className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 border-slate-700 shadow-xl hover:shadow-2xl transition-all duration-300">
-          <CardHeader className="py-2 md:py-3">
-            <CardDescription className="text-slate-400 text-[10px] md:text-xs uppercase tracking-wider">YTD Performance</CardDescription>
-            <CardTitle className={`text-xl md:text-3xl font-mono font-bold mt-0.5 md:mt-1 ${(portfolioMetrics.ytdPerformanceNum ?? portfolioMetrics.weightedYtd) >= 0
-              ? 'text-green-400'
-              : 'text-red-400'
-              }`}>
-              {portfolioMetrics.ytdPerformance
-                ? portfolioMetrics.ytdPerformance
-                : formatPercentage(portfolioMetrics.weightedYtd)}
-            </CardTitle>
-          </CardHeader>
-        </Card>
+        {/* YTD */}
+        <div className="bg-[#111D33] border border-[#1E2D47] rounded-xl px-3 py-2.5 hover:border-[#2A3F5F] transition-colors">
+          <div className="text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-0.5">YTD</div>
+          <div className={`text-lg font-mono font-black tabular-nums ${(portfolioMetrics.ytdPerformanceNum ?? portfolioMetrics.weightedYtd) >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
+            {portfolioMetrics.ytdPerformance || formatPercentage(portfolioMetrics.weightedYtd)}
+          </div>
+        </div>
 
-        <Card className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 border-slate-700 shadow-xl hover:shadow-2xl transition-all duration-300">
-          <CardHeader className="py-2 md:py-3">
-            <CardDescription className="text-slate-400 text-[10px] md:text-xs uppercase tracking-wider">Lifetime CAGR</CardDescription>
-            <CardTitle className={`text-xl md:text-3xl font-mono font-bold mt-0.5 md:mt-1 ${(() => {
-              const num = portfolioMetrics.lifetimeCagr ? parseNumeric(portfolioMetrics.lifetimeCagr.toString().replace(/[+%]/g, '')) : null;
-              return (num ?? 0) >= 0 ? 'text-green-400' : 'text-red-400';
-            })()
-              }`}>
-              {portfolioMetrics.lifetimeCagr || "0%"}
-            </CardTitle>
-            <div className="text-slate-400 text-[9px] mt-1">
-              Jan 29th, 2020 -
-            </div>
-          </CardHeader>
-        </Card>
+        {/* CAGR */}
+        <div className="bg-[#111D33] border border-[#1E2D47] rounded-xl px-3 py-2.5 hover:border-[#2A3F5F] transition-colors">
+          <div className="text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-0.5">CAGR</div>
+          <div className={`text-lg font-mono font-black tabular-nums ${(() => {
+            const num = portfolioMetrics.lifetimeCagr ? parseNumeric(portfolioMetrics.lifetimeCagr.toString().replace(/[+%]/g, '')) : null;
+            return (num ?? 0) >= 0 ? 'text-emerald-400' : 'text-rose-400';
+          })()}`}>
+            {portfolioMetrics.lifetimeCagr || "0%"}
+          </div>
+          <div className="text-[8px] text-slate-600 mt-0.5">Since Jan 2020</div>
+        </div>
+
+        {/* P/FCF */}
+        <div className="bg-[#111D33] border border-[#1E2D47] rounded-xl px-3 py-2.5 hover:border-[#2A3F5F] transition-colors">
+          <div className="text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-0.5">26e P/FCF</div>
+          <div className="text-lg font-mono font-black text-amber-400 tabular-nums">
+            {portfolioMetrics.portfolioMultiples.fcf2026 ? `${portfolioMetrics.portfolioMultiples.fcf2026.toFixed(1)}x` : '—'}
+          </div>
+        </div>
+
+        {/* P/E */}
+        <div className="bg-[#111D33] border border-[#1E2D47] rounded-xl px-3 py-2.5 hover:border-[#2A3F5F] transition-colors">
+          <div className="text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-0.5">26e P/E</div>
+          <div className="text-lg font-mono font-black text-amber-400 tabular-nums">
+            {portfolioMetrics.portfolioMultiples.pe2026 ? `${portfolioMetrics.portfolioMultiples.pe2026.toFixed(1)}x` : '—'}
+          </div>
+        </div>
+
+        {/* PEG */}
+        <div className="bg-[#111D33] border border-[#1E2D47] rounded-xl px-3 py-2.5 hover:border-[#2A3F5F] transition-colors">
+          <div className="text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-0.5">PEG</div>
+          <div className="text-lg font-mono font-black text-amber-400 tabular-nums">
+            {portfolioMetrics.portfolioMultiples.peg ? `${portfolioMetrics.portfolioMultiples.peg.toFixed(2)}x` : '—'}
+          </div>
+        </div>
       </div>
 
       {/* Allocation - FIRST Section (Full Width) */}

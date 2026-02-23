@@ -1,6 +1,9 @@
 @import "tailwindcss";
 
 @theme {
+  --font-sans: var(--font-sans);
+  --font-mono: var(--font-mono);
+
   --color-background: 0 0% 100%;
   --color-foreground: 222.2 84% 4.9%;
   --color-card: 0 0% 100%;
@@ -25,25 +28,25 @@
 
 @media (prefers-color-scheme: dark) {
   @theme {
-    --color-background: 222.2 84% 4.9%;
+    --color-background: 220 60% 6%;
     --color-foreground: 210 40% 98%;
-    --color-card: 222.2 84% 4.9%;
+    --color-card: 220 50% 8%;
     --color-card-foreground: 210 40% 98%;
-    --color-popover: 222.2 84% 4.9%;
+    --color-popover: 220 50% 8%;
     --color-popover-foreground: 210 40% 98%;
     --color-primary: 210 40% 98%;
-    --color-primary-foreground: 222.2 47.4% 11.2%;
-    --color-secondary: 217.2 32.6% 17.5%;
+    --color-primary-foreground: 220 60% 6%;
+    --color-secondary: 220 40% 14%;
     --color-secondary-foreground: 210 40% 98%;
-    --color-muted: 217.2 32.6% 17.5%;
+    --color-muted: 220 40% 14%;
     --color-muted-foreground: 215 20.2% 65.1%;
-    --color-accent: 217.2 32.6% 17.5%;
+    --color-accent: 220 40% 14%;
     --color-accent-foreground: 210 40% 98%;
     --color-destructive: 0 62.8% 30.6%;
     --color-destructive-foreground: 210 40% 98%;
-    --color-border: 217.2 32.6% 17.5%;
-    --color-input: 217.2 32.6% 17.5%;
-    --color-ring: 212.7 26.8% 83.9%;
+    --color-border: 220 35% 16%;
+    --color-input: 220 35% 16%;
+    --color-ring: 45 93% 58%;
   }
 }
 
@@ -52,14 +55,22 @@ html {
 }
 
 body {
-  background: hsl(var(--color-background));
-  color: hsl(var(--color-foreground));
+  background: #0A1628;
+  color: hsl(210 40% 98%);
+  font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
   font-feature-settings: "rlig" 1, "calt" 1;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 /* Monospaced font for financial numbers */
 .font-mono {
   font-family: 'JetBrains Mono', 'Geist Mono', 'Courier New', monospace;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Tabular numbers for all financial data */
+.tabular-nums {
   font-variant-numeric: tabular-nums;
 }
 
@@ -70,13 +81,24 @@ body {
   font-size: 0.875rem;
 }
 
-/* Financial terminal styling */
+/* Jiggy Navy background */
 .terminal-bg {
-  background: hsl(222.2 84% 4.9%);
+  background: #0A1628;
   color: hsl(210 40% 98%);
 }
 
-/* Professional Slate Scrollbar */
+/* Gold accent utilities */
+.text-jiggy-gold { color: #F59E0B; }
+.bg-jiggy-gold { background-color: #F59E0B; }
+.border-jiggy-gold { border-color: #F59E0B; }
+.text-jiggy-gold\/20 { color: rgba(245, 158, 11, 0.2); }
+
+/* Navy surface levels */
+.bg-jiggy-surface { background-color: #111D33; }
+.bg-jiggy-surface-2 { background-color: #162340; }
+.border-jiggy-border { border-color: #1E2D47; }
+
+/* Professional Scrollbar — navy theme */
 .custom-scrollbar::-webkit-scrollbar {
   width: 6px;
   height: 6px;
@@ -87,22 +109,22 @@ body {
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: #334155;
+  background: #1E2D47;
   border-radius: 10px;
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: #475569;
+  background: #2A3F5F;
 }
 
 /* Hide sidebar scrollbar completely */
 aside nav {
-  -ms-overflow-style: none;  /* IE and Edge */
-  scrollbar-width: none;  /* Firefox */
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
 
 aside nav::-webkit-scrollbar {
-  display: none;  /* Chrome, Safari and Opera */
+  display: none;
 }
 
 /* Kill all focus outlines and tap highlights for charts */
@@ -123,7 +145,6 @@ svg:focus {
   outline: none !important;
 }
 
-/* Fix for orange focus rings on browsers */
 :focus-visible {
   outline: none !important;
 }
