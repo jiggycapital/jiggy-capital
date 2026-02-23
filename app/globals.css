@@ -55,7 +55,8 @@ html {
 }
 
 body {
-  background: #0A0A1A;
+  background: radial-gradient(circle at top left, #05152A, #030D1A, #020810);
+  background-attachment: fixed;
   color: hsl(210 40% 98%);
   font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
   font-feature-settings: "rlig" 1, "calt" 1;
@@ -83,7 +84,7 @@ body {
 
 /* Jiggy Navy background */
 .terminal-bg {
-  background: #0A0A1A;
+  background: #030D1A;
   color: hsl(210 40% 98%);
 }
 
