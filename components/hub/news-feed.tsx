@@ -4,21 +4,16 @@ import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Newspaper, ExternalLink, MessageSquare } from "lucide-react";
 
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-
 /**
  * Advanced headline relevance checker to filter out "clout-chasing" news.
- * Targets headlines like "SmallCo Launches on Google Marketplace" where Google is secondary noise.
  */
 function isHeadlineRelevant(headline: string, ticker: string, companyName: string): boolean {
   const h = headline.toLowerCase();
   const t = ticker.toLowerCase();
   const n = companyName.toLowerCase().replace(/ (inc|corp|ltd|plc|class [ab])$/i, "").trim();
 
-  // Basic check: must contain ticker or name
   if (!h.includes(t) && !h.includes(n)) return false;
 
-  // Pattern 1: Platform Noise (X launches on [Company])
   const platformKeywords = [
     "launches on", "available on", "now on", "integrated with",
     "integration with", "listed on", "marketplace", "app store",
@@ -31,10 +26,7 @@ function isHeadlineRelevant(headline: string, ticker: string, companyName: strin
     if (h.includes(phrase)) {
       const phraseIdx = h.indexOf(phrase);
       const companyIdx = h.includes(t) ? h.indexOf(t) : h.indexOf(n);
-
-      // If company is mentioned AFTER the platform/launch phrase, it's likely secondary
       if (companyIdx > phraseIdx) {
-        // Exception: If the company is ALSO at the start (Subject), it might be legit
         const first15 = h.substring(0, 15);
         if (first15.includes(t) || first15.includes(n)) return true;
         return false;
@@ -42,19 +34,14 @@ function isHeadlineRelevant(headline: string, ticker: string, companyName: strin
     }
   }
 
-  // Pattern 2: Subject-Detail analysis (Colon/Dash)
-  // Headlines like "SmallCo News: launches on Google" are usually noise for Google.
   if (h.includes(":") || h.includes(" - ")) {
     const separator = h.includes(":") ? ":" : " - ";
     const parts = h.split(separator);
     const subject = parts[0].trim();
     const details = parts.slice(1).join(separator).trim();
-
     const inSubject = subject.includes(t) || subject.includes(n);
     const inDetails = details.includes(t) || details.includes(n);
-
     if (inDetails && !inSubject) {
-      // If in details but not subject, only allow if high-value financial keywords are present
       const financeKeywords = ["shares", "stock", "earnings", "dividend", "revenue", "profit", "outlook", "guidance", "buyback"];
       if (!financeKeywords.some(k => details.includes(k))) {
         return false;
@@ -85,6 +72,7 @@ interface NewsFeedProps {
 export function NewsFeed({ portfolioData, logos, className }: NewsFeedProps) {
   const [news, setNews] = useState<NewsItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [newsSource, setNewsSource] = useState<"fmp" | "finnhub">("fmp");
 
   useEffect(() => {
     async function fetchNews() {
@@ -102,56 +90,88 @@ export function NewsFeed({ portfolioData, logos, className }: NewsFeedProps) {
           }))
           .filter(t => t.ticker && t.ticker !== "CASH" && t.ticker !== "SUM");
 
-        const allFetchedNews: any[] = [];
-        const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+        // Try FMP first (multi-source news: Reuters, CNBC, MarketWatch, etc.)
+        let allFetchedNews: any[] = [];
+        let usedFMP = false;
 
-        for (const item of tickers) {
-          try {
-            const resp = await fetch(`/api/finnhub?endpoint=company-news&symbol=${item.ticker}&from=${fromDate}&to=${toDate}`);
-            if (!resp.ok) continue;
+        try {
+          const tickerList = tickers.map(t => t.ticker).join(",");
+          const fmpResp = await fetch(
+            `/api/fmp?endpoint=stock-news&tickers=${tickerList}&from=${fromDate}&to=${toDate}&limit=100`
+          );
 
-            const data = await resp.json();
-            if (Array.isArray(data)) {
-              const taggedNews = data.map((newsItem: any) => ({
-                ...newsItem,
-                ticker: item.ticker,
-                companyName: item.name
+          if (fmpResp.ok) {
+            const fmpData = await fmpResp.json();
+            if (Array.isArray(fmpData) && fmpData.length > 0) {
+              allFetchedNews = fmpData.map((item: any) => ({
+                id: item.url || `fmp-${item.publishedDate}-${item.title?.substring(0, 20)}`,
+                ticker: (item.symbol || item.tickers || "").toString().split(",")[0].toUpperCase(),
+                headline: item.title || "",
+                summary: item.text || "",
+                source: item.site || item.source || "FMP",
+                url: item.url || "",
+                datetime: item.publishedDate ? Math.floor(new Date(item.publishedDate).getTime() / 1000) : 0,
+                image: item.image || "",
+                companyName: tickers.find(t => t.ticker === (item.symbol || "").toUpperCase())?.name || "",
               }));
-              allFetchedNews.push(...taggedNews);
+              usedFMP = true;
+              setNewsSource("fmp");
             }
-            await sleep(100);
-          } catch (e) {
-            console.error(`Error fetching news for ${item.ticker}:`, e);
+          }
+        } catch (e) {
+          console.warn("FMP news fetch failed, falling back to Finnhub:", e);
+        }
+
+        // Fallback to Finnhub if FMP fails or returns no data
+        if (!usedFMP) {
+          setNewsSource("finnhub");
+          const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
+          for (const item of tickers) {
+            try {
+              const resp = await fetch(`/api/finnhub?endpoint=company-news&symbol=${item.ticker}&from=${fromDate}&to=${toDate}`);
+              if (!resp.ok) continue;
+
+              const data = await resp.json();
+              if (Array.isArray(data)) {
+                const taggedNews = data.map((newsItem: any) => ({
+                  ...newsItem,
+                  ticker: item.ticker,
+                  companyName: item.name
+                }));
+                allFetchedNews.push(...taggedNews);
+              }
+              await sleep(100);
+            } catch (e) {
+              console.error(`Error fetching news for ${item.ticker}:`, e);
+            }
           }
         }
 
+        // Deduplicate
         const uniqueNewsMap = new Map();
         allFetchedNews.forEach(n => {
-          if (n.id && !uniqueNewsMap.has(n.id)) {
-            uniqueNewsMap.set(n.id, n);
+          const key = n.id || n.url || `${n.headline}-${n.datetime}`;
+          if (key && !uniqueNewsMap.has(key)) {
+            uniqueNewsMap.set(key, n);
           }
         });
         const uniqueNews = Array.from(uniqueNewsMap.values());
 
+        // Filter
         const filteredNews = uniqueNews.filter(n => {
           const ticker = (n.ticker || "").toUpperCase();
           const headline = n.headline || "";
           const companyName = n.companyName || "";
-          const url = (n.url || "").toLowerCase();
-          const source = (n.source || "").toLowerCase();
 
-          if (ticker === 'TSLA') return false; // Filter out Tesla due to noise
-          if (url.includes('fool.com')) return false;
-          if (url.includes('seekingalpha.com')) return false;
-          if (source.includes('seekingalpha')) return false;
-          if (source.includes('seeking alpha')) return false;
+          if (ticker === 'TSLA') return false;
 
           return isHeadlineRelevant(headline, ticker, companyName);
         });
 
         const sortedNews = filteredNews
           .sort((a, b) => b.datetime - a.datetime)
-          .slice(0, 30);
+          .slice(0, 40);
 
         setNews(sortedNews);
       } catch (err) {
@@ -167,16 +187,18 @@ export function NewsFeed({ portfolioData, logos, className }: NewsFeedProps) {
   }, [portfolioData]);
 
   return (
-    <Card className={`bg-slate-900/50 border-slate-800 overflow-hidden flex flex-col shadow-2xl ${className || 'h-[750px]'}`}>
-      <CardHeader className="py-4 border-b border-slate-800 shrink-0">
+    <Card className={`bg-[#111D33]/50 border-[#1E2D47] overflow-hidden flex flex-col shadow-2xl ${className || 'h-[750px]'}`}>
+      <CardHeader className="py-4 border-b border-[#1E2D47] shrink-0">
         <CardTitle className="text-sm font-bold flex items-center justify-between text-slate-100 uppercase tracking-wider">
           <div className="flex items-center gap-2">
-            <Newspaper className="w-4 h-4 text-emerald-400" />
+            <Newspaper className="w-4 h-4 text-amber-400" />
             Company News
           </div>
           <div className="flex items-center gap-1.5">
             <span className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
-            <span className="text-[10px] text-slate-500 lowercase font-normal italic">real-time pulses</span>
+            <span className="text-[9px] text-slate-600 lowercase font-semibold">
+              {newsSource === "fmp" ? "multi-source" : "finnhub"}
+            </span>
           </div>
         </CardTitle>
       </CardHeader>
@@ -184,39 +206,39 @@ export function NewsFeed({ portfolioData, logos, className }: NewsFeedProps) {
         {loading ? (
           <div className="flex-1 flex flex-col items-center justify-center p-12 text-center space-y-4">
             <div className="flex justify-center">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-400"></div>
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-amber-400"></div>
             </div>
             <p className="text-slate-500 text-sm">Aggregating market signal...</p>
           </div>
         ) : news.length === 0 ? (
           <div className="flex-1 flex items-center justify-center p-12 text-center text-slate-500 text-sm italic">No relevant news found for your holdings</div>
         ) : (
-          <div className="divide-y divide-slate-800/50 overflow-y-auto flex-1 custom-scrollbar">
+          <div className="divide-y divide-[#1E2D47]/50 overflow-y-auto flex-1 custom-scrollbar">
             {news.map((item) => (
-              <div key={item.id} className="p-3.5 hover:bg-slate-800/40 transition-all flex gap-4 group relative overflow-hidden">
+              <div key={item.id} className="p-3.5 hover:bg-[#111D33]/60 transition-all flex gap-4 group relative overflow-hidden">
                 <div className="shrink-0 flex flex-col items-center gap-1.5 relative z-10">
-                  <div className="w-10 h-10 rounded-xl bg-slate-800 flex items-center justify-center shrink-0 border border-slate-700 shadow-xl group-hover:border-emerald-500/30 transition-all transform group-hover:scale-105">
+                  <div className="w-10 h-10 rounded-xl bg-[#0A1628] flex items-center justify-center shrink-0 border border-[#1E2D47] shadow-xl group-hover:border-amber-500/30 transition-all transform group-hover:scale-105">
                     {logos[item.ticker] ? (
-                      <img src={logos[item.ticker]} alt={item.ticker} className="w-6 h-6 object-contain" />
+                      <img src={logos[item.ticker]} alt={item.ticker} className="w-7 h-7 object-contain" />
                     ) : (
                       <span className="text-[10px] font-black text-slate-500">{item.ticker}</span>
                     )}
                   </div>
-                  <div className="px-1 py-0.5 rounded bg-slate-800 border border-slate-700 text-[8px] font-black text-slate-400 font-mono tracking-tighter uppercase group-hover:bg-slate-700 group-hover:text-slate-200 transition-colors">
+                  <div className="px-1 py-0.5 rounded bg-[#0A1628] border border-[#1E2D47] text-[8px] font-black text-slate-500 font-mono tracking-tighter uppercase group-hover:text-slate-300 transition-colors">
                     {item.ticker}
                   </div>
                 </div>
                 <div className="min-w-0 flex-1 relative z-10">
                   <div className="flex items-center justify-between mb-1">
                     <div className="flex items-center gap-2">
-                      <span className="text-[9px] font-black text-emerald-400 bg-emerald-500/5 border border-emerald-500/10 px-1.5 py-0.5 rounded uppercase tracking-tighter">{item.source}</span>
+                      <span className="text-[9px] font-black text-amber-400 bg-amber-500/10 border border-amber-500/15 px-1.5 py-0.5 rounded uppercase tracking-tighter">{item.source}</span>
                       <span className="text-[10px] text-slate-500 font-medium flex items-center gap-1">
                         <MessageSquare className="w-2.5 h-2.5" />
                         {new Date(item.datetime * 1000).toLocaleDateString([], { month: 'short', day: 'numeric' })} • {new Date(item.datetime * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                       </span>
                     </div>
                   </div>
-                  <h4 className="text-[14px] font-bold text-slate-100 leading-[1.3] mb-1 group-hover:text-emerald-50 transition-colors tracking-tight">
+                  <h4 className="text-[14px] font-bold text-slate-100 leading-[1.3] mb-1 group-hover:text-amber-50 transition-colors tracking-tight">
                     {item.headline}
                   </h4>
                   <p className="text-[12px] text-slate-400 line-clamp-2 mb-2 leading-relaxed font-medium group-hover:text-slate-300 transition-colors">
@@ -226,13 +248,11 @@ export function NewsFeed({ portfolioData, logos, className }: NewsFeedProps) {
                     href={item.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 text-[10px] font-black text-blue-400 hover:text-blue-300 transition-all transform group-hover:translate-x-1"
+                    className="inline-flex items-center gap-2 text-[10px] font-black text-amber-400 hover:text-amber-300 transition-all transform group-hover:translate-x-1"
                   >
-                    READ ANALYSIS <ExternalLink className="w-2.5 h-2.5" />
+                    READ ARTICLE <ExternalLink className="w-2.5 h-2.5" />
                   </a>
                 </div>
-                {/* Subtle background decoration */}
-                <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/5 blur-[60px] rounded-full -translate-y-16 translate-x-16 pointer-events-none" />
               </div>
             ))}
           </div>
