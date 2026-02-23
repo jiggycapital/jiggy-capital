@@ -132,14 +132,14 @@ export function PortfolioTanStackTable({ positionsData, logos }: PortfolioTanSta
         cell: ({ row }) => {
           const { ticker, name, isCash } = row.original;
           return (
-            <div className="flex items-center gap-2">
-              <div className="w-7 h-7 rounded bg-slate-800 flex items-center justify-center overflow-hidden shrink-0 border border-slate-700">
+            <div className="flex items-center gap-2.5">
+              <div className="w-9 h-9 rounded-lg bg-[#111D33] flex items-center justify-center overflow-hidden shrink-0 border border-[#1E2D47]">
                 {isCash ? (
-                  <Wallet className="w-3.5 h-3.5 text-emerald-400" />
+                  <Wallet className="w-4 h-4 text-emerald-400" />
                 ) : logos[ticker] ? (
-                  <img src={logos[ticker]} alt={ticker} className="w-5 h-5 object-contain" />
+                  <img src={logos[ticker]} alt={ticker} className="w-7 h-7 object-contain" />
                 ) : (
-                  <span className="text-[9px] font-bold text-slate-500">{ticker.substring(0, 3)}</span>
+                  <span className="text-[10px] font-extrabold text-slate-500">{ticker.substring(0, 3)}</span>
                 )}
               </div>
               <div className="flex flex-col min-w-0">
@@ -255,8 +255,11 @@ export function PortfolioTanStackTable({ positionsData, logos }: PortfolioTanSta
         cell: ({ row }) => {
           const { dailyChange, isCash } = row.original;
           if (isCash) return null;
+          const bg = dailyChange >= 0
+            ? dailyChange > 2 ? 'bg-emerald-500/15' : dailyChange > 0.5 ? 'bg-emerald-500/8' : ''
+            : dailyChange < -2 ? 'bg-rose-500/15' : dailyChange < -0.5 ? 'bg-rose-500/8' : '';
           return (
-            <div className={`text-right font-mono text-[13px] font-bold ${dailyChange >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
+            <div className={`text-right font-mono text-[13px] font-bold px-2 py-0.5 rounded ${bg} ${dailyChange >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
               {dailyChange >= 0 ? '+' : ''}{dailyChange.toFixed(1)}%
             </div>
           );
@@ -279,8 +282,11 @@ export function PortfolioTanStackTable({ positionsData, logos }: PortfolioTanSta
         cell: ({ row }) => {
           const { ytdGain, isCash } = row.original;
           if (isCash) return null;
+          const bg = ytdGain >= 0
+            ? ytdGain > 10 ? 'bg-emerald-500/15' : ytdGain > 3 ? 'bg-emerald-500/8' : ''
+            : ytdGain < -10 ? 'bg-rose-500/15' : ytdGain < -3 ? 'bg-rose-500/8' : '';
           return (
-            <div className={`text-right font-mono text-[13px] font-bold ${ytdGain >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
+            <div className={`text-right font-mono text-[13px] font-bold px-2 py-0.5 rounded ${bg} ${ytdGain >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
               {ytdGain >= 0 ? '+' : ''}{ytdGain.toFixed(1)}%
             </div>
           );
@@ -459,18 +465,18 @@ export function PortfolioTanStackTable({ positionsData, logos }: PortfolioTanSta
   });
 
   return (
-    <div className="rounded-xl border border-slate-800 bg-slate-900/50 overflow-hidden flex flex-col h-full max-h-[750px]">
+    <div className="rounded-xl border border-[#1E2D47] bg-[#111D33]/50 overflow-hidden flex flex-col h-full max-h-[750px]">
       <div className="overflow-auto custom-scrollbar flex-1 relative">
         <Table className="relative">
-          <TableHeader className="bg-slate-800/50 sticky top-0 z-20 shadow-md">
+          <TableHeader className="bg-[#0D1A2E] sticky top-0 z-20 shadow-md">
             {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id} className="border-slate-800 hover:bg-transparent">
+              <TableRow key={headerGroup.id} className="border-[#1E2D47] hover:bg-transparent">
                 {headerGroup.headers.map((header) => (
                   <TableHead
                     key={header.id}
                     className={`text-slate-400 font-bold py-4 ${header.id === 'ticker'
-                      ? 'sticky left-0 z-30 bg-slate-800 border-r border-slate-800/50 min-w-[120px] max-w-[150px] md:min-w-[180px]'
-                      : 'bg-slate-800/50'
+                      ? 'sticky left-0 z-30 bg-[#0D1A2E] border-r border-[#1E2D47]/50 min-w-[140px] max-w-[170px] md:min-w-[200px]'
+                      : 'bg-[#0D1A2E]'
                       }`}
                   >
                     {header.isPlaceholder
@@ -490,13 +496,13 @@ export function PortfolioTanStackTable({ positionsData, logos }: PortfolioTanSta
                 <TableRow
                   key={row.id}
                   data-state={row.getIsSelected() && "selected"}
-                  className="border-slate-800 hover:bg-slate-800/30 transition-colors"
+                  className="border-[#1E2D47] hover:bg-[#111D33]/60 transition-colors"
                 >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell
                       key={cell.id}
                       className={`py-3 ${cell.column.id === 'ticker'
-                        ? 'sticky left-0 bg-slate-900 z-10 border-r border-slate-800/50 min-w-[120px] max-w-[150px] md:min-w-[180px]'
+                        ? 'sticky left-0 bg-[#0A1628] z-10 border-r border-[#1E2D47]/50 min-w-[140px] max-w-[170px] md:min-w-[200px]'
                         : ''
                         }`}
                     >

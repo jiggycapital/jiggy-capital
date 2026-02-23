@@ -512,10 +512,10 @@ export function HomeDashboard() {
       {/* Allocation - FIRST Section (Full Width) */}
       <div className="w-full">
         {/* Interactive Pie Chart */}
-        <Card className="bg-slate-900/50 backdrop-blur-sm border-slate-800 shadow-xl">
+        <Card className="bg-[#111D33]/50 backdrop-blur-sm border-[#1E2D47] shadow-xl">
           <CardHeader className="pb-2">
             <CardTitle className="text-xl font-bold text-slate-100 flex items-center gap-2">
-              <PieChartIcon className="h-5 w-5 text-blue-400" />
+              <PieChartIcon className="h-5 w-5 text-amber-400" />
               {pieChartView === "company" ? "Portfolio Allocation" : "Sector Allocation"}
             </CardTitle>
           </CardHeader>
@@ -534,21 +534,21 @@ export function HomeDashboard() {
       <div className="w-full">
         <Tabs defaultValue="holdings" className="w-full">
           <div className="flex items-center justify-between mb-4">
-            <TabsList className="bg-slate-900/50 border border-slate-800 p-1">
+            <TabsList className="bg-[#111D33] border border-[#1E2D47] p-1">
               <TabsTrigger
                 value="holdings"
-                className="data-[state=active]:bg-blue-600 data-[state=active]:text-white text-xs font-bold px-6"
+                className="data-[state=active]:bg-amber-500 data-[state=active]:text-black text-xs font-bold px-6"
               >
                 My Holdings
               </TabsTrigger>
               <TabsTrigger
                 value="watchlist"
-                className="data-[state=active]:bg-blue-600 data-[state=active]:text-white text-xs font-bold px-6"
+                className="data-[state=active]:bg-amber-500 data-[state=active]:text-black text-xs font-bold px-6"
               >
                 Watchlist
               </TabsTrigger>
             </TabsList>
-            <div className="hidden md:block text-[10px] font-medium text-slate-500 uppercase tracking-widest bg-slate-900/30 px-3 py-1 rounded-full border border-slate-800/50">
+            <div className="hidden md:block text-[10px] font-medium text-slate-600 uppercase tracking-widest bg-[#111D33] px-3 py-1 rounded-full border border-[#1E2D47]">
               {new Date().toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' })}
             </div>
           </div>
@@ -574,7 +574,7 @@ export function HomeDashboard() {
         {/* Left Column: Movers + Events */}
         <div className="flex flex-col gap-4 md:gap-6 h-full min-h-0">
           {/* Daily Movers - Compact Horizontal Design */}
-          <Card className="bg-slate-900/50 backdrop-blur-sm border-slate-800 shadow-xl shrink-0">
+          <Card className="bg-[#111D33]/50 backdrop-blur-sm border-[#1E2D47] shadow-xl shrink-0">
             <CardContent className="p-4 space-y-3">
               {/* Top Gainers Row */}
               <div className="space-y-2">
@@ -586,29 +586,31 @@ export function HomeDashboard() {
                   {topGainers.map((item, idx) => (
                     <div
                       key={idx}
-                      className="flex items-center gap-2 px-3 py-2 rounded-full bg-emerald-500/10 border border-emerald-500/20 hover:bg-emerald-500/15 transition-colors"
+                      className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-emerald-500/8 border border-emerald-500/15 hover:bg-emerald-500/15 transition-colors"
                     >
-                      <div className="w-5 h-5 rounded-full bg-slate-800 flex items-center justify-center overflow-hidden border border-slate-700">
+                      <div className="w-8 h-8 rounded-lg bg-[#0A1628] flex items-center justify-center overflow-hidden border border-[#1E2D47]">
                         {logos[item.ticker] ? (
                           <img
                             src={logos[item.ticker]}
                             alt=""
-                            className="w-4 h-4 object-contain"
+                            className="w-6 h-6 object-contain"
                             onError={(e) => (e.target as any).style.display = 'none'}
                           />
                         ) : (
-                          <span className="text-[8px] font-bold text-slate-500">{item.ticker.substring(0, 2)}</span>
+                          <span className="text-[9px] font-extrabold text-slate-500">{item.ticker.substring(0, 2)}</span>
                         )}
                       </div>
-                      <span className="text-xs font-bold text-slate-200">{item.ticker}</span>
-                      <span className="text-xs font-mono font-bold text-emerald-400">+{item.gain.toFixed(1)}%</span>
+                      <div className="flex flex-col">
+                        <span className="text-xs font-bold text-slate-200 leading-tight">{item.ticker}</span>
+                        <span className="text-[10px] font-mono font-bold text-emerald-400 leading-tight">+{item.gain.toFixed(1)}%</span>
+                      </div>
                     </div>
                   ))}
                 </div>
               </div>
 
               {/* Divider */}
-              <div className="border-t border-slate-800"></div>
+              <div className="border-t border-[#1E2D47]"></div>
 
               {/* Top Losers Row */}
               <div className="space-y-2">
@@ -620,22 +622,24 @@ export function HomeDashboard() {
                   {topLosers.map((item, idx) => (
                     <div
                       key={idx}
-                      className="flex items-center gap-2 px-3 py-2 rounded-full bg-rose-500/10 border border-rose-500/20 hover:bg-rose-500/15 transition-colors"
+                      className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-rose-500/8 border border-rose-500/15 hover:bg-rose-500/15 transition-colors"
                     >
-                      <div className="w-5 h-5 rounded-full bg-slate-800 flex items-center justify-center overflow-hidden border border-slate-700">
+                      <div className="w-8 h-8 rounded-lg bg-[#0A1628] flex items-center justify-center overflow-hidden border border-[#1E2D47]">
                         {logos[item.ticker] ? (
                           <img
                             src={logos[item.ticker]}
                             alt=""
-                            className="w-4 h-4 object-contain"
+                            className="w-6 h-6 object-contain"
                             onError={(e) => (e.target as any).style.display = 'none'}
                           />
                         ) : (
-                          <span className="text-[8px] font-bold text-slate-500">{item.ticker.substring(0, 2)}</span>
+                          <span className="text-[9px] font-extrabold text-slate-500">{item.ticker.substring(0, 2)}</span>
                         )}
                       </div>
-                      <span className="text-xs font-bold text-slate-200">{item.ticker}</span>
-                      <span className="text-xs font-mono font-bold text-rose-400">{item.gain.toFixed(1)}%</span>
+                      <div className="flex flex-col">
+                        <span className="text-xs font-bold text-slate-200 leading-tight">{item.ticker}</span>
+                        <span className="text-[10px] font-mono font-bold text-rose-400 leading-tight">{item.gain.toFixed(1)}%</span>
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -663,7 +667,7 @@ export function HomeDashboard() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
         {/* YTD Benchmark Performance */}
         {performanceData?.ytdBenchmarks && performanceData.ytdBenchmarks.length > 0 && (
-          <Card className="bg-slate-900/50 backdrop-blur-sm border-slate-800 shadow-xl">
+          <Card className="bg-[#111D33]/50 backdrop-blur-sm border-[#1E2D47] shadow-xl">
             <CardHeader className="pb-3">
               <CardTitle className="text-lg font-bold text-slate-100 flex items-center gap-2">
                 <Activity className="h-4 w-4 text-emerald-400" />
@@ -675,9 +679,9 @@ export function HomeDashboard() {
                 {performanceData.ytdBenchmarks.map((benchmark: { name: string; value: string }, idx: number) => {
                   const num = parseNumeric(benchmark.value.toString().replace(/[+%bp]/g, ''));
                   return (
-                    <div key={idx} className="p-3 rounded-lg bg-slate-800/50 border border-slate-800 flex flex-col items-center justify-center gap-1">
+                    <div key={idx} className="p-3 rounded-lg bg-[#0A1628] border border-[#1E2D47] flex flex-col items-center justify-center gap-1">
                       <span className="text-[10px] text-slate-500 uppercase font-bold tracking-widest">{benchmark.name}</span>
-                      <span className={`text-xl font-mono font-bold ${num !== null && num >= 0 ? 'text-green-400' : 'text-red-400'
+                      <span className={`text-xl font-mono font-bold ${num !== null && num >= 0 ? 'text-emerald-400' : 'text-rose-400'
                         }`}>
                         {benchmark.value}
                       </span>
@@ -690,7 +694,7 @@ export function HomeDashboard() {
         )}
 
         {/* Portfolio Multiples */}
-        <Card className="bg-slate-900/50 backdrop-blur-sm border-slate-800 shadow-xl">
+        <Card className="bg-[#111D33]/50 backdrop-blur-sm border-[#1E2D47] shadow-xl">
           <CardHeader className="pb-3">
             <CardTitle className="text-lg font-bold text-slate-100 flex items-center gap-2">
               <Target className="h-4 w-4 text-amber-400" />
@@ -699,21 +703,21 @@ export function HomeDashboard() {
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-3 gap-3">
-              <div className="p-3 rounded-lg bg-slate-800/50 border border-slate-800 flex flex-col items-center justify-center gap-1">
+              <div className="p-3 rounded-lg bg-[#0A1628] border border-[#1E2D47] flex flex-col items-center justify-center gap-1">
                 <span className="text-[10px] text-slate-500 uppercase font-bold tracking-widest text-center">26e FCF</span>
-                <span className="text-xl font-mono font-bold text-slate-100">
+                <span className="text-xl font-mono font-bold text-amber-400">
                   {portfolioMetrics.portfolioMultiples.fcf2026 ? `${portfolioMetrics.portfolioMultiples.fcf2026.toFixed(1)}x` : '-'}
                 </span>
               </div>
-              <div className="p-3 rounded-lg bg-slate-800/50 border border-slate-800 flex flex-col items-center justify-center gap-1">
+              <div className="p-3 rounded-lg bg-[#0A1628] border border-[#1E2D47] flex flex-col items-center justify-center gap-1">
                 <span className="text-[10px] text-slate-500 uppercase font-bold tracking-widest text-center">26e P/E</span>
-                <span className="text-xl font-mono font-bold text-slate-100">
+                <span className="text-xl font-mono font-bold text-amber-400">
                   {portfolioMetrics.portfolioMultiples.pe2026 ? `${portfolioMetrics.portfolioMultiples.pe2026.toFixed(1)}x` : '-'}
                 </span>
               </div>
-              <div className="p-3 rounded-lg bg-slate-800/50 border border-slate-800 flex flex-col items-center justify-center gap-1">
+              <div className="p-3 rounded-lg bg-[#0A1628] border border-[#1E2D47] flex flex-col items-center justify-center gap-1">
                 <span className="text-[10px] text-slate-500 uppercase font-bold tracking-widest text-center">PEG</span>
-                <span className="text-xl font-mono font-bold text-slate-100">
+                <span className="text-xl font-mono font-bold text-amber-400">
                   {portfolioMetrics.portfolioMultiples.peg ? `${portfolioMetrics.portfolioMultiples.peg.toFixed(2)}x` : '-'}
                 </span>
               </div>
