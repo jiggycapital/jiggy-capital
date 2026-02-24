@@ -46,6 +46,8 @@ interface PortfolioRow {
 }
 
 export function PortfolioTanStackTable({ positionsData, logos: initialLogos }: PortfolioTanStackTableProps) {
+  const [maView, setMaView] = useState<'50D' | '200D'>('50D');
+
   const tickers = useMemo(() => {
     return positionsData
       .map(p => (p.Ticker || p.Symbol || "").toUpperCase())
@@ -161,20 +163,6 @@ export function PortfolioTanStackTable({ positionsData, logos: initialLogos }: P
         },
       },
       {
-        id: "sparkline",
-        header: () => <div className="text-center text-slate-400 text-[11px]">30D</div>,
-        cell: ({ row }) => {
-          const { ticker, isCash } = row.original;
-          if (isCash) return null;
-          return (
-            <div className="flex justify-center">
-              <InlineSparkline ticker={ticker} width={72} height={22} days={30} />
-            </div>
-          );
-        },
-        enableSorting: false,
-      },
-      {
         accessorKey: "price",
         header: ({ column }) => (
           <div
@@ -263,6 +251,20 @@ export function PortfolioTanStackTable({ positionsData, logos: initialLogos }: P
         ),
       },
       {
+        id: "sparkline",
+        header: () => <div className="text-center text-slate-400 text-[11px]">30D Trend</div>,
+        cell: ({ row }) => {
+          const { ticker, isCash } = row.original;
+          if (isCash) return null;
+          return (
+            <div className="flex justify-center">
+              <InlineSparkline ticker={ticker} width={140} height={26} days={30} />
+            </div>
+          );
+        },
+        enableSorting: false,
+      },
+      {
         accessorKey: "dailyChange",
         header: ({ column }) => (
           <div
@@ -317,59 +319,36 @@ export function PortfolioTanStackTable({ positionsData, logos: initialLogos }: P
         },
       },
       {
-        accessorKey: "d50",
-        sortingFn: (rowA, rowB, columnId) => {
-          const a = rowA.original.d50;
-          const b = rowB.original.d50;
+        id: "movingAvg",
+        sortingFn: (rowA, rowB) => {
+          const field = maView === '50D' ? 'd50' : 'd200';
+          const a = rowA.original[field];
+          const b = rowB.original[field];
           const numA = typeof a === 'number' ? a : 0;
           const numB = typeof b === 'number' ? b : 0;
           return numA - numB;
         },
         header: ({ column }) => (
-          <div
-            className="flex items-center justify-end gap-1 cursor-pointer select-none hover:text-slate-200 transition-colors whitespace-normal leading-tight text-right"
-            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          >
-            50D
-            {{
-              asc: <ArrowUp className="h-3 w-3 shrink-0" />,
-              desc: <ArrowDown className="h-3 w-3 shrink-0" />,
-            }[column.getIsSorted() as string] ?? <ArrowUpDown className="h-3 w-3 shrink-0 opacity-50" />}
+          <div className="flex items-center justify-end gap-1">
+            <button
+              onClick={(e) => { e.stopPropagation(); setMaView(prev => prev === '50D' ? '200D' : '50D'); }}
+              className="text-[11px] px-1.5 py-0.5 rounded bg-[#2A2A61]/60 hover:bg-[#2A2A61] text-amber-400 font-bold transition-colors cursor-pointer"
+            >
+              {maView}
+            </button>
+            <span
+              className="cursor-pointer select-none hover:text-slate-200 transition-colors"
+              onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+            >
+              {{
+                asc: <ArrowUp className="h-3 w-3 shrink-0" />,
+                desc: <ArrowDown className="h-3 w-3 shrink-0" />,
+              }[column.getIsSorted() as string] ?? <ArrowUpDown className="h-3 w-3 shrink-0 opacity-50" />}
+            </span>
           </div>
         ),
         cell: ({ row }) => {
-          const val = row.original.d50;
-          const numVal = typeof val === 'number' ? val : null;
-          return (
-            <div className={`text-right font-mono text-[12px] font-bold ${numVal !== null ? (numVal >= 0 ? 'text-emerald-400' : 'text-rose-400') : 'text-slate-400'}`}>
-              {numVal !== null ? formatPercentage(numVal) : (val || "-")}
-            </div>
-          );
-        }
-      },
-      {
-        accessorKey: "d200",
-        sortingFn: (rowA, rowB, columnId) => {
-          const a = rowA.original.d200;
-          const b = rowB.original.d200;
-          const numA = typeof a === 'number' ? a : 0;
-          const numB = typeof b === 'number' ? b : 0;
-          return numA - numB;
-        },
-        header: ({ column }) => (
-          <div
-            className="flex items-center justify-end gap-1 cursor-pointer select-none hover:text-slate-200 transition-colors whitespace-normal leading-tight text-right"
-            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          >
-            200D
-            {{
-              asc: <ArrowUp className="h-3 w-3 shrink-0" />,
-              desc: <ArrowDown className="h-3 w-3 shrink-0" />,
-            }[column.getIsSorted() as string] ?? <ArrowUpDown className="h-3 w-3 shrink-0 opacity-50" />}
-          </div>
-        ),
-        cell: ({ row }) => {
-          const val = row.original.d200;
+          const val = maView === '50D' ? row.original.d50 : row.original.d200;
           const numVal = typeof val === 'number' ? val : null;
           return (
             <div className={`text-right font-mono text-[12px] font-bold ${numVal !== null ? (numVal >= 0 ? 'text-emerald-400' : 'text-rose-400') : 'text-slate-400'}`}>
