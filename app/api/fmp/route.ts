@@ -26,21 +26,27 @@ export async function GET(req: NextRequest) {
     const endpointMap: Record<string, string> = {
         "stock-news": "news/stock",
         "stock-news-latest": "news/stock-latest",
-        "profile": "profile",
     };
 
-    const fmpPath = endpointMap[endpoint] || endpoint;
-    let url = `https://financialmodelingprep.com/stable/${fmpPath}?apikey=${apiKey}`;
+    let url = "";
 
-    if (tickers) url += `&tickers=${tickers}`;
-    if (from) url += `&from=${from}`;
-    if (to) url += `&to=${to}`;
-    if (limit) url += `&limit=${limit}`;
-    if (page) url += `&page=${page}`;
+    if (endpoint === "profile") {
+        // FMP Profile API uses v3 and expects comma-separated symbols in the path
+        const symbol = searchParams.get("symbol");
+        if (!symbol) {
+            return NextResponse.json({ error: "Symbol parameter is required for profile endpoint" }, { status: 400 });
+        }
+        url = `https://financialmodelingprep.com/api/v3/profile/${symbol}?apikey=${apiKey}`;
+    } else {
+        const fmpPath = endpointMap[endpoint] || endpoint;
+        url = `https://financialmodelingprep.com/stable/${fmpPath}?apikey=${apiKey}`;
 
-    // For profile endpoint, use symbol param instead of tickers
-    const symbol = searchParams.get("symbol");
-    if (symbol) url += `&symbol=${symbol}`;
+        if (tickers) url += `&tickers=${tickers}`;
+        if (from) url += `&from=${from}`;
+        if (to) url += `&to=${to}`;
+        if (limit) url += `&limit=${limit}`;
+        if (page) url += `&page=${page}`;
+    }
 
     try {
         const response = await fetch(url, {

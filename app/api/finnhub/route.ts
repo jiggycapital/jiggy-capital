@@ -6,6 +6,7 @@ export async function GET(req: NextRequest) {
   const symbol = searchParams.get("symbol");
   const from = searchParams.get("from");
   const to = searchParams.get("to");
+  const resolution = searchParams.get("resolution");
   const token = process.env.FINNHUB_API_KEY || "d2l0fm1r01qqq9qsstfgd2l0fm1r01qqq9qsstg0";
 
   if (!endpoint) {
@@ -16,6 +17,7 @@ export async function GET(req: NextRequest) {
   if (symbol) url += `&symbol=${symbol}`;
   if (from) url += `&from=${from}`;
   if (to) url += `&to=${to}`;
+  if (resolution) url += `&resolution=${resolution}`;
 
   try {
     const response = await fetch(url);

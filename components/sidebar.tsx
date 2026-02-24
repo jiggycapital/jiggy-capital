@@ -41,14 +41,14 @@ export function Sidebar() {
       label: "Portfolio",
       items: [
         { title: "Dashboard", href: "/", icon: LayoutDashboard },
-        { title: "Screener", href: "/screener", icon: Filter },
+        { title: "Earnings", href: "/earnings", icon: Mic },
       ],
     },
     {
       label: "Research",
       items: [
         { title: "Charts", href: "/chart", icon: BarChart3 },
-        { title: "Earnings", href: "/earnings", icon: Mic },
+        { title: "Screener", href: "/screener", icon: Filter },
         { title: "Deep Research", href: "/deep-research", icon: Database },
       ],
     },

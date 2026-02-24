@@ -19,6 +19,8 @@ import {
 } from "@/components/ui/table";
 import { parseNumeric, parseMarketCap, formatCurrency, formatPercentage, formatCurrencyBillions } from "@/lib/utils";
 import { ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
+import { useCompanyLogos } from "@/hooks/use-company-logos";
+import { InlineSparkline } from "@/components/ui/inline-sparkline";
 
 interface WatchlistTanStackTableProps {
   watchlistData: any[];
@@ -40,7 +42,13 @@ interface WatchlistRow {
   logoUrl: string;
 }
 
-export function WatchlistTanStackTable({ watchlistData, logos }: WatchlistTanStackTableProps) {
+export function WatchlistTanStackTable({ watchlistData, logos: initialLogos }: WatchlistTanStackTableProps) {
+  const tickers = useMemo(() => {
+    return watchlistData.map(p => (p.Ticker || p.Symbol || "").toUpperCase()).filter(Boolean);
+  }, [watchlistData]);
+
+  const { logos } = useCompanyLogos(tickers, initialLogos);
+
   const tableData = useMemo(() => {
     return watchlistData.map(p => {
       const ticker = p.Ticker || p.Symbol || "";
@@ -90,7 +98,7 @@ export function WatchlistTanStackTable({ watchlistData, logos }: WatchlistTanSta
             <div className="flex items-center gap-2.5">
               <div className="w-9 h-9 rounded-lg bg-[#151536] flex items-center justify-center overflow-hidden shrink-0 border border-[#2A2A61]">
                 {logoUrl ? (
-                  <img src={logoUrl} alt={ticker} className="w-7 h-7 object-contain" />
+                  <img src={logoUrl} alt={ticker} className="w-7 h-7 object-contain animate-in fade-in duration-500" />
                 ) : (
                   <span className="text-[10px] font-extrabold text-slate-500">{ticker.substring(0, 3)}</span>
                 )}
@@ -102,6 +110,19 @@ export function WatchlistTanStackTable({ watchlistData, logos }: WatchlistTanSta
             </div>
           );
         },
+      },
+      {
+        id: "sparkline",
+        header: () => <div className="text-center text-slate-400 text-[11px]">30D</div>,
+        cell: ({ row }) => {
+          const { ticker } = row.original;
+          return (
+            <div className="flex justify-center">
+              <InlineSparkline ticker={ticker} width={72} height={22} days={30} />
+            </div>
+          );
+        },
+        enableSorting: false,
       },
       {
         accessorKey: "price",

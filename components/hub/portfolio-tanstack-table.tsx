@@ -19,6 +19,8 @@ import {
 } from "@/components/ui/table";
 import { parseNumeric, parseMarketCap, formatCurrency, formatPercentage, formatCurrencyBillions } from "@/lib/utils";
 import { ArrowUpDown, ArrowUp, ArrowDown, Wallet } from "lucide-react";
+import { useCompanyLogos } from "@/hooks/use-company-logos";
+import { InlineSparkline } from "@/components/ui/inline-sparkline";
 
 interface PortfolioTanStackTableProps {
   positionsData: any[];
@@ -43,7 +45,15 @@ interface PortfolioRow {
   isCash: boolean;
 }
 
-export function PortfolioTanStackTable({ positionsData, logos }: PortfolioTanStackTableProps) {
+export function PortfolioTanStackTable({ positionsData, logos: initialLogos }: PortfolioTanStackTableProps) {
+  const tickers = useMemo(() => {
+    return positionsData
+      .map(p => (p.Ticker || p.Symbol || "").toUpperCase())
+      .filter(t => t && t !== "SUM");
+  }, [positionsData]);
+
+  const { logos } = useCompanyLogos(tickers, initialLogos);
+
   const tableData = useMemo(() => {
     const totalValue = positionsData
       .map(p => {
@@ -137,7 +147,7 @@ export function PortfolioTanStackTable({ positionsData, logos }: PortfolioTanSta
                 {isCash ? (
                   <Wallet className="w-4 h-4 text-emerald-400" />
                 ) : logos[ticker] ? (
-                  <img src={logos[ticker]} alt={ticker} className="w-7 h-7 object-contain" />
+                  <img src={logos[ticker]} alt={ticker} className="w-7 h-7 object-contain animate-in fade-in duration-500" />
                 ) : (
                   <span className="text-[10px] font-extrabold text-slate-500">{ticker.substring(0, 3)}</span>
                 )}
@@ -149,6 +159,20 @@ export function PortfolioTanStackTable({ positionsData, logos }: PortfolioTanSta
             </div>
           );
         },
+      },
+      {
+        id: "sparkline",
+        header: () => <div className="text-center text-slate-400 text-[11px]">30D</div>,
+        cell: ({ row }) => {
+          const { ticker, isCash } = row.original;
+          if (isCash) return null;
+          return (
+            <div className="flex justify-center">
+              <InlineSparkline ticker={ticker} width={72} height={22} days={30} />
+            </div>
+          );
+        },
+        enableSorting: false,
       },
       {
         accessorKey: "price",
