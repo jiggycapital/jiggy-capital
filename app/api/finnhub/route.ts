@@ -7,7 +7,14 @@ export async function GET(req: NextRequest) {
   const from = searchParams.get("from");
   const to = searchParams.get("to");
   const resolution = searchParams.get("resolution");
-  const token = process.env.FINNHUB_API_KEY || "d2l0fm1r01qqq9qsstfgd2l0fm1r01qqq9qsstg0";
+  const token = process.env.FINNHUB_API_KEY;
+
+  if (!token) {
+    return NextResponse.json(
+      { error: "FINNHUB_API_KEY not configured. Set it in environment variables." },
+      { status: 500 }
+    );
+  }
 
   if (!endpoint) {
     return NextResponse.json({ error: "Endpoint is required" }, { status: 400 });

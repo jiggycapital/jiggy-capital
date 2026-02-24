@@ -2,8 +2,8 @@
 // Since we're using public sheets, we can use the CSV export method
 
 const SHEET_IDS = {
-  positionsDetailed: process.env.NEXT_PUBLIC_GOOGLE_SHEET_ID || "1xmD_h2_1I-kJkh-MsNUhxXMV7WDHrAlClj1Uq5jLcFE",
-  watchlistDetailed: process.env.NEXT_PUBLIC_GOOGLE_SHEET_ID || "1xmD_h2_1I-kJkh-MsNUhxXMV7WDHrAlClj1Uq5jLcFE",
+  positionsDetailed: process.env.NEXT_PUBLIC_GOOGLE_SHEET_ID || "",
+  watchlistDetailed: process.env.NEXT_PUBLIC_GOOGLE_SHEET_ID || "",
 } as const;
 
 const GIDS = {
@@ -66,26 +66,26 @@ const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
 export async function fetchSheetData(dataset: DatasetType): Promise<string[][]> {
   const cacheKey = `sheet-${dataset}`;
   const cached = cache.get(cacheKey);
-  
+
   if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
     return cached.data;
   }
 
   const config = SHEET_CONFIGS[dataset];
   const url = getSheetUrl(config);
-  
+
   try {
     const response = await fetch(url, {
       next: { revalidate: 300 }, // Revalidate every 5 minutes
     });
-    
+
     if (!response.ok) {
       throw new Error(`Failed to fetch sheet: ${response.statusText}`);
     }
-    
+
     const csvText = await response.text();
     const rows = parseCSV(csvText);
-    
+
     cache.set(cacheKey, { data: rows, timestamp: Date.now() });
     return rows;
   } catch (error) {
@@ -97,12 +97,12 @@ export async function fetchSheetData(dataset: DatasetType): Promise<string[][]> 
 function parseCSV(csv: string): string[][] {
   const lines = csv.split('\n').filter(line => line.trim());
   const rows: string[][] = [];
-  
+
   for (const line of lines) {
     const values = parseCSVLine(line);
     rows.push(values);
   }
-  
+
   return rows;
 }
 
@@ -110,10 +110,10 @@ function parseCSVLine(line: string): string[] {
   const values: string[] = [];
   let current = '';
   let inQuotes = false;
-  
+
   for (let i = 0; i < line.length; i++) {
     const char = line[i];
-    
+
     if (char === '"') {
       inQuotes = !inQuotes;
     } else if (char === ',' && !inQuotes) {
@@ -124,7 +124,7 @@ function parseCSVLine(line: string): string[] {
     }
   }
   values.push(current.trim());
-  
+
   return values;
 }
 
@@ -166,27 +166,27 @@ export function findDataStartRow(rows: string[][], headerRow: number): number {
 export function extractColumnCategories(rows: string[][]): Record<string, string> {
   const headerRowIndex = findHeaderRow(rows);
   const categoryRowIndex = headerRowIndex > 0 ? headerRowIndex - 1 : -1;
-  
+
   const categoryMap: Record<string, string> = {};
-  
+
   // If we have a category row, extract categories
   if (categoryRowIndex >= 0 && categoryRowIndex < rows.length) {
     const categoryRow = rows[categoryRowIndex];
     const headerRow = rows[headerRowIndex];
-    
+
     let currentCategory = "General Info";
-    
+
     // Process each column
     // Merged cells in CSV appear as empty strings, so we propagate the last seen category
     for (let i = 0; i < Math.max(categoryRow.length, headerRow.length); i++) {
       const categoryCell = (categoryRow[i] || '').trim().replace(/^"|"$/g, '');
       const headerCell = (headerRow[i] || '').trim().replace(/^"|"$/g, '');
-      
+
       // If category cell has content, it's a new category header (start of merged cell range)
       if (categoryCell && categoryCell.length > 0) {
         currentCategory = categoryCell;
       }
-      
+
       // Map this column to the current category (even if category cell was empty due to merge)
       if (headerCell && headerCell.length > 0) {
         categoryMap[headerCell] = currentCategory;
@@ -204,7 +204,7 @@ export function extractColumnCategories(rows: string[][]): Record<string, string
       });
     }
   }
-  
+
   return categoryMap;
 }
 
@@ -212,13 +212,13 @@ export function parseSheetData(rows: string[][]): Record<string, string>[] {
   const headerRowIndex = findHeaderRow(rows);
   const headers = rows[headerRowIndex].map(h => h.trim().replace(/^"|"$/g, ''));
   const dataStartRow = findDataStartRow(rows, headerRowIndex);
-  
+
   const data: Record<string, string>[] = [];
-  
+
   for (let i = dataStartRow; i < rows.length; i++) {
     const row = rows[i];
     const firstCell = (row[0] || '').trim().replace(/^"|"$/g, '');
-    
+
     // Stop at summary rows
     if (
       firstCell.toLowerCase().includes('median') ||
@@ -229,7 +229,7 @@ export function parseSheetData(rows: string[][]): Record<string, string>[] {
     ) {
       break;
     }
-    
+
     const record: Record<string, string> = {};
     headers.forEach((header, index) => {
       let value = (row[index] || '').trim().replace(/^"|"$/g, '');
@@ -238,12 +238,12 @@ export function parseSheetData(rows: string[][]): Record<string, string>[] {
       }
       record[header] = value;
     });
-    
+
     if (record[headers[0]] && record[headers[0]].length > 0) {
       data.push(record);
     }
   }
-  
+
   return data;
 }
 
@@ -253,45 +253,45 @@ export function parseLogosData(rows: string[][]): { logos: Record<string, string
   const irLinkMap: Record<string, string> = {};
   const headerRowIndex = findHeaderRow(rows);
   const dataStartRow = findDataStartRow(rows, headerRowIndex);
-  
+
   for (let i = dataStartRow; i < rows.length; i++) {
     const row = rows[i];
     const ticker = (row[0] || '').trim().replace(/^"|"$/g, '').toUpperCase();
     const logoUrl = (row[2] || '').trim().replace(/^"|"$/g, ''); // Column C (index 2)
     const irLink = (row[3] || '').trim().replace(/^"|"$/g, ''); // Column D (index 3)
-    
+
     if (ticker && ticker !== '') {
       if (logoUrl && logoUrl !== '') logoMap[ticker] = logoUrl;
       if (irLink && irLink !== '') irLinkMap[ticker] = irLink;
     }
   }
-  
+
   return { logos: logoMap, irLinks: irLinkMap };
 }
 
 export async function fetchLogos(): Promise<{ logos: Record<string, string>; irLinks: Record<string, string> }> {
   const cacheKey = 'logos';
   const cached = cache.get(cacheKey);
-  
+
   if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
     return cached.data;
   }
 
   const url = getSheetUrl(LOGOS_CONFIG);
-  
+
   try {
     const response = await fetch(url, {
       next: { revalidate: 300 }, // Revalidate every 5 minutes
     });
-    
+
     if (!response.ok) {
       throw new Error(`Failed to fetch logos: ${response.statusText}`);
     }
-    
+
     const csvText = await response.text();
     const rows = parseCSV(csvText);
     const data = parseLogosData(rows);
-    
+
     cache.set(cacheKey, { data, timestamp: Date.now() });
     return data;
   } catch (error) {

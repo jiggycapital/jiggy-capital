@@ -61,17 +61,14 @@ function InlineSparklineInner({ ticker, width = 80, height = 24, days = 30 }: In
             } catch (_) { }
 
             try {
-                const now = Math.floor(Date.now() / 1000);
-                const from = now - days * 24 * 60 * 60 * 1.5; // extra buffer for weekends
                 const res = await fetch(
-                    `/api/finnhub?endpoint=stock/candle&symbol=${ticker}&resolution=D&from=${Math.floor(from)}&to=${now}`
+                    `/api/yahoo-chart?symbol=${ticker}&range=1mo&interval=1d`
                 );
 
                 if (res.ok) {
-                    const data: CandleData = await res.json();
-                    if (data.s === "ok" && data.c && data.c.length > 0) {
-                        // Take last N days of closing prices
-                        const closes = data.c.slice(-days);
+                    const data = await res.json();
+                    if (data.prices && data.prices.length > 0) {
+                        const closes = data.prices.slice(-days);
                         sparklineCache[ticker] = closes;
 
                         try {
