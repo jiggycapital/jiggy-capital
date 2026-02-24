@@ -61,8 +61,9 @@ function InlineSparklineInner({ ticker, width = 80, height = 24, days = 30 }: In
             } catch (_) { }
 
             try {
+                const range = days <= 30 ? '1mo' : days <= 90 ? '3mo' : days <= 180 ? '6mo' : '1y';
                 const res = await fetch(
-                    `/api/yahoo-chart?symbol=${ticker}&range=1mo&interval=1d`
+                    `/api/yahoo-chart?symbol=${ticker}&range=${range}&interval=1d`
                 );
 
                 if (res.ok) {

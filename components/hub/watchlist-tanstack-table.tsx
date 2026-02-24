@@ -113,12 +113,12 @@ export function WatchlistTanStackTable({ watchlistData, logos: initialLogos }: W
       },
       {
         id: "sparkline",
-        header: () => <div className="text-center text-slate-400 text-[11px]">30D</div>,
+        header: () => <div className="text-center text-slate-400 text-[11px]">90D Trend</div>,
         cell: ({ row }) => {
           const { ticker } = row.original;
           return (
             <div className="flex justify-center">
-              <InlineSparkline ticker={ticker} width={72} height={22} days={30} />
+              <InlineSparkline ticker={ticker} width={140} height={26} days={90} />
             </div>
           );
         },

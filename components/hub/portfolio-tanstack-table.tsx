@@ -252,13 +252,13 @@ export function PortfolioTanStackTable({ positionsData, logos: initialLogos }: P
       },
       {
         id: "sparkline",
-        header: () => <div className="text-center text-slate-400 text-[11px]">30D Trend</div>,
+        header: () => <div className="text-center text-slate-400 text-[11px]">90D Trend</div>,
         cell: ({ row }) => {
           const { ticker, isCash } = row.original;
           if (isCash) return null;
           return (
             <div className="flex justify-center">
-              <InlineSparkline ticker={ticker} width={140} height={26} days={30} />
+              <InlineSparkline ticker={ticker} width={140} height={26} days={90} />
             </div>
           );
         },
@@ -359,6 +359,13 @@ export function PortfolioTanStackTable({ positionsData, logos: initialLogos }: P
       },
       {
         accessorKey: "revCagr",
+        sortingFn: (rowA, rowB) => {
+          const a = rowA.original.revCagr;
+          const b = rowB.original.revCagr;
+          const numA = typeof a === 'number' ? a : -Infinity;
+          const numB = typeof b === 'number' ? b : -Infinity;
+          return numA - numB;
+        },
         header: ({ column }) => (
           <div
             className="flex items-center justify-end gap-1 cursor-pointer select-none hover:text-slate-200 transition-colors text-right whitespace-normal leading-tight max-w-[60px]"
@@ -383,6 +390,13 @@ export function PortfolioTanStackTable({ positionsData, logos: initialLogos }: P
       },
       {
         accessorKey: "fcfMultiple",
+        sortingFn: (rowA, rowB) => {
+          const a = rowA.original.fcfMultiple;
+          const b = rowB.original.fcfMultiple;
+          const numA = typeof a === 'number' ? a : Infinity;
+          const numB = typeof b === 'number' ? b : Infinity;
+          return numA - numB;
+        },
         header: ({ column }) => (
           <div
             className="flex items-center justify-end gap-1 cursor-pointer select-none hover:text-slate-200 transition-colors whitespace-normal leading-tight text-right max-w-[60px]"
@@ -407,6 +421,13 @@ export function PortfolioTanStackTable({ positionsData, logos: initialLogos }: P
       },
       {
         accessorKey: "peMultiple",
+        sortingFn: (rowA, rowB) => {
+          const a = rowA.original.peMultiple;
+          const b = rowB.original.peMultiple;
+          const numA = typeof a === 'number' ? a : Infinity;
+          const numB = typeof b === 'number' ? b : Infinity;
+          return numA - numB;
+        },
         header: ({ column }) => (
           <div
             className="flex items-center justify-end gap-1 cursor-pointer select-none hover:text-slate-200 transition-colors text-right whitespace-normal leading-tight max-w-[60px]"
@@ -431,6 +452,13 @@ export function PortfolioTanStackTable({ positionsData, logos: initialLogos }: P
       },
       {
         accessorKey: "peg",
+        sortingFn: (rowA, rowB) => {
+          const a = rowA.original.peg;
+          const b = rowB.original.peg;
+          const numA = typeof a === 'number' ? a : Infinity;
+          const numB = typeof b === 'number' ? b : Infinity;
+          return numA - numB;
+        },
         header: ({ column }) => (
           <div
             className="flex items-center justify-end gap-1 cursor-pointer select-none hover:text-slate-200 transition-colors whitespace-normal leading-tight text-right"
@@ -453,7 +481,7 @@ export function PortfolioTanStackTable({ positionsData, logos: initialLogos }: P
         }
       },
     ],
-    [logos]
+    [logos, maView]
   );
 
   const table = useReactTable({
