@@ -37,10 +37,15 @@ export async function GET(req: NextRequest) {
             return NextResponse.json({ error: "Symbol parameter is required for profile endpoint" }, { status: 400 });
         }
         url = `https://financialmodelingprep.com/api/v3/profile/${symbol}?apikey=${apiKey}`;
+    } else if (endpoint.startsWith("v3/")) {
+        // v3 API endpoints — path already includes version prefix
+        url = `https://financialmodelingprep.com/api/${endpoint}?apikey=${apiKey}`;
     } else {
         const fmpPath = endpointMap[endpoint] || endpoint;
         url = `https://financialmodelingprep.com/stable/${fmpPath}?apikey=${apiKey}`;
 
+        const symbol = searchParams.get("symbol");
+        if (symbol) url += `&symbol=${symbol}`;
         if (tickers) url += `&tickers=${tickers}`;
         if (from) url += `&from=${from}`;
         if (to) url += `&to=${to}`;

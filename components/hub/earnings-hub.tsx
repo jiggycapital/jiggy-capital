@@ -7,10 +7,12 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { EarningsCalendar } from "./earnings-calendar";
 import { EarningsDetail } from "./earnings-detail";
+import { EarningsResultsTable, EarningsResult } from "./earnings-results-table";
 import {
     Mic,
     Calendar,
     TrendingUp,
+    Trophy,
     Clock,
     AlertTriangle,
     Zap,
@@ -28,6 +30,8 @@ interface EarningsEvent {
 export function EarningsHub() {
     const [positionsData, setPositionsData] = useState<any[]>([]);
     const [watchlistData, setWatchlistData] = useState<any[]>([]);
+    const [positionsDetailedData, setPositionsDetailedData] = useState<any[]>([]);
+    const [watchlistDetailedData, setWatchlistDetailedData] = useState<any[]>([]);
     const [logos, setLogos] = useState<Record<string, string>>({});
     const [irLinks, setIrLinks] = useState<Record<string, string>>({});
     const [events, setEvents] = useState<EarningsEvent[]>([]);
@@ -41,12 +45,14 @@ export function EarningsHub() {
         async function loadData() {
             try {
                 setLoading(true);
-                const [portfolioRows, watchlistRows, logosData, logosPt2Rows] =
+                const [portfolioRows, watchlistRows, logosData, logosPt2Rows, positionsDetailedRows, watchlistDetailedRows] =
                     await Promise.all([
                         fetchSheetData("portfolio"),
                         fetchSheetData("watchlistDashboard"),
                         fetchLogos(),
                         fetchSheetData("logosPt2"),
+                        fetchSheetData("positions"),
+                        fetchSheetData("watchlist"),
                     ]);
 
                 const parsedPositions = parseSheetData(portfolioRows);
@@ -54,6 +60,12 @@ export function EarningsHub() {
 
                 const parsedWatchlist = parseSheetData(watchlistRows);
                 setWatchlistData(parsedWatchlist);
+
+                // Parse detailed sheets for earnings data
+                const parsedPositionsDetailed = parseSheetData(positionsDetailedRows);
+                const parsedWatchlistDetailed = parseSheetData(watchlistDetailedRows);
+                setPositionsDetailedData(parsedPositionsDetailed);
+                setWatchlistDetailedData(parsedWatchlistDetailed);
 
                 setLogos(logosData.logos);
 
@@ -111,6 +123,74 @@ export function EarningsHub() {
     const allTickers = useMemo(() => {
         return [...new Set([...portfolioTickers, ...watchlistTickers])];
     }, [portfolioTickers, watchlistTickers]);
+
+    // Parse earnings results from detailed sheets
+    const earningsResults = useMemo(() => {
+        const parsePercent = (val: string | undefined): number | null => {
+            if (!val) return null;
+            const cleaned = val.replace('%', '').replace('+', '').trim();
+            const num = parseFloat(cleaned);
+            // -100% is almost always a formula artifact from an empty cell in the sheet
+            if (isNaN(num) || num === -100) return null;
+            return num;
+        };
+
+        const parseCurrency = (val: string | undefined): number | null => {
+            if (!val) return null;
+            let cleaned = val.replace(/[$,]/g, '').trim();
+            let multiplier = 1;
+            if (cleaned.toLowerCase().endsWith('m')) {
+                multiplier = 1_000_000;
+                cleaned = cleaned.slice(0, -1);
+            } else if (cleaned.toLowerCase().endsWith('b')) {
+                multiplier = 1_000_000_000;
+                cleaned = cleaned.slice(0, -1);
+            }
+            const num = parseFloat(cleaned);
+            return isNaN(num) ? null : num * multiplier;
+        };
+
+        const mapRow = (row: any, source: 'portfolio' | 'watchlist'): EarningsResult | null => {
+            const ticker = (row.Ticker || row.Symbol || '').toUpperCase();
+            if (!ticker || ticker === 'CASH' || ticker === 'SUM') return null;
+
+            const enteredResults = (row['Entered Results'] || '').trim();
+            const hasResults = enteredResults && enteredResults !== 'N/A' && enteredResults.toLowerCase() !== 'no';
+
+            return {
+                ticker,
+                company: row.Company || '',
+                source,
+                earningsDate: row['Earnings Date'] || '',
+                enteredResults: !!hasResults,
+                revenue: parseCurrency(row.Revenue),
+                eps: parseCurrency(row.EPS),
+                fcf: parseCurrency(row['FCF/EBIT']),
+                expRevenue: parseCurrency(row['Exp Revenue']),
+                expEps: parseCurrency(row[' Exp EPS '] || row['Exp EPS']),
+                expFcf: parseCurrency(row[' Exp FCF/EBIT '] || row['Exp FCF/EBIT']),
+                revenueBeatPercent: parsePercent(row['Revenue Beat / Miss %']),
+                epsBeatPercent: parsePercent(row['EPS Beat / Miss %']),
+                fcfBeatPercent: parsePercent(row['FCF Beat / Miss %']),
+                nextQRevBeatPercent: parsePercent(row['Next Q/FY Rev Beat / Miss %']),
+                nextQEpsBeatPercent: parsePercent(row['Next Q/FY EPS Beat / Miss %']),
+                revenueYoYGrowth: row['Revenue Y/Y Growth'] || '',
+                epsYoYGrowth: row['EPS Y/Y Growth'] || '',
+            };
+        };
+
+        const results: EarningsResult[] = [];
+        positionsDetailedData.forEach(row => {
+            const r = mapRow(row, 'portfolio');
+            if (r) results.push(r);
+        });
+        watchlistDetailedData.forEach(row => {
+            const r = mapRow(row, 'watchlist');
+            if (r) results.push(r);
+        });
+
+        return results;
+    }, [positionsDetailedData, watchlistDetailedData]);
 
     // Fetch earnings calendar
     useEffect(() => {
@@ -366,8 +446,8 @@ export function EarningsHub() {
                                             </span>
                                             <span
                                                 className={`text-[8px] font-black px-1.5 py-0.5 rounded border uppercase tracking-tighter ${event.source === "portfolio"
-                                                        ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
-                                                        : "bg-sky-500/10 text-sky-400 border-sky-500/20"
+                                                    ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
+                                                    : "bg-sky-500/10 text-sky-400 border-sky-500/20"
                                                     }`}
                                             >
                                                 {event.source}
@@ -400,34 +480,64 @@ export function EarningsHub() {
                 </CardContent>
             </Card>
 
-            {/* Main Content Area */}
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-                {/* Earnings Calendar */}
-                <div className={selectedTicker ? "lg:col-span-5" : "lg:col-span-12"}>
-                    <EarningsCalendar
-                        events={events}
-                        loading={eventsLoading}
-                        logos={logos}
-                        irLinks={irLinks}
-                        selectedTicker={selectedTicker}
-                        onSelectTicker={setSelectedTicker}
-                        portfolioTickers={portfolioTickers}
-                        watchlistTickers={watchlistTickers}
-                    />
-                </div>
+            {/* Main Content Tabs */}
+            <Tabs defaultValue="upcoming" className="w-full">
+                <TabsList className="bg-slate-900/80 border border-slate-800 p-1 mb-4">
+                    <TabsTrigger
+                        value="upcoming"
+                        className="data-[state=active]:bg-purple-500/20 data-[state=active]:text-purple-300 data-[state=active]:border-purple-500/30 text-xs font-bold px-5 py-2 rounded-lg border border-transparent transition-all flex items-center gap-2"
+                    >
+                        <Calendar className="w-3.5 h-3.5" />
+                        Upcoming Earnings
+                    </TabsTrigger>
+                    <TabsTrigger
+                        value="results"
+                        className="data-[state=active]:bg-amber-500/20 data-[state=active]:text-amber-300 data-[state=active]:border-amber-500/30 text-xs font-bold px-5 py-2 rounded-lg border border-transparent transition-all flex items-center gap-2"
+                    >
+                        <Trophy className="w-3.5 h-3.5" />
+                        Recent Results
+                    </TabsTrigger>
+                </TabsList>
 
-                {/* Detail Panel */}
-                {selectedTicker && (
-                    <div className="lg:col-span-7">
-                        <EarningsDetail
-                            ticker={selectedTicker}
-                            logos={logos}
-                            irLinks={irLinks}
-                            onClose={() => setSelectedTicker(null)}
-                        />
+                <TabsContent value="upcoming" className="mt-0 focus-visible:outline-none">
+                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                        {/* Earnings Calendar */}
+                        <div className={selectedTicker ? "lg:col-span-5" : "lg:col-span-12"}>
+                            <EarningsCalendar
+                                events={events}
+                                loading={eventsLoading}
+                                logos={logos}
+                                irLinks={irLinks}
+                                selectedTicker={selectedTicker}
+                                onSelectTicker={setSelectedTicker}
+                                portfolioTickers={portfolioTickers}
+                                watchlistTickers={watchlistTickers}
+                            />
+                        </div>
+
+                        {/* Detail Panel */}
+                        {selectedTicker && (
+                            <div className="lg:col-span-7">
+                                <EarningsDetail
+                                    ticker={selectedTicker}
+                                    logos={logos}
+                                    irLinks={irLinks}
+                                    onClose={() => setSelectedTicker(null)}
+                                />
+                            </div>
+                        )}
                     </div>
-                )}
-            </div>
+                </TabsContent>
+
+                <TabsContent value="results" className="mt-0 focus-visible:outline-none">
+                    <EarningsResultsTable
+                        results={earningsResults}
+                        logos={logos}
+                        loading={loading}
+                        onSelectTicker={setSelectedTicker}
+                    />
+                </TabsContent>
+            </Tabs>
         </div>
     );
 }
