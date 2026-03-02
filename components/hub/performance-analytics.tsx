@@ -14,9 +14,9 @@ interface PerformanceAnalyticsProps {
 export function PerformanceAnalytics({ positionsData, ytdBenchmarks, logos }: PerformanceAnalyticsProps) {
   const movers = useMemo(() => {
     // Filter out CASH and ensure we have YTD Gain (from Column AT)
-    const stocks = positionsData.filter(p => 
-      p.Ticker !== "CASH" && 
-      p.Ticker !== "Cash" && 
+    const stocks = positionsData.filter(p =>
+      p.Ticker !== "CASH" &&
+      p.Ticker !== "Cash" &&
       (p["YTD Gain"] || p._columnATHeader)
     );
 
@@ -27,7 +27,7 @@ export function PerformanceAnalytics({ positionsData, ytdBenchmarks, logos }: Pe
     };
 
     const sorted = [...stocks].sort((a, b) => getATValue(b) - getATValue(a));
-    
+
     return {
       top: sorted.slice(0, 3),
       bottom: [...sorted].reverse().slice(0, 3)
@@ -39,9 +39,9 @@ export function PerformanceAnalytics({ positionsData, ytdBenchmarks, logos }: Pe
       {/* Movers Grid */}
       <div className="grid grid-cols-2 gap-4">
         {/* Top Performers */}
-        <Card className="bg-slate-900/50 border-slate-800">
+        <Card className="bg-jiggy-surface-2 border border-jiggy-tan/50 rounded-2xl shadow-sm">
           <CardHeader className="py-3 px-4">
-            <CardTitle className="text-sm font-medium flex items-center gap-2 text-emerald-400">
+            <CardTitle className="text-sm font-black uppercase tracking-widest flex items-center gap-2 text-emerald-400">
               <TrendingUp className="w-4 h-4" />
               Top Performers
             </CardTitle>
@@ -58,7 +58,7 @@ export function PerformanceAnalytics({ positionsData, ytdBenchmarks, logos }: Pe
                     )}
                     <span className="font-mono text-sm font-bold text-slate-200">{ticker}</span>
                   </div>
-                  <span className="text-sm font-semibold text-emerald-400">+{ytd.toFixed(1)}%</span>
+                  <span className="text-sm font-semibold text-jiggy-neon">+{ytd.toFixed(1)}%</span>
                 </div>
               );
             })}
@@ -66,9 +66,9 @@ export function PerformanceAnalytics({ positionsData, ytdBenchmarks, logos }: Pe
         </Card>
 
         {/* Top Laggards */}
-        <Card className="bg-slate-900/50 border-slate-800">
+        <Card className="bg-jiggy-surface-2 border border-jiggy-tan/50 rounded-2xl shadow-sm">
           <CardHeader className="py-3 px-4">
-            <CardTitle className="text-sm font-medium flex items-center gap-2 text-rose-400">
+            <CardTitle className="text-sm font-black uppercase tracking-widest flex items-center gap-2 text-rose-400">
               <TrendingDown className="w-4 h-4" />
               Top Laggards
             </CardTitle>
@@ -94,9 +94,9 @@ export function PerformanceAnalytics({ positionsData, ytdBenchmarks, logos }: Pe
       </div>
 
       {/* Benchmarks Card */}
-      <Card className="bg-slate-900/50 border-slate-800">
+      <Card className="bg-jiggy-surface-2 border border-jiggy-tan/50 rounded-2xl shadow-sm">
         <CardHeader className="py-3 px-4">
-          <CardTitle className="text-sm font-medium flex items-center gap-2 text-blue-400">
+          <CardTitle className="text-sm font-black uppercase tracking-widest flex items-center gap-2 text-emerald-400">
             <BarChart3 className="w-4 h-4" />
             Performance vs Benchmarks
           </CardTitle>
@@ -105,9 +105,9 @@ export function PerformanceAnalytics({ positionsData, ytdBenchmarks, logos }: Pe
           {ytdBenchmarks.map((benchmark) => {
             const val = parseNumeric(benchmark.value) || 0;
             return (
-              <div key={benchmark.name} className="bg-slate-800/30 rounded-lg p-2 text-center">
+              <div key={benchmark.name} className="bg-jiggy-surface rounded-xl p-2 text-center border border-jiggy-tan/30">
                 <div className="text-[10px] text-slate-500 font-bold uppercase tracking-wider mb-1">{benchmark.name}</div>
-                <div className={`text-sm font-bold font-mono ${val >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
+                <div className={`text-sm font-bold font-mono ${val >= 0 ? 'text-jiggy-neon' : 'text-rose-400'}`}>
                   {val >= 0 ? '+' : ''}{benchmark.value}
                 </div>
               </div>

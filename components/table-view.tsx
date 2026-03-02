@@ -71,14 +71,14 @@ export function TableView() {
     try {
       const saved = localStorage.getItem('jiggy-table-templates-v2');
       if (saved) setTemplates(JSON.parse(saved));
-    } catch (err) {}
+    } catch (err) { }
   }
 
   function saveTemplates(newTemplates: Record<string, string[]>) {
     try {
       localStorage.setItem('jiggy-table-templates-v2', JSON.stringify(newTemplates));
       setTemplates(newTemplates);
-    } catch (err) {}
+    } catch (err) { }
   }
 
   function saveCurrentAsTemplate() {
@@ -108,11 +108,11 @@ export function TableView() {
         fetchSheetData("watchlist"),
         fetchLogos(),
       ]);
-      
+
       setRawPositionsRows(positionsRows);
       const categories = extractColumnCategories(positionsRows);
       setColumnCategories(categories);
-      
+
       setPositionsData(parseSheetData(positionsRows));
       setWatchlistData(parseSheetData(watchlistRows));
       setLogos(logosData.logos);
@@ -148,7 +148,7 @@ export function TableView() {
     } else {
       cols = columnOrder.filter(col => columnVisibility[col] !== false);
     }
-    
+
     // Remove "Company" or "Name" from visible columns if "Ticker" or "Symbol" is present
     const hasTicker = cols.some(c => c.toLowerCase() === 'ticker' || c.toLowerCase() === 'symbol');
     if (hasTicker) {
@@ -161,7 +161,7 @@ export function TableView() {
     return visibleColumns.map(key => {
       const isTicker = key.toLowerCase() === 'ticker' || key.toLowerCase() === 'symbol';
       const isMarketCap = key.toLowerCase().includes("market cap") || key.toLowerCase().includes("ev");
-      
+
       return {
         accessorKey: key,
         header: isTicker ? "Company" : key,
@@ -196,25 +196,25 @@ export function TableView() {
         sortingFn: (rowA, rowB) => {
           const valA = rowA.getValue(key);
           const valB = rowB.getValue(key);
-          
+
           if (isTicker || typeof valA === 'string') {
             const a = String(valA || "").toLowerCase();
             const b = String(valB || "").toLowerCase();
-            
+
             // Try numeric sort first if they look like numbers but parseNumeric failed
             const numA = parseNumeric(a);
             const numB = parseNumeric(b);
-            
+
             if (numA !== null && numB !== null) {
               return numA - numB;
             }
-            
+
             return a.localeCompare(b);
           }
 
           let a = parseNumeric(String(valA || "")) ?? -Infinity;
           let b = parseNumeric(String(valB || "")) ?? -Infinity;
-          
+
           return a - b;
         },
       };
@@ -259,45 +259,45 @@ export function TableView() {
 
   return (
     <div className="space-y-4">
-      <Card className="bg-[#0f172a] border-slate-800 shadow-2xl">
-        <CardHeader className="p-6 border-b border-slate-800/50">
+      <Card className="bg-jiggy-surface border border-jiggy-tan/50 shadow-2xl rounded-2xl overflow-hidden">
+        <CardHeader className="p-6 border-b border-jiggy-tan/50 bg-jiggy-surface-2">
           <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
             <div>
               <CardTitle className="text-slate-100 text-xl font-bold tracking-tight">Data Table</CardTitle>
-              <p className="text-xs text-slate-500 mt-1">Unified view of holdings and watchlist</p>
+              <p className="text-[10px] uppercase font-bold tracking-widest text-slate-500 mt-1">Unified view of holdings and watchlist</p>
             </div>
             <div className="flex flex-wrap items-center gap-2 w-full md:w-auto">
               <div className="relative flex-1 md:w-64">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-emerald-500" />
                 <Input
                   placeholder="Search Tickers..."
                   value={globalFilter}
                   onChange={(e) => setGlobalFilter(e.target.value)}
-                  className="pl-9 bg-[#1e293b] border-slate-700 text-slate-100 h-9"
+                  className="pl-9 bg-terminal-bg border-jiggy-border text-slate-100 h-10 rounded-xl font-bold focus:border-emerald-500/50 transition-all"
                 />
               </div>
-              
+
               <DropdownMenu open={showTemplateMenu} onOpenChange={setShowTemplateMenu}>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="outline" size="sm" className="bg-[#1e293b] border-slate-700 text-slate-300">
+                  <Button variant="outline" size="sm" className="bg-terminal-bg border-jiggy-border text-emerald-400 hover:text-slate-950 hover:bg-emerald-400 h-10 px-4 rounded-xl font-black tracking-widest uppercase text-[10px] transition-all">
                     <FolderOpen className="h-4 w-4 mr-2" />
                     Templates
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent className="bg-[#1e293b] border-slate-700 text-slate-100 w-56">
-                  <DropdownMenuItem onClick={() => { setShowSaveTemplateDialog(true); setShowTemplateMenu(false); }} className="cursor-pointer">
+                <DropdownMenuContent className="bg-jiggy-surface-2 border-jiggy-border text-slate-100 w-56 rounded-xl">
+                  <DropdownMenuItem onClick={() => { setShowSaveTemplateDialog(true); setShowTemplateMenu(false); }} className="cursor-pointer focus:bg-emerald-500/10 focus:text-emerald-400 font-bold rounded-lg">
                     <Save className="h-4 w-4 mr-2" />
                     Save Current View
                   </DropdownMenuItem>
                   {Object.keys(templates).length > 0 && (
                     <>
-                      <DropdownMenuSeparator className="bg-slate-700" />
-                      <DropdownMenuLabel className="text-[10px] uppercase font-bold text-slate-500">Saved Layouts</DropdownMenuLabel>
+                      <DropdownMenuSeparator className="bg-slate-700/50" />
+                      <DropdownMenuLabel className="text-[10px] uppercase font-black tracking-widest text-slate-500">Saved Layouts</DropdownMenuLabel>
                       {Object.keys(templates).map((name) => (
-                        <DropdownMenuItem key={name} onClick={() => loadTemplate(name)} className="cursor-pointer">
+                        <DropdownMenuItem key={name} onClick={() => loadTemplate(name)} className="cursor-pointer focus:bg-emerald-500/10 focus:text-emerald-400 font-bold rounded-lg group">
                           <Layout className="h-4 w-4 mr-2" />
                           {name}
-                          <Button variant="ghost" size="icon" className="ml-auto h-4 w-4 text-rose-400" onClick={(e) => { e.stopPropagation(); const next = { ...templates }; delete next[name]; saveTemplates(next); }}>
+                          <Button variant="ghost" size="icon" className="ml-auto h-5 w-5 text-rose-400 opacity-0 group-hover:opacity-100 transition-opacity" onClick={(e) => { e.stopPropagation(); const next = { ...templates }; delete next[name]; saveTemplates(next); }}>
                             <Trash2 className="h-3 w-3" />
                           </Button>
                         </DropdownMenuItem>
@@ -307,11 +307,11 @@ export function TableView() {
                 </DropdownMenuContent>
               </DropdownMenu>
 
-              <Button 
-                variant="outline" 
-                size="sm" 
-                onClick={() => setShowColumnSelector(true)} 
-                className="bg-blue-600 hover:bg-blue-700 border-none text-white font-bold"
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowColumnSelector(true)}
+                className="bg-emerald-500 hover:bg-emerald-400 border-none text-slate-950 font-black h-10 px-4 rounded-xl tracking-widest uppercase text-[10px] transition-all"
               >
                 <Settings2 className="h-4 w-4 mr-2" />
                 Modify Columns
@@ -319,37 +319,37 @@ export function TableView() {
             </div>
           </div>
         </CardHeader>
-        
+
         <CardContent className="p-0">
-          <div className="px-6 py-4 bg-[#0a0f1d] border-b border-slate-800 flex items-center justify-between">
+          <div className="px-6 py-5 bg-jiggy-surface border-b border-jiggy-tan/50 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 sm:gap-0">
             <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as any)} className="w-auto">
-              <TabsList className="bg-[#1e293b] border-slate-700">
-                <TabsTrigger value="positions" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white text-xs font-bold px-4">Holdings</TabsTrigger>
-                <TabsTrigger value="watchlist" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white text-xs font-bold px-4">Watchlist</TabsTrigger>
-                <TabsTrigger value="combined" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white text-xs font-bold px-4">Combined</TabsTrigger>
+              <TabsList className="bg-[#0B0F19]/80 backdrop-blur-md border border-slate-800/60 p-1.5 rounded-2xl shadow-inner">
+                <TabsTrigger value="positions" className="data-[state=active]:bg-emerald-400 data-[state=active]:text-slate-950 text-xs sm:text-sm uppercase tracking-wider font-black px-6 py-2 rounded-xl text-slate-500 hover:text-slate-300 transition-all">Holdings</TabsTrigger>
+                <TabsTrigger value="watchlist" className="data-[state=active]:bg-emerald-400 data-[state=active]:text-slate-950 text-xs sm:text-sm uppercase tracking-wider font-black px-6 py-2 rounded-xl text-slate-500 hover:text-slate-300 transition-all">Watchlist</TabsTrigger>
+                <TabsTrigger value="combined" className="data-[state=active]:bg-emerald-400 data-[state=active]:text-slate-950 text-xs sm:text-sm uppercase tracking-wider font-black px-6 py-2 rounded-xl text-slate-500 hover:text-slate-300 transition-all">Combined</TabsTrigger>
               </TabsList>
             </Tabs>
-            <div className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">
+            <div className="text-[10px] font-black tracking-widest uppercase text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-3 py-1.5 rounded-lg shadow-sm">
               {currentData.length} Companies
             </div>
           </div>
 
           <div className="overflow-x-auto relative min-h-[400px]">
             <Table>
-              <TableHeader className="bg-[#0f172a] sticky top-0 z-10 shadow-xl">
+              <TableHeader className="bg-jiggy-surface-2 sticky top-0 z-10 shadow-xl">
                 {table.getHeaderGroups().map((headerGroup) => (
-                  <TableRow key={headerGroup.id} className="border-slate-800 hover:bg-transparent">
+                  <TableRow key={headerGroup.id} className="border-jiggy-tan/50 hover:bg-transparent">
                     {headerGroup.headers.map((header) => {
                       const isCompany = header.column.columnDef.header === "Company";
                       return (
-                        <TableHead 
-                          key={header.id} 
+                        <TableHead
+                          key={header.id}
                           className={cn(
                             "text-slate-400 font-bold py-4",
                             isCompany && "min-w-[120px] max-w-[150px] md:min-w-[180px] sticky left-0 z-30 bg-slate-800 border-r border-slate-800/50"
                           )}
                         >
-                          <div 
+                          <div
                             className={cn(
                               "flex items-center gap-1 cursor-pointer select-none hover:text-slate-200 transition-colors",
                               !isCompany && "justify-end text-right"
@@ -371,19 +371,19 @@ export function TableView() {
                   </TableRow>
                 ))}
               </TableHeader>
-              <TableBody>
+              <TableBody className="bg-jiggy-surface/50">
                 {table.getRowModel().rows?.length ? (
                   table.getRowModel().rows.map((row) => (
-                    <TableRow key={row.id} className="border-slate-800 hover:bg-slate-800/30 transition-colors cursor-pointer" onClick={() => setSelectedStock(row.original)}>
+                    <TableRow key={row.id} className="border-b border-jiggy-tan/30 hover:bg-jiggy-tan/10 transition-colors cursor-pointer group" onClick={() => setSelectedStock(row.original)}>
                       {row.getVisibleCells().map((cell) => {
                         const isCompany = cell.column.columnDef.header === "Company";
                         return (
-                          <TableCell 
-                            key={cell.id} 
+                          <TableCell
+                            key={cell.id}
                             className={cn(
-                              "py-3", 
+                              "py-3",
                               !isCompany && "text-right",
-                              isCompany && "sticky left-0 bg-slate-900 z-10 border-r border-slate-800/50 min-w-[120px] max-w-[150px] md:min-w-[180px]"
+                              isCompany && "sticky left-0 bg-jiggy-surface-2 z-10 border-r border-jiggy-border/50 min-w-[120px] max-w-[150px] md:min-w-[180px]"
                             )}
                           >
                             {flexRender(cell.column.columnDef.cell, cell.getContext())}
@@ -415,14 +415,15 @@ export function TableView() {
       {selectedStock && <StockDetailSheet stock={selectedStock} open={!!selectedStock} onOpenChange={(open) => !open && setSelectedStock(null)} />}
 
       <Dialog open={showSaveTemplateDialog} onOpenChange={setShowSaveTemplateDialog}>
-        <DialogContent className="bg-[#0f172a] border-slate-800 text-slate-100">
-          <DialogHeader><DialogTitle>Save Layout Template</DialogTitle></DialogHeader>
-          <div className="py-4">
-            <Input placeholder="Template name..." value={newTemplateName} onChange={(e) => setNewTemplateName(e.target.value)} className="bg-slate-900 border-slate-800" />
+        <DialogContent className="bg-jiggy-surface border-jiggy-border text-slate-100 rounded-2xl">
+          <DialogHeader><DialogTitle className="text-xl font-black italic uppercase tracking-tighter">Save Layout Template</DialogTitle></DialogHeader>
+          <div className="py-4 space-y-2">
+            <p className="text-sm font-bold text-slate-400">Save this column arrangement for quick access.</p>
+            <Input placeholder="Template name..." value={newTemplateName} onChange={(e) => setNewTemplateName(e.target.value)} className="bg-terminal-bg border-jiggy-border rounded-xl h-11 focus:border-emerald-500/50 transition-all font-bold" />
           </div>
           <DialogFooter>
-            <Button variant="ghost" onClick={() => setShowSaveTemplateDialog(false)}>Cancel</Button>
-            <Button onClick={saveCurrentAsTemplate} className="bg-blue-600 hover:bg-blue-700">Save</Button>
+            <Button variant="ghost" onClick={() => setShowSaveTemplateDialog(false)} className="rounded-xl font-black uppercase tracking-widest text-[10px]">Cancel</Button>
+            <Button onClick={saveCurrentAsTemplate} className="bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black px-8 rounded-xl uppercase tracking-widest text-[10px]">Save Template</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -438,7 +439,7 @@ function formatCellValue(value: string, columnKey: string, isNumeric: boolean, c
 
   if (num !== null) {
     if (cat.includes("price action") || cat.includes("growth") || col.includes("%") || col.includes("change")) {
-      return <span className={cn("font-mono", num >= 0 ? "text-emerald-400" : "text-rose-400")}>{formatPercentage(num)}</span>;
+      return <span className={cn("font-mono font-bold", num >= 0 ? "text-jiggy-neon" : "text-rose-400")}>{formatPercentage(num)}</span>;
     }
     if (cat.includes("multiples") || col.includes("p/e") || col.includes("p/fcf") || col.includes("peg")) {
       return <span className="font-mono text-slate-300">{num.toFixed(1)}x</span>;

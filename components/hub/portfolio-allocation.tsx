@@ -13,20 +13,20 @@ export function PortfolioAllocation({ positionsData, logos }: PortfolioAllocatio
   const [view, setView] = useState<"company" | "sector">("company");
 
   return (
-    <Card className="bg-slate-900/50 border-slate-800 h-full">
+    <Card className="bg-jiggy-surface-2 border border-jiggy-tan/50 rounded-2xl shadow-sm h-full">
       <CardHeader className="pb-2">
-        <CardTitle className="text-lg font-semibold flex items-center justify-between">
+        <CardTitle className="text-sm font-black tracking-widest uppercase flex items-center justify-between">
           Allocation
-          <span className="text-xs font-normal text-slate-400 bg-slate-800/50 px-2 py-1 rounded">
+          <span className="text-[10px] font-black bg-emerald-500/20 text-emerald-400 px-2 py-1 rounded-lg">
             {view === "company" ? "By Holding" : "By Sector"}
           </span>
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <InteractivePieChart 
-          positionsData={positionsData} 
-          logos={logos} 
-          view={view} 
+        <InteractivePieChart
+          positionsData={positionsData}
+          logos={logos}
+          view={view}
           onViewChange={setView}
         />
       </CardContent>

@@ -20,7 +20,7 @@ export function MainLayout({ children }: { children: React.ReactNode }) {
             variant="ghost"
             size="icon"
             onClick={() => setIsHidden(false)}
-            className="bg-[#151536] backdrop-blur border border-[#2A2A61] text-slate-400 hover:text-amber-400 hover:bg-[#222252] shadow-2xl transition-all"
+            className="bg-jiggy-surface backdrop-blur border border-jiggy-border text-slate-400 hover:text-jiggy-gold hover:bg-jiggy-surface-2 shadow-2xl transition-all"
             title="Show Sidebar"
           >
             <PanelLeftOpen className="h-5 w-5" />

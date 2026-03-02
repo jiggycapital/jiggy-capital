@@ -9,6 +9,7 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@fontsource/nunito": "^5.2.7",
     "@google-cloud/local-auth": "^3.0.1",
     "@hello-pangea/dnd": "^18.0.1",
     "@nivo/core": "^0.99.0",

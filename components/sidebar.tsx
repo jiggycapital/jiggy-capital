@@ -21,7 +21,7 @@ import {
   Newspaper,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Logo } from "@/components/logo";
+import { TreePine } from "lucide-react"; // Playful alternative logo icon if needed
 
 interface NavSection {
   label: string;
@@ -41,6 +41,7 @@ export function Sidebar() {
       label: "Portfolio",
       items: [
         { title: "Dashboard", href: "/", icon: LayoutDashboard },
+        { title: "Table", href: "/table", icon: Table2 },
         { title: "Earnings", href: "/earnings", icon: Mic },
       ],
     },
@@ -50,12 +51,6 @@ export function Sidebar() {
         { title: "Charts", href: "/chart", icon: BarChart3 },
         { title: "Screener", href: "/screener", icon: Filter },
         { title: "Deep Research", href: "/deep-research", icon: Database },
-      ],
-    },
-    {
-      label: "Data",
-      items: [
-        { title: "Table", href: "/table", icon: Table2 },
       ],
     },
   ];
@@ -83,7 +78,7 @@ export function Sidebar() {
           variant="ghost"
           size="icon"
           onClick={() => setIsMobileOpen(!isMobileOpen)}
-          className="bg-[#151536] border border-[#2A2A61] text-slate-100 hover:bg-[#222252]"
+          className="bg-jiggy-surface border border-jiggy-border text-slate-100 hover:bg-jiggy-surface-2"
         >
           {isMobileOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
         </Button>
@@ -100,7 +95,7 @@ export function Sidebar() {
       {/* Sidebar */}
       <aside
         className={cn(
-          "fixed left-0 top-0 z-50 h-screen border-r border-[#2A2A61]/50 bg-[#151536]/60 backdrop-blur-2xl transition-all duration-300 ease-in-out",
+          "fixed left-0 top-0 z-50 h-screen border-r border-jiggy-tan/50 bg-jiggy-surface/80 backdrop-blur-2xl transition-all duration-300 ease-in-out",
           isCollapsed ? "w-20" : "w-56",
           "md:translate-x-0",
           isMobileOpen ? "translate-x-0 w-56" : "-translate-x-full"
@@ -110,20 +105,20 @@ export function Sidebar() {
           {/* Collapse Toggle Button (Desktop only) */}
           <button
             onClick={toggleSidebar}
-            className="absolute -right-3 top-20 hidden md:flex h-6 w-6 items-center justify-center rounded-full border border-[#2A2A61] bg-[#151536] text-slate-400 hover:text-amber-400 shadow-xl z-[60] transition-colors"
+            className="absolute -right-3 top-20 hidden md:flex h-6 w-6 items-center justify-center rounded-full border border-jiggy-tan/50 bg-jiggy-surface text-slate-400 hover:text-jiggy-gold shadow-xl z-[60] transition-colors"
           >
             {isCollapsed ? <ChevronRight className="h-3.5 w-3.5" /> : <ChevronLeft className="h-3.5 w-3.5" />}
           </button>
 
           {/* Logo */}
           <div className={cn(
-            "flex h-14 items-center border-b border-[#2A2A61] px-5",
+            "flex h-14 items-center border-b border-jiggy-tan/50 px-5",
             isCollapsed ? "justify-center px-0" : "justify-between"
           )}>
             <Link href="/" className="flex items-center gap-2.5 group/logo min-w-0 overflow-hidden">
-              <Logo className="h-7 w-7 shrink-0" />
+              <TreePine className="h-6 w-6 shrink-0 text-jiggy-gold" />
               {!isCollapsed && (
-                <h1 className="text-base font-extrabold text-slate-100 tracking-tight group-hover/logo:text-amber-400 transition-colors truncate">
+                <h1 className="text-base font-extrabold text-slate-100 tracking-tight group-hover/logo:text-jiggy-gold transition-colors truncate">
                   Jiggy Capital
                 </h1>
               )}
@@ -145,13 +140,13 @@ export function Sidebar() {
                 {/* Section Label */}
                 {!isCollapsed && (
                   <div className="px-3 mb-2">
-                    <span className="text-[9px] font-extrabold text-slate-600 uppercase tracking-[0.15em]">
+                    <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest">
                       {section.label}
                     </span>
                   </div>
                 )}
                 {isCollapsed && si > 0 && (
-                  <div className="mx-3 mb-2 border-t border-[#2A2A61]" />
+                  <div className="mx-3 mb-2 border-t border-jiggy-tan/50" />
                 )}
 
                 {/* Section Items */}
@@ -165,21 +160,21 @@ export function Sidebar() {
                         href={item.href}
                         title={isCollapsed ? item.title : ""}
                         className={cn(
-                          "flex items-center gap-2.5 rounded-lg transition-all duration-150",
-                          isCollapsed ? "justify-center p-2.5" : "px-3 py-2",
+                          "flex items-center gap-3 rounded-xl transition-all duration-200",
+                          isCollapsed ? "justify-center p-3" : "px-3 py-2.5",
                           isActive
-                            ? "bg-amber-500/10 text-amber-400 border border-amber-500/20"
-                            : "text-slate-400 hover:bg-[#151536] hover:text-slate-200 border border-transparent"
+                            ? "bg-jiggy-gold/20 text-jiggy-gold border border-jiggy-gold/30"
+                            : "text-slate-300 hover:bg-jiggy-surface-2 hover:text-slate-100 border border-transparent"
                         )}
                       >
                         <Icon className={cn(
-                          "h-4 w-4 flex-shrink-0 transition-colors",
-                          isActive ? "text-amber-400" : "text-slate-500 group-hover:text-slate-300"
+                          "h-5 w-5 flex-shrink-0 transition-colors",
+                          isActive ? "text-jiggy-gold" : "text-slate-400 group-hover:text-slate-200"
                         )} />
                         {!isCollapsed && (
                           <span className={cn(
-                            "text-[13px] font-semibold",
-                            isActive ? "text-amber-400" : ""
+                            "text-sm font-bold",
+                            isActive ? "text-jiggy-gold" : ""
                           )}>
                             {item.title}
                           </span>
@@ -193,12 +188,12 @@ export function Sidebar() {
           </nav>
 
           {/* Bottom Actions */}
-          <div className="border-t border-[#2A2A61] p-3">
+          <div className="border-t border-jiggy-tan/50 p-4">
             <Button
               variant="ghost"
               size="sm"
               className={cn(
-                "w-full flex items-center gap-2.5 text-slate-500 hover:text-slate-300 hover:bg-[#151536]",
+                "w-full flex items-center gap-3 text-slate-400 hover:text-slate-200 hover:bg-jiggy-surface-2 rounded-xl py-5",
                 isCollapsed ? "justify-center" : "justify-start px-3"
               )}
               onClick={() => setIsHidden(true)}

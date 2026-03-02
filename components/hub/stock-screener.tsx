@@ -22,13 +22,13 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { 
-  ArrowUpDown, 
-  ArrowUp, 
-  ArrowDown, 
-  Search, 
-  Star, 
-  Trash2, 
+import {
+  ArrowUpDown,
+  ArrowUp,
+  ArrowDown,
+  Search,
+  Star,
+  Trash2,
   Plus,
   Filter,
   X,
@@ -41,10 +41,10 @@ import {
   Target
 } from "lucide-react";
 import { parseNumeric, formatCurrency, formatPercentage, formatCurrencyBillions, formatNumber, formatMultiple } from "@/lib/utils";
-import { 
-  DropdownMenu, 
-  DropdownMenuContent, 
-  DropdownMenuItem, 
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
   DropdownMenuTrigger,
   DropdownMenuSeparator,
   DropdownMenuLabel
@@ -91,12 +91,12 @@ interface FavoriteScreen {
   tableColumns?: string[];
 }
 
-export function StockScreener({ 
-  positionsData, 
-  watchlistData, 
-  logos, 
+export function StockScreener({
+  positionsData,
+  watchlistData,
+  logos,
   rawPositionsRows,
-  rawWatchlistRows 
+  rawWatchlistRows
 }: StockScreenerProps) {
   const [activeFilters, setActiveFilters] = useState<ActiveFilter[]>([
     { key: "2026e P/E" },
@@ -119,7 +119,7 @@ export function StockScreener({
     if (saved) {
       try {
         setFavorites(JSON.parse(saved));
-      } catch (e) {}
+      } catch (e) { }
     }
   }, []);
 
@@ -200,7 +200,7 @@ export function StockScreener({
       allAvailableCriteria.forEach(key => {
         row[key] = source[key];
         let numVal = parseNumeric(source[key]);
-        
+
         if (numVal !== null) row[`${key}_num`] = numVal;
       });
 
@@ -213,7 +213,7 @@ export function StockScreener({
     return tableData.filter(row => {
       // 1. Ticker Search
       if (globalTickerSearch && !row.ticker.toLowerCase().includes(globalTickerSearch.toLowerCase())) return false;
-      
+
       // 2. Sector Filter
       if (selectedSector !== "All Sectors" && row.sector !== selectedSector) return false;
 
@@ -229,7 +229,7 @@ export function StockScreener({
         if (hasMin || hasMax) {
           // If we have a numeric filter but no numeric value, exclude this row
           if (numVal === undefined || numVal === null) return false;
-          
+
           if (hasMin && numVal < parseFloat(filter.min!)) return false;
           if (hasMax && numVal > parseFloat(filter.max!)) return false;
         } else if (filter.search && filter.search.trim() !== "") {
@@ -257,7 +257,7 @@ export function StockScreener({
             </div>
             <div className="flex flex-col min-w-0">
               <span className="text-sm font-bold text-slate-100 leading-tight truncate">{row.original.ticker}</span>
-              {row.original.isHolding && <span className="text-[8px] text-blue-400 font-bold uppercase tracking-tighter">Holding</span>}
+              {row.original.isHolding && <span className="text-[8px] text-jiggy-neon font-bold uppercase tracking-tighter">Holding</span>}
             </div>
           </div>
         ),
@@ -271,10 +271,10 @@ export function StockScreener({
         const val = row.original[key];
         const numVal = row.original[`${key}_num`];
         const cat = criteriaCategories[key]?.toLowerCase() || "";
-        
+
         if (numVal !== null && numVal !== undefined) {
           if (cat.includes("price action") || cat.includes("growth") || key.includes("%") || key.includes("Change")) {
-            return <div className={cn("font-mono font-bold", numVal >= 0 ? "text-emerald-400" : "text-rose-400")}>{formatPercentage(numVal)}</div>;
+            return <div className={cn("font-mono font-bold", numVal >= 0 ? "text-jiggy-neon" : "text-rose-400")}>{formatPercentage(numVal)}</div>;
           }
           if (cat.includes("multiples") || key.includes("P/E") || key.includes("P/FCF") || key.includes("PEG")) {
             return <div className="font-mono text-slate-300">{numVal.toFixed(1)}x</div>;
@@ -340,15 +340,15 @@ export function StockScreener({
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <div className="p-3 rounded-2xl bg-blue-600 shadow-[0_0_20px_rgba(37,99,235,0.3)]">
-            <SlidersHorizontal className="h-6 w-6 text-white" />
+          <div className="p-3.5 rounded-2xl bg-emerald-500/20 border border-emerald-500/30 shadow-sm">
+            <SlidersHorizontal className="h-6 w-6 text-emerald-400" />
           </div>
           <div>
-            <h1 className="text-3xl font-black text-white tracking-tighter italic uppercase">Stock Screener</h1>
-            <p className="text-slate-500 font-medium">Custom screens across {tableData.length} global securities</p>
+            <h1 className="text-3xl font-black text-slate-100 tracking-tighter italic uppercase">Stock Screener</h1>
+            <p className="text-slate-500 font-bold tracking-widest text-[10px] uppercase mt-1">Custom screens across {tableData.length} global securities</p>
           </div>
         </div>
-        
+
         <div className="flex items-center gap-3">
           {favorites.length > 0 && (
             <DropdownMenu>
@@ -358,9 +358,9 @@ export function StockScreener({
                   My Saved Screens
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent className="bg-[#1e293b] border-slate-700 text-white w-56">
+              <DropdownMenuContent className="bg-jiggy-surface-2 border-jiggy-border text-white w-56 rounded-xl">
                 {favorites.map(f => (
-                  <DropdownMenuItem key={f.id} onClick={() => handleApplyScreen(f)} className="flex items-center justify-between cursor-pointer group">
+                  <DropdownMenuItem key={f.id} onClick={() => handleApplyScreen(f)} className="flex items-center justify-between cursor-pointer group focus:bg-emerald-500/10 focus:text-emerald-400 rounded-lg">
                     <span>{f.name}</span>
                     <Trash2 className="h-3 w-3 text-rose-400 opacity-0 group-hover:opacity-100 transition-opacity" onClick={(e) => handleDeleteScreen(f.id, e)} />
                   </DropdownMenuItem>
@@ -368,7 +368,7 @@ export function StockScreener({
               </DropdownMenuContent>
             </DropdownMenu>
           )}
-          <Button onClick={() => setIsSaving(true)} variant="outline" className="bg-slate-900 border-slate-700 text-slate-400 hover:text-white">
+          <Button onClick={() => setIsSaving(true)} variant="outline" className="bg-terminal-bg border-jiggy-border text-emerald-500 hover:text-emerald-400 hover:bg-emerald-500/10 font-black tracking-widest uppercase text-[10px] rounded-xl">
             <Star className="h-4 w-4 mr-2" />
             Save View
           </Button>
@@ -381,18 +381,18 @@ export function StockScreener({
           {/* STEP 1: Universe */}
           <div className="space-y-4">
             <div className="flex items-center gap-2">
-              <div className="flex items-center justify-center w-6 h-6 rounded-full bg-blue-600 text-[10px] font-bold text-white">1</div>
-              <h2 className="text-sm font-bold text-slate-200 uppercase tracking-widest">Define your universe</h2>
+              <div className="flex items-center justify-center w-6 h-6 rounded-lg bg-emerald-500/20 border border-emerald-500/30 text-[10px] font-black text-emerald-400">1</div>
+              <h2 className="text-sm font-black text-slate-200 uppercase tracking-widest">Define your universe</h2>
             </div>
-            
-            <div className="bg-[#0f172a] border border-slate-800 rounded-2xl p-5 space-y-4 shadow-xl">
+
+            <div className="bg-jiggy-surface border border-jiggy-border rounded-2xl p-5 space-y-4 shadow-xl">
               <div className="space-y-2">
-                <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest px-1">Ticker Search</label>
+                <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest px-1">Ticker Search</label>
                 <div className="relative">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
-                  <Input 
-                    placeholder="Filter by symbols..." 
-                    className="pl-10 bg-[#0a0f1d] border-slate-800 h-11 focus:border-blue-500/50 transition-all"
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-emerald-500" />
+                  <Input
+                    placeholder="Filter by symbols..."
+                    className="pl-10 bg-terminal-bg border-jiggy-border h-11 focus:border-emerald-500/50 transition-all rounded-xl text-slate-200 font-bold"
                     value={globalTickerSearch}
                     onChange={(e) => setGlobalTickerSearch(e.target.value)}
                   />
@@ -401,7 +401,7 @@ export function StockScreener({
 
               <div className="space-y-2">
                 <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest px-1">Sector / Industry</label>
-                <select 
+                <select
                   className="w-full h-11 bg-[#0a0f1d] border border-slate-800 rounded-xl px-4 text-sm text-slate-300 focus:outline-none focus:border-blue-500/50 appearance-none cursor-pointer"
                   value={selectedSector}
                   onChange={(e) => setSelectedSector(e.target.value)}
@@ -418,16 +418,16 @@ export function StockScreener({
           {/* STEP 2: Criteria */}
           <div className="space-y-4">
             <div className="flex items-center gap-2">
-              <div className="flex items-center justify-center w-6 h-6 rounded-full bg-blue-600 text-[10px] font-bold text-white">2</div>
-              <h2 className="text-sm font-bold text-slate-200 uppercase tracking-widest">Filter Results</h2>
+              <div className="flex items-center justify-center w-6 h-6 rounded-lg bg-emerald-500/20 border border-emerald-500/30 text-[10px] font-black text-emerald-400">2</div>
+              <h2 className="text-sm font-black text-slate-200 uppercase tracking-widest">Filter Results</h2>
             </div>
 
-            <div className="bg-[#0f172a] border border-slate-800 rounded-2xl p-2 space-y-1 shadow-xl overflow-hidden">
+            <div className="bg-jiggy-surface border border-jiggy-border rounded-2xl p-2 space-y-1 shadow-xl overflow-hidden">
               <div className="max-h-[500px] overflow-y-auto p-3 space-y-3 custom-scrollbar">
                 {activeFilters.map((filter) => {
                   const isNumeric = rowHasNumericVal(tableData, filter.key);
                   return (
-                    <div key={filter.key} className="bg-[#0a0f1d] border border-slate-800/50 rounded-xl p-4 space-y-3 relative group">
+                    <div key={filter.key} className="bg-terminal-bg border border-slate-800/50 rounded-xl p-4 space-y-3 relative group">
                       <div className="flex items-center justify-between">
                         <div className="space-y-0.5">
                           <div className="text-[10px] font-bold text-blue-500 uppercase tracking-tighter truncate max-w-[180px]">
@@ -435,9 +435,9 @@ export function StockScreener({
                           </div>
                           <div className="text-xs font-bold text-slate-200">{filter.key}</div>
                         </div>
-                        <Button 
-                          variant="ghost" 
-                          size="icon" 
+                        <Button
+                          variant="ghost"
+                          size="icon"
                           className="h-6 w-6 text-slate-600 hover:text-rose-400 hover:bg-rose-400/10"
                           onClick={() => removeFilter(filter.key)}
                         >
@@ -449,9 +449,9 @@ export function StockScreener({
                         <div className="grid grid-cols-2 gap-3">
                           <div className="space-y-1">
                             <span className="text-[9px] text-slate-500 font-bold uppercase">Min</span>
-                            <Input 
-                              type="number" 
-                              placeholder="Any" 
+                            <Input
+                              type="number"
+                              placeholder="Any"
                               className="h-8 bg-[#1e293b] border-none text-xs"
                               value={filter.min || ""}
                               onChange={(e) => updateFilter(filter.key, { min: e.target.value })}
@@ -459,9 +459,9 @@ export function StockScreener({
                           </div>
                           <div className="space-y-1">
                             <span className="text-[9px] text-slate-500 font-bold uppercase">Max</span>
-                            <Input 
-                              type="number" 
-                              placeholder="Any" 
+                            <Input
+                              type="number"
+                              placeholder="Any"
                               className="h-8 bg-[#1e293b] border-none text-xs"
                               value={filter.max || ""}
                               onChange={(e) => updateFilter(filter.key, { max: e.target.value })}
@@ -469,8 +469,8 @@ export function StockScreener({
                           </div>
                         </div>
                       ) : (
-                        <Input 
-                          placeholder="Search text..." 
+                        <Input
+                          placeholder="Search text..."
                           className="h-8 bg-[#1e293b] border-none text-xs"
                           value={filter.search || ""}
                           onChange={(e) => updateFilter(filter.key, { search: e.target.value })}
@@ -481,75 +481,75 @@ export function StockScreener({
                 })}
               </div>
 
-          <Button 
-            variant="ghost" 
-            className="w-full py-6 text-blue-400 hover:bg-blue-400/5 hover:text-blue-300 font-bold gap-2 border-t border-slate-800 rounded-none"
-            onClick={() => {
-              setPickerMode('filter');
-              setShowCriteriaPicker(true);
-            }}
-          >
-            <Plus className="h-4 w-4" />
-            Add Filter Criteria
-          </Button>
-        </div>
-      </div>
-      
-      <div className="flex justify-end">
-        <Button 
-          variant="ghost" 
-          size="sm" 
-          className="text-[10px] font-bold text-slate-500 hover:text-rose-400 uppercase tracking-widest gap-2"
-          onClick={() => {
-            setActiveFilters([]);
-            setSelectedSector("All Sectors");
-            setGlobalTickerSearch("");
-          }}
-        >
-          <Trash2 className="h-3 w-3" />
-          Reset All Filters
-        </Button>
-      </div>
-    </div>
+              <Button
+                variant="ghost"
+                className="w-full py-6 text-emerald-400 hover:bg-emerald-400/10 hover:text-emerald-300 font-black uppercase tracking-widest gap-2 border-t border-jiggy-border rounded-none text-xs"
+                onClick={() => {
+                  setPickerMode('filter');
+                  setShowCriteriaPicker(true);
+                }}
+              >
+                <Plus className="h-4 w-4" />
+                Add Filter Criteria
+              </Button>
+            </div>
+          </div>
 
-    {/* Results Section */}
-    <div className="lg:col-span-8 space-y-4">
-      <div className="flex items-center justify-between px-2">
-        <div className="flex items-center gap-4">
-          <h2 className="text-sm font-bold text-slate-400 uppercase tracking-widest italic">Screener Results</h2>
-          <Badge variant="outline" className="bg-blue-600/10 border-blue-600/20 text-blue-400 font-mono text-[10px]">
-            {filteredData.length} Matches
-          </Badge>
+          <div className="flex justify-end">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-[10px] font-bold text-slate-500 hover:text-rose-400 uppercase tracking-widest gap-2"
+              onClick={() => {
+                setActiveFilters([]);
+                setSelectedSector("All Sectors");
+                setGlobalTickerSearch("");
+              }}
+            >
+              <Trash2 className="h-3 w-3" />
+              Reset All Filters
+            </Button>
+          </div>
         </div>
-        <Button 
-          variant="ghost" 
-          size="sm"
-          className="text-[10px] font-bold text-blue-400 hover:bg-blue-400/10 uppercase tracking-widest gap-2"
-          onClick={() => {
-            setPickerMode('column');
-            setShowCriteriaPicker(true);
-          }}
-        >
-          <Settings2 className="h-3.5 w-3.5" />
-          Modify Columns
-        </Button>
-      </div>
 
-          <div className="rounded-2xl border border-slate-800 bg-[#0f172a] overflow-hidden shadow-2xl">
+        {/* Results Section */}
+        <div className="lg:col-span-8 space-y-4">
+          <div className="flex items-center justify-between px-2">
+            <div className="flex items-center gap-4">
+              <h2 className="text-sm font-black text-slate-400 uppercase tracking-widest italic">Screener Results</h2>
+              <Badge variant="outline" className="bg-emerald-500/10 border-emerald-500/20 text-emerald-400 font-mono text-[10px]">
+                {filteredData.length} Matches
+              </Badge>
+            </div>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-[10px] font-bold text-blue-400 hover:bg-blue-400/10 uppercase tracking-widest gap-2"
+              onClick={() => {
+                setPickerMode('column');
+                setShowCriteriaPicker(true);
+              }}
+            >
+              <Settings2 className="h-3.5 w-3.5" />
+              Modify Columns
+            </Button>
+          </div>
+
+          <div className="rounded-2xl border border-jiggy-tan/50 bg-jiggy-surface-2 overflow-hidden shadow-2xl">
             <div className="overflow-x-auto relative">
               <Table>
-                <TableHeader className="bg-slate-900/50 sticky top-0 z-10">
+                <TableHeader className="bg-jiggy-surface border-b border-jiggy-tan/50 sticky top-0 z-10">
                   {table.getHeaderGroups().map((headerGroup) => (
-                    <TableRow key={headerGroup.id} className="border-slate-800 hover:bg-transparent">
+                    <TableRow key={headerGroup.id} className="border-jiggy-tan/50 hover:bg-transparent">
                       {headerGroup.headers.map((header) => (
-                        <TableHead 
-                          key={header.id} 
+                        <TableHead
+                          key={header.id}
                           className={cn(
                             "text-slate-400 font-bold py-4",
                             header.id === 'ticker' && "sticky left-0 z-30 bg-slate-800 border-r border-slate-800/50 min-w-[120px] max-w-[150px] md:min-w-[180px]"
                           )}
                         >
-                          <div 
+                          <div
                             className={cn(
                               "flex items-center gap-1 cursor-pointer select-none hover:text-slate-200 transition-colors",
                               header.id !== 'ticker' && "justify-end"
@@ -573,14 +573,14 @@ export function StockScreener({
                 <TableBody>
                   {table.getRowModel().rows?.length ? (
                     table.getRowModel().rows.map((row) => (
-                      <TableRow key={row.id} className="border-slate-800 hover:bg-slate-800/30 transition-colors group">
+                      <TableRow key={row.id} className="border-b border-jiggy-tan/30 hover:bg-jiggy-tan/10 transition-colors group">
                         {row.getVisibleCells().map((cell) => (
-                          <TableCell 
-                            key={cell.id} 
+                          <TableCell
+                            key={cell.id}
                             className={cn(
-                              "py-3", 
+                              "py-3",
                               cell.column.id !== 'ticker' && "text-right",
-                              cell.column.id === 'ticker' && "sticky left-0 bg-slate-900 z-10 border-r border-slate-800/50 min-w-[120px] max-w-[150px] md:min-w-[180px]"
+                              cell.column.id === 'ticker' && "sticky left-0 bg-jiggy-surface-2 z-10 border-r border-jiggy-tan/50 min-w-[120px] max-w-[150px] md:min-w-[180px]"
                             )}
                           >
                             {flexRender(cell.column.columnDef.cell, cell.getContext())}
@@ -608,22 +608,22 @@ export function StockScreener({
 
       {/* Save Dialog */}
       <Dialog open={isSaving} onOpenChange={setIsSaving}>
-        <DialogContent className="bg-[#0f172a] border-slate-800 text-white">
+        <DialogContent className="bg-jiggy-surface border-jiggy-border text-white rounded-2xl">
           <DialogHeader>
-            <DialogTitle className="text-xl font-bold italic uppercase tracking-tighter">Save Current Screen</DialogTitle>
+            <DialogTitle className="text-xl font-black italic uppercase tracking-tighter">Save Current Screen</DialogTitle>
           </DialogHeader>
           <div className="py-6 space-y-4">
-            <p className="text-sm text-slate-400">This will save your universe filters, criteria, and sorting order.</p>
-            <Input 
-              placeholder="Screen name (e.g. High Growth Tech)" 
-              className="bg-slate-900 border-slate-800"
+            <p className="text-sm text-slate-400 font-bold">This will save your universe filters, criteria, and sorting order.</p>
+            <Input
+              placeholder="Screen name (e.g. High Growth Tech)"
+              className="bg-terminal-bg border-jiggy-border rounded-xl h-11 focus:border-emerald-500/50 transition-all font-bold"
               value={newScreenName}
               onChange={(e) => setNewScreenName(e.target.value)}
             />
           </div>
           <div className="flex justify-end gap-3">
-            <Button variant="ghost" onClick={() => setIsSaving(false)}>Cancel</Button>
-            <Button onClick={handleSaveScreen} className="bg-blue-600 hover:bg-blue-700 font-bold px-8">Save Screen</Button>
+            <Button variant="ghost" onClick={() => setIsSaving(false)} className="rounded-xl font-black uppercase tracking-widest text-[10px]">Cancel</Button>
+            <Button onClick={handleSaveScreen} className="bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black px-8 rounded-xl uppercase tracking-widest text-[10px]">Save Screen</Button>
           </div>
         </DialogContent>
       </Dialog>

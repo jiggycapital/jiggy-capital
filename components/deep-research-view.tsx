@@ -17,34 +17,34 @@ import {
   Legend,
   ResponsiveContainer,
 } from "recharts";
-import { 
-  fetchAllCompanyData, 
-  getAllMetrics, 
-  getAllQuarters, 
-  categorizeMetrics, 
-  getMetricsByCategory, 
-  type CompanyFinancialData, 
-  type MetricCategory 
+import {
+  fetchAllCompanyData,
+  getAllMetrics,
+  getAllQuarters,
+  categorizeMetrics,
+  getMetricsByCategory,
+  type CompanyFinancialData,
+  type MetricCategory
 } from "@/lib/financial-sheets";
 import { formatCurrency, formatNumber, formatPercentage } from "@/lib/utils";
 import { Settings2, Download, Table as TableIcon, BarChart3, Layout, ChevronDown, Search, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { 
-  Table, 
-  TableBody, 
-  TableCell, 
-  TableHead, 
-  TableHeader, 
-  TableRow 
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow
 } from "@/components/ui/table";
-import { 
-  useReactTable, 
-  getCoreRowModel, 
-  getSortedRowModel, 
-  flexRender, 
-  type ColumnDef, 
-  type SortingState 
+import {
+  useReactTable,
+  getCoreRowModel,
+  getSortedRowModel,
+  flexRender,
+  type ColumnDef,
+  type SortingState
 } from "@tanstack/react-table";
 import { cn } from "@/lib/utils";
 
@@ -62,7 +62,7 @@ export function DeepResearchView() {
   const [error, setError] = useState<string | null>(null);
   const [displayMode, setDisplayMode] = useState<DisplayMode>("split");
   const [chartType, setChartType] = useState<"line" | "bar">("line");
-  
+
   // Shared state
   const [selectedCompanies, setSelectedCompanies] = useState<string[]>([]);
   const [selectedMetric, setSelectedMetric] = useState<string>("");
@@ -81,15 +81,15 @@ export function DeepResearchView() {
       setLoading(true);
       const data = await fetchAllCompanyData();
       setCompaniesData(data);
-      
+
       if (data.length > 0) {
         const allMetrics = getAllMetrics(data);
-        const netNewRevenueGrowth = allMetrics.find(m => 
+        const netNewRevenueGrowth = allMetrics.find(m =>
           m.toLowerCase().includes("net new revenue growth")
         );
         const metricToSelect = netNewRevenueGrowth || allMetrics[0];
         setSelectedMetric(metricToSelect);
-        
+
         // Auto-select companies that have this metric
         const companiesWithMetric = data
           .filter(company => company.metrics.some(m => m.metric === metricToSelect))
@@ -257,8 +257,8 @@ export function DeepResearchView() {
       {/* Header with Toggle */}
       <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
         <div className="flex items-center gap-4">
-          <div className="p-3 rounded-2xl bg-blue-600 shadow-[0_0_20px_rgba(37,99,235,0.3)]">
-            <Database className="h-6 w-6 text-white" />
+          <div className="p-3 rounded-2xl bg-jiggy-gold shadow-[0_0_20px_rgba(255,183,77,0.3)]">
+            <Database className="h-6 w-6 text-slate-900" />
           </div>
           <div>
             <h1 className="text-3xl font-black text-white tracking-tighter italic uppercase">Deep Research</h1>
@@ -266,30 +266,30 @@ export function DeepResearchView() {
           </div>
         </div>
 
-        <div className="flex items-center gap-2 bg-slate-900 border border-slate-800 p-1 rounded-xl">
-          <Button 
-            variant="ghost" 
-            size="sm" 
+        <div className="flex items-center gap-2 bg-jiggy-surface border border-jiggy-border p-1 rounded-xl">
+          <Button
+            variant="ghost"
+            size="sm"
             onClick={() => setDisplayMode("chart")}
-            className={cn("gap-2 px-4 rounded-lg", displayMode === "chart" ? "bg-blue-600 text-white hover:bg-blue-700" : "text-slate-400")}
+            className={cn("gap-2 px-4 rounded-lg", displayMode === "chart" ? "bg-jiggy-gold text-slate-900 hover:bg-jiggy-gold-alt font-black" : "text-slate-400")}
           >
             <BarChart3 className="h-4 w-4" />
             Chart
           </Button>
-          <Button 
-            variant="ghost" 
-            size="sm" 
+          <Button
+            variant="ghost"
+            size="sm"
             onClick={() => setDisplayMode("split")}
-            className={cn("gap-2 px-4 rounded-lg", displayMode === "split" ? "bg-blue-600 text-white hover:bg-blue-700" : "text-slate-400")}
+            className={cn("gap-2 px-4 rounded-lg", displayMode === "split" ? "bg-jiggy-gold text-slate-900 hover:bg-jiggy-gold-alt font-black" : "text-slate-400")}
           >
             <Layout className="h-4 w-4" />
             Chart + Table
           </Button>
-          <Button 
-            variant="ghost" 
-            size="sm" 
+          <Button
+            variant="ghost"
+            size="sm"
             onClick={() => setDisplayMode("table")}
-            className={cn("gap-2 px-4 rounded-lg", displayMode === "table" ? "bg-blue-600 text-white hover:bg-blue-700" : "text-slate-400")}
+            className={cn("gap-2 px-4 rounded-lg", displayMode === "table" ? "bg-jiggy-gold text-slate-900 hover:bg-jiggy-gold-alt font-black" : "text-slate-400")}
           >
             <TableIcon className="h-4 w-4" />
             Table
@@ -300,8 +300,8 @@ export function DeepResearchView() {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Sidebar Settings */}
         <div className={cn("lg:col-span-3 space-y-6", !showSettings && "hidden lg:block")}>
-          <Card className="bg-slate-950 border-slate-800 shadow-xl overflow-hidden sticky top-6">
-            <div className="p-4 border-b border-slate-800 bg-slate-900/50 flex items-center justify-between">
+          <Card className="bg-jiggy-surface border-jiggy-border shadow-xl rounded-2xl overflow-hidden sticky top-6">
+            <div className="p-4 border-b border-jiggy-border bg-jiggy-surface-2 flex items-center justify-between">
               <h3 className="font-bold text-slate-200 uppercase tracking-widest text-xs">Configuration</h3>
               <Button variant="ghost" size="icon" className="h-6 w-6 text-slate-500" onClick={() => setShowSettings(false)}>
                 <X className="h-4 w-4" />
@@ -312,10 +312,10 @@ export function DeepResearchView() {
                 <div className="space-y-2">
                   <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest px-1">Chart Type</label>
                   <Select value={chartType} onValueChange={(v: any) => setChartType(v)}>
-                    <SelectTrigger className="bg-slate-900 border-slate-800 h-10">
+                    <SelectTrigger className="bg-terminal-bg border-jiggy-border h-10">
                       <SelectValue />
                     </SelectTrigger>
-                    <SelectContent className="bg-slate-900 border-slate-800">
+                    <SelectContent className="bg-terminal-bg border-jiggy-border">
                       <SelectItem value="line">Line Chart</SelectItem>
                       <SelectItem value="bar">Bar Chart</SelectItem>
                     </SelectContent>
@@ -325,10 +325,10 @@ export function DeepResearchView() {
                 <div className="space-y-2">
                   <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest px-1">Metric Category</label>
                   <Select value={selectedCategory} onValueChange={(v: any) => { setSelectedCategory(v); setSelectedMetric(""); }}>
-                    <SelectTrigger className="bg-slate-900 border-slate-800 h-10">
+                    <SelectTrigger className="bg-terminal-bg border-jiggy-border h-10">
                       <SelectValue />
                     </SelectTrigger>
-                    <SelectContent className="bg-slate-900 border-slate-800">
+                    <SelectContent className="bg-terminal-bg border-jiggy-border">
                       <SelectItem value="all">All Categories</SelectItem>
                       <SelectItem value="universal">Universal</SelectItem>
                       <SelectItem value="segment">Segment-Specific</SelectItem>
@@ -341,9 +341,9 @@ export function DeepResearchView() {
                   <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest px-1">Search Metric</label>
                   <div className="relative">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-500" />
-                    <Input 
-                      placeholder="Filter metrics..." 
-                      className="pl-9 bg-slate-900 border-slate-800 h-10"
+                    <Input
+                      placeholder="Filter metrics..."
+                      className="pl-9 bg-terminal-bg border-jiggy-border h-10"
                       value={metricSearch}
                       onChange={(e) => setMetricSearch(e.target.value)}
                     />
@@ -353,10 +353,10 @@ export function DeepResearchView() {
                 <div className="space-y-2">
                   <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest px-1">Select Metric</label>
                   <Select value={selectedMetric} onValueChange={setSelectedMetric}>
-                    <SelectTrigger className="bg-slate-900 border-slate-800 h-10 overflow-hidden">
+                    <SelectTrigger className="bg-terminal-bg border-jiggy-border h-10 overflow-hidden">
                       <SelectValue placeholder="Select a metric" />
                     </SelectTrigger>
-                    <SelectContent className="bg-slate-900 border-slate-800 max-h-[400px]">
+                    <SelectContent className="bg-terminal-bg border-jiggy-border max-h-[400px]">
                       {filteredMetrics.map(m => <SelectItem key={m} value={m}>{m}</SelectItem>)}
                     </SelectContent>
                   </Select>
@@ -367,29 +367,29 @@ export function DeepResearchView() {
                 <div className="flex items-center justify-between px-1">
                   <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Companies</label>
                   <div className="flex gap-2">
-                    <button onClick={() => setSelectedCompanies(companiesWithMetric)} className="text-[9px] text-blue-400 hover:text-blue-300 font-bold uppercase">All</button>
-                    <button onClick={() => setSelectedCompanies([])} className="text-[9px] text-slate-500 hover:text-rose-400 font-bold uppercase">None</button>
+                    <button onClick={() => setSelectedCompanies(companiesWithMetric)} className="text-[9px] text-jiggy-gold hover:text-jiggy-gold-alt font-black uppercase">All</button>
+                    <button onClick={() => setSelectedCompanies([])} className="text-[9px] text-slate-500 hover:text-rose-400 font-black uppercase">None</button>
                   </div>
                 </div>
-                <div className="max-h-64 overflow-y-auto space-y-1 pr-2 custom-scrollbar border border-slate-800/50 rounded-lg p-2 bg-slate-900/30">
+                <div className="max-h-64 overflow-y-auto space-y-1 pr-2 custom-scrollbar border border-jiggy-border rounded-xl p-2 bg-terminal-bg border-dashed">
                   {companiesWithMetric.map(c => (
-                    <div key={c} className="flex items-center gap-2 px-2 py-1.5 rounded hover:bg-slate-800/50 transition-colors">
-                      <Checkbox 
-                        id={`c-${c}`} 
-                        checked={selectedCompanies.includes(c)} 
+                    <div key={c} className="flex items-center gap-2 px-2 py-1.5 rounded hover:bg-jiggy-surface-2 transition-colors">
+                      <Checkbox
+                        id={`c-${c}`}
+                        checked={selectedCompanies.includes(c)}
                         onCheckedChange={(checked) => {
                           setSelectedCompanies(prev => checked ? [...prev, c] : prev.filter(x => x !== c));
                         }}
-                        className="border-slate-700"
+                        className="border-slate-600 data-[state=checked]:bg-jiggy-gold data-[state=checked]:text-slate-900"
                       />
-                      <label htmlFor={`c-${c}`} className="text-xs text-slate-300 cursor-pointer flex-1 truncate">{c}</label>
+                      <label htmlFor={`c-${c}`} className="text-xs font-bold text-slate-400 cursor-pointer flex-1 truncate">{c}</label>
                     </div>
                   ))}
                 </div>
               </div>
 
-              <div className="pt-4 border-t border-slate-800">
-                <Button variant="outline" className="w-full bg-slate-900 border-slate-800 text-slate-400 hover:text-white" onClick={handleExport}>
+              <div className="pt-4 border-t border-jiggy-border">
+                <Button variant="outline" className="w-full font-bold bg-terminal-bg border-jiggy-border text-slate-400 hover:text-white" onClick={handleExport}>
                   <Download className="h-4 w-4 mr-2" />
                   Export Data
                 </Button>
@@ -401,7 +401,7 @@ export function DeepResearchView() {
         {/* Main Content */}
         <div className={cn("space-y-6", showSettings ? "lg:col-span-9" : "lg:col-span-12")}>
           {!showSettings && (
-            <Button variant="outline" className="bg-slate-900 border-slate-800 mb-2" onClick={() => setShowSettings(true)}>
+            <Button variant="outline" className="bg-jiggy-surface border-jiggy-border font-bold mb-2" onClick={() => setShowSettings(true)}>
               <Settings2 className="h-4 w-4 mr-2" />
               Show Settings
             </Button>
@@ -411,37 +411,38 @@ export function DeepResearchView() {
             <>
               {/* Chart Section */}
               {(displayMode === "chart" || displayMode === "split") && (
-                <Card className="bg-slate-950 border-slate-800 shadow-2xl overflow-hidden">
-                  <CardHeader className="p-6 border-b border-slate-800/50 flex flex-row items-center justify-between">
+                <Card className="bg-jiggy-surface border-jiggy-border rounded-2xl shadow-2xl overflow-hidden">
+                  <CardHeader className="p-6 border-b border-jiggy-border flex flex-row items-center justify-between">
                     <div>
-                      <CardTitle className="text-xl font-bold text-white tracking-tight">{selectedMetric}</CardTitle>
-                      <p className="text-xs text-slate-500 mt-1">{selectedCompanies.length} companies selected</p>
+                      <CardTitle className="text-xl font-black text-white tracking-tight">{selectedMetric}</CardTitle>
+                      <p className="text-xs font-bold text-slate-500 mt-1">{selectedCompanies.length} companies selected</p>
                     </div>
                     <Popover>
                       <PopoverTrigger asChild>
-                        <Button variant="ghost" size="sm" className="text-slate-400 hover:text-white">
+                        <Button variant="ghost" size="sm" className="text-slate-400 hover:text-white font-bold">
                           <Settings2 className="h-4 w-4 mr-2" />
                           Quarters
                         </Button>
                       </PopoverTrigger>
-                      <PopoverContent className="w-64 bg-slate-900 border-slate-800">
+                      <PopoverContent className="w-64 bg-jiggy-surface border-jiggy-border">
                         <div className="space-y-4">
                           <div className="flex items-center justify-between">
-                            <h4 className="text-xs font-bold text-slate-200 uppercase">Quarter Visibility</h4>
+                            <h4 className="text-xs font-black text-slate-200 uppercase">Quarter Visibility</h4>
                             <div className="flex gap-2">
-                              <button onClick={() => setQuarterVisibility(allQuarters.reduce((acc, q) => ({...acc, [q]: true}), {}))} className="text-[9px] text-blue-400 uppercase font-bold">All</button>
-                              <button onClick={() => setQuarterVisibility(allQuarters.reduce((acc, q) => ({...acc, [q]: false}), {}))} className="text-[9px] text-slate-500 uppercase font-bold">None</button>
+                              <button onClick={() => setQuarterVisibility(allQuarters.reduce((acc, q) => ({ ...acc, [q]: true }), {}))} className="text-[9px] text-jiggy-gold hover:text-jiggy-gold-alt uppercase font-black">All</button>
+                              <button onClick={() => setQuarterVisibility(allQuarters.reduce((acc, q) => ({ ...acc, [q]: false }), {}))} className="text-[9px] text-slate-500 hover:text-rose-400 uppercase font-black">None</button>
                             </div>
                           </div>
                           <div className="max-h-64 overflow-y-auto space-y-1 custom-scrollbar">
                             {allQuarters.map(q => (
                               <div key={q} className="flex items-center gap-2">
-                                <Checkbox 
-                                  id={`q-${q}`} 
-                                  checked={quarterVisibility[q] !== false} 
-                                  onCheckedChange={(checked) => setQuarterVisibility(prev => ({...prev, [q]: !!checked}))}
+                                <Checkbox
+                                  id={`q-${q}`}
+                                  checked={quarterVisibility[q] !== false}
+                                  onCheckedChange={(checked) => setQuarterVisibility(prev => ({ ...prev, [q]: !!checked }))}
+                                  className="border-slate-600 data-[state=checked]:bg-jiggy-gold data-[state=checked]:text-slate-900"
                                 />
-                                <label htmlFor={`q-${q}`} className="text-xs text-slate-300">{q}</label>
+                                <label htmlFor={`q-${q}`} className="text-xs font-bold text-slate-400">{q}</label>
                               </div>
                             ))}
                           </div>
@@ -456,10 +457,10 @@ export function DeepResearchView() {
                           <LineChart data={chartData} margin={{ top: 10, right: 30, left: 20, bottom: 60 }}>
                             <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" vertical={false} />
                             <XAxis dataKey="quarter" stroke="#475569" fontSize={10} tickMargin={15} angle={-45} textAnchor="end" />
-                            <YAxis 
-                              stroke="#475569" 
-                              fontSize={10} 
-                              tickFormatter={(v) => isPercentage ? formatPercentage(v) : isCurrency ? formatCurrency(v) : formatNumber(v)} 
+                            <YAxis
+                              stroke="#475569"
+                              fontSize={10}
+                              tickFormatter={(v) => isPercentage ? formatPercentage(v) : isCurrency ? formatCurrency(v) : formatNumber(v)}
                             />
                             <Tooltip
                               contentStyle={{ backgroundColor: "#0f172a", border: "1px solid #1e293b", borderRadius: "12px" }}
@@ -474,10 +475,10 @@ export function DeepResearchView() {
                           <BarChart data={chartData} margin={{ top: 10, right: 30, left: 20, bottom: 60 }}>
                             <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" vertical={false} />
                             <XAxis dataKey="quarter" stroke="#475569" fontSize={10} tickMargin={15} angle={-45} textAnchor="end" />
-                            <YAxis 
-                              stroke="#475569" 
-                              fontSize={10} 
-                              tickFormatter={(v) => isPercentage ? formatPercentage(v) : isCurrency ? formatCurrency(v) : formatNumber(v)} 
+                            <YAxis
+                              stroke="#475569"
+                              fontSize={10}
+                              tickFormatter={(v) => isPercentage ? formatPercentage(v) : isCurrency ? formatCurrency(v) : formatNumber(v)}
                             />
                             <Tooltip
                               contentStyle={{ backgroundColor: "#0f172a", border: "1px solid #1e293b", borderRadius: "12px" }}
@@ -497,19 +498,19 @@ export function DeepResearchView() {
 
               {/* Table Section */}
               {(displayMode === "table" || displayMode === "split") && (
-                <Card className="bg-slate-950 border-slate-800 shadow-2xl overflow-hidden">
-                  <div className="p-4 border-b border-slate-800 bg-slate-900/50 flex items-center justify-between">
+                <Card className="bg-jiggy-surface border-jiggy-border rounded-2xl shadow-2xl overflow-hidden mt-6">
+                  <div className="p-4 border-b border-jiggy-border bg-jiggy-surface-2 flex items-center justify-between">
                     <h3 className="font-bold text-slate-200 uppercase tracking-widest text-xs">Data Table</h3>
                   </div>
                   <CardContent className="p-0">
                     <div className="overflow-x-auto relative">
                       <Table>
-                        <TableHeader className="bg-slate-900 sticky top-0 z-10">
+                        <TableHeader className="bg-jiggy-surface-2 sticky top-0 z-10">
                           {table.getHeaderGroups().map((headerGroup) => (
-                            <TableRow key={headerGroup.id} className="border-slate-800 hover:bg-transparent">
+                            <TableRow key={headerGroup.id} className="border-jiggy-border hover:bg-transparent">
                               {headerGroup.headers.map((header) => (
                                 <TableHead key={header.id} className="text-slate-400 font-bold py-4">
-                                  <div 
+                                  <div
                                     className="flex items-center gap-1 cursor-pointer select-none hover:text-slate-200 transition-colors"
                                     onClick={header.column.getToggleSortingHandler()}
                                   >
@@ -524,7 +525,7 @@ export function DeepResearchView() {
                         </TableHeader>
                         <TableBody>
                           {table.getRowModel().rows.map((row) => (
-                            <TableRow key={row.id} className="border-slate-800 hover:bg-slate-800/30 transition-colors group">
+                            <TableRow key={row.id} className="border-jiggy-border hover:bg-jiggy-surface-2 transition-colors group">
                               {row.getVisibleCells().map((cell) => (
                                 <TableCell key={cell.id} className="py-3 font-mono text-xs">
                                   {flexRender(cell.column.columnDef.cell, cell.getContext())}
@@ -540,10 +541,10 @@ export function DeepResearchView() {
               )}
             </>
           ) : (
-            <div className="flex flex-col items-center justify-center h-[600px] border-2 border-dashed border-slate-800 rounded-3xl bg-slate-900/20 text-slate-500">
+            <div className="flex flex-col items-center justify-center h-[600px] border-2 border-dashed border-jiggy-border rounded-3xl bg-jiggy-surface/30 text-slate-500">
               <Database className="h-16 w-16 mb-4 opacity-10" />
-              <p className="text-lg font-bold text-slate-400 italic">Select companies and a metric to begin research</p>
-              <p className="text-sm mt-2">Use the configuration panel on the left to get started</p>
+              <p className="text-lg font-black text-slate-400 italic">Select companies and a metric to begin research</p>
+              <p className="text-sm mt-2 font-bold">Use the configuration panel on the left to get started</p>
             </div>
           )}
         </div>
@@ -554,21 +555,21 @@ export function DeepResearchView() {
 
 function Database({ className }: { className?: string }) {
   return (
-    <svg 
-      className={className} 
-      xmlns="http://www.w3.org/2000/svg" 
-      width="24" 
-      height="24" 
-      viewBox="0 0 24 24" 
-      fill="none" 
-      stroke="currentColor" 
-      strokeWidth="2" 
-      strokeLinecap="round" 
+    <svg
+      className={className}
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
       strokeLinejoin="round"
     >
-      <ellipse cx="12" cy="5" rx="9" ry="3"/>
-      <path d="M3 5V19A9 3 0 0 0 21 19V5"/>
-      <path d="M3 12A9 3 0 0 0 21 12"/>
+      <ellipse cx="12" cy="5" rx="9" ry="3" />
+      <path d="M3 5V19A9 3 0 0 0 21 19V5" />
+      <path d="M3 12A9 3 0 0 0 21 12" />
     </svg>
   );
 }

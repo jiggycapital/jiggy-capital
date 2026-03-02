@@ -116,11 +116,11 @@ export function UpcomingEvents({ portfolioTickers, logos, irLinks, className }: 
   }, [portfolioTickers, irLinks]);
 
   return (
-    <Card className={`bg-[#151536]/50 border-[#2A2A61] overflow-hidden flex flex-col shadow-2xl ${className || 'h-[750px]'}`}>
-      <CardHeader className="py-4 border-b border-[#2A2A61] shrink-0">
+    <Card className={`bg-jiggy-surface border-jiggy-border overflow-hidden flex flex-col shadow-2xl rounded-2xl ${className || 'h-[750px]'}`}>
+      <CardHeader className="py-4 border-b border-jiggy-border shrink-0 bg-jiggy-surface-2">
         <CardTitle className="text-sm font-bold flex items-center justify-between text-slate-100 uppercase tracking-wider">
           <div className="flex items-center gap-2">
-            <Calendar className="w-4 h-4 text-amber-400" />
+            <Calendar className="w-5 h-5 text-jiggy-gold" />
             Upcoming Events
           </div>
           <span className="text-[10px] text-slate-600 lowercase font-semibold">updated 24h</span>
@@ -130,21 +130,21 @@ export function UpcomingEvents({ portfolioTickers, logos, irLinks, className }: 
         {loading ? (
           <div className="flex-1 flex flex-col items-center justify-center p-12 text-center space-y-4">
             <div className="flex justify-center">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-amber-400"></div>
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-jiggy-gold"></div>
             </div>
             <p className="text-slate-500 text-sm">Synchronizing calendars...</p>
           </div>
         ) : events.length === 0 ? (
           <div className="flex-1 flex items-center justify-center p-12 text-center text-slate-500 text-sm italic">No upcoming events scheduled</div>
         ) : (
-          <div className="divide-y divide-[#2A2A61]/50 overflow-y-auto flex-1 custom-scrollbar">
+          <div className="divide-y divide-jiggy-border border-t border-jiggy-border overflow-y-auto flex-1 custom-scrollbar">
             {events.map((event, i) => (
-              <div key={`${event.ticker}-${i}`} className="p-4 hover:bg-[#151536]/60 transition-all flex items-center justify-between group">
+              <div key={`${event.ticker}-${i}`} className="p-4 hover:bg-jiggy-surface-2 transition-all flex items-center justify-between group">
                 <div className="flex items-center gap-4 min-w-0">
                   <div className="relative">
-                    <div className="w-11 h-11 rounded-lg bg-[#030D1A] flex items-center justify-center shrink-0 border border-[#2A2A61] shadow-inner group-hover:border-amber-500/30 transition-colors">
+                    <div className="w-12 h-12 rounded-xl bg-terminal-bg flex items-center justify-center shrink-0 border border-jiggy-border shadow-inner group-hover:border-jiggy-gold/40 transition-colors">
                       {logos[event.ticker] ? (
-                        <img src={logos[event.ticker]} alt={event.ticker} className="w-7 h-7 object-contain" />
+                        <img src={logos[event.ticker]} alt={event.ticker} className="w-8 h-8 object-contain drop-shadow-sm" />
                       ) : (
                         <span className="text-[10px] font-bold text-slate-500">{event.ticker}</span>
                       )}
@@ -152,18 +152,18 @@ export function UpcomingEvents({ portfolioTickers, logos, irLinks, className }: 
                   </div>
                   <div className="min-w-0">
                     <div className="flex items-center gap-2 mb-0.5">
-                      <span className="text-sm font-bold text-slate-100 group-hover:text-amber-300 transition-colors">{event.ticker}</span>
-                      <span className="text-[9px] font-black px-1.5 py-0.5 rounded tracking-tighter uppercase border bg-amber-500/10 text-amber-400 border-amber-500/20">
+                      <span className="text-sm font-extrabold text-slate-100 group-hover:text-jiggy-gold transition-colors">{event.ticker}</span>
+                      <span className="text-[9px] font-black px-1.5 py-0.5 rounded tracking-tighter uppercase border bg-jiggy-gold/10 text-jiggy-gold border-jiggy-gold/20">
                         {event.type}
                       </span>
                     </div>
-                    <div className="text-xs text-slate-400 truncate pr-2 font-medium tracking-tight uppercase opacity-70 group-hover:opacity-100">{event.title}</div>
+                    <div className="text-sm text-slate-400 truncate pr-2 font-bold tracking-tight uppercase opacity-70 group-hover:opacity-100">{event.title}</div>
                   </div>
                 </div>
                 <div className="text-right shrink-0">
-                  <div className="bg-[#030D1A] px-2 py-1 rounded border border-[#2A2A61] group-hover:border-[#38387A] transition-all">
-                    <div className="text-[11px] font-mono font-bold text-slate-200 flex items-center gap-1.5 justify-end">
-                      <Clock className="w-3 h-3 text-slate-500" />
+                  <div className="bg-terminal-bg px-2.5 py-1.5 rounded-lg border border-jiggy-border shadow-sm group-hover:border-jiggy-gold/30 transition-all">
+                    <div className="text-[12px] font-mono font-bold text-slate-300 flex items-center gap-1.5 justify-end">
+                      <Clock className="w-3.5 h-3.5 text-slate-400" />
                       {new Date(event.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }).toUpperCase()}
                     </div>
                   </div>
@@ -172,9 +172,9 @@ export function UpcomingEvents({ portfolioTickers, logos, irLinks, className }: 
                       href={event.link}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-[10px] font-bold text-amber-400 hover:text-amber-300 flex items-center gap-1 justify-end mt-1.5 tracking-wide uppercase opacity-0 group-hover:opacity-100 transform translate-y-1 group-hover:translate-y-0 transition-all"
+                      className="text-[10px] font-bold text-jiggy-gold hover:text-jiggy-gold-alt flex items-center gap-1 justify-end mt-2 tracking-wide uppercase opacity-0 group-hover:opacity-100 transform translate-y-1 group-hover:translate-y-0 transition-all"
                     >
-                      Resource <ExternalLink className="w-2.5 h-2.5" />
+                      Resource <ExternalLink className="w-3 h-3" />
                     </a>
                   )}
                 </div>

@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
-import { Inter, JetBrains_Mono } from "next/font/google";
+import { Nunito, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { SidebarProvider } from "@/components/sidebar-provider";
 import { MainLayout } from "@/components/main-layout";
 import { Analytics } from "@vercel/analytics/next";
 
-const inter = Inter({
+const nunito = Nunito({
   variable: "--font-sans",
   subsets: ["latin"],
   display: "swap",
@@ -29,7 +29,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="dark">
-      <body className={`${inter.variable} ${jetbrainsMono.variable} font-sans antialiased text-slate-100`}>
+      <body className={`${nunito.variable} ${jetbrainsMono.variable} font-sans antialiased text-slate-100`}>
         <SidebarProvider>
           <MainLayout>{children}</MainLayout>
         </SidebarProvider>

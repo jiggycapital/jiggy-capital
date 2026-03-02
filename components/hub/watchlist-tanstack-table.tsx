@@ -82,7 +82,7 @@ export function WatchlistTanStackTable({ watchlistData, logos: initialLogos }: W
         accessorKey: "ticker",
         header: ({ column }) => (
           <div
-            className="flex items-center gap-1 cursor-pointer select-none hover:text-slate-200 transition-colors whitespace-normal leading-tight"
+            className="flex items-center gap-1 cursor-pointer select-none text-slate-300 font-bold uppercase tracking-wider text-[11px] hover:text-white transition-colors whitespace-normal leading-tight"
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           >
             Company
@@ -96,7 +96,7 @@ export function WatchlistTanStackTable({ watchlistData, logos: initialLogos }: W
           const { ticker, name, logoUrl } = row.original;
           return (
             <div className="flex items-center gap-2.5">
-              <div className="w-9 h-9 rounded-lg bg-[#151536] flex items-center justify-center overflow-hidden shrink-0 border border-[#2A2A61]">
+              <div className="w-10 h-10 rounded-xl bg-jiggy-surface-2 flex items-center justify-center overflow-hidden shrink-0 border border-jiggy-border shadow-sm">
                 {logoUrl ? (
                   <img src={logoUrl} alt={ticker} className="w-7 h-7 object-contain animate-in fade-in duration-500" />
                 ) : (
@@ -113,7 +113,7 @@ export function WatchlistTanStackTable({ watchlistData, logos: initialLogos }: W
       },
       {
         id: "sparkline",
-        header: () => <div className="text-center text-slate-400 text-[11px]">90D Trend</div>,
+        header: () => <div className="text-center text-slate-300 font-bold uppercase tracking-wider text-[11px]">90D Trend</div>,
         cell: ({ row }) => {
           const { ticker } = row.original;
           return (
@@ -128,7 +128,7 @@ export function WatchlistTanStackTable({ watchlistData, logos: initialLogos }: W
         accessorKey: "price",
         header: ({ column }) => (
           <div
-            className="flex items-center justify-end gap-1 cursor-pointer select-none hover:text-slate-200 transition-colors whitespace-normal leading-tight text-right"
+            className="flex items-center justify-end gap-1 cursor-pointer select-none text-slate-300 font-bold uppercase tracking-wider text-[11px] hover:text-white transition-colors whitespace-normal leading-tight text-right"
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           >
             Price
@@ -144,7 +144,7 @@ export function WatchlistTanStackTable({ watchlistData, logos: initialLogos }: W
         accessorKey: "marketCap",
         header: ({ column }) => (
           <div
-            className="flex items-center justify-end gap-1 cursor-pointer select-none hover:text-slate-200 transition-colors whitespace-normal leading-tight text-right max-w-[50px]"
+            className="flex items-center justify-end gap-1 cursor-pointer select-none text-slate-300 font-bold uppercase tracking-wider text-[11px] hover:text-white transition-colors whitespace-normal leading-tight text-right max-w-[50px]"
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           >
             Mkt Cap
@@ -168,7 +168,7 @@ export function WatchlistTanStackTable({ watchlistData, logos: initialLogos }: W
         accessorKey: "change",
         header: ({ column }) => (
           <div
-            className="flex items-center justify-end gap-1 cursor-pointer select-none hover:text-slate-200 transition-colors whitespace-normal leading-tight text-right"
+            className="flex items-center justify-end gap-1 cursor-pointer select-none text-slate-300 font-bold uppercase tracking-wider text-[11px] hover:text-white transition-colors whitespace-normal leading-tight text-right"
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           >
             Daily
@@ -194,7 +194,7 @@ export function WatchlistTanStackTable({ watchlistData, logos: initialLogos }: W
         accessorKey: "w1Change",
         header: ({ column }) => (
           <div
-            className="flex items-center justify-end gap-1 cursor-pointer select-none hover:text-slate-200 transition-colors whitespace-normal leading-tight text-right"
+            className="flex items-center justify-end gap-1 cursor-pointer select-none text-slate-300 font-bold uppercase tracking-wider text-[11px] hover:text-white transition-colors whitespace-normal leading-tight text-right"
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           >
             1W
@@ -220,7 +220,7 @@ export function WatchlistTanStackTable({ watchlistData, logos: initialLogos }: W
         accessorKey: "ytdChange",
         header: ({ column }) => (
           <div
-            className="flex items-center justify-end gap-1 cursor-pointer select-none hover:text-slate-200 transition-colors whitespace-normal leading-tight text-right"
+            className="flex items-center justify-end gap-1 cursor-pointer select-none text-slate-300 font-bold uppercase tracking-wider text-[11px] hover:text-white transition-colors whitespace-normal leading-tight text-right"
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           >
             YTD
@@ -246,7 +246,7 @@ export function WatchlistTanStackTable({ watchlistData, logos: initialLogos }: W
         accessorKey: "pe2026",
         header: ({ column }) => (
           <div
-            className="flex items-center justify-end gap-1 cursor-pointer select-none hover:text-slate-200 transition-colors whitespace-normal leading-tight text-right max-w-[50px]"
+            className="flex items-center justify-end gap-1 cursor-pointer select-none text-slate-300 font-bold uppercase tracking-wider text-[11px] hover:text-white transition-colors whitespace-normal leading-tight text-right max-w-[50px]"
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           >
             26e P/E
@@ -265,7 +265,7 @@ export function WatchlistTanStackTable({ watchlistData, logos: initialLogos }: W
         accessorKey: "fcf2026",
         header: ({ column }) => (
           <div
-            className="flex items-center justify-end gap-1 cursor-pointer select-none hover:text-slate-200 transition-colors whitespace-normal leading-tight text-right max-w-[50px]"
+            className="flex items-center justify-end gap-1 cursor-pointer select-none text-slate-300 font-bold uppercase tracking-wider text-[11px] hover:text-white transition-colors whitespace-normal leading-tight text-right max-w-[50px]"
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           >
             2026e P/FCF
@@ -303,7 +303,7 @@ export function WatchlistTanStackTable({ watchlistData, logos: initialLogos }: W
         accessorKey: "peg",
         header: ({ column }) => (
           <div
-            className="flex items-center justify-end gap-1 cursor-pointer select-none hover:text-slate-200 transition-colors whitespace-normal leading-tight text-right max-w-[50px]"
+            className="flex items-center justify-end gap-1 cursor-pointer select-none text-slate-300 font-bold uppercase tracking-wider text-[11px] hover:text-white transition-colors whitespace-normal leading-tight text-right max-w-[50px]"
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           >
             PEG
@@ -332,18 +332,18 @@ export function WatchlistTanStackTable({ watchlistData, logos: initialLogos }: W
   });
 
   return (
-    <div className="rounded-xl border border-[#2A2A61] bg-[#151536]/50 overflow-hidden flex flex-col h-full max-h-[750px]">
+    <div className="rounded-2xl border border-jiggy-border bg-jiggy-surface shadow-xl overflow-hidden flex flex-col h-full max-h-[750px]">
       <div className="overflow-auto custom-scrollbar flex-1 relative">
         <Table className="relative">
-          <TableHeader className="bg-[#1A1A40] sticky top-0 z-20 shadow-md">
+          <TableHeader className="bg-jiggy-surface-2 sticky top-0 z-20 shadow-md">
             {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id} className="border-[#2A2A61] hover:bg-transparent">
+              <TableRow key={headerGroup.id} className="border-jiggy-border hover:bg-transparent">
                 {headerGroup.headers.map((header) => (
                   <TableHead
                     key={header.id}
                     className={`text-slate-400 font-bold py-4 px-2 ${header.id === 'ticker'
-                      ? 'sticky left-0 z-30 bg-[#1A1A40] border-r border-[#2A2A61]/50 min-w-[140px] max-w-[170px] md:min-w-[200px]'
-                      : 'bg-[#1A1A40]'
+                      ? 'sticky left-0 z-30 bg-jiggy-surface-2 border-r border-jiggy-border min-w-[140px] max-w-[170px] md:min-w-[200px]'
+                      : 'bg-jiggy-surface-2'
                       }`}
                   >
                     {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
@@ -355,12 +355,12 @@ export function WatchlistTanStackTable({ watchlistData, logos: initialLogos }: W
           <TableBody>
             {table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => (
-                <TableRow key={row.id} className="border-[#2A2A61] hover:bg-[#151536]/60 transition-colors">
+                <TableRow key={row.id} className="border-jiggy-border hover:bg-jiggy-surface-2 transition-colors">
                   {row.getVisibleCells().map((cell) => (
                     <TableCell
                       key={cell.id}
                       className={`py-3 px-2 ${cell.column.id === 'ticker'
-                        ? 'sticky left-0 bg-[#030D1A] z-10 border-r border-[#2A2A61]/50 min-w-[140px] max-w-[170px] md:min-w-[200px]'
+                        ? 'sticky left-0 bg-terminal-bg z-10 border-r border-jiggy-border min-w-[140px] max-w-[170px] md:min-w-[200px]'
                         : ''
                         }`}
                     >

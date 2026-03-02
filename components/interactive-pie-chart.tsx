@@ -1,11 +1,11 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { 
-  PieChart, 
-  Pie, 
-  Cell, 
-  ResponsiveContainer, 
+import {
+  PieChart,
+  Pie,
+  Cell,
+  ResponsiveContainer,
   Sector,
   Tooltip
 } from "recharts";
@@ -20,28 +20,23 @@ interface InteractivePieChartProps {
 }
 
 const COLORS = [
-  "#6366F1", "#EC4899", "#10B981", "#F59E0B", "#8B5CF6",
-  "#06B6D4", "#84CC16", "#F97316", "#EF4444", "#14B8A6",
-  "#F43F5E", "#A855F7", "#0EA5E9", "#22C55E", "#EAB308"
+  "#FF4757", // Vibrant Red
+  "#FF6348", // Coral
+  "#FFA502", // Orange
+  "#ECCC68", // Yellow
+  "#A3CB38", // Lime Green
+  "#1DD1A1", // Mint Green
+  "#00D2D3", // Bright Cyan
+  "#01A3A4", // Teal
+  "#0097E6", // Blue
+  "#54A0FF", // Pastel Blue
+  "#5F27CD", // Purple
+  "#9C88FF", // Periwinkle
+  "#D980FA", // Lavender
+  "#FF9FF3", // Pink
+  "#FF006E", // Magenta
+  "#e84393", // Deep Rose
 ];
-
-const SECTOR_COLORS: Record<string, string> = {
-  'Technology': '#6366F1',
-  'Software': '#EF4444',
-  'Healthcare': '#EC4899',
-  'Financial Services': '#10B981',
-  'Consumer Discretionary': '#F59E0B',
-  'Communication Services': '#8B5CF6',
-  'Semiconductors': '#EAB308',
-  'Industrials': '#06B6D4',
-  'Energy': '#84CC16',
-  'Consumer Staples': '#F97316',
-  'Real Estate': '#EF4444',
-  'Materials': '#14B8A6',
-  'Utilities': '#F43F5E',
-  'Other': '#F43F5E',
-  'Cash': '#22C55E'
-};
 
 const renderFiscalLabel = (props: any) => {
   const { cx, cy, midAngle, outerRadius, fill, payload, percent } = props;
@@ -61,24 +56,24 @@ const renderFiscalLabel = (props: any) => {
 
   // END: The end of the visible line
   const isRightSide = cos >= 0;
-  const ex = mx + (isRightSide ? 1 : -1) * 40; 
+  const ex = mx + (isRightSide ? 1 : -1) * 40;
   const ey = my;
 
   // 2. Calculate Content Positions (The "Gap" Logic)
-  const logoWidth = 22;
-  const gap = 8; // Space between elements
-  
+  const logoWidth = 36;
+  const gap = 12; // Space between elements
+
   // LOGO POSITION:
   // If Right: Start after line end + gap
   // If Left: Start before line end - gap - logoWidth
   const logoX = isRightSide ? (ex + gap) : (ex - gap - logoWidth);
-  const logoY = ey - 11; // Vertically centered (half of height 22)
+  const logoY = ey - 18; // Vertically centered (half of height 36)
 
   // TEXT POSITION:
   // If Right: Start after Logo + gap
   // If Left: Start before Logo - gap
   const textX = isRightSide ? (logoX + logoWidth + gap) : (logoX - gap);
-  
+
   // Anchor text based on side
   const textAnchor = isRightSide ? 'start' : 'end';
 
@@ -90,38 +85,38 @@ const renderFiscalLabel = (props: any) => {
       {/* Connector Line */}
       <path
         d={`M${sx},${sy}L${mx},${my}L${ex},${ey}`}
-        stroke={fill} 
-        strokeWidth={1.5}
+        stroke={fill}
+        strokeWidth={2}
         fill="none"
-        opacity={0.8}
+        opacity={0.6}
       />
-      
+
       {/* LOGO */}
       {payload.image ? (
-         <image 
-           href={payload.image} 
-           x={logoX}
-           y={logoY} 
-           height={logoWidth} 
-           width={logoWidth} 
-           preserveAspectRatio="xMidYMid meet"
-         />
+        <image
+          href={payload.image}
+          x={logoX}
+          y={logoY}
+          height={logoWidth}
+          width={logoWidth}
+          preserveAspectRatio="xMidYMid meet"
+        />
       ) : (
         !payload.isOther && (
-          <circle 
-            cx={logoX + logoWidth / 2} 
-            cy={ey} 
-            r={5} 
-            fill={fill} 
-            fillOpacity={0.5} 
+          <circle
+            cx={logoX + logoWidth / 2}
+            cy={ey}
+            r={8}
+            fill={fill}
+            fillOpacity={0.5}
           />
         )
       )}
 
       {payload.isOther && (
         <g transform={`translate(${logoX}, ${logoY})`}>
-          <circle cx={11} cy={11} r={11} fill="rgba(255,255,255,0.1)" />
-          <text x={11} y={11} dy={4} textAnchor="middle" fill="#FFF" fontSize={14} fontWeight="bold">+</text>
+          <circle cx={18} cy={18} r={18} fill="rgba(255,255,255,0.1)" />
+          <text x={18} y={18} dy={6} textAnchor="middle" fill="#FFF" fontSize={22} fontWeight="bold">+</text>
         </g>
       )}
 
@@ -132,14 +127,14 @@ const renderFiscalLabel = (props: any) => {
           y={ey}
           textAnchor={textAnchor}
           fill="#FFF"
-          fontSize={13}
-          fontWeight="bold"
+          fontSize={14}
+          fontWeight="900"
           dominantBaseline="middle"
           className="tracking-tight"
         >
           {payload.ticker || payload.label}
-          <tspan fill="#9CA3AF" fontWeight="normal" dx={6} fontFamily="monospace">
-          {`${(percent * 100).toFixed(1)}%`}
+          <tspan fill="#78e08f" fontWeight="bold" dx={6} fontFamily="monospace">
+            {`${(percent * 100).toFixed(1)}%`}
           </tspan>
         </text>
       </g>
@@ -148,8 +143,8 @@ const renderFiscalLabel = (props: any) => {
 };
 
 const renderActiveShape = (props: any) => {
-  const { 
-    cx, cy, innerRadius, outerRadius, startAngle, endAngle, 
+  const {
+    cx, cy, innerRadius, outerRadius, startAngle, endAngle,
     fill
   } = props;
 
@@ -159,11 +154,14 @@ const renderActiveShape = (props: any) => {
         cx={cx}
         cy={cy}
         innerRadius={innerRadius}
-        outerRadius={outerRadius + 6}
+        outerRadius={outerRadius + 8}
         startAngle={startAngle}
         endAngle={endAngle}
         fill={fill}
-        className="transition-all duration-300"
+        className="transition-all duration-300 drop-shadow-[0_0_15px_rgba(255,255,255,0.3)]"
+        stroke="#22352f"
+        strokeWidth={6}
+        cornerRadius={12}
       />
       {/* Ensure label remains visible and on top during hover */}
       {renderFiscalLabel(props)}
@@ -205,7 +203,7 @@ export function InteractivePieChart({ positionsData, logos, view, onViewChange }
           const ticker = (row.Ticker || row.Symbol || "").toUpperCase();
           const marketValue = parseNumeric(row["Market Value"] || row["Value"] || "0") || 0;
           const weight = totalValue > 0 ? (marketValue / totalValue) * 100 : 0;
-          
+
           if (ticker && ticker !== "CASH" && weight > 0) {
             const logoUrl = logos[ticker] || null;
             return {
@@ -251,7 +249,7 @@ export function InteractivePieChart({ positionsData, logos, view, onViewChange }
       const threshold = 2.5;
       const largeHoldings = sortedData.filter(d => d.value >= threshold);
       const smallHoldings = sortedData.filter(d => d.value < threshold);
-      
+
       combinedData = [...largeHoldings];
       if (smallHoldings.length > 0) {
         combinedData.push({
@@ -267,7 +265,7 @@ export function InteractivePieChart({ positionsData, logos, view, onViewChange }
     } else {
       combinedData = [...sortedData];
     }
-    
+
     // Sort to maintain descending order, but force "Other" to the very end
     const finalData = combinedData.sort((a, b) => {
       if (a.isOther) return 1;
@@ -289,14 +287,14 @@ export function InteractivePieChart({ positionsData, logos, view, onViewChange }
   return (
     <div className="relative w-full">
       {/* Toggle Buttons */}
-      <div className="flex gap-2 mb-4 justify-center relative z-20">
+      <div className="flex gap-3 mb-4 justify-center relative z-20">
         <Button
           variant={view === "company" ? "default" : "outline"}
           size="sm"
           onClick={() => onViewChange("company")}
           className={cn(
-            "relative",
-            view === "company" ? "bg-blue-600 hover:bg-blue-700" : "border-slate-700 text-slate-400"
+            "relative px-6 rounded-xl font-extrabold shadow-md",
+            view === "company" ? "bg-jiggy-gold hover:bg-jiggy-gold-alt text-slate-900 border-none" : "border-jiggy-border bg-jiggy-surface-2 text-slate-400 hover:text-white"
           )}
         >
           Holdings
@@ -306,8 +304,8 @@ export function InteractivePieChart({ positionsData, logos, view, onViewChange }
           size="sm"
           onClick={() => onViewChange("sector")}
           className={cn(
-            "relative",
-            view === "sector" ? "bg-blue-600 hover:bg-blue-700" : "border-slate-700 text-slate-400"
+            "relative px-6 rounded-xl font-extrabold shadow-md",
+            view === "sector" ? "bg-jiggy-gold hover:bg-jiggy-gold-alt text-slate-900 border-none" : "border-jiggy-border bg-jiggy-surface-2 text-slate-400 hover:text-white"
           )}
         >
           Sector
@@ -317,7 +315,7 @@ export function InteractivePieChart({ positionsData, logos, view, onViewChange }
       {/* Chart Container */}
       <div className="w-full h-[500px] md:h-[800px] flex items-center justify-center min-h-0 min-w-0 outline-none select-none touch-none relative z-10" style={{ WebkitTapHighlightColor: 'transparent' }}>
         <ResponsiveContainer width="100%" height="100%" minHeight={0}>
-          <PieChart 
+          <PieChart
             margin={{ top: 0, left: 50, right: 50, bottom: 0 }}
             style={{ outline: 'none' }}
             tabIndex={-1}
@@ -329,15 +327,16 @@ export function InteractivePieChart({ positionsData, logos, view, onViewChange }
                 data: chartData,
                 cx: "50%",
                 cy: "50%",
-                innerRadius: "37%",
-                outerRadius: "65%",
+                innerRadius: "45%",
+                outerRadius: "70%",
                 fill: "#8884d8",
                 dataKey: "value",
                 onMouseEnter: onPieEnter,
                 onMouseLeave: onPieLeave,
-                stroke: "#0f172a",
-                strokeWidth: 3,
-                paddingAngle: 2,
+                stroke: "#22352f",
+                strokeWidth: 6,
+                paddingAngle: 0,
+                cornerRadius: 12,
                 label: renderFiscalLabel,
                 labelLine: false,
                 animationBegin: 0,
@@ -345,13 +344,13 @@ export function InteractivePieChart({ positionsData, logos, view, onViewChange }
                 startAngle: 90,
                 endAngle: -270,
                 isAnimationActive: false,
-                tabIndex: -1 // Disable focus on pie slices
+                tabIndex: -1
               } as any)}
             >
               {chartData.map((entry, index) => (
-                <Cell 
-                  key={`cell-${index}`} 
-                  fill={view === "sector" ? (SECTOR_COLORS[entry.id] || COLORS[index % COLORS.length]) : COLORS[index % COLORS.length]} 
+                <Cell
+                  key={`cell-${index}`}
+                  fill={COLORS[index % COLORS.length]}
                   className="transition-all duration-200 cursor-pointer outline-none border-none focus:ring-0 focus:outline-none active:outline-none"
                   style={{ outline: 'none' }}
                 />

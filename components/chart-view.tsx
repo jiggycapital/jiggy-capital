@@ -138,11 +138,11 @@ export function ChartView() {
       const logoUrl = logos[ticker];
 
       return (
-        <div className="bg-[#0f172a] border border-slate-700/50 rounded-xl p-4 shadow-2xl backdrop-blur-xl ring-1 ring-white/10">
+        <div className="bg-jiggy-surface-2 border border-jiggy-tan/50 rounded-2xl p-4 shadow-2xl backdrop-blur-xl ring-1 ring-white/10">
           <div className="flex items-center justify-between gap-6 mb-3">
             <span className="text-slate-100 font-black text-sm tracking-tight uppercase">{ticker}</span>
             {logoUrl && (
-              <div className="w-8 h-8 rounded-lg bg-slate-900 p-1.5 border border-slate-700 shadow-inner">
+              <div className="w-10 h-10 rounded-xl bg-terminal-bg p-1.5 border border-slate-700 shadow-inner flex items-center justify-center shrink-0">
                 <img src={logoUrl} alt="" className="w-full h-full object-contain" />
               </div>
             )}
@@ -158,8 +158,8 @@ export function ChartView() {
 
               return (
                 <div key={index} className="flex items-center justify-between gap-8">
-                  <span className="text-slate-500 text-[9px] uppercase font-black tracking-widest">{entry.name}</span>
-                  <span className="text-blue-400 font-mono text-xs font-black">
+                  <span className="text-slate-500 text-[10px] uppercase font-black tracking-widest">{entry.name}</span>
+                  <span className="text-jiggy-neon font-mono text-sm font-black">
                     {displayVal}
                   </span>
                 </div>
@@ -172,32 +172,32 @@ export function ChartView() {
     return null;
   };
 
-  const COLORS = ["#3b82f6", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6", "#06b6d4", "#f97316", "#ec4899", "#84cc16", "#6366f1"];
+  const COLORS = ["#facc15", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6", "#06b6d4", "#f97316", "#ec4899", "#84cc16", "#6366f1"];
 
   if (loading) return <div className="flex items-center justify-center min-h-[400px] text-slate-400">Loading chart data...</div>;
   if (error) return <div className="flex items-center justify-center min-h-[400px] text-red-400">Error: {error}</div>;
 
   return (
     <div className="space-y-6">
-      <Card className="bg-[#0f172a] border-slate-800 shadow-2xl">
-        <CardHeader className="p-6 border-b border-slate-800/50">
+      <Card className="bg-jiggy-surface border border-jiggy-tan/50 shadow-2xl rounded-2xl overflow-hidden">
+        <CardHeader className="p-6 border-b border-jiggy-tan/50 bg-jiggy-surface-2">
           <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-xl bg-blue-600/10 border border-blue-600/20">
-                <BarChart3 className="h-5 w-5 text-blue-400" />
+              <div className="p-2.5 rounded-2xl bg-emerald-500/20 border border-emerald-500/30 shadow-sm">
+                <BarChart3 className="h-6 w-6 text-emerald-400" />
               </div>
               <div>
                 <CardTitle className="text-slate-100 text-xl font-bold tracking-tight">Financial Visualization</CardTitle>
-                <p className="text-xs text-slate-500 mt-1">Analyze {currentData.length} companies across metrics</p>
+                <p className="text-xs text-slate-500 font-bold tracking-widest mt-1">ANALYZE {currentData.length} COMPANIES ACROSS METRICS</p>
               </div>
             </div>
 
             <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
-              <div className="flex bg-[#1e293b] rounded-lg p-1 border border-slate-700">
+              <div className="flex bg-[#0B0F19]/80 backdrop-blur-md rounded-xl p-1.5 border border-slate-800/60 shadow-inner">
                 <Button
                   variant="ghost"
                   size="sm"
-                  className={cn("px-3 h-8 text-[10px] font-bold uppercase tracking-widest transition-all", chartType === "line" ? "bg-blue-600 text-white" : "text-slate-400 hover:text-slate-200")}
+                  className={cn("px-4 py-2 h-9 text-[10px] sm:text-xs font-black uppercase tracking-widest transition-all rounded-lg", chartType === "line" ? "bg-emerald-400 text-slate-950 shadow-md" : "text-slate-500 hover:text-slate-300")}
                   onClick={() => setChartType("line")}
                 >
                   Line
@@ -205,7 +205,7 @@ export function ChartView() {
                 <Button
                   variant="ghost"
                   size="sm"
-                  className={cn("px-3 h-8 text-[10px] font-bold uppercase tracking-widest transition-all", chartType === "bar" ? "bg-blue-600 text-white" : "text-slate-400 hover:text-slate-200")}
+                  className={cn("px-4 py-2 h-9 text-[10px] sm:text-xs font-black uppercase tracking-widest transition-all rounded-lg", chartType === "bar" ? "bg-emerald-400 text-slate-950 shadow-md" : "text-slate-500 hover:text-slate-300")}
                   onClick={() => setChartType("bar")}
                 >
                   Bar
@@ -213,14 +213,14 @@ export function ChartView() {
               </div>
 
               <div className="flex items-center gap-2">
-                <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">X-Axis:</span>
+                <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">X-Axis:</span>
                 <Select value={xAxisColumn} onValueChange={setXAxisColumn}>
-                  <SelectTrigger className="w-[140px] h-9 bg-[#1e293b] border-slate-700 text-xs text-slate-200">
+                  <SelectTrigger className="w-[150px] h-10 bg-terminal-bg border-jiggy-border text-xs font-bold text-slate-200 rounded-xl">
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent className="bg-[#1e293b] border-slate-700">
+                  <SelectContent className="bg-jiggy-surface-2 border-jiggy-border rounded-xl">
                     {allColumns.map(col => (
-                      <SelectItem key={col} value={col} className="text-xs text-slate-200">{col}</SelectItem>
+                      <SelectItem key={col} value={col} className="text-xs font-bold text-slate-200 focus:bg-emerald-500/10 focus:text-emerald-400">{col}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -229,7 +229,7 @@ export function ChartView() {
               <Button
                 variant="outline"
                 size="sm"
-                className="bg-blue-600 hover:bg-blue-700 border-none text-white font-bold"
+                className="bg-emerald-500/20 hover:bg-emerald-400 hover:text-slate-950 border border-emerald-500/30 text-emerald-400 font-black h-10 px-4 rounded-xl transition-all"
                 onClick={() => setShowCriteriaPicker(true)}
               >
                 <Plus className="h-4 w-4 mr-2" />
@@ -240,22 +240,22 @@ export function ChartView() {
         </CardHeader>
 
         <CardContent className="p-0">
-          <div className="px-6 py-4 bg-[#0a0f1d] border-b border-slate-800 flex items-center justify-between">
+          <div className="px-6 py-5 bg-jiggy-surface border-b border-jiggy-tan/50 flex flex-col xl:flex-row items-start xl:items-center justify-between gap-4 xl:gap-0">
             <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as any)} className="w-auto">
-              <TabsList className="bg-[#1e293b] border-slate-700">
-                <TabsTrigger value="positions" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white text-xs font-bold px-4">Holdings</TabsTrigger>
-                <TabsTrigger value="watchlist" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white text-xs font-bold px-4">Watchlist</TabsTrigger>
-                <TabsTrigger value="combined" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white text-xs font-bold px-4">Combined</TabsTrigger>
+              <TabsList className="bg-[#0B0F19]/80 backdrop-blur-md border border-slate-800/60 p-1.5 rounded-2xl shadow-inner">
+                <TabsTrigger value="positions" className="data-[state=active]:bg-emerald-400 data-[state=active]:text-slate-950 text-xs sm:text-sm uppercase tracking-wider font-black px-6 py-2 rounded-xl text-slate-500 hover:text-slate-300 transition-all">Holdings</TabsTrigger>
+                <TabsTrigger value="watchlist" className="data-[state=active]:bg-emerald-400 data-[state=active]:text-slate-950 text-xs sm:text-sm uppercase tracking-wider font-black px-6 py-2 rounded-xl text-slate-500 hover:text-slate-300 transition-all">Watchlist</TabsTrigger>
+                <TabsTrigger value="combined" className="data-[state=active]:bg-emerald-400 data-[state=active]:text-slate-950 text-xs sm:text-sm uppercase tracking-wider font-black px-6 py-2 rounded-xl text-slate-500 hover:text-slate-300 transition-all">Combined</TabsTrigger>
               </TabsList>
             </Tabs>
 
-            <div className="flex items-center gap-2 overflow-x-auto max-w-[500px] no-scrollbar">
+            <div className="flex flex-wrap items-center gap-2 max-w-full">
               {yAxisColumns.map((col, idx) => (
-                <div key={col} className="flex items-center gap-2 px-3 py-1 rounded-full bg-slate-800 border border-slate-700 group shrink-0">
-                  <div className="w-2 h-2 rounded-full" style={{ backgroundColor: COLORS[idx % COLORS.length] }}></div>
-                  <span className="text-[10px] font-bold text-slate-300 uppercase tracking-tight">{col}</span>
-                  <button onClick={() => setYAxisColumns(prev => prev.filter(c => c !== col))} className="text-slate-500 hover:text-rose-400">
-                    <X className="h-3 w-3" />
+                <div key={col} className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-terminal-bg border border-slate-700/50 shadow-sm shrink-0">
+                  <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: COLORS[idx % COLORS.length] }}></div>
+                  <span className="text-[10px] font-black text-slate-200 uppercase tracking-wider">{col}</span>
+                  <button onClick={() => setYAxisColumns(prev => prev.filter(c => c !== col))} className="text-slate-500 hover:text-rose-400 transition-colors">
+                    <X className="h-3.5 w-3.5" />
                   </button>
                 </div>
               ))}
@@ -280,9 +280,9 @@ export function ChartView() {
                     <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" vertical={false} />
                     <XAxis dataKey="name" stroke="#475569" fontSize={10} tickMargin={15} angle={-45} textAnchor="end" />
                     <YAxis stroke="#475569" fontSize={10} tickFormatter={(val) => val > 1000 ? `${(val / 1000).toFixed(1)}k` : val} />
-                    <Tooltip cursor={{ fill: "rgba(59, 130, 246, 0.1)" }} content={<CustomTooltip />} />
+                    <Tooltip cursor={{ fill: "rgba(16, 185, 129, 0.1)" }} content={<CustomTooltip />} />
                     {yAxisColumns.map((col, index) => (
-                      <Bar key={col} dataKey={col} fill={COLORS[index % COLORS.length]} radius={[4, 4, 0, 0]} animationDuration={1000} />
+                      <Bar key={col} dataKey={col} fill={COLORS[index % COLORS.length]} radius={[8, 8, 0, 0]} animationDuration={1000} />
                     ))}
                   </BarChart>
                 )}
@@ -300,57 +300,58 @@ export function ChartView() {
 
       {/* Data Summary Table */}
       {chartData.length > 0 && (
-        <Card className="bg-[#0f172a] border-slate-800 shadow-2xl overflow-hidden mb-8">
-          <CardHeader className="px-6 py-5 border-b border-slate-800/50 bg-[#0a0f1d]/50">
-            <div className="flex items-center justify-between">
+        <Card className="bg-jiggy-surface border border-jiggy-tan/50 shadow-2xl rounded-2xl overflow-hidden mb-8">
+          <CardHeader className="px-6 py-5 border-b border-jiggy-tan/50 bg-jiggy-surface-2">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 sm:gap-0">
               <div className="flex items-center gap-3">
-                <div className="p-2 rounded-lg bg-emerald-500/10 border border-emerald-500/20">
-                  <TrendingUp className="h-4 w-4 text-emerald-400" />
+                <div className="p-2.5 rounded-xl bg-jiggy-gold/20 border border-jiggy-gold/30 shadow-sm">
+                  <TrendingUp className="h-5 w-5 text-jiggy-gold" />
                 </div>
                 <div>
                   <CardTitle className="text-slate-100 text-base font-bold tracking-tight">Data Rankings</CardTitle>
-                  <p className="text-[10px] text-slate-500 font-medium uppercase tracking-wider mt-0.5">Performance Summary</p>
+                  <p className="text-[10px] text-slate-500 font-black uppercase tracking-widest mt-0.5">Performance Summary</p>
                 </div>
               </div>
-              <div className="px-3 py-1 rounded-full bg-slate-800/50 border border-slate-700/50">
-                <span className="text-[10px] text-slate-400 font-bold tracking-widest uppercase italic">{chartData.length} Companies Analyzed</span>
+              <div className="px-3 py-1.5 rounded-lg bg-terminal-bg border border-slate-700/50 shadow-sm">
+                <span className="text-[10px] text-slate-400 font-black tracking-widest uppercase">{chartData.length} Companies Analyzed</span>
               </div>
             </div>
           </CardHeader>
           <CardContent className="p-0 overflow-x-auto no-scrollbar">
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="bg-slate-900/50">
-                  <th className="px-6 py-4 text-[11px] font-black text-slate-500 uppercase tracking-[0.2em] border-b border-slate-800/80 w-16">Rank</th>
-                  <th className="px-6 py-4 text-[11px] font-black text-slate-500 uppercase tracking-[0.2em] border-b border-slate-800/80">Company</th>
+                <tr className="bg-jiggy-surface border-b border-jiggy-tan/50">
+                  <th className="px-6 py-5 text-[10px] font-black text-slate-500 uppercase tracking-widest w-16">Rank</th>
+                  <th className="px-6 py-5 text-[10px] font-black text-slate-500 uppercase tracking-widest">Company</th>
                   {yAxisColumns.map((col) => (
-                    <th key={col} className="px-6 py-4 text-[11px] font-black text-slate-500 uppercase tracking-[0.2em] border-b border-slate-800/80 text-right">{col}</th>
+                    <th key={col} className="px-6 py-5 text-[10px] font-black text-slate-500 uppercase tracking-widest text-right">{col}</th>
                   ))}
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-800/30 bg-[#0f172a]">
+              <tbody className="divide-y divide-jiggy-tan/30 bg-jiggy-surface-2">
                 {chartData.map((row, idx) => (
-                  <tr key={idx} className="hover:bg-blue-600/[0.03] transition-colors group">
+                  <tr key={idx} className="hover:bg-slate-800/40 transition-colors group">
                     <td className="px-6 py-5 whitespace-nowrap">
-                      <div className="flex items-center justify-center w-7 h-7 rounded-full bg-slate-800/30 border border-slate-700/50 group-hover:border-blue-500/30 transition-all">
-                        <span className="text-[11px] font-black text-slate-400 group-hover:text-blue-400 leading-none">#{idx + 1}</span>
+                      <div className="flex items-center justify-center w-8 h-8 rounded-full bg-slate-800/30 border border-slate-700/50 group-hover:border-emerald-500/30 transition-all">
+                        <span className="text-xs font-black text-slate-500 group-hover:text-emerald-400 leading-none">#{idx + 1}</span>
                       </div>
                     </td>
                     <td className="px-6 py-5 whitespace-nowrap">
                       <div className="flex items-center gap-4">
                         <div className="relative">
-                          <div className="absolute inset-0 bg-blue-500/10 blur-xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                          <div className="relative w-10 h-10 rounded-xl bg-slate-900 flex items-center justify-center p-2 border border-slate-800 group-hover:border-blue-500/50 transition-all shadow-inner overflow-hidden">
+                          <div className="absolute inset-0 bg-emerald-500/10 blur-xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                          <div className="relative w-12 h-12 rounded-xl bg-terminal-bg flex items-center justify-center p-2 border border-slate-800 group-hover:border-emerald-500/50 transition-all shadow-inner overflow-hidden">
                             {logos[row.name] ? (
                               <img src={logos[row.name]} alt="" className="w-full h-full object-contain filter grayscale group-hover:grayscale-0 transition-all duration-500 scale-90 group-hover:scale-100" onError={(e) => (e.target as any).style.display = 'none'} />
                             ) : (
-                              <span className="text-[11px] font-black text-slate-600 group-hover:text-blue-400">{row.name.substring(0, 2)}</span>
+                              <span className="text-[12px] font-black text-slate-600 group-hover:text-jiggy-neon">{row.name.substring(0, 2)}</span>
                             )}
                           </div>
                         </div>
                         <div className="flex flex-col">
-                          <span className="text-sm font-black text-slate-200 group-hover:text-white transition-colors">{row.name}</span>
-                          <span className="text-[10px] font-bold text-slate-500 group-hover:text-blue-400/70 transition-colors uppercase tracking-widest">{irLinks[row.name] ? 'Public Equity' : 'Holding'}</span>
+                          <span className="text-sm font-black text-slate-200 group-hover:text-jiggy-neon transition-colors">{row.name}</span>
+                          <span className={`text-[9px] font-black px-1.5 py-0.5 rounded-md border uppercase tracking-wider w-fit mt-1.5 ${irLinks[row.name] ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-sky-500/10 text-sky-400 border-sky-500/20'
+                            }`}>{irLinks[row.name] ? 'Public Equity' : 'Holding'}</span>
                         </div>
                       </div>
                     </td>
@@ -366,12 +367,12 @@ export function ChartView() {
                       return (
                         <td key={col} className="px-6 py-5 whitespace-nowrap text-right">
                           <div className="flex flex-col items-end">
-                            <span className="text-xs font-mono font-black text-blue-400/90 group-hover:text-blue-400 transition-colors">
+                            <span className="text-sm font-mono font-black text-slate-300 group-hover:text-jiggy-neon transition-colors">
                               {displayVal}
                             </span>
-                            <div className="w-12 h-[2px] bg-slate-800 rounded-full mt-1.5 overflow-hidden">
+                            <div className="w-16 h-2 bg-slate-800 rounded-full mt-2 overflow-hidden shadow-inner">
                               <div
-                                className="h-full bg-blue-500 opacity-30 group-hover:opacity-100 transition-all duration-1000"
+                                className="h-full bg-emerald-500 opacity-40 group-hover:opacity-100 transition-all duration-1000"
                                 style={{ width: `${Math.min(100, (val / (chartData[0][col] || 1)) * 100)}%` }}
                               ></div>
                             </div>

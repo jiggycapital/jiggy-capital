@@ -29,7 +29,7 @@ export function HubDashboard() {
   async function loadData() {
     try {
       setLoading(true);
-      
+
       // Load all data in parallel
       const [portfolioRows, watchlistRows, performanceRows, logosData, logosPt2Rows] = await Promise.all([
         fetchSheetData("portfolio"),
@@ -41,7 +41,7 @@ export function HubDashboard() {
 
       // Parse Portfolio Data
       const portfolioData = parseSheetData(portfolioRows);
-      
+
       // Get column headers for V, AT, and S
       const headerRowIndex = portfolioRows.findIndex((row) => {
         const firstCell = (row[0] || '').toLowerCase();
@@ -58,7 +58,7 @@ export function HubDashboard() {
         _columnATHeader: columnATHeader,
         _columnSHeader: columnSHeader,
       }));
-      
+
       setPositionsData(dataWithHeaders);
       setLogos(logosData.logos);
 
@@ -136,13 +136,13 @@ export function HubDashboard() {
     return (
       <div className="space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <Skeleton className="h-24 w-full bg-slate-900/50" />
-          <Skeleton className="h-24 w-full bg-slate-900/50" />
-          <Skeleton className="h-24 w-full bg-slate-900/50" />
+          <Skeleton className="h-24 w-full bg-jiggy-surface-2/50 rounded-2xl" />
+          <Skeleton className="h-24 w-full bg-jiggy-surface-2/50 rounded-2xl" />
+          <Skeleton className="h-24 w-full bg-jiggy-surface-2/50 rounded-2xl" />
         </div>
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <Skeleton className="h-[400px] lg:col-span-2 bg-slate-900/50" />
-          <Skeleton className="h-[400px] bg-slate-900/50" />
+          <Skeleton className="h-[400px] lg:col-span-2 bg-jiggy-surface-2/50 rounded-2xl" />
+          <Skeleton className="h-[400px] bg-jiggy-surface-2/50 rounded-2xl" />
         </div>
       </div>
     );
@@ -155,10 +155,10 @@ export function HubDashboard() {
   return (
     <div className="space-y-6 max-w-[1600px] mx-auto pb-12">
       {/* Top Stats */}
-      <PerformanceStats 
-        ytdPerformance={performanceData?.ytdPerformance} 
-        lifetimeCagr={performanceData?.lifetimeCagr} 
-        dailyMove={dailyMove} 
+      <PerformanceStats
+        ytdPerformance={performanceData?.ytdPerformance}
+        lifetimeCagr={performanceData?.lifetimeCagr}
+        dailyMove={dailyMove}
       />
 
       {/* Hero Section */}
@@ -170,10 +170,10 @@ export function HubDashboard() {
 
         {/* Right: Analytics & Benchmark */}
         <div className="lg:col-span-4">
-          <PerformanceAnalytics 
-            positionsData={positionsData} 
-            ytdBenchmarks={performanceData?.ytdBenchmarks || []} 
-            logos={logos} 
+          <PerformanceAnalytics
+            positionsData={positionsData}
+            ytdBenchmarks={performanceData?.ytdBenchmarks || []}
+            logos={logos}
           />
         </div>
       </div>
@@ -182,30 +182,30 @@ export function HubDashboard() {
       <div className="space-y-4">
         <Tabs defaultValue="holdings" className="w-full">
           <div className="flex items-center justify-between mb-2">
-            <TabsList className="bg-slate-900/50 border border-slate-800 p-1">
-              <TabsTrigger 
-                value="holdings" 
-                className="data-[state=active]:bg-blue-600 data-[state=active]:text-white text-xs font-bold"
+            <TabsList className="bg-[#0B0F19]/80 backdrop-blur-md border border-slate-800/60 p-1.5 rounded-2xl shadow-inner">
+              <TabsTrigger
+                value="holdings"
+                className="data-[state=active]:bg-emerald-400 data-[state=active]:text-slate-950 text-xs sm:text-sm uppercase tracking-wider font-black px-6 py-2 rounded-xl text-slate-500 hover:text-slate-300 transition-all"
               >
                 My Holdings
               </TabsTrigger>
-              <TabsTrigger 
+              <TabsTrigger
                 value="watchlist"
-                className="data-[state=active]:bg-blue-600 data-[state=active]:text-white text-xs font-bold"
+                className="data-[state=active]:bg-emerald-400 data-[state=active]:text-slate-950 text-xs sm:text-sm uppercase tracking-wider font-black px-6 py-2 rounded-xl text-slate-500 hover:text-slate-300 transition-all"
               >
                 Watchlist
               </TabsTrigger>
             </TabsList>
-            
-            <div className="text-[10px] font-medium text-slate-500 uppercase tracking-wider">
+
+            <div className="text-[10px] font-black text-emerald-500/70 uppercase tracking-widest bg-emerald-500/10 px-3 py-1.5 rounded-lg border border-emerald-500/20">
               {new Date().toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' })}
             </div>
           </div>
 
           <TabsContent value="holdings" className="mt-0 outline-none">
-      <PortfolioTable positionsData={positionsData} logos={logos} />
+            <PortfolioTable positionsData={positionsData} logos={logos} />
           </TabsContent>
-          
+
           <TabsContent value="watchlist" className="mt-0 outline-none">
             <WatchlistTable watchlistData={watchlistData} logos={logos} />
           </TabsContent>
@@ -214,14 +214,14 @@ export function HubDashboard() {
 
       {/* Bottom Hub Section */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <UpcomingEvents 
-          portfolioTickers={portfolioTickers} 
-          logos={logos} 
-          irLinks={irLinks} 
+        <UpcomingEvents
+          portfolioTickers={portfolioTickers}
+          logos={logos}
+          irLinks={irLinks}
         />
-        <NewsFeed 
-          portfolioData={positionsData} 
-          logos={logos} 
+        <NewsFeed
+          portfolioData={positionsData}
+          logos={logos}
         />
       </div>
     </div>

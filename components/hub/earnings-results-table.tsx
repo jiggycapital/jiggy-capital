@@ -160,7 +160,7 @@ export function EarningsResultsTable({
 
     const getBeatColor = (val: number | null) => {
         if (val === null) return "text-slate-500";
-        if (val > 0) return "text-emerald-400";
+        if (val > 0) return "text-jiggy-neon";
         if (val < 0) return "text-rose-400";
         return "text-slate-400";
     };
@@ -183,41 +183,41 @@ export function EarningsResultsTable({
     };
 
     return (
-        <Card className="bg-slate-900/50 border-slate-800 shadow-2xl overflow-hidden">
-            <CardHeader className="py-4 border-b border-slate-800">
-                <CardTitle className="text-sm font-bold flex items-center justify-between text-slate-100 uppercase tracking-wider">
+        <Card className="bg-jiggy-surface border border-jiggy-tan/50 shadow-2xl rounded-2xl overflow-hidden">
+            <CardHeader className="py-4 border-b border-jiggy-tan/50 bg-jiggy-surface-2">
+                <CardTitle className="text-sm font-black flex items-center justify-between text-slate-100 uppercase tracking-widest">
                     <div className="flex items-center gap-2">
-                        <Trophy className="w-4 h-4 text-amber-400" />
+                        <Trophy className="w-5 h-5 text-jiggy-gold" />
                         Recent Earnings Results
                     </div>
-                    <div className="flex items-center gap-1">
+                    <div className="flex items-center gap-1.5">
                         <button
                             onClick={() => setFilter("all")}
-                            className={`text-[9px] font-black px-2 py-1 rounded border uppercase tracking-tighter transition-all ${filter === "all"
-                                ? "bg-purple-500/20 text-purple-300 border-purple-500/30"
-                                : "bg-slate-800/50 text-slate-500 border-slate-700/50 hover:text-slate-300"
+                            className={`text-[10px] font-black px-3 py-1.5 rounded-lg border uppercase tracking-wider transition-all ${filter === "all"
+                                ? "bg-purple-500/20 text-purple-300 border-purple-500/30 shadow-sm"
+                                : "bg-jiggy-surface text-slate-500 border-jiggy-border hover:text-slate-300"
                                 }`}
                         >
                             All ({totalAll})
                         </button>
                         <button
                             onClick={() => setFilter("portfolio")}
-                            className={`text-[9px] font-black px-2 py-1 rounded border uppercase tracking-tighter transition-all flex items-center gap-1 ${filter === "portfolio"
-                                ? "bg-emerald-500/20 text-emerald-300 border-emerald-500/30"
-                                : "bg-slate-800/50 text-slate-500 border-slate-700/50 hover:text-slate-300"
+                            className={`text-[10px] font-black px-3 py-1.5 rounded-lg border uppercase tracking-wider transition-all flex items-center gap-1.5 ${filter === "portfolio"
+                                ? "bg-emerald-500/20 text-emerald-300 border-emerald-500/30 shadow-sm"
+                                : "bg-jiggy-surface text-slate-500 border-jiggy-border hover:text-slate-300"
                                 }`}
                         >
-                            <Briefcase className="w-2.5 h-2.5" />
+                            <Briefcase className="w-3 h-3" />
                             Portfolio ({totalPortfolio})
                         </button>
                         <button
                             onClick={() => setFilter("watchlist")}
-                            className={`text-[9px] font-black px-2 py-1 rounded border uppercase tracking-tighter transition-all flex items-center gap-1 ${filter === "watchlist"
-                                ? "bg-sky-500/20 text-sky-300 border-sky-500/30"
-                                : "bg-slate-800/50 text-slate-500 border-slate-700/50 hover:text-slate-300"
+                            className={`text-[10px] font-black px-3 py-1.5 rounded-lg border uppercase tracking-wider transition-all flex items-center gap-1.5 ${filter === "watchlist"
+                                ? "bg-sky-500/20 text-sky-300 border-sky-500/30 shadow-sm"
+                                : "bg-jiggy-surface text-slate-500 border-jiggy-border hover:text-slate-300"
                                 }`}
                         >
-                            <Eye className="w-2.5 h-2.5" />
+                            <Eye className="w-3 h-3" />
                             Watchlist ({totalWatchlist})
                         </button>
                     </div>
@@ -227,43 +227,43 @@ export function EarningsResultsTable({
             <CardContent className="p-0">
                 {/* Summary Stats Bar */}
                 {!loading && enteredResults.length > 0 && (
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-0 border-b border-slate-800/50">
-                        <div className="px-4 py-3 border-r border-slate-800/50">
-                            <div className="text-[9px] font-black text-slate-500 uppercase tracking-wider">
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-0 border-b border-jiggy-tan/50 bg-jiggy-surface/50">
+                        <div className="px-4 py-3 border-r border-jiggy-tan/50">
+                            <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
                                 Reported
                             </div>
-                            <div className="text-lg font-black text-slate-100 font-mono tabular-nums">
+                            <div className="text-xl font-black text-slate-100 font-mono tabular-nums mt-0.5">
                                 {summaryStats.total}
                             </div>
                         </div>
-                        <div className="px-4 py-3 border-r border-slate-800/50">
-                            <div className="text-[9px] font-black text-slate-500 uppercase tracking-wider">
+                        <div className="px-4 py-3 border-r border-jiggy-border">
+                            <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
                                 EPS Beat Rate
                             </div>
-                            <div className={`text-lg font-black font-mono tabular-nums ${summaryStats.epsBeatRate >= 50 ? "text-emerald-400" : "text-rose-400"}`}>
+                            <div className={`text-xl font-black font-mono tabular-nums mt-0.5 ${summaryStats.epsBeatRate >= 50 ? "text-jiggy-neon" : "text-rose-400"}`}>
                                 {summaryStats.epsBeatRate.toFixed(0)}%
                             </div>
-                            <div className="text-[9px] text-slate-600 font-mono">
+                            <div className="text-[10px] text-slate-500 font-mono font-bold mt-0.5">
                                 {summaryStats.epsBeats}/{summaryStats.withEps} beat
                             </div>
                         </div>
-                        <div className="px-4 py-3 border-r border-slate-800/50">
-                            <div className="text-[9px] font-black text-slate-500 uppercase tracking-wider">
+                        <div className="px-4 py-3 border-r border-jiggy-tan/50">
+                            <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
                                 Rev Beat Rate
                             </div>
-                            <div className={`text-lg font-black font-mono tabular-nums ${summaryStats.revBeatRate >= 50 ? "text-emerald-400" : "text-rose-400"}`}>
+                            <div className={`text-xl font-black font-mono tabular-nums mt-0.5 ${summaryStats.revBeatRate >= 50 ? "text-jiggy-neon" : "text-rose-400"}`}>
                                 {summaryStats.revBeatRate.toFixed(0)}%
                             </div>
-                            <div className="text-[9px] text-slate-600 font-mono">
+                            <div className="text-[10px] text-slate-500 font-mono font-bold mt-0.5">
                                 {summaryStats.revBeats}/{summaryStats.withRev} beat
                             </div>
                         </div>
                         <div className="px-4 py-3">
-                            <div className="text-[9px] font-black text-slate-500 uppercase tracking-wider">
+                            <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
                                 Avg Rev Beat
                             </div>
                             <div
-                                className={`text-lg font-black font-mono tabular-nums ${getBeatColor(
+                                className={`text-xl font-black font-mono tabular-nums mt-0.5 ${getBeatColor(
                                     summaryStats.avgRevBeat
                                 )}`}
                             >
@@ -294,9 +294,9 @@ export function EarningsResultsTable({
                     <div className="overflow-x-auto">
                         <table className="w-full text-left">
                             <thead>
-                                <tr className="border-b border-slate-800/80">
+                                <tr className="border-b border-jiggy-tan/50 bg-jiggy-surface">
                                     <th
-                                        className="px-4 py-3 text-[9px] font-black text-slate-400 uppercase tracking-wider cursor-pointer hover:text-slate-200 transition-colors sticky left-0 bg-slate-900/90 backdrop-blur-sm z-10"
+                                        className="px-4 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest cursor-pointer hover:text-slate-200 transition-colors sticky left-0 bg-jiggy-surface z-10"
                                         onClick={() => handleSort("ticker")}
                                     >
                                         Company
@@ -350,14 +350,14 @@ export function EarningsResultsTable({
                                 {filteredAndSorted.map((result, idx) => (
                                     <tr
                                         key={result.ticker}
-                                        className={`border-b border-slate-800/30 hover:bg-slate-800/40 transition-all cursor-pointer group ${idx % 2 === 0 ? "bg-transparent" : "bg-slate-900/20"
+                                        className={`border-b border-jiggy-tan/30 hover:bg-jiggy-tan/10 transition-all cursor-pointer group ${idx % 2 === 0 ? "bg-transparent" : "bg-jiggy-surface-2"
                                             }`}
                                         onClick={() => onSelectTicker?.(result.ticker)}
                                     >
                                         {/* Company */}
-                                        <td className="px-4 py-3 sticky left-0 bg-inherit backdrop-blur-sm z-10">
-                                            <div className="flex items-center gap-2.5">
-                                                <div className="w-8 h-8 rounded-lg bg-slate-800 flex items-center justify-center shrink-0 border border-slate-700 group-hover:border-purple-500/40 transition-colors">
+                                        <td className="px-4 py-4 sticky left-0 bg-inherit z-10">
+                                            <div className="flex items-center gap-3">
+                                                <div className="w-10 h-10 rounded-xl bg-terminal-bg flex items-center justify-center shrink-0 border border-slate-700/50 group-hover:border-purple-500/40 transition-colors shadow-sm">
                                                     {logos[result.ticker] ? (
                                                         <img
                                                             src={logos[result.ticker]}
@@ -411,7 +411,7 @@ export function EarningsResultsTable({
                                                 {result.revenueBeatPercent !== null &&
                                                     result.revenueBeatPercent !== 0 &&
                                                     (result.revenueBeatPercent > 0 ? (
-                                                        <TrendingUp className="w-3 h-3 text-emerald-400" />
+                                                        <TrendingUp className="w-3 h-3 text-jiggy-neon" />
                                                     ) : (
                                                         <TrendingDown className="w-3 h-3 text-rose-400" />
                                                     ))}
@@ -431,7 +431,7 @@ export function EarningsResultsTable({
                                                 {result.nextQRevBeatPercent !== null &&
                                                     result.nextQRevBeatPercent !== 0 &&
                                                     (result.nextQRevBeatPercent > 0 ? (
-                                                        <TrendingUp className="w-3 h-3 text-emerald-400" />
+                                                        <TrendingUp className="w-3 h-3 text-jiggy-neon" />
                                                     ) : (
                                                         <TrendingDown className="w-3 h-3 text-rose-400" />
                                                     ))}
@@ -460,7 +460,7 @@ export function EarningsResultsTable({
                                                 {result.epsBeatPercent !== null &&
                                                     result.epsBeatPercent !== 0 &&
                                                     (result.epsBeatPercent > 0 ? (
-                                                        <TrendingUp className="w-3 h-3 text-emerald-400" />
+                                                        <TrendingUp className="w-3 h-3 text-jiggy-neon" />
                                                     ) : (
                                                         <TrendingDown className="w-3 h-3 text-rose-400" />
                                                     ))}
@@ -480,7 +480,7 @@ export function EarningsResultsTable({
                                                 {result.fcfBeatPercent !== null &&
                                                     result.fcfBeatPercent !== 0 &&
                                                     (result.fcfBeatPercent > 0 ? (
-                                                        <TrendingUp className="w-3 h-3 text-emerald-400" />
+                                                        <TrendingUp className="w-3 h-3 text-jiggy-neon" />
                                                     ) : (
                                                         <TrendingDown className="w-3 h-3 text-rose-400" />
                                                     ))}

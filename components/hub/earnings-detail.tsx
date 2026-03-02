@@ -164,7 +164,7 @@ export function EarningsDetail({
     }
 
     return (
-        <Card className="bg-slate-900/50 border-slate-800 shadow-2xl overflow-hidden">
+        <Card className="bg-jiggy-surface-2/50 border-jiggy-border shadow-2xl overflow-hidden rounded-2xl">
             <CardHeader className="py-4 border-b border-slate-800">
                 <CardTitle className="text-sm font-bold flex items-center justify-between text-slate-100">
                     <div className="flex items-center gap-3">
@@ -266,8 +266,8 @@ export function EarningsDetail({
                                         {metric.trend && metric.trend !== "flat" && (
                                             <span
                                                 className={`flex items-center ${metric.trend === "up"
-                                                        ? "text-emerald-400"
-                                                        : "text-rose-400"
+                                                    ? "text-emerald-400"
+                                                    : "text-rose-400"
                                                     }`}
                                             >
                                                 {metric.trend === "up" ? (

@@ -347,11 +347,11 @@ export function EarningsHub() {
                     </div>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <Skeleton className="h-32 bg-slate-900/50" />
-                    <Skeleton className="h-32 bg-slate-900/50" />
-                    <Skeleton className="h-32 bg-slate-900/50" />
+                    <Skeleton className="h-32 bg-jiggy-surface-2/50 rounded-2xl" />
+                    <Skeleton className="h-32 bg-jiggy-surface-2/50 rounded-2xl" />
+                    <Skeleton className="h-32 bg-jiggy-surface-2/50 rounded-2xl" />
                 </div>
-                <Skeleton className="h-[500px] bg-slate-900/50" />
+                <Skeleton className="h-[500px] bg-jiggy-surface-2/50 rounded-2xl" />
             </div>
         );
     }
@@ -369,14 +369,14 @@ export function EarningsHub() {
             {/* Header */}
             <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center gap-3">
-                    <div className="p-2.5 rounded-xl bg-gradient-to-br from-purple-500/20 to-blue-500/20 border border-purple-500/20 shadow-lg shadow-purple-500/5">
-                        <Mic className="w-6 h-6 text-purple-400" />
+                    <div className="p-2.5 rounded-2xl bg-emerald-500/20 border border-emerald-500/30 shadow-lg shadow-emerald-500/10">
+                        <Mic className="w-6 h-6 text-emerald-400" />
                     </div>
                     <div>
                         <h1 className="text-2xl font-black text-slate-100 tracking-tight">
                             Earnings Hub
                         </h1>
-                        <p className="text-xs text-slate-500 font-medium uppercase tracking-wider">
+                        <p className="text-xs text-slate-500 font-bold uppercase tracking-wider">
                             Portfolio & Watchlist Earnings Intelligence
                         </p>
                     </div>
@@ -390,16 +390,16 @@ export function EarningsHub() {
             </div>
 
             {/* Reporting This Week Hero */}
-            <Card className="bg-gradient-to-br from-slate-900/80 via-purple-950/20 to-slate-900/80 border-purple-500/10 shadow-2xl overflow-hidden relative">
-                <div className="absolute top-0 right-0 w-64 h-64 bg-purple-500/5 blur-[100px] rounded-full -translate-y-32 translate-x-32 pointer-events-none" />
-                <CardHeader className="pb-3 relative z-10">
-                    <CardTitle className="text-sm font-bold flex items-center justify-between text-slate-100 uppercase tracking-wider">
+            <Card className="bg-jiggy-surface border-jiggy-border shadow-2xl rounded-2xl overflow-hidden relative">
+                <div className="absolute -top-32 -right-32 w-64 h-64 bg-emerald-500/10 blur-[100px] rounded-full pointer-events-none" />
+                <CardHeader className="pb-3 relative z-10 border-b border-jiggy-border bg-jiggy-surface-2">
+                    <CardTitle className="text-sm font-black flex items-center justify-between text-slate-100 uppercase tracking-widest">
                         <div className="flex items-center gap-2">
-                            <Zap className="w-4 h-4 text-amber-400" />
+                            <Zap className="w-5 h-5 text-jiggy-gold" />
                             Reporting This Week
                         </div>
-                        <span className="text-[10px] text-slate-500 lowercase font-normal italic">
-                            Next 7 days
+                        <span className="text-[10px] text-slate-500 font-bold tracking-wider">
+                            NEXT 7 DAYS
                         </span>
                     </CardTitle>
                 </CardHeader>
@@ -424,9 +424,9 @@ export function EarningsHub() {
                                 <button
                                     key={`${event.ticker}-${i}`}
                                     onClick={() => setSelectedTicker(event.ticker)}
-                                    className="group flex items-center gap-3 p-3 rounded-xl bg-slate-900/60 border border-slate-800 hover:border-purple-500/30 hover:bg-slate-800/60 transition-all cursor-pointer text-left"
+                                    className="group flex items-center gap-3 p-3 rounded-2xl bg-jiggy-surface-2/60 border border-jiggy-border hover:border-emerald-500/30 hover:bg-jiggy-surface/60 transition-all cursor-pointer text-left"
                                 >
-                                    <div className="w-10 h-10 rounded-lg bg-slate-800 flex items-center justify-center shrink-0 border border-slate-700 group-hover:border-purple-500/40 transition-colors shadow-inner">
+                                    <div className="w-10 h-10 rounded-xl bg-jiggy-surface flex items-center justify-center shrink-0 border border-jiggy-border group-hover:border-emerald-500/40 transition-colors shadow-inner">
                                         {logos[event.ticker] ? (
                                             <img
                                                 src={logos[event.ticker]}
@@ -482,22 +482,24 @@ export function EarningsHub() {
 
             {/* Main Content Tabs */}
             <Tabs defaultValue="upcoming" className="w-full">
-                <TabsList className="bg-slate-900/80 border border-slate-800 p-1 mb-4">
-                    <TabsTrigger
-                        value="upcoming"
-                        className="data-[state=active]:bg-purple-500/20 data-[state=active]:text-purple-300 data-[state=active]:border-purple-500/30 text-xs font-bold px-5 py-2 rounded-lg border border-transparent transition-all flex items-center gap-2"
-                    >
-                        <Calendar className="w-3.5 h-3.5" />
-                        Upcoming Earnings
-                    </TabsTrigger>
-                    <TabsTrigger
-                        value="results"
-                        className="data-[state=active]:bg-amber-500/20 data-[state=active]:text-amber-300 data-[state=active]:border-amber-500/30 text-xs font-bold px-5 py-2 rounded-lg border border-transparent transition-all flex items-center gap-2"
-                    >
-                        <Trophy className="w-3.5 h-3.5" />
-                        Recent Results
-                    </TabsTrigger>
-                </TabsList>
+                <div className="flex items-center mb-6">
+                    <TabsList className="bg-[#0B0F19]/80 backdrop-blur-md border border-slate-800/60 p-1.5 rounded-2xl shadow-inner">
+                        <TabsTrigger
+                            value="upcoming"
+                            className="data-[state=active]:bg-emerald-400 data-[state=active]:text-slate-950 data-[state=active]:shadow-lg text-xs sm:text-sm uppercase tracking-wider font-black px-6 sm:px-8 py-2.5 rounded-xl text-slate-500 hover:text-slate-300 transition-all flex items-center gap-2"
+                        >
+                            <Calendar className="w-4 h-4" />
+                            Upcoming Earnings
+                        </TabsTrigger>
+                        <TabsTrigger
+                            value="results"
+                            className="data-[state=active]:bg-emerald-400 data-[state=active]:text-slate-950 data-[state=active]:shadow-lg text-xs sm:text-sm uppercase tracking-wider font-black px-6 sm:px-8 py-2.5 rounded-xl text-slate-500 hover:text-slate-300 transition-all flex items-center gap-2"
+                        >
+                            <Trophy className="w-4 h-4" />
+                            Recent Results
+                        </TabsTrigger>
+                    </TabsList>
+                </div>
 
                 <TabsContent value="upcoming" className="mt-0 focus-visible:outline-none">
                     <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">

@@ -124,41 +124,41 @@ export function EarningsCalendar({
     };
 
     return (
-        <Card className="bg-slate-900/50 border-slate-800 shadow-2xl overflow-hidden">
-            <CardHeader className="py-4 border-b border-slate-800">
-                <CardTitle className="text-sm font-bold flex items-center justify-between text-slate-100 uppercase tracking-wider">
+        <Card className="bg-jiggy-surface border-jiggy-border shadow-2xl rounded-2xl overflow-hidden">
+            <CardHeader className="py-4 border-b border-jiggy-border bg-jiggy-surface-2">
+                <CardTitle className="text-sm font-black flex items-center justify-between text-slate-100 uppercase tracking-widest">
                     <div className="flex items-center gap-2">
-                        <Calendar className="w-4 h-4 text-purple-400" />
+                        <Calendar className="w-5 h-5 text-emerald-400" />
                         Earnings Calendar
                     </div>
-                    <div className="flex items-center gap-1">
+                    <div className="flex items-center gap-1.5">
                         <button
                             onClick={() => setFilter("all")}
-                            className={`text-[9px] font-black px-2 py-1 rounded border uppercase tracking-tighter transition-all ${filter === "all"
-                                    ? "bg-purple-500/20 text-purple-300 border-purple-500/30"
-                                    : "bg-slate-800/50 text-slate-500 border-slate-700/50 hover:text-slate-300"
+                            className={`text-[10px] font-black px-3 py-1.5 rounded-lg border uppercase tracking-wider transition-all ${filter === "all"
+                                ? "bg-purple-500/20 text-purple-300 border-purple-500/30 shadow-sm"
+                                : "bg-jiggy-surface text-slate-500 border-jiggy-border hover:text-slate-300"
                                 }`}
                         >
                             All ({events.length})
                         </button>
                         <button
                             onClick={() => setFilter("portfolio")}
-                            className={`text-[9px] font-black px-2 py-1 rounded border uppercase tracking-tighter transition-all flex items-center gap-1 ${filter === "portfolio"
-                                    ? "bg-emerald-500/20 text-emerald-300 border-emerald-500/30"
-                                    : "bg-slate-800/50 text-slate-500 border-slate-700/50 hover:text-slate-300"
+                            className={`text-[10px] font-black px-3 py-1.5 rounded-lg border uppercase tracking-wider transition-all flex items-center gap-1.5 ${filter === "portfolio"
+                                ? "bg-emerald-500/20 text-emerald-300 border-emerald-500/30 shadow-sm"
+                                : "bg-jiggy-surface text-slate-500 border-jiggy-border hover:text-slate-300"
                                 }`}
                         >
-                            <Briefcase className="w-2.5 h-2.5" />
+                            <Briefcase className="w-3 h-3" />
                             Portfolio
                         </button>
                         <button
                             onClick={() => setFilter("watchlist")}
-                            className={`text-[9px] font-black px-2 py-1 rounded border uppercase tracking-tighter transition-all flex items-center gap-1 ${filter === "watchlist"
-                                    ? "bg-sky-500/20 text-sky-300 border-sky-500/30"
-                                    : "bg-slate-800/50 text-slate-500 border-slate-700/50 hover:text-slate-300"
+                            className={`text-[10px] font-black px-3 py-1.5 rounded-lg border uppercase tracking-wider transition-all flex items-center gap-1.5 ${filter === "watchlist"
+                                ? "bg-sky-500/20 text-sky-300 border-sky-500/30 shadow-sm"
+                                : "bg-jiggy-surface text-slate-500 border-jiggy-border hover:text-slate-300"
                                 }`}
                         >
-                            <Eye className="w-2.5 h-2.5" />
+                            <Eye className="w-3 h-3" />
                             Watchlist
                         </button>
                     </div>
@@ -185,19 +185,19 @@ export function EarningsCalendar({
                             <div key={gi}>
                                 {/* Week Header */}
                                 <div
-                                    className={`sticky top-0 z-10 px-4 py-2.5 border-b border-slate-800/50 backdrop-blur-sm ${group.isThisWeek
-                                            ? "bg-purple-950/40 border-purple-500/10"
-                                            : "bg-slate-900/90"
+                                    className={`sticky top-0 z-10 px-4 py-2.5 border-b border-jiggy-border backdrop-blur-sm ${group.isThisWeek
+                                        ? "bg-emerald-500/10 border-emerald-500/20"
+                                        : "bg-jiggy-surface-2"
                                         }`}
                                 >
                                     <div className="flex items-center justify-between">
                                         <span
-                                            className={`text-[11px] font-black uppercase tracking-wider ${group.isThisWeek ? "text-purple-300" : "text-slate-400"
+                                            className={`text-xs font-black uppercase tracking-widest ${group.isThisWeek ? "text-emerald-400" : "text-slate-400"
                                                 }`}
                                         >
                                             {group.label}
                                         </span>
-                                        <span className="text-[10px] text-slate-600 font-mono">
+                                        <span className="text-[10px] text-slate-500 font-mono font-bold">
                                             {group.events.length} report
                                             {group.events.length !== 1 ? "s" : ""}
                                         </span>
@@ -205,45 +205,45 @@ export function EarningsCalendar({
                                 </div>
 
                                 {/* Events */}
-                                <div className="divide-y divide-slate-800/30">
+                                <div className="divide-y divide-jiggy-border/50">
                                     {group.events.map((event, ei) => (
                                         <button
                                             key={`${event.ticker}-${ei}`}
                                             onClick={() => onSelectTicker(event.ticker)}
-                                            className={`w-full flex items-center justify-between p-3.5 hover:bg-slate-800/40 transition-all group text-left ${selectedTicker === event.ticker
-                                                    ? "bg-purple-500/5 border-l-2 border-l-purple-500"
-                                                    : "border-l-2 border-l-transparent"
+                                            className={`w-full flex items-center justify-between p-4 hover:bg-slate-800/40 transition-all group text-left ${selectedTicker === event.ticker
+                                                ? "bg-emerald-500/5 border-l-4 border-l-emerald-400"
+                                                : "border-l-4 border-l-transparent bg-transparent"
                                                 }`}
                                         >
-                                            <div className="flex items-center gap-3 min-w-0">
-                                                <div className="w-9 h-9 rounded-lg bg-slate-800 flex items-center justify-center shrink-0 border border-slate-700 group-hover:border-purple-500/40 transition-colors">
+                                            <div className="flex items-center gap-4 min-w-0">
+                                                <div className="w-10 h-10 rounded-xl bg-terminal-bg flex items-center justify-center shrink-0 border border-slate-700/50 group-hover:border-emerald-500/40 transition-colors shadow-sm">
                                                     {logos[event.ticker] ? (
                                                         <img
                                                             src={logos[event.ticker]}
                                                             alt={event.ticker}
-                                                            className="w-5 h-5 object-contain"
+                                                            className="w-6 h-6 object-contain"
                                                         />
                                                     ) : (
-                                                        <span className="text-[8px] font-bold text-slate-500">
+                                                        <span className="text-[9px] font-bold text-slate-500">
                                                             {event.ticker}
                                                         </span>
                                                     )}
                                                 </div>
                                                 <div className="min-w-0">
                                                     <div className="flex items-center gap-2 mb-0.5">
-                                                        <span className="text-sm font-bold text-slate-100 group-hover:text-purple-300 transition-colors">
+                                                        <span className="text-sm font-bold text-slate-100 group-hover:text-emerald-400 transition-colors">
                                                             {event.ticker}
                                                         </span>
                                                         <span
-                                                            className={`text-[7px] font-black px-1 py-0.5 rounded border uppercase tracking-tighter ${event.source === "portfolio"
-                                                                    ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
-                                                                    : "bg-sky-500/10 text-sky-400 border-sky-500/20"
+                                                            className={`text-[8px] font-black px-1.5 py-0.5 rounded-md border uppercase tracking-wider ${event.source === "portfolio"
+                                                                ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
+                                                                : "bg-sky-500/10 text-sky-400 border-sky-500/20"
                                                                 }`}
                                                         >
                                                             {event.source}
                                                         </span>
                                                     </div>
-                                                    <div className="text-[10px] text-slate-500 font-mono">
+                                                    <div className="text-[10px] text-slate-500 font-mono font-bold">
                                                         {new Date(event.date).toLocaleDateString(undefined, {
                                                             weekday: "short",
                                                             month: "short",
@@ -252,11 +252,11 @@ export function EarningsCalendar({
                                                     </div>
                                                 </div>
                                             </div>
-                                            <div className="flex items-center gap-2 shrink-0">
-                                                <span className="text-[9px] font-mono font-bold text-slate-400 bg-slate-800/80 px-1.5 py-0.5 rounded border border-slate-700/50">
+                                            <div className="flex items-center gap-3 shrink-0">
+                                                <span className="text-[10px] font-mono font-black text-slate-400 bg-jiggy-surface-2 px-2 py-1 rounded-md border border-jiggy-border shadow-sm">
                                                     {getCountdown(event.date)}
                                                 </span>
-                                                <ChevronRight className="w-3.5 h-3.5 text-slate-600 group-hover:text-purple-400 transition-colors" />
+                                                <ChevronRight className="w-4 h-4 text-slate-600 group-hover:text-emerald-400 transition-colors" />
                                             </div>
                                         </button>
                                     ))}

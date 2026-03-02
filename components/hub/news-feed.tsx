@@ -187,11 +187,11 @@ export function NewsFeed({ portfolioData, logos, className }: NewsFeedProps) {
   }, [portfolioData]);
 
   return (
-    <Card className={`bg-[#151536]/50 border-[#2A2A61] overflow-hidden flex flex-col shadow-2xl ${className || 'h-[750px]'}`}>
-      <CardHeader className="py-4 border-b border-[#2A2A61] shrink-0">
+    <Card className={`bg-jiggy-surface border-jiggy-border overflow-hidden flex flex-col shadow-2xl rounded-2xl ${className || 'h-[750px]'}`}>
+      <CardHeader className="py-4 border-b border-jiggy-border shrink-0 bg-jiggy-surface-2">
         <CardTitle className="text-sm font-bold flex items-center justify-between text-slate-100 uppercase tracking-wider">
           <div className="flex items-center gap-2">
-            <Newspaper className="w-4 h-4 text-amber-400" />
+            <Newspaper className="w-5 h-5 text-jiggy-gold" />
             Company News
           </div>
           <div className="flex items-center gap-1.5">
@@ -206,51 +206,51 @@ export function NewsFeed({ portfolioData, logos, className }: NewsFeedProps) {
         {loading ? (
           <div className="flex-1 flex flex-col items-center justify-center p-12 text-center space-y-4">
             <div className="flex justify-center">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-amber-400"></div>
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-jiggy-gold"></div>
             </div>
             <p className="text-slate-500 text-sm">Aggregating market signal...</p>
           </div>
         ) : news.length === 0 ? (
           <div className="flex-1 flex items-center justify-center p-12 text-center text-slate-500 text-sm italic">No relevant news found for your holdings</div>
         ) : (
-          <div className="divide-y divide-[#2A2A61]/50 overflow-y-auto flex-1 custom-scrollbar">
+          <div className="divide-y divide-jiggy-border border-t border-jiggy-border overflow-y-auto flex-1 custom-scrollbar">
             {news.map((item) => (
-              <div key={item.id} className="p-3.5 hover:bg-[#151536]/60 transition-all flex gap-4 group relative overflow-hidden">
+              <div key={item.id} className="p-4 hover:bg-jiggy-surface-2 transition-all flex gap-4 group relative overflow-hidden">
                 <div className="shrink-0 flex flex-col items-center gap-1.5 relative z-10">
-                  <div className="w-10 h-10 rounded-xl bg-[#030D1A] flex items-center justify-center shrink-0 border border-[#2A2A61] shadow-xl group-hover:border-amber-500/30 transition-all transform group-hover:scale-105">
+                  <div className="w-12 h-12 rounded-xl bg-terminal-bg flex items-center justify-center shrink-0 border border-jiggy-border shadow-xl group-hover:border-jiggy-gold/40 transition-all transform group-hover:scale-105">
                     {logos[item.ticker] ? (
-                      <img src={logos[item.ticker]} alt={item.ticker} className="w-7 h-7 object-contain" />
+                      <img src={logos[item.ticker]} alt={item.ticker} className="w-8 h-8 object-contain drop-shadow-sm" />
                     ) : (
                       <span className="text-[10px] font-black text-slate-500">{item.ticker}</span>
                     )}
                   </div>
-                  <div className="px-1 py-0.5 rounded bg-[#030D1A] border border-[#2A2A61] text-[8px] font-black text-slate-500 font-mono tracking-tighter uppercase group-hover:text-slate-300 transition-colors">
+                  <div className="px-1.5 py-0.5 rounded bg-terminal-bg border border-jiggy-border text-[9px] font-black text-slate-400 font-mono tracking-tighter uppercase group-hover:text-jiggy-gold transition-colors">
                     {item.ticker}
                   </div>
                 </div>
                 <div className="min-w-0 flex-1 relative z-10">
-                  <div className="flex items-center justify-between mb-1">
+                  <div className="flex items-center justify-between mb-1.5">
                     <div className="flex items-center gap-2">
-                      <span className="text-[9px] font-black text-amber-400 bg-amber-500/10 border border-amber-500/15 px-1.5 py-0.5 rounded uppercase tracking-tighter">{item.source}</span>
-                      <span className="text-[10px] text-slate-500 font-medium flex items-center gap-1">
-                        <MessageSquare className="w-2.5 h-2.5" />
+                      <span className="text-[9px] font-black text-jiggy-gold bg-jiggy-gold/10 border border-jiggy-gold/20 px-1.5 py-0.5 rounded uppercase tracking-tighter">{item.source}</span>
+                      <span className="text-[10px] text-slate-400 font-bold flex items-center gap-1">
+                        <MessageSquare className="w-3 h-3 text-slate-500" />
                         {new Date(item.datetime * 1000).toLocaleDateString([], { month: 'short', day: 'numeric' })} • {new Date(item.datetime * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                       </span>
                     </div>
                   </div>
-                  <h4 className="text-[14px] font-bold text-slate-100 leading-[1.3] mb-1 group-hover:text-amber-50 transition-colors tracking-tight">
+                  <h4 className="text-[15px] font-extrabold text-slate-100 leading-[1.3] mb-1.5 group-hover:text-jiggy-gold transition-colors tracking-tight">
                     {item.headline}
                   </h4>
-                  <p className="text-[12px] text-slate-400 line-clamp-2 mb-2 leading-relaxed font-medium group-hover:text-slate-300 transition-colors">
+                  <p className="text-[13px] text-slate-300 line-clamp-2 mb-2 leading-relaxed font-medium transition-colors">
                     {item.summary}
                   </p>
                   <a
                     href={item.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 text-[10px] font-black text-amber-400 hover:text-amber-300 transition-all transform group-hover:translate-x-1"
+                    className="inline-flex items-center gap-2 text-[10px] font-black text-jiggy-gold hover:text-jiggy-gold-alt transition-all transform group-hover:translate-x-1"
                   >
-                    READ ARTICLE <ExternalLink className="w-2.5 h-2.5" />
+                    READ ARTICLE <ExternalLink className="w-3 h-3" />
                   </a>
                 </div>
               </div>

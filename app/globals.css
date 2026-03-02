@@ -5,48 +5,52 @@
   --font-mono: var(--font-mono);
 
   --color-background: 0 0% 100%;
-  --color-foreground: 222.2 84% 4.9%;
+  --color-foreground: 160 10% 98%;
   --color-card: 0 0% 100%;
-  --color-card-foreground: 222.2 84% 4.9%;
+  --color-card-foreground: 160 50% 10%;
   --color-popover: 0 0% 100%;
-  --color-popover-foreground: 222.2 84% 4.9%;
-  --color-primary: 222.2 47.4% 11.2%;
-  --color-primary-foreground: 210 40% 98%;
-  --color-secondary: 210 40% 96.1%;
-  --color-secondary-foreground: 222.2 47.4% 11.2%;
-  --color-muted: 210 40% 96.1%;
-  --color-muted-foreground: 215.4 16.3% 46.9%;
-  --color-accent: 210 40% 96.1%;
-  --color-accent-foreground: 222.2 47.4% 11.2%;
+  --color-popover-foreground: 160 50% 10%;
+  --color-primary: 160 60% 30%;
+  --color-primary-foreground: 160 10% 98%;
+  --color-secondary: 160 30% 90%;
+  --color-secondary-foreground: 160 60% 30%;
+  --color-muted: 160 20% 90%;
+  --color-muted-foreground: 160 15% 45%;
+  --color-accent: 140 70% 50%;
+  --color-accent-foreground: 160 50% 10%;
   --color-destructive: 0 84.2% 60.2%;
-  --color-destructive-foreground: 210 40% 98%;
-  --color-border: 214.3 31.8% 91.4%;
-  --color-input: 214.3 31.8% 91.4%;
-  --color-ring: 222.2 84% 4.9%;
-  --radius: 0.5rem;
+  --color-destructive-foreground: 160 10% 98%;
+  --color-border: 160 20% 85%;
+  --color-input: 160 20% 85%;
+  --color-ring: 140 70% 50%;
+  --radius: 1rem;
 }
 
 @media (prefers-color-scheme: dark) {
   @theme {
-    --color-background: 220 60% 6%;
-    --color-foreground: 210 40% 98%;
-    --color-card: 220 50% 8%;
-    --color-card-foreground: 210 40% 98%;
-    --color-popover: 220 50% 8%;
-    --color-popover-foreground: 210 40% 98%;
-    --color-primary: 210 40% 98%;
-    --color-primary-foreground: 220 60% 6%;
-    --color-secondary: 220 40% 14%;
-    --color-secondary-foreground: 210 40% 98%;
-    --color-muted: 220 40% 14%;
-    --color-muted-foreground: 215 20.2% 65.1%;
-    --color-accent: 220 40% 14%;
-    --color-accent-foreground: 210 40% 98%;
+    --color-background: 160 20% 15%;
+    /* #1e2c28 */
+    --color-foreground: 160 10% 98%;
+    --color-card: 160 25% 18%;
+    /* #22352f */
+    --color-card-foreground: 160 10% 98%;
+    --color-popover: 160 25% 18%;
+    --color-popover-foreground: 160 10% 98%;
+    --color-primary: 140 70% 50%;
+    /* Vibrant mint green */
+    --color-primary-foreground: 160 50% 10%;
+    --color-secondary: 160 20% 25%;
+    /* Slightly lighter card */
+    --color-secondary-foreground: 160 10% 98%;
+    --color-muted: 160 20% 25%;
+    --color-muted-foreground: 160 15% 65%;
+    --color-accent: 140 70% 50%;
+    --color-accent-foreground: 160 50% 10%;
     --color-destructive: 0 62.8% 30.6%;
-    --color-destructive-foreground: 210 40% 98%;
-    --color-border: 220 35% 16%;
-    --color-input: 220 35% 16%;
-    --color-ring: 45 93% 58%;
+    --color-destructive-foreground: 160 10% 98%;
+    --color-border: 160 20% 25%;
+    --color-input: 160 20% 25%;
+    --color-ring: 140 70% 50%;
   }
 }
 
@@ -55,11 +59,11 @@ html {
 }
 
 body {
-  background: linear-gradient(-45deg, #18091d, #0f1c3f, #072a38, #1f0b2e);
+  background: linear-gradient(-45deg, #25332f, #31403b, #1e2c28, #2b3a35);
   background-size: 400% 400%;
   animation: auroraBG 20s ease infinite;
   background-attachment: fixed;
-  color: hsl(210 40% 98%);
+  color: hsl(160 10% 98%);
   font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
   font-feature-settings: "rlig" 1, "calt" 1;
   -webkit-font-smoothing: antialiased;
@@ -98,46 +102,79 @@ body {
   font-size: 0.875rem;
 }
 
-/* Jiggy Navy background */
+/* Jiggy Nook background */
 .terminal-bg {
-  background: #030D1A;
-  color: hsl(210 40% 98%);
+  background: #1e2c28;
+  color: hsl(160 10% 98%);
 }
 
-/* Gold accent utilities */
+/* Nook vibrant accent utilities */
 .text-jiggy-gold {
-  color: #F59E0B;
+  color: #78e08f;
+  /* Mint green */
+}
+
+.text-jiggy-gold-alt {
+  color: #38ada9;
+  /* vibrant teal */
 }
 
 .bg-jiggy-gold {
-  background-color: #F59E0B;
+  background-color: #78e08f;
 }
 
 .border-jiggy-gold {
-  border-color: #F59E0B;
+  border-color: #78e08f;
 }
 
 .text-jiggy-gold\/20 {
-  color: rgba(245, 158, 11, 0.2);
+  color: rgba(120, 224, 143, 0.2);
 }
 
-/* Navy surface levels */
+/* Nook surface levels */
 .bg-jiggy-surface {
-  background-color: #151536;
+  background-color: #22352f;
 }
 
 .bg-jiggy-surface-2 {
-  background-color: #222252;
+  background-color: #2b3a35;
 }
 
 .border-jiggy-border {
-  border-color: #2A2A61;
+  border-color: #31403b;
 }
 
-/* Professional Scrollbar — navy theme */
+/* Nook Tan / Brown structural elements */
+.text-jiggy-tan {
+  color: #c2a077;
+}
+
+.bg-jiggy-tan {
+  background-color: #c2a077;
+}
+
+.border-jiggy-tan {
+  border-color: #c2a077;
+}
+
+.border-jiggy-tan\/30 {
+  border-color: rgba(194, 160, 119, 0.3);
+}
+
+.border-jiggy-tan\/50 {
+  border-color: rgba(194, 160, 119, 0.5);
+}
+
+/* High Contrast Neon Green */
+.text-jiggy-neon {
+  color: #00E676;
+  /* Ultra-bright green for positive metrics */
+}
+
+/* Professional Scrollbar — nook theme */
 .custom-scrollbar::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 8px;
+  height: 8px;
 }
 
 .custom-scrollbar::-webkit-scrollbar-track {
@@ -145,12 +182,12 @@ body {
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: #2A2A61;
-  border-radius: 10px;
+  background: #31403b;
+  border-radius: 12px;
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: #38387A;
+  background: #38ada9;
 }
 
 /* Hide sidebar scrollbar completely */
@@ -282,10 +319,10 @@ div:focus {
 }
 
 .shimmer-loading {
-  background: linear-gradient(90deg, #151536 25%, #2A2A61 50%, #151536 75%);
+  background: linear-gradient(90deg, #22352f 25%, #31403b 50%, #22352f 75%);
   background-size: 200% 100%;
   animation: shimmer 1.5s infinite;
-  border-radius: 0.5rem;
+  border-radius: 1rem;
 }
 
 /* Smooth number transition (for when values update) */
@@ -305,8 +342,11 @@ div:focus {
   left: 0;
   top: 0;
   bottom: 0;
-  width: 2px;
-  background: #F59E0B;
+  width: 4px;
+  /* thicker for bubbly UI */
+  background: #00E676;
+  /* Use neon green for highlight */
+  border-radius: 4px 0 0 4px;
   opacity: 0;
   transition: opacity 0.15s ease;
 }
@@ -321,8 +361,9 @@ div:focus {
 }
 
 .logo-hover:hover {
-  transform: scale(1.08);
-  border-color: #F59E0B40;
+  transform: scale(1.08) rotate(-2deg);
+  /* playful tilt */
+  border-color: #78e08f40;
 }
 
 /* Smooth sidebar link underline reveal */
@@ -333,11 +374,13 @@ div:focus {
 .nav-link-underline::after {
   content: '';
   position: absolute;
-  bottom: -1px;
+  bottom: -2px;
   left: 12px;
   right: 12px;
-  height: 1px;
-  background: #F59E0B;
+  height: 3px;
+  /* thicker underline */
+  border-radius: 3px;
+  background: #78e08f;
   transform: scaleX(0);
   transition: transform 0.2s ease;
   transform-origin: left;
