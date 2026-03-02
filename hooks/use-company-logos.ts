@@ -12,10 +12,15 @@ export function useCompanyLogos(tickers: string[], initialLogos: Record<string, 
     const [logos, setLogos] = useState<Record<string, string>>(initialLogos);
     const [isLoading, setIsLoading] = useState(false);
 
+    // Stable stringified version of initialLogos to prevent infinite re-renders
+    const initialLogosString = JSON.stringify(initialLogos);
+
     useEffect(() => {
         // Sync initial logos if they change
-        setLogos((prev) => ({ ...prev, ...initialLogos }));
-    }, [initialLogos]);
+        if (initialLogosString !== '{}') {
+            setLogos((prev) => ({ ...prev, ...JSON.parse(initialLogosString) }));
+        }
+    }, [initialLogosString]);
 
     useEffect(() => {
         let isMounted = true;

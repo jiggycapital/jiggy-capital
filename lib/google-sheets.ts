@@ -247,10 +247,11 @@ export function parseSheetData(rows: string[][]): Record<string, string>[] {
   return data;
 }
 
-// Parse logos and IR links data - expects Ticker in column A (index 0), Logo in column C (index 2), and IR Link in column D (index 3)
-export function parseLogosData(rows: string[][]): { logos: Record<string, string>; irLinks: Record<string, string> } {
+// Parse logos and IR links data - expects Ticker in column A (index 0), Logo in column C (index 2), IR Link in column D (index 3), Company Name in column E (index 4)
+export function parseLogosData(rows: string[][]): { logos: Record<string, string>; irLinks: Record<string, string>; companyNameToTicker: Record<string, string> } {
   const logoMap: Record<string, string> = {};
   const irLinkMap: Record<string, string> = {};
+  const nameToTickerMap: Record<string, string> = {};
   const headerRowIndex = findHeaderRow(rows);
   const dataStartRow = findDataStartRow(rows, headerRowIndex);
 
@@ -259,17 +260,19 @@ export function parseLogosData(rows: string[][]): { logos: Record<string, string
     const ticker = (row[0] || '').trim().replace(/^"|"$/g, '').toUpperCase();
     const logoUrl = (row[2] || '').trim().replace(/^"|"$/g, ''); // Column C (index 2)
     const irLink = (row[3] || '').trim().replace(/^"|"$/g, ''); // Column D (index 3)
+    const companyName = (row[4] || '').trim().replace(/^"|"$/g, ''); // Column E (index 4)
 
     if (ticker && ticker !== '') {
       if (logoUrl && logoUrl !== '') logoMap[ticker] = logoUrl;
       if (irLink && irLink !== '') irLinkMap[ticker] = irLink;
+      if (companyName && companyName !== '') nameToTickerMap[companyName] = ticker;
     }
   }
 
-  return { logos: logoMap, irLinks: irLinkMap };
+  return { logos: logoMap, irLinks: irLinkMap, companyNameToTicker: nameToTickerMap };
 }
 
-export async function fetchLogos(): Promise<{ logos: Record<string, string>; irLinks: Record<string, string> }> {
+export async function fetchLogos(): Promise<{ logos: Record<string, string>; irLinks: Record<string, string>; companyNameToTicker: Record<string, string> }> {
   const cacheKey = 'logos';
   const cached = cache.get(cacheKey);
 
@@ -296,7 +299,7 @@ export async function fetchLogos(): Promise<{ logos: Record<string, string>; irL
     return data;
   } catch (error) {
     console.error('Error fetching logos:', error);
-    return { logos: {}, irLinks: {} };
+    return { logos: {}, irLinks: {}, companyNameToTicker: {} };
   }
 }
 
