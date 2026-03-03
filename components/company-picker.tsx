@@ -33,6 +33,7 @@ interface CompanyPickerProps {
     title?: string;
     allCompanies: string[]; // List of company names
     nameToTickerMap: Record<string, string>; // Map of company name to ticker
+    initialLogos?: Record<string, string>; // Pre-fetched transparent logos from Google Sheet
     selectedCompanies: string[];
     singleSelection?: boolean;
     onClose: () => void;
@@ -43,6 +44,7 @@ export function CompanyPicker({
     title = "Select Companies",
     allCompanies,
     nameToTickerMap,
+    initialLogos = {},
     selectedCompanies: initialSelected,
     singleSelection = false,
     onClose,
@@ -58,7 +60,7 @@ export function CompanyPicker({
         return allCompanies.map(name => nameToTickerMap[name]).filter(Boolean) as string[];
     }, [allCompanies, nameToTickerMap]);
 
-    const { logos } = useCompanyLogos(allTickers, {});
+    const { logos } = useCompanyLogos(allTickers, initialLogos);
 
     // Load favorites
     useEffect(() => {

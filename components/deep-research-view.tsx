@@ -63,6 +63,7 @@ type DisplayMode = "chart" | "split" | "table";
 export function DeepResearchView() {
   const [companiesData, setCompaniesData] = useState<CompanyFinancialData[]>([]);
   const [nameToTickerMap, setNameToTickerMap] = useState<Record<string, string>>({});
+  const [sheetLogos, setSheetLogos] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [displayMode, setDisplayMode] = useState<DisplayMode>("split");
@@ -101,6 +102,7 @@ export function DeepResearchView() {
       ]);
       setCompaniesData(data);
       setNameToTickerMap(logosResult.companyNameToTicker);
+      setSheetLogos(logosResult.logos);
 
       if (data.length > 0) {
         const allMetrics = getAllMetrics(data);
@@ -190,14 +192,35 @@ export function DeepResearchView() {
       .filter(Boolean) as string[];
   }, [companiesData, selectedCompanies, selectedCompany, researchMode, nameToTickerMap]);
 
-  // Fetch logos
-  const { logos } = useCompanyLogos(activeTickers, {});
+  // Fetch logos — Google Sheet transparent PNGs are the primary source
+  const { logos } = useCompanyLogos(activeTickers, sheetLogos);
 
-  // Debug tickers mapping
-  useEffect(() => {
-    console.log("DEEP RESEARCH TICKERS:", activeTickers, "LOGOS:", logos);
-    console.log("FIRST COMPANY DATA (checking for ticker):", companiesData[0]);
-  }, [activeTickers, logos, companiesData]);
+  // Custom legend renderer with company logos for multi-company mode
+  const renderCustomLegend = (props: any) => {
+    const { payload } = props;
+    if (!payload) return null;
+    return (
+      <div className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 pt-5">
+        {payload.map((entry: any, index: number) => {
+          const companyName = entry.value;
+          const ticker = nameToTickerMap[companyName];
+          const logoUrl = ticker ? logos[ticker] : null;
+          return (
+            <div key={`legend-${index}`} className="flex items-center gap-2">
+              <div
+                className="w-3 h-3 rounded-full shrink-0"
+                style={{ backgroundColor: entry.color }}
+              />
+              {researchMode === "multi-company" && logoUrl ? (
+                <img src={logoUrl} alt={companyName} className="h-5 w-5 object-contain" />
+              ) : null}
+              <span className="text-xs font-bold text-slate-300">{companyName}</span>
+            </div>
+          );
+        })}
+      </div>
+    );
+  };
 
   const visibleQuarters = useMemo(() => {
     return allQuarters.filter(quarter => quarterVisibility[quarter] !== false);
@@ -639,7 +662,7 @@ export function DeepResearchView() {
                                 return [isPerc ? formatPercentage(v) : isCurr ? formatCurrency(v) : formatNumber(v)];
                               }}
                             />
-                            <Legend wrapperStyle={{ paddingTop: "20px" }} />
+                            <Legend content={renderCustomLegend} />
                             {researchMode === "multi-company" ? (
                               selectedCompanies.map((c, i) => (
                                 <Line key={c} type="monotone" dataKey={c} stroke={COLORS[i % COLORS.length]} strokeWidth={3} dot={{ r: 4, strokeWidth: 2, fill: "#0f172a" }} activeDot={{ r: 6 }} />
@@ -675,7 +698,7 @@ export function DeepResearchView() {
                                 return [isPerc ? formatPercentage(v) : isCurr ? formatCurrency(v) : formatNumber(v)];
                               }}
                             />
-                            <Legend wrapperStyle={{ paddingTop: "20px" }} />
+                            <Legend content={renderCustomLegend} />
                             {researchMode === "multi-company" ? (
                               selectedCompanies.map((c, i) => (
                                 <Bar key={c} dataKey={c} fill={COLORS[i % COLORS.length]} radius={[4, 4, 0, 0]} />
@@ -762,6 +785,7 @@ export function DeepResearchView() {
             title={researchMode === "multi-company" ? "Select Companies" : "Select Target Company"}
             allCompanies={allCompanies}
             nameToTickerMap={nameToTickerMap}
+            initialLogos={sheetLogos}
             selectedCompanies={researchMode === "multi-company" ? selectedCompanies : (selectedCompany ? [selectedCompany] : [])}
             singleSelection={researchMode === "single-company"}
             onClose={() => setShowCompanyPicker(false)}
