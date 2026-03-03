@@ -26,7 +26,7 @@ import {
   type CompanyFinancialData,
   type MetricCategory
 } from "@/lib/financial-sheets";
-import { fetchLogos } from "@/lib/google-sheets";
+import { fetchLogos, fetchSheetData, parseSheetData } from "@/lib/google-sheets";
 import { formatCurrency, formatNumber, formatPercentage } from "@/lib/utils";
 import { Settings2, Download, Table as TableIcon, BarChart3, Layout, ChevronDown, Search, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -57,6 +57,12 @@ const COLORS = [
   "#06b6d4", "#f97316", "#ec4899", "#84cc16", "#6366f1",
   "#14b8a6", "#a855f7", "#f43f5e", "#22c55e", "#eab308"
 ];
+
+// Normalize names for robust mapping (e.g. "Nvidia" -> "nvidia", "NVIDIA Corp" -> "nvidia")
+function normalizeName(name: string): string {
+  if (!name) return "";
+  return name.toLowerCase().replace(/[^a-z0-9]/g, '').replace(/corp$|inc$|ltd$|company$|co$/g, '');
+}
 
 type DisplayMode = "chart" | "split" | "table";
 
@@ -96,12 +102,42 @@ export function DeepResearchView() {
   async function loadData() {
     try {
       setLoading(true);
-      const [data, logosResult] = await Promise.all([
+      const [data, logosResult, portfolioRows] = await Promise.all([
         fetchAllCompanyData(),
-        fetchLogos()
+        fetchLogos(),
+        fetchSheetData("portfolio")
       ]);
       setCompaniesData(data);
-      setNameToTickerMap(logosResult.companyNameToTicker);
+
+      const positions = parseSheetData(portfolioRows);
+
+      // Build a robust name -> ticker mapping
+      const augmentedTickerMap: Record<string, string> = {};
+
+      // 1. Start with the mapping from the Logos sheet
+      Object.entries(logosResult.companyNameToTicker).forEach(([name, ticker]) => {
+        augmentedTickerMap[name] = ticker;
+        augmentedTickerMap[normalizeName(name)] = ticker;
+      });
+
+      // 2. Augment with data from the master Positions sheet for 100% accuracy
+      if (positions && positions.length > 0) {
+        positions.forEach(row => {
+          const ticker = (row.Ticker || row.Symbol || "").toUpperCase();
+          const name = row.Name || row.Company || "";
+
+          if (ticker && ticker !== "CASH" && ticker !== "SUM") {
+            if (name) {
+              augmentedTickerMap[name] = ticker;
+              augmentedTickerMap[normalizeName(name)] = ticker;
+            }
+            augmentedTickerMap[ticker] = ticker;
+            augmentedTickerMap[normalizeName(ticker)] = ticker;
+          }
+        });
+      }
+
+      setNameToTickerMap(augmentedTickerMap);
       setSheetLogos(logosResult.logos);
 
       if (data.length > 0) {
@@ -188,7 +224,7 @@ export function DeepResearchView() {
           ? selectedCompanies.includes(c.companyName)
           : c.companyName === selectedCompany
       )
-      .map(c => nameToTickerMap[c.companyName] || c.ticker)
+      .map(c => nameToTickerMap[normalizeName(c.companyName)] || nameToTickerMap[c.companyName] || c.ticker)
       .filter(Boolean) as string[];
   }, [companiesData, selectedCompanies, selectedCompany, researchMode, nameToTickerMap]);
 
@@ -203,7 +239,7 @@ export function DeepResearchView() {
       <div className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 pt-5">
         {payload.map((entry: any, index: number) => {
           const companyName = entry.value;
-          const ticker = nameToTickerMap[companyName];
+          const ticker = nameToTickerMap[normalizeName(companyName)] || nameToTickerMap[companyName];
           const logoUrl = ticker ? logos[ticker] : null;
           return (
             <div key={`legend-${index}`} className="flex items-center gap-2">
@@ -365,7 +401,7 @@ export function DeepResearchView() {
         if (researchMode === "multi-company") {
           const companyName = row.original.name;
           const companyData = companiesData.find(c => c.companyName === companyName);
-          const ticker = nameToTickerMap[companyName] || companyData?.ticker;
+          const ticker = nameToTickerMap[normalizeName(companyName)] || nameToTickerMap[companyName] || companyData?.ticker;
           const logoUrl = ticker ? logos[ticker] : null;
 
           return (
@@ -515,7 +551,8 @@ export function DeepResearchView() {
               <div className="flex items-center gap-3">
                 {researchMode === "single-company" && selectedCompany ? (
                   (() => {
-                    const t = nameToTickerMap[selectedCompany];
+                    const companyData = companiesData.find(c => c.companyName === selectedCompany);
+                    const t = nameToTickerMap[normalizeName(selectedCompany)] || nameToTickerMap[selectedCompany] || companyData?.ticker;
                     const l = t ? logos[t] : null;
                     return l ? <img src={l} alt="Logo" className="w-5 h-5 object-contain" /> : <div className="w-5 h-5 bg-slate-800 rounded-full flex items-center justify-center text-[8px]">{selectedCompany.substring(0, 2)}</div>;
                   })()
@@ -585,7 +622,7 @@ export function DeepResearchView() {
                           <>
                             {(() => {
                               const companyData = companiesData.find(c => c.companyName === selectedCompany);
-                              const ticker = nameToTickerMap[selectedCompany] || companyData?.ticker;
+                              const ticker = nameToTickerMap[normalizeName(selectedCompany)] || nameToTickerMap[selectedCompany] || companyData?.ticker;
                               const logoUrl = ticker ? logos[ticker] : null;
                               return logoUrl ? (
                                 <img src={logoUrl} alt={selectedCompany} className="h-8 w-auto object-contain drop-shadow-lg" />

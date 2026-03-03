@@ -29,6 +29,12 @@ import {
 import { cn } from "@/lib/utils";
 import { useCompanyLogos } from "@/hooks/use-company-logos";
 
+// Helper to normalize company names for robust ticker matching
+function normalizeName(name: string): string {
+    if (!name) return "";
+    return name.toLowerCase().replace(/[^a-z0-9]/g, '').replace(/corp$|inc$|ltd$|company$|co$/g, '');
+}
+
 interface CompanyPickerProps {
     title?: string;
     allCompanies: string[]; // List of company names
@@ -57,7 +63,7 @@ export function CompanyPicker({
 
     // Fetch logos for all available companies to display in the list
     const allTickers = useMemo(() => {
-        return allCompanies.map(name => nameToTickerMap[name]).filter(Boolean) as string[];
+        return allCompanies.map(name => nameToTickerMap[normalizeName(name)] || nameToTickerMap[name]).filter(Boolean) as string[];
     }, [allCompanies, nameToTickerMap]);
 
     const { logos } = useCompanyLogos(allTickers, initialLogos);
@@ -204,7 +210,7 @@ export function CompanyPicker({
                                 {currentList.map(c => {
                                     const isSelected = selected.includes(c);
                                     const isFav = favorites.includes(c);
-                                    const ticker = nameToTickerMap[c];
+                                    const ticker = nameToTickerMap[normalizeName(c)] || nameToTickerMap[c];
                                     const logoUrl = ticker ? logos[ticker] : null;
 
                                     return (
@@ -272,7 +278,7 @@ export function CompanyPicker({
                                                 className="p-2 space-y-1"
                                             >
                                                 {selected.map((c, index) => {
-                                                    const ticker = nameToTickerMap[c];
+                                                    const ticker = nameToTickerMap[normalizeName(c)] || nameToTickerMap[c];
                                                     const logoUrl = ticker ? logos[ticker] : null;
 
                                                     return (
