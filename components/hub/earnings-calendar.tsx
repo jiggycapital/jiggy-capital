@@ -54,58 +54,24 @@ export function EarningsCalendar({
         return events.filter((e) => e.source === filter);
     }, [events, filter]);
 
-    // Group events by week
-    const weekGroups = useMemo(() => {
-        const groups: WeekGroup[] = [];
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
+    // Group events by day
+    const dayGroups = useMemo(() => {
+        const groups: { dateStr: string; dateObj: Date; events: EarningsEvent[] }[] = [];
 
-        // Get the start of current week (Sunday)
-        const currentWeekStart = new Date(today);
-        currentWeekStart.setDate(today.getDate() - today.getDay());
+        filteredEvents.forEach(event => {
+            const dateObj = new Date(event.date);
+            dateObj.setHours(0, 0, 0, 0);
+            const dateStr = dateObj.toISOString().split("T")[0];
 
-        filteredEvents.forEach((event) => {
-            const eventDate = new Date(event.date);
-            eventDate.setHours(0, 0, 0, 0);
-
-            // Get the start of the event's week
-            const eventWeekStart = new Date(eventDate);
-            eventWeekStart.setDate(eventDate.getDate() - eventDate.getDay());
-
-            const weekKey = eventWeekStart.toISOString().split("T")[0];
-            const isThisWeek = eventWeekStart.getTime() === currentWeekStart.getTime();
-
-            let group = groups.find(
-                (g) => g.startDate.getTime() === eventWeekStart.getTime()
-            );
-
+            let group = groups.find(g => g.dateStr === dateStr);
             if (!group) {
-                const endOfWeek = new Date(eventWeekStart);
-                endOfWeek.setDate(eventWeekStart.getDate() + 6);
-
-                const label = isThisWeek
-                    ? "This Week"
-                    : `${eventWeekStart.toLocaleDateString(undefined, {
-                        month: "short",
-                        day: "numeric",
-                    })} — ${endOfWeek.toLocaleDateString(undefined, {
-                        month: "short",
-                        day: "numeric",
-                    })}`;
-
-                group = {
-                    label,
-                    startDate: eventWeekStart,
-                    events: [],
-                    isThisWeek,
-                };
+                group = { dateStr, dateObj, events: [] };
                 groups.push(group);
             }
-
             group.events.push(event);
         });
 
-        groups.sort((a, b) => a.startDate.getTime() - b.startDate.getTime());
+        groups.sort((a, b) => a.dateObj.getTime() - b.dateObj.getTime());
         return groups;
     }, [filteredEvents]);
 
@@ -124,28 +90,28 @@ export function EarningsCalendar({
     };
 
     return (
-        <Card className="bg-jiggy-surface border-jiggy-border shadow-2xl rounded-2xl overflow-hidden">
-            <CardHeader className="py-4 border-b border-jiggy-border bg-jiggy-surface-2">
+        <Card className="bg-jiggy-surface border border-jiggy-tan/50 shadow-2xl rounded-2xl overflow-hidden">
+            <CardHeader className="py-4 border-b border-jiggy-tan/50 bg-jiggy-surface-2">
                 <CardTitle className="text-sm font-black flex items-center justify-between text-slate-100 uppercase tracking-widest">
                     <div className="flex items-center gap-2">
                         <Calendar className="w-5 h-5 text-emerald-400" />
-                        Earnings Calendar
+                        Upcoming Earnings Schedule
                     </div>
-                    <div className="flex items-center gap-1.5">
+                    <div className="flex items-center gap-1.5 flex-wrap justify-end">
                         <button
                             onClick={() => setFilter("all")}
-                            className={`text-[10px] font-black px-3 py-1.5 rounded-lg border uppercase tracking-wider transition-all ${filter === "all"
-                                ? "bg-purple-500/20 text-purple-300 border-purple-500/30 shadow-sm"
-                                : "bg-jiggy-surface text-slate-500 border-jiggy-border hover:text-slate-300"
+                            className={`text-[10px] font-black px-3 py-1.5 rounded-xl border uppercase tracking-wider transition-all ${filter === "all"
+                                ? "bg-emerald-500/20 text-emerald-300 border-emerald-500/30 shadow-sm"
+                                : "bg-terminal-bg text-slate-400 border-jiggy-border hover:bg-slate-800/40 hover:text-slate-200"
                                 }`}
                         >
                             All ({events.length})
                         </button>
                         <button
                             onClick={() => setFilter("portfolio")}
-                            className={`text-[10px] font-black px-3 py-1.5 rounded-lg border uppercase tracking-wider transition-all flex items-center gap-1.5 ${filter === "portfolio"
+                            className={`text-[10px] font-black px-3 py-1.5 rounded-xl border uppercase tracking-wider transition-all flex items-center gap-1.5 ${filter === "portfolio"
                                 ? "bg-emerald-500/20 text-emerald-300 border-emerald-500/30 shadow-sm"
-                                : "bg-jiggy-surface text-slate-500 border-jiggy-border hover:text-slate-300"
+                                : "bg-terminal-bg text-slate-400 border-jiggy-border hover:bg-slate-800/40 hover:text-slate-200"
                                 }`}
                         >
                             <Briefcase className="w-3 h-3" />
@@ -153,9 +119,9 @@ export function EarningsCalendar({
                         </button>
                         <button
                             onClick={() => setFilter("watchlist")}
-                            className={`text-[10px] font-black px-3 py-1.5 rounded-lg border uppercase tracking-wider transition-all flex items-center gap-1.5 ${filter === "watchlist"
-                                ? "bg-sky-500/20 text-sky-300 border-sky-500/30 shadow-sm"
-                                : "bg-jiggy-surface text-slate-500 border-jiggy-border hover:text-slate-300"
+                            className={`text-[10px] font-black px-3 py-1.5 rounded-xl border uppercase tracking-wider transition-all flex items-center gap-1.5 ${filter === "watchlist"
+                                ? "bg-emerald-500/20 text-emerald-300 border-emerald-500/30 shadow-sm"
+                                : "bg-terminal-bg text-slate-400 border-jiggy-border hover:bg-slate-800/40 hover:text-slate-200"
                                 }`}
                         >
                             <Eye className="w-3 h-3" />
@@ -164,15 +130,15 @@ export function EarningsCalendar({
                     </div>
                 </CardTitle>
             </CardHeader>
-            <CardContent className="p-0">
+            <CardContent className="p-0 bg-terminal-bg/50">
                 {loading ? (
                     <div className="flex flex-col items-center justify-center py-16 text-center space-y-3">
-                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-400" />
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-400" />
                         <p className="text-slate-500 text-sm">
                             Synchronizing earnings calendar...
                         </p>
                     </div>
-                ) : weekGroups.length === 0 ? (
+                ) : dayGroups.length === 0 ? (
                     <div className="py-16 text-center">
                         <Calendar className="w-10 h-10 text-slate-700 mx-auto mb-3" />
                         <p className="text-sm text-slate-500 italic">
@@ -180,89 +146,70 @@ export function EarningsCalendar({
                         </p>
                     </div>
                 ) : (
-                    <div className="max-h-[700px] overflow-y-auto custom-scrollbar">
-                        {weekGroups.map((group, gi) => (
-                            <div key={gi}>
-                                {/* Week Header */}
-                                <div
-                                    className={`sticky top-0 z-10 px-4 py-2.5 border-b border-jiggy-border backdrop-blur-sm ${group.isThisWeek
-                                        ? "bg-emerald-500/10 border-emerald-500/20"
-                                        : "bg-jiggy-surface-2"
-                                        }`}
-                                >
-                                    <div className="flex items-center justify-between">
-                                        <span
-                                            className={`text-xs font-black uppercase tracking-widest ${group.isThisWeek ? "text-emerald-400" : "text-slate-400"
-                                                }`}
-                                        >
-                                            {group.label}
-                                        </span>
-                                        <span className="text-[10px] text-slate-500 font-mono font-bold">
-                                            {group.events.length} report
-                                            {group.events.length !== 1 ? "s" : ""}
-                                        </span>
+                    <div className="max-h-[700px] overflow-y-auto custom-scrollbar p-6">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                            {dayGroups.map((group, gi) => (
+                                <div key={gi} className="bg-jiggy-surface-2 border border-jiggy-border rounded-2xl overflow-hidden flex flex-col shadow-lg shadow-black/20">
+                                    {/* Day Header */}
+                                    <div className="px-4 py-3 border-b border-jiggy-border bg-emerald-500/5 flex items-center justify-between">
+                                        <div>
+                                            <div className="text-[10px] font-black uppercase tracking-widest text-slate-400">
+                                                {group.dateObj.toLocaleDateString(undefined, { weekday: "long" })}
+                                            </div>
+                                            <div className="text-sm font-black text-slate-100">
+                                                {group.dateObj.toLocaleDateString(undefined, { month: "short", day: "numeric" })}
+                                            </div>
+                                        </div>
+                                        <div className="flex flex-col items-end gap-1">
+                                            <span className="text-[10px] font-mono font-black text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">
+                                                {getCountdown(group.dateStr)}
+                                            </span>
+                                            <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">
+                                                {group.events.length} Report{group.events.length !== 1 ? 's' : ''}
+                                            </span>
+                                        </div>
                                     </div>
-                                </div>
 
-                                {/* Events */}
-                                <div className="divide-y divide-jiggy-border/50">
-                                    {group.events.map((event, ei) => (
-                                        <button
-                                            key={`${event.ticker}-${ei}`}
-                                            onClick={() => onSelectTicker(event.ticker)}
-                                            className={`w-full flex items-center justify-between p-4 hover:bg-slate-800/40 transition-all group text-left ${selectedTicker === event.ticker
-                                                ? "bg-emerald-500/5 border-l-4 border-l-emerald-400"
-                                                : "border-l-4 border-l-transparent bg-transparent"
-                                                }`}
-                                        >
-                                            <div className="flex items-center gap-4 min-w-0">
-                                                <div className="w-10 h-10 rounded-xl bg-terminal-bg flex items-center justify-center shrink-0 border border-slate-700/50 group-hover:border-emerald-500/40 transition-colors shadow-sm">
-                                                    {logos[event.ticker] ? (
-                                                        <img
-                                                            src={logos[event.ticker]}
-                                                            alt={event.ticker}
-                                                            className="w-6 h-6 object-contain"
-                                                        />
-                                                    ) : (
-                                                        <span className="text-[9px] font-bold text-slate-500">
+                                    {/* Companies Stack */}
+                                    <div className="flex-1 p-3 flex flex-col gap-2">
+                                        {group.events.map((event, ei) => (
+                                            <button
+                                                key={`${event.ticker}-${ei}`}
+                                                onClick={() => onSelectTicker(event.ticker)}
+                                                className={`w-full flex items-center justify-between p-2.5 rounded-xl border border-transparent hover:border-emerald-500/30 hover:bg-emerald-500/5 transition-all text-left group ${selectedTicker === event.ticker ? "bg-emerald-500/10 border-emerald-500/40 shadow-sm" : ""
+                                                    }`}
+                                            >
+                                                <div className="flex items-center gap-3 min-w-0">
+                                                    <div className="w-8 h-8 rounded-lg bg-terminal-bg flex items-center justify-center shrink-0 border border-slate-700/50 group-hover:border-emerald-500/40 transition-colors shadow-sm overflow-hidden">
+                                                        {logos[event.ticker] ? (
+                                                            <img
+                                                                src={logos[event.ticker]}
+                                                                alt={event.ticker}
+                                                                className="w-5 h-5 object-contain"
+                                                            />
+                                                        ) : (
+                                                            <span className="text-[8px] font-black text-slate-500">
+                                                                {event.ticker}
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                    <div className="min-w-0 flex flex-col">
+                                                        <span className="text-sm font-black text-slate-100 group-hover:text-emerald-400 transition-colors tabular-nums">
                                                             {event.ticker}
                                                         </span>
-                                                    )}
-                                                </div>
-                                                <div className="min-w-0">
-                                                    <div className="flex items-center gap-2 mb-0.5">
-                                                        <span className="text-sm font-bold text-slate-100 group-hover:text-emerald-400 transition-colors">
-                                                            {event.ticker}
-                                                        </span>
-                                                        <span
-                                                            className={`text-[8px] font-black px-1.5 py-0.5 rounded-md border uppercase tracking-wider ${event.source === "portfolio"
-                                                                ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
-                                                                : "bg-sky-500/10 text-sky-400 border-sky-500/20"
-                                                                }`}
-                                                        >
+                                                        <span className={`text-[8px] font-black uppercase tracking-widest ${event.source === 'portfolio' ? 'text-emerald-500' : 'text-sky-500'
+                                                            }`}>
                                                             {event.source}
                                                         </span>
                                                     </div>
-                                                    <div className="text-[10px] text-slate-500 font-mono font-bold">
-                                                        {new Date(event.date).toLocaleDateString(undefined, {
-                                                            weekday: "short",
-                                                            month: "short",
-                                                            day: "numeric",
-                                                        })}
-                                                    </div>
                                                 </div>
-                                            </div>
-                                            <div className="flex items-center gap-3 shrink-0">
-                                                <span className="text-[10px] font-mono font-black text-slate-400 bg-jiggy-surface-2 px-2 py-1 rounded-md border border-jiggy-border shadow-sm">
-                                                    {getCountdown(event.date)}
-                                                </span>
-                                                <ChevronRight className="w-4 h-4 text-slate-600 group-hover:text-emerald-400 transition-colors" />
-                                            </div>
-                                        </button>
-                                    ))}
+                                                <ChevronRight className="w-4 h-4 text-slate-600 group-hover:text-emerald-400 transition-colors shrink-0" />
+                                            </button>
+                                        ))}
+                                    </div>
                                 </div>
-                            </div>
-                        ))}
+                            ))}
+                        </div>
                     </div>
                 )}
             </CardContent>

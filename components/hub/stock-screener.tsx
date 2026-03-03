@@ -402,7 +402,7 @@ export function StockScreener({
               <div className="space-y-2">
                 <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest px-1">Sector / Industry</label>
                 <select
-                  className="w-full h-11 bg-[#0a0f1d] border border-slate-800 rounded-xl px-4 text-sm text-slate-300 focus:outline-none focus:border-blue-500/50 appearance-none cursor-pointer"
+                  className="w-full h-11 bg-terminal-bg border border-slate-800 rounded-xl px-4 text-sm text-slate-300 focus:outline-none focus:border-emerald-500/50 appearance-none cursor-pointer"
                   value={selectedSector}
                   onChange={(e) => setSelectedSector(e.target.value)}
                 >
@@ -430,7 +430,7 @@ export function StockScreener({
                     <div key={filter.key} className="bg-terminal-bg border border-slate-800/50 rounded-xl p-4 space-y-3 relative group">
                       <div className="flex items-center justify-between">
                         <div className="space-y-0.5">
-                          <div className="text-[10px] font-bold text-blue-500 uppercase tracking-tighter truncate max-w-[180px]">
+                          <div className="text-[10px] font-bold text-emerald-500 uppercase tracking-tighter truncate max-w-[180px]">
                             {criteriaCategories[filter.key] || "General"}
                           </div>
                           <div className="text-xs font-bold text-slate-200">{filter.key}</div>
@@ -452,7 +452,7 @@ export function StockScreener({
                             <Input
                               type="number"
                               placeholder="Any"
-                              className="h-8 bg-[#1e293b] border-none text-xs"
+                              className="h-8 bg-jiggy-surface-2 border-none text-xs"
                               value={filter.min || ""}
                               onChange={(e) => updateFilter(filter.key, { min: e.target.value })}
                             />
@@ -462,7 +462,7 @@ export function StockScreener({
                             <Input
                               type="number"
                               placeholder="Any"
-                              className="h-8 bg-[#1e293b] border-none text-xs"
+                              className="h-8 bg-jiggy-surface-2 border-none text-xs"
                               value={filter.max || ""}
                               onChange={(e) => updateFilter(filter.key, { max: e.target.value })}
                             />
@@ -471,7 +471,7 @@ export function StockScreener({
                       ) : (
                         <Input
                           placeholder="Search text..."
-                          className="h-8 bg-[#1e293b] border-none text-xs"
+                          className="h-8 bg-jiggy-surface-2 border-none text-xs"
                           value={filter.search || ""}
                           onChange={(e) => updateFilter(filter.key, { search: e.target.value })}
                         />
@@ -524,7 +524,7 @@ export function StockScreener({
             <Button
               variant="ghost"
               size="sm"
-              className="text-[10px] font-bold text-blue-400 hover:bg-blue-400/10 uppercase tracking-widest gap-2"
+              className="text-[10px] font-bold text-emerald-400 hover:bg-emerald-400/10 uppercase tracking-widest gap-2"
               onClick={() => {
                 setPickerMode('column');
                 setShowCriteriaPicker(true);
@@ -546,7 +546,7 @@ export function StockScreener({
                           key={header.id}
                           className={cn(
                             "text-slate-400 font-bold py-4",
-                            header.id === 'ticker' && "sticky left-0 z-30 bg-slate-800 border-r border-slate-800/50 min-w-[120px] max-w-[150px] md:min-w-[180px]"
+                            header.id === 'ticker' && "sticky left-0 z-30 bg-jiggy-surface border-r border-jiggy-tan/50 min-w-[120px] max-w-[150px] md:min-w-[180px]"
                           )}
                         >
                           <div
@@ -580,7 +580,7 @@ export function StockScreener({
                             className={cn(
                               "py-3",
                               cell.column.id !== 'ticker' && "text-right",
-                              cell.column.id === 'ticker' && "sticky left-0 bg-jiggy-surface-2 z-10 border-r border-jiggy-tan/50 min-w-[120px] max-w-[150px] md:min-w-[180px]"
+                              cell.column.id === 'ticker' && "sticky left-0 bg-jiggy-surface-2 group-hover:bg-jiggy-surface-2 z-10 border-r border-jiggy-tan/50 min-w-[120px] max-w-[150px] md:min-w-[180px]"
                             )}
                           >
                             {flexRender(cell.column.columnDef.cell, cell.getContext())}

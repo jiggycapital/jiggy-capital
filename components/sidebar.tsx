@@ -21,7 +21,6 @@ import {
   Newspaper,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { TreePine } from "lucide-react"; // Playful alternative logo icon if needed
 
 interface NavSection {
   label: string;
@@ -115,8 +114,8 @@ export function Sidebar() {
             "flex h-14 items-center border-b border-jiggy-tan/50 px-5",
             isCollapsed ? "justify-center px-0" : "justify-between"
           )}>
-            <Link href="/" className="flex items-center gap-2.5 group/logo min-w-0 overflow-hidden">
-              <TreePine className="h-6 w-6 shrink-0 text-jiggy-gold" />
+            <Link href="/" className="flex items-center gap-2.5 group/logo min-w-0 overflow-hidden logo-hover">
+              <img src="/jiggy-icon.png" alt="Jiggy Capital Logo" className="h-6 w-auto shrink-0 drop-shadow-sm" />
               {!isCollapsed && (
                 <h1 className="text-base font-extrabold text-slate-100 tracking-tight group-hover/logo:text-jiggy-gold transition-colors truncate">
                   Jiggy Capital

@@ -406,7 +406,7 @@ export function EarningsHub() {
                 <CardContent className="relative z-10">
                     {eventsLoading ? (
                         <div className="flex items-center gap-3 py-4">
-                            <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-purple-400" />
+                            <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-emerald-400" />
                             <span className="text-sm text-slate-500">
                                 Loading earnings calendar...
                             </span>
@@ -441,7 +441,7 @@ export function EarningsHub() {
                                     </div>
                                     <div className="min-w-0 flex-1">
                                         <div className="flex items-center gap-2 mb-0.5">
-                                            <span className="text-sm font-bold text-slate-100 group-hover:text-purple-300 transition-colors">
+                                            <span className="text-sm font-bold text-slate-100 group-hover:text-emerald-400 transition-colors">
                                                 {event.ticker}
                                             </span>
                                             <span
@@ -472,7 +472,7 @@ export function EarningsHub() {
                                             </span>
                                         </div>
                                     </div>
-                                    <ChevronRight className="w-4 h-4 text-slate-600 group-hover:text-purple-400 shrink-0 transition-colors" />
+                                    <ChevronRight className="w-4 h-4 text-slate-600 group-hover:text-emerald-400 shrink-0 transition-colors" />
                                 </button>
                             ))}
                         </div>

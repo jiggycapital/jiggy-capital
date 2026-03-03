@@ -279,7 +279,7 @@ export function TableView() {
 
               <DropdownMenu open={showTemplateMenu} onOpenChange={setShowTemplateMenu}>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="outline" size="sm" className="bg-terminal-bg border-jiggy-border text-emerald-400 hover:text-slate-950 hover:bg-emerald-400 h-10 px-4 rounded-xl font-black tracking-widest uppercase text-[10px] transition-all">
+                  <Button variant="outline" size="sm" className="bg-emerald-500/10 border-emerald-500/20 text-emerald-400 hover:text-emerald-300 hover:bg-emerald-500/20 h-10 px-4 rounded-xl font-black tracking-widest uppercase text-[10px] transition-all">
                     <FolderOpen className="h-4 w-4 mr-2" />
                     Templates
                   </Button>
@@ -311,7 +311,7 @@ export function TableView() {
                 variant="outline"
                 size="sm"
                 onClick={() => setShowColumnSelector(true)}
-                className="bg-emerald-500 hover:bg-emerald-400 border-none text-slate-950 font-black h-10 px-4 rounded-xl tracking-widest uppercase text-[10px] transition-all"
+                className="bg-emerald-500 hover:bg-emerald-400 border-none text-slate-950 font-black h-10 px-4 rounded-xl tracking-widest uppercase text-[10px] transition-all shadow-sm shadow-emerald-500/20"
               >
                 <Settings2 className="h-4 w-4 mr-2" />
                 Modify Columns
@@ -346,7 +346,7 @@ export function TableView() {
                           key={header.id}
                           className={cn(
                             "text-slate-400 font-bold py-4",
-                            isCompany && "min-w-[120px] max-w-[150px] md:min-w-[180px] sticky left-0 z-30 bg-slate-800 border-r border-slate-800/50"
+                            header.id === 'ticker' && "min-w-[120px] max-w-[150px] md:min-w-[180px] sticky left-0 z-30 bg-jiggy-surface-2 border-r border-jiggy-tan/50"
                           )}
                         >
                           <div
@@ -371,7 +371,7 @@ export function TableView() {
                   </TableRow>
                 ))}
               </TableHeader>
-              <TableBody className="bg-jiggy-surface/50">
+              <TableBody>
                 {table.getRowModel().rows?.length ? (
                   table.getRowModel().rows.map((row) => (
                     <TableRow key={row.id} className="border-b border-jiggy-tan/30 hover:bg-jiggy-tan/10 transition-colors cursor-pointer group" onClick={() => setSelectedStock(row.original)}>
@@ -383,7 +383,7 @@ export function TableView() {
                             className={cn(
                               "py-3",
                               !isCompany && "text-right",
-                              isCompany && "sticky left-0 bg-jiggy-surface-2 z-10 border-r border-jiggy-border/50 min-w-[120px] max-w-[150px] md:min-w-[180px]"
+                              cell.column.id === 'ticker' && "sticky left-0 bg-jiggy-surface group-hover:bg-jiggy-surface/80 z-10 border-r border-jiggy-tan/50 min-w-[120px] max-w-[150px] md:min-w-[180px]"
                             )}
                           >
                             {flexRender(cell.column.columnDef.cell, cell.getContext())}
@@ -439,18 +439,18 @@ function formatCellValue(value: string, columnKey: string, isNumeric: boolean, c
 
   if (num !== null) {
     if (cat.includes("price action") || cat.includes("growth") || col.includes("%") || col.includes("change")) {
-      return <span className={cn("font-mono font-bold", num >= 0 ? "text-jiggy-neon" : "text-rose-400")}>{formatPercentage(num)}</span>;
+      return <span className={cn("font-mono font-bold text-[13px] tracking-tight", num >= 0 ? "text-jiggy-neon" : "text-rose-400")}>{formatPercentage(num)}</span>;
     }
     if (cat.includes("multiples") || col.includes("p/e") || col.includes("p/fcf") || col.includes("peg")) {
-      return <span className="font-mono text-slate-300">{num.toFixed(1)}x</span>;
+      return <span className="font-mono text-slate-300 text-[13px] tracking-tight">{num.toFixed(1)}x</span>;
     }
     if (col.includes("market cap") || col.includes("ev")) {
       let normalizedNum = num;
       if (normalizedNum > 10000) normalizedNum = normalizedNum / 1000;
-      return <span className="font-mono text-slate-300">{formatCurrencyBillions(normalizedNum)}</span>;
+      return <span className="font-mono text-slate-300 text-[13px] tracking-tight">{formatCurrencyBillions(normalizedNum)}</span>;
     }
-    if (col.includes("price")) return <span className="font-mono text-slate-300">{formatCurrency(num)}</span>;
-    return <span className="font-mono text-slate-300">{formatNumber(num)}</span>;
+    if (col.includes("price")) return <span className="font-mono text-slate-300 text-[13px] tracking-tight">{formatCurrency(num)}</span>;
+    return <span className="font-mono text-slate-300 text-[13px] tracking-tight">{formatNumber(num)}</span>;
   }
-  return <span className="text-slate-400 text-xs">{value}</span>;
+  return <span className="text-slate-400 text-xs text-[13px] tracking-tight">{value}</span>;
 }

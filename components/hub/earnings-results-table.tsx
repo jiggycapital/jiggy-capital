@@ -193,18 +193,18 @@ export function EarningsResultsTable({
                     <div className="flex items-center gap-1.5">
                         <button
                             onClick={() => setFilter("all")}
-                            className={`text-[10px] font-black px-3 py-1.5 rounded-lg border uppercase tracking-wider transition-all ${filter === "all"
-                                ? "bg-purple-500/20 text-purple-300 border-purple-500/30 shadow-sm"
-                                : "bg-jiggy-surface text-slate-500 border-jiggy-border hover:text-slate-300"
+                            className={`text-[10px] font-black px-3 py-1.5 rounded-xl border uppercase tracking-wider transition-all ${filter === "all"
+                                ? "bg-emerald-500/20 text-emerald-300 border-emerald-500/30 shadow-sm"
+                                : "bg-terminal-bg text-slate-400 border-jiggy-border hover:bg-slate-800/40 hover:text-slate-200"
                                 }`}
                         >
                             All ({totalAll})
                         </button>
                         <button
                             onClick={() => setFilter("portfolio")}
-                            className={`text-[10px] font-black px-3 py-1.5 rounded-lg border uppercase tracking-wider transition-all flex items-center gap-1.5 ${filter === "portfolio"
+                            className={`text-[10px] font-black px-3 py-1.5 rounded-xl border uppercase tracking-wider transition-all flex items-center gap-1.5 ${filter === "portfolio"
                                 ? "bg-emerald-500/20 text-emerald-300 border-emerald-500/30 shadow-sm"
-                                : "bg-jiggy-surface text-slate-500 border-jiggy-border hover:text-slate-300"
+                                : "bg-terminal-bg text-slate-400 border-jiggy-border hover:bg-slate-800/40 hover:text-slate-200"
                                 }`}
                         >
                             <Briefcase className="w-3 h-3" />
@@ -212,9 +212,9 @@ export function EarningsResultsTable({
                         </button>
                         <button
                             onClick={() => setFilter("watchlist")}
-                            className={`text-[10px] font-black px-3 py-1.5 rounded-lg border uppercase tracking-wider transition-all flex items-center gap-1.5 ${filter === "watchlist"
-                                ? "bg-sky-500/20 text-sky-300 border-sky-500/30 shadow-sm"
-                                : "bg-jiggy-surface text-slate-500 border-jiggy-border hover:text-slate-300"
+                            className={`text-[10px] font-black px-3 py-1.5 rounded-xl border uppercase tracking-wider transition-all flex items-center gap-1.5 ${filter === "watchlist"
+                                ? "bg-emerald-500/20 text-emerald-300 border-emerald-500/30 shadow-sm"
+                                : "bg-terminal-bg text-slate-400 border-jiggy-border hover:bg-slate-800/40 hover:text-slate-200"
                                 }`}
                         >
                             <Eye className="w-3 h-3" />
@@ -296,7 +296,7 @@ export function EarningsResultsTable({
                             <thead>
                                 <tr className="border-b border-jiggy-tan/50 bg-jiggy-surface">
                                     <th
-                                        className="px-4 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest cursor-pointer hover:text-slate-200 transition-colors sticky left-0 bg-jiggy-surface z-10"
+                                        className="px-4 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest cursor-pointer hover:text-slate-200 transition-colors sticky left-0 bg-jiggy-surface-2 border-r border-jiggy-tan/50 z-10"
                                         onClick={() => handleSort("ticker")}
                                     >
                                         Company
@@ -355,7 +355,7 @@ export function EarningsResultsTable({
                                         onClick={() => onSelectTicker?.(result.ticker)}
                                     >
                                         {/* Company */}
-                                        <td className="px-4 py-4 sticky left-0 bg-inherit z-10">
+                                        <td className="px-4 py-4 sticky left-0 bg-jiggy-surface group-hover:bg-jiggy-surface/80 border-r border-jiggy-tan/50 z-10">
                                             <div className="flex items-center gap-3">
                                                 <div className="w-10 h-10 rounded-xl bg-terminal-bg flex items-center justify-center shrink-0 border border-slate-700/50 group-hover:border-purple-500/40 transition-colors shadow-sm">
                                                     {logos[result.ticker] ? (
@@ -393,11 +393,11 @@ export function EarningsResultsTable({
 
                                         {/* Revenue */}
                                         <td className="px-3 py-3 text-right">
-                                            <span className="text-xs font-bold text-slate-100 font-mono tabular-nums">
+                                            <span className="text-[13px] tracking-tight font-bold text-slate-100 font-mono tabular-nums">
                                                 {formatRevenue(result.revenue)}
                                             </span>
                                             {result.revenueYoYGrowth && (
-                                                <div className="text-[9px] text-slate-500 font-mono">
+                                                <div className="text-[10px] text-slate-500 font-mono tracking-tight font-bold">
                                                     {result.revenueYoYGrowth} Y/Y
                                                 </div>
                                             )}
@@ -416,7 +416,7 @@ export function EarningsResultsTable({
                                                         <TrendingDown className="w-3 h-3 text-rose-400" />
                                                     ))}
                                                 <span
-                                                    className={`text-xs font-black font-mono tabular-nums ${getBeatColor(result.revenueBeatPercent)}`}
+                                                    className={`text-[13px] tracking-tight font-black font-mono tabular-nums ${getBeatColor(result.revenueBeatPercent)}`}
                                                 >
                                                     {formatBeatPercent(result.revenueBeatPercent)}
                                                 </span>
@@ -436,7 +436,7 @@ export function EarningsResultsTable({
                                                         <TrendingDown className="w-3 h-3 text-rose-400" />
                                                     ))}
                                                 <span
-                                                    className={`text-xs font-black font-mono tabular-nums ${getBeatColor(result.nextQRevBeatPercent)}`}
+                                                    className={`text-[13px] tracking-tight font-black font-mono tabular-nums ${getBeatColor(result.nextQRevBeatPercent)}`}
                                                 >
                                                     {formatBeatPercent(result.nextQRevBeatPercent)}
                                                 </span>
@@ -445,7 +445,7 @@ export function EarningsResultsTable({
 
                                         {/* EPS */}
                                         <td className="px-3 py-3 text-right">
-                                            <span className="text-xs font-bold text-slate-100 font-mono tabular-nums">
+                                            <span className="text-[13px] tracking-tight font-bold text-slate-100 font-mono tabular-nums">
                                                 {result.eps !== null
                                                     ? `$${result.eps.toFixed(2)}`
                                                     : "—"}
@@ -465,7 +465,7 @@ export function EarningsResultsTable({
                                                         <TrendingDown className="w-3 h-3 text-rose-400" />
                                                     ))}
                                                 <span
-                                                    className={`text-xs font-black font-mono tabular-nums ${getBeatColor(result.epsBeatPercent)}`}
+                                                    className={`text-[13px] tracking-tight font-black font-mono tabular-nums ${getBeatColor(result.epsBeatPercent)}`}
                                                 >
                                                     {formatBeatPercent(result.epsBeatPercent)}
                                                 </span>
@@ -485,7 +485,7 @@ export function EarningsResultsTable({
                                                         <TrendingDown className="w-3 h-3 text-rose-400" />
                                                     ))}
                                                 <span
-                                                    className={`text-xs font-black font-mono tabular-nums ${getBeatColor(result.fcfBeatPercent)}`}
+                                                    className={`text-[13px] tracking-tight font-black font-mono tabular-nums ${getBeatColor(result.fcfBeatPercent)}`}
                                                 >
                                                     {formatBeatPercent(result.fcfBeatPercent)}
                                                 </span>
