@@ -82,7 +82,7 @@ export function PortfolioTable({ positionsData, logos }: PortfolioTableProps) {
                     </div>
                   </div>
                 </TableCell>
-                <TableCell className="text-right font-mono text-sm text-slate-300">
+                <TableCell className="text-right font-mono text-sm text-slate-400">
                   {formatCurrency(row.price)}
                 </TableCell>
                 <TableCell className="text-right font-mono text-sm font-bold text-jiggy-gold-alt">
@@ -94,13 +94,13 @@ export function PortfolioTable({ positionsData, logos }: PortfolioTableProps) {
                 <TableCell className={`text-right font-mono text-sm font-bold ${row.ytd >= 0 ? 'text-jiggy-neon' : 'text-rose-400'}`}>
                   {row.ytd >= 0 ? '+' : ''}{row.ytd.toFixed(1)}%
                 </TableCell>
-                <TableCell className="text-right font-mono text-sm text-slate-300">
+                <TableCell className="text-right font-mono text-sm text-slate-400">
                   {row.revCagr}
                 </TableCell>
-                <TableCell className="text-right font-mono text-sm text-slate-300">
+                <TableCell className="text-right font-mono text-sm text-slate-400">
                   {row.fcf}
                 </TableCell>
-                <TableCell className="text-right font-mono text-sm text-slate-300">
+                <TableCell className="text-right font-mono text-sm text-slate-400">
                   {row.pe}
                 </TableCell>
               </TableRow>

@@ -327,15 +327,15 @@ export function EarningsHub() {
         );
         if (diff === 0) return "text-rose-400 bg-rose-500/10 border-rose-500/20";
         if (diff === 1) return "text-amber-400 bg-amber-500/10 border-amber-500/20";
-        return "text-blue-400 bg-blue-500/10 border-blue-500/20";
+        return "text-emerald-400 bg-emerald-500/10 border-emerald-500/20";
     }, []);
 
     if (loading) {
         return (
             <div className="space-y-6 max-w-[1600px] mx-auto p-6">
                 <div className="flex items-center gap-3 mb-8">
-                    <div className="p-2.5 rounded-xl bg-gradient-to-br from-purple-500/20 to-blue-500/20 border border-purple-500/20">
-                        <Mic className="w-6 h-6 text-purple-400" />
+                    <div className="p-2.5 rounded-xl bg-gradient-to-br from-emerald-500/20 to-jiggy-gold/20 border border-emerald-500/20">
+                        <Mic className="w-6 h-6 text-emerald-400" />
                     </div>
                     <div>
                         <h1 className="text-2xl font-black text-slate-100 tracking-tight">
@@ -426,7 +426,7 @@ export function EarningsHub() {
                                     onClick={() => setSelectedTicker(event.ticker)}
                                     className="group flex items-center gap-3 p-3 rounded-2xl bg-jiggy-surface-2/60 border border-jiggy-border hover:border-emerald-500/30 hover:bg-jiggy-surface/60 transition-all cursor-pointer text-left"
                                 >
-                                    <div className="w-10 h-10 rounded-xl bg-jiggy-surface flex items-center justify-center shrink-0 border border-jiggy-border group-hover:border-emerald-500/40 transition-colors shadow-inner">
+                                    <div className="w-10 h-10 rounded-xl bg-jiggy-surface flex items-center justify-center shrink-0 border border-jiggy-border group-hover:border-emerald-500/40 transition-colors shadow-inner logo-glow">
                                         {logos[event.ticker] ? (
                                             <img
                                                 src={logos[event.ticker]}

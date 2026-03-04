@@ -116,8 +116,8 @@ export function UpcomingEvents({ portfolioTickers, logos, irLinks, className }: 
   }, [portfolioTickers, irLinks]);
 
   return (
-    <Card className={`bg-jiggy-surface border-jiggy-border overflow-hidden flex flex-col shadow-2xl rounded-2xl ${className || 'h-[750px]'}`}>
-      <CardHeader className="py-4 border-b border-jiggy-border shrink-0 bg-jiggy-surface-2">
+    <Card className={`bg-jiggy-surface border border-jiggy-tan/50 overflow-hidden flex flex-col shadow-2xl rounded-2xl ${className || 'h-[750px]'}`}>
+      <CardHeader className="py-4 border-b border-jiggy-tan/50 shrink-0 bg-jiggy-surface-2">
         <CardTitle className="text-sm font-bold flex items-center justify-between text-slate-100 uppercase tracking-wider">
           <div className="flex items-center gap-2">
             <Calendar className="w-5 h-5 text-jiggy-gold" />
@@ -142,7 +142,7 @@ export function UpcomingEvents({ portfolioTickers, logos, irLinks, className }: 
               <div key={`${event.ticker}-${i}`} className="p-4 hover:bg-jiggy-surface-2 transition-all flex items-center justify-between group">
                 <div className="flex items-center gap-4 min-w-0">
                   <div className="relative">
-                    <div className="w-12 h-12 rounded-xl bg-terminal-bg flex items-center justify-center shrink-0 border border-jiggy-border shadow-inner group-hover:border-jiggy-gold/40 transition-colors">
+                    <div className="w-12 h-12 rounded-xl bg-terminal-bg flex items-center justify-center shrink-0 border border-jiggy-tan/50 shadow-inner group-hover:border-jiggy-gold/40 transition-colors logo-glow">
                       {logos[event.ticker] ? (
                         <img src={logos[event.ticker]} alt={event.ticker} className="w-8 h-8 object-contain drop-shadow-sm" />
                       ) : (

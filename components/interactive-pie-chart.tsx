@@ -294,7 +294,7 @@ export function InteractivePieChart({ positionsData, logos, view, onViewChange }
           onClick={() => onViewChange("company")}
           className={cn(
             "relative px-6 rounded-xl font-extrabold shadow-md",
-            view === "company" ? "bg-jiggy-gold hover:bg-jiggy-gold-alt text-slate-900 border-none" : "border-jiggy-border bg-jiggy-surface-2 text-slate-400 hover:text-white"
+            view === "company" ? "bg-jiggy-gold hover:bg-jiggy-gold-alt text-slate-900 border-none" : "border-jiggy-border bg-jiggy-surface-2 text-slate-400 hover:text-jiggy-tan"
           )}
         >
           Holdings
@@ -305,7 +305,7 @@ export function InteractivePieChart({ positionsData, logos, view, onViewChange }
           onClick={() => onViewChange("sector")}
           className={cn(
             "relative px-6 rounded-xl font-extrabold shadow-md",
-            view === "sector" ? "bg-jiggy-gold hover:bg-jiggy-gold-alt text-slate-900 border-none" : "border-jiggy-border bg-jiggy-surface-2 text-slate-400 hover:text-white"
+            view === "sector" ? "bg-jiggy-gold hover:bg-jiggy-gold-alt text-slate-900 border-none" : "border-jiggy-border bg-jiggy-surface-2 text-slate-400 hover:text-jiggy-tan"
           )}
         >
           Sector

@@ -164,17 +164,17 @@ export function EarningsAiSummary({ ticker }: EarningsAiSummaryProps) {
     if (loading) {
         return (
             <div className="space-y-4">
-                <div className="flex items-center gap-2 text-sm font-bold text-purple-300">
+                <div className="flex items-center gap-2 text-sm font-bold text-emerald-300">
                     <Sparkles className="w-4 h-4" />
                     AI Earnings Analysis
                 </div>
-                <div className="p-6 rounded-xl bg-gradient-to-br from-purple-500/5 to-blue-500/5 border border-purple-500/10">
+                <div className="p-6 rounded-xl bg-gradient-to-br from-emerald-500/5 to-jiggy-gold/5 border border-emerald-500/10">
                     <div className="flex flex-col items-center gap-3">
                         <div className="relative">
-                            <div className="w-10 h-10 rounded-xl bg-purple-500/10 flex items-center justify-center">
-                                <Loader2 className="w-5 h-5 text-purple-400 animate-spin" />
+                            <div className="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center">
+                                <Loader2 className="w-5 h-5 text-emerald-400 animate-spin" />
                             </div>
-                            <div className="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-purple-400 animate-ping" />
+                            <div className="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-emerald-400 animate-ping" />
                         </div>
                         <div className="text-center">
                             <div className="text-sm font-bold text-slate-200">{stage}</div>
@@ -191,7 +191,7 @@ export function EarningsAiSummary({ ticker }: EarningsAiSummaryProps) {
     if (error) {
         return (
             <div className="space-y-3">
-                <div className="flex items-center gap-2 text-sm font-bold text-purple-300">
+                <div className="flex items-center gap-2 text-sm font-bold text-emerald-300">
                     <Sparkles className="w-4 h-4" />
                     AI Earnings Analysis
                 </div>
@@ -202,7 +202,7 @@ export function EarningsAiSummary({ ticker }: EarningsAiSummaryProps) {
                             <div className="text-sm text-amber-300 font-medium">{error}</div>
                             <button
                                 onClick={() => generateSummary()}
-                                className="mt-2 text-[10px] font-bold text-blue-400 hover:text-blue-300 flex items-center gap-1 transition-colors"
+                                className="mt-2 text-[10px] font-bold text-emerald-400 hover:text-emerald-300 flex items-center gap-1 transition-colors"
                             >
                                 <RefreshCw className="w-3 h-3" />
                                 Retry
@@ -219,7 +219,7 @@ export function EarningsAiSummary({ ticker }: EarningsAiSummaryProps) {
     return (
         <div className="space-y-3">
             <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2 text-sm font-bold text-purple-300">
+                <div className="flex items-center gap-2 text-sm font-bold text-emerald-300">
                     <Sparkles className="w-4 h-4" />
                     AI Earnings Analysis
                 </div>
@@ -236,10 +236,10 @@ export function EarningsAiSummary({ ticker }: EarningsAiSummaryProps) {
                     Refresh
                 </button>
             </div>
-            <div className="p-4 rounded-xl bg-slate-800/30 border border-slate-800/50">
+            <div className="p-4 rounded-xl bg-jiggy-surface/30 border border-jiggy-border">
                 <div
                     className="prose prose-invert prose-sm max-w-none
-            prose-headings:text-purple-300 prose-headings:text-xs prose-headings:font-black prose-headings:uppercase prose-headings:tracking-wider prose-headings:mt-4 prose-headings:mb-2
+            prose-headings:text-emerald-300 prose-headings:text-xs prose-headings:font-black prose-headings:uppercase prose-headings:tracking-wider prose-headings:mt-4 prose-headings:mb-2
             prose-p:text-slate-300 prose-p:text-[12px] prose-p:leading-relaxed
             prose-li:text-slate-300 prose-li:text-[12px] prose-li:leading-relaxed
             prose-strong:text-slate-100

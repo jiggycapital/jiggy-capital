@@ -600,7 +600,7 @@ export function DeepResearchView() {
               </Select>
             </div>
 
-            <Button variant="ghost" size="icon" className="h-11 w-11 bg-terminal-bg border border-jiggy-border text-slate-400 hover:text-white rounded-xl ml-auto lg:ml-0" onClick={handleExport} title="Export CSV">
+            <Button variant="ghost" size="icon" className="h-11 w-11 bg-terminal-bg border border-jiggy-border text-slate-400 hover:text-jiggy-tan rounded-xl ml-auto lg:ml-0" onClick={handleExport} title="Export CSV">
               <Download className="h-4 w-4" />
             </Button>
           </div>
@@ -640,7 +640,7 @@ export function DeepResearchView() {
                     </div>
                     <Popover>
                       <PopoverTrigger asChild>
-                        <Button variant="ghost" size="sm" className="text-slate-400 hover:text-white font-bold">
+                        <Button variant="ghost" size="sm" className="text-slate-400 hover:text-jiggy-tan font-bold">
                           <Settings2 className="h-4 w-4 mr-2" />
                           Quarters
                         </Button>

@@ -395,7 +395,7 @@ export function HomeDashboard() {
     return (
       <div className="flex items-center justify-center min-h-[600px]">
         <div className="text-center">
-          <div className="inline-block animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500 mb-4"></div>
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-emerald-400 mb-4"></div>
           <div className="text-slate-400 text-lg">Loading dashboard...</div>
         </div>
       </div>
@@ -585,7 +585,7 @@ export function HomeDashboard() {
                       key={idx}
                       className="flex items-center gap-3 px-3 py-2 rounded-xl bg-emerald-500/10 border border-emerald-500/20 hover:bg-emerald-500/20 transition-all cursor-default hover:scale-105"
                     >
-                      <div className="w-9 h-9 rounded-xl bg-terminal-bg flex items-center justify-center overflow-hidden border border-emerald-500/30">
+                      <div className="w-9 h-9 rounded-xl bg-terminal-bg flex items-center justify-center overflow-hidden border border-emerald-500/30 logo-glow">
                         {logos[item.ticker] ? (
                           <img
                             src={logos[item.ticker]}
@@ -621,7 +621,7 @@ export function HomeDashboard() {
                       key={idx}
                       className="flex items-center gap-3 px-3 py-2 rounded-xl bg-rose-500/10 border border-rose-500/20 hover:bg-rose-500/20 transition-all cursor-default hover:scale-105"
                     >
-                      <div className="w-9 h-9 rounded-xl bg-terminal-bg flex items-center justify-center overflow-hidden border border-rose-500/30">
+                      <div className="w-9 h-9 rounded-xl bg-terminal-bg flex items-center justify-center overflow-hidden border border-rose-500/30 logo-glow">
                         {logos[item.ticker] ? (
                           <img
                             src={logos[item.ticker]}

@@ -30,8 +30,8 @@ export function PerformanceStats({ ytdPerformance, lifetimeCagr, dailyMove }: Pe
       label: "Lifetime CAGR",
       value: lifetimeCagr,
       isPercentage: false, // Already formatted as string
-      icon: <Target className="w-4 h-4 text-purple-400" />,
-      color: "text-purple-400"
+      icon: <Target className="w-4 h-4 text-jiggy-gold" />,
+      color: "text-jiggy-gold"
     }
   ];
 

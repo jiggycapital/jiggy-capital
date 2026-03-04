@@ -176,9 +176,9 @@ export function EarningsResultsTable({
         if (sortKey !== column)
             return <ArrowUpDown className="w-3 h-3 text-slate-600 ml-1 inline" />;
         return sortDirection === "asc" ? (
-            <ArrowUp className="w-3 h-3 text-purple-400 ml-1 inline" />
+            <ArrowUp className="w-3 h-3 text-emerald-400 ml-1 inline" />
         ) : (
-            <ArrowDown className="w-3 h-3 text-purple-400 ml-1 inline" />
+            <ArrowDown className="w-3 h-3 text-emerald-400 ml-1 inline" />
         );
     };
 
@@ -275,7 +275,7 @@ export function EarningsResultsTable({
 
                 {loading ? (
                     <div className="flex flex-col items-center justify-center py-16 text-center space-y-3">
-                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-400" />
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-400" />
                         <p className="text-slate-500 text-sm">
                             Loading earnings data...
                         </p>
@@ -357,7 +357,7 @@ export function EarningsResultsTable({
                                         {/* Company */}
                                         <td className="px-4 py-4 sticky left-0 bg-jiggy-surface group-hover:bg-jiggy-surface/80 border-r border-jiggy-tan/50 z-10">
                                             <div className="flex items-center gap-3">
-                                                <div className="w-10 h-10 rounded-xl bg-terminal-bg flex items-center justify-center shrink-0 border border-slate-700/50 group-hover:border-purple-500/40 transition-colors shadow-sm">
+                                                <div className="w-10 h-10 rounded-xl bg-terminal-bg flex items-center justify-center shrink-0 border border-jiggy-border group-hover:border-emerald-500/40 transition-colors shadow-sm logo-glow">
                                                     {logos[result.ticker] ? (
                                                         <img
                                                             src={logos[result.ticker]}
@@ -372,7 +372,7 @@ export function EarningsResultsTable({
                                                 </div>
                                                 <div>
                                                     <div className="flex items-center gap-1.5">
-                                                        <span className="text-xs font-bold text-slate-100 group-hover:text-purple-300 transition-colors">
+                                                        <span className="text-xs font-bold text-slate-100 group-hover:text-emerald-300 transition-colors">
                                                             {result.ticker}
                                                         </span>
                                                         <span

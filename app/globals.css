@@ -4,54 +4,31 @@
   --font-sans: var(--font-sans);
   --font-mono: var(--font-mono);
 
-  --color-background: 0 0% 100%;
+  /* Dark-mode-only site — use dark values as defaults */
+  --color-background: 160 20% 15%;
+  /* #1e2c28 */
   --color-foreground: 160 10% 98%;
-  --color-card: 0 0% 100%;
-  --color-card-foreground: 160 50% 10%;
-  --color-popover: 0 0% 100%;
-  --color-popover-foreground: 160 50% 10%;
-  --color-primary: 160 60% 30%;
-  --color-primary-foreground: 160 10% 98%;
-  --color-secondary: 160 30% 90%;
-  --color-secondary-foreground: 160 60% 30%;
-  --color-muted: 160 20% 90%;
-  --color-muted-foreground: 160 15% 45%;
+  --color-card: 160 25% 18%;
+  /* #22352f */
+  --color-card-foreground: 160 10% 98%;
+  --color-popover: 160 25% 18%;
+  --color-popover-foreground: 160 10% 98%;
+  --color-primary: 140 70% 50%;
+  /* Vibrant mint green */
+  --color-primary-foreground: 160 50% 10%;
+  --color-secondary: 160 20% 25%;
+  /* Slightly lighter card */
+  --color-secondary-foreground: 160 10% 98%;
+  --color-muted: 160 20% 25%;
+  --color-muted-foreground: 160 15% 65%;
   --color-accent: 140 70% 50%;
   --color-accent-foreground: 160 50% 10%;
-  --color-destructive: 0 84.2% 60.2%;
+  --color-destructive: 0 62.8% 30.6%;
   --color-destructive-foreground: 160 10% 98%;
-  --color-border: 160 20% 85%;
-  --color-input: 160 20% 85%;
+  --color-border: 160 20% 25%;
+  --color-input: 160 20% 25%;
   --color-ring: 140 70% 50%;
   --radius: 1rem;
-}
-
-@media (prefers-color-scheme: dark) {
-  @theme {
-    --color-background: 160 20% 15%;
-    /* #1e2c28 */
-    --color-foreground: 160 10% 98%;
-    --color-card: 160 25% 18%;
-    /* #22352f */
-    --color-card-foreground: 160 10% 98%;
-    --color-popover: 160 25% 18%;
-    --color-popover-foreground: 160 10% 98%;
-    --color-primary: 140 70% 50%;
-    /* Vibrant mint green */
-    --color-primary-foreground: 160 50% 10%;
-    --color-secondary: 160 20% 25%;
-    /* Slightly lighter card */
-    --color-secondary-foreground: 160 10% 98%;
-    --color-muted: 160 20% 25%;
-    --color-muted-foreground: 160 15% 65%;
-    --color-accent: 140 70% 50%;
-    --color-accent-foreground: 160 50% 10%;
-    --color-destructive: 0 62.8% 30.6%;
-    --color-destructive-foreground: 160 10% 98%;
-    --color-border: 160 20% 25%;
-    --color-input: 160 20% 25%;
-    --color-ring: 140 70% 50%;
-  }
 }
 
 html {
@@ -68,6 +45,15 @@ body {
   font-feature-settings: "rlig" 1, "calt" 1;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* Force all borders to default to the dark jiggy border color,
+   not currentColor (which inherits near-white text color in dark mode).
+   This fixes Tailwind v4's divide-y and border-b rendering as white. */
+*,
+::before,
+::after {
+  border-color: #31403b;
 }
 
 @keyframes auroraBG {
@@ -364,6 +350,18 @@ div:focus {
   transform: scale(1.08) rotate(-2deg);
   /* playful tilt */
   border-color: #78e08f40;
+}
+
+/* Logo glow ring — use on logo container divs for that "alive" feel */
+.logo-glow {
+  transition: box-shadow 0.25s ease, border-color 0.25s ease, transform 0.2s ease;
+}
+
+.logo-glow:hover,
+.group:hover .logo-glow {
+  box-shadow: 0 0 14px rgba(16, 185, 129, 0.35), 0 0 4px rgba(120, 224, 143, 0.2);
+  border-color: rgba(16, 185, 129, 0.5) !important;
+  transform: scale(1.05);
 }
 
 /* Smooth sidebar link underline reveal */

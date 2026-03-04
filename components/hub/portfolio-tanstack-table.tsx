@@ -129,7 +129,7 @@ export function PortfolioTanStackTable({ positionsData, logos: initialLogos }: P
         accessorKey: "ticker",
         header: ({ column }) => (
           <div
-            className="flex items-center gap-1 cursor-pointer select-none text-slate-300 font-bold uppercase tracking-wider text-[11px] hover:text-white transition-colors whitespace-normal leading-tight"
+            className="flex items-center gap-1 cursor-pointer select-none text-slate-300 font-bold uppercase tracking-wider text-[11px] hover:text-jiggy-tan transition-colors whitespace-normal leading-tight"
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           >
             Company
@@ -143,7 +143,7 @@ export function PortfolioTanStackTable({ positionsData, logos: initialLogos }: P
           const { ticker, name, isCash } = row.original;
           return (
             <div className="flex items-center gap-2.5">
-              <div className="w-10 h-10 rounded-xl bg-jiggy-surface-2 flex items-center justify-center overflow-hidden shrink-0 border border-jiggy-border shadow-sm">
+              <div className="w-10 h-10 rounded-xl bg-jiggy-surface-2 flex items-center justify-center overflow-hidden shrink-0 border border-jiggy-border shadow-sm logo-glow">
                 {isCash ? (
                   <Wallet className="w-4 h-4 text-emerald-400" />
                 ) : logos[ticker] ? (
@@ -164,7 +164,7 @@ export function PortfolioTanStackTable({ positionsData, logos: initialLogos }: P
         accessorKey: "price",
         header: ({ column }) => (
           <div
-            className="flex items-center justify-end gap-1 cursor-pointer select-none text-slate-300 font-bold uppercase tracking-wider text-[11px] hover:text-white transition-colors whitespace-normal leading-tight text-right"
+            className="flex items-center justify-end gap-1 cursor-pointer select-none text-slate-300 font-bold uppercase tracking-wider text-[11px] hover:text-jiggy-tan transition-colors whitespace-normal leading-tight text-right"
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           >
             Price
@@ -178,7 +178,7 @@ export function PortfolioTanStackTable({ positionsData, logos: initialLogos }: P
           const { isCash, price } = row.original;
           if (isCash) return null;
           return (
-            <div className="text-right font-mono text-[13px] text-slate-300">
+            <div className="text-right font-mono text-[13px] text-slate-400">
               {formatCurrency(price)}
             </div>
           );
@@ -188,7 +188,7 @@ export function PortfolioTanStackTable({ positionsData, logos: initialLogos }: P
         accessorKey: "marketCap",
         header: ({ column }) => (
           <div
-            className="flex items-center justify-end gap-1 cursor-pointer select-none text-slate-300 font-bold uppercase tracking-wider text-[11px] hover:text-white transition-colors whitespace-normal leading-tight text-right max-w-[50px]"
+            className="flex items-center justify-end gap-1 cursor-pointer select-none text-slate-400 font-bold uppercase tracking-wider text-[11px] hover:text-jiggy-tan transition-colors whitespace-normal leading-tight text-right max-w-[50px]"
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           >
             Mkt Cap
@@ -202,7 +202,7 @@ export function PortfolioTanStackTable({ positionsData, logos: initialLogos }: P
           const { isCash, marketCap } = row.original;
           if (isCash || !marketCap) return null;
           return (
-            <div className="text-right font-mono text-[13px] text-slate-300">
+            <div className="text-right font-mono text-[13px] text-slate-400">
               {formatCurrencyBillions(marketCap)}
             </div>
           );
@@ -212,7 +212,7 @@ export function PortfolioTanStackTable({ positionsData, logos: initialLogos }: P
         accessorKey: "weight",
         header: ({ column }) => (
           <div
-            className="flex items-center justify-end gap-1 cursor-pointer select-none text-slate-300 font-bold uppercase tracking-wider text-[11px] hover:text-white transition-colors whitespace-normal leading-tight text-right"
+            className="flex items-center justify-end gap-1 cursor-pointer select-none text-slate-400 font-bold uppercase tracking-wider text-[11px] hover:text-jiggy-tan transition-colors whitespace-normal leading-tight text-right"
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           >
             Weight
@@ -223,7 +223,7 @@ export function PortfolioTanStackTable({ positionsData, logos: initialLogos }: P
           </div>
         ),
         cell: ({ row }) => (
-          <div className="text-right font-mono text-[13px] font-bold text-blue-400">
+          <div className="text-right font-mono text-[13px] font-bold text-jiggy-gold">
             {(row.getValue("weight") as number).toFixed(1)}%
           </div>
         ),
@@ -232,7 +232,7 @@ export function PortfolioTanStackTable({ positionsData, logos: initialLogos }: P
         accessorKey: "firstBuy",
         header: ({ column }) => (
           <div
-            className="flex items-center justify-end gap-1 cursor-pointer select-none text-slate-300 font-bold uppercase tracking-wider text-[11px] hover:text-white transition-colors whitespace-normal leading-tight text-right max-w-[50px]"
+            className="flex items-center justify-end gap-1 cursor-pointer select-none text-slate-400 font-bold uppercase tracking-wider text-[11px] hover:text-jiggy-tan transition-colors whitespace-normal leading-tight text-right max-w-[50px]"
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           >
             First Buy
@@ -250,7 +250,7 @@ export function PortfolioTanStackTable({ positionsData, logos: initialLogos }: P
       },
       {
         id: "sparkline",
-        header: () => <div className="text-center text-slate-300 font-bold uppercase tracking-wider text-[11px]">90D Trend</div>,
+        header: () => <div className="text-center text-slate-400 font-bold uppercase tracking-wider text-[11px]">90D Trend</div>,
         cell: ({ row }) => {
           const { ticker, isCash } = row.original;
           if (isCash) return null;
@@ -266,7 +266,7 @@ export function PortfolioTanStackTable({ positionsData, logos: initialLogos }: P
         accessorKey: "dailyChange",
         header: ({ column }) => (
           <div
-            className="flex items-center justify-end gap-1 cursor-pointer select-none text-slate-300 font-bold uppercase tracking-wider text-[11px] hover:text-white transition-colors whitespace-normal leading-tight text-right"
+            className="flex items-center justify-end gap-1 cursor-pointer select-none text-slate-400 font-bold uppercase tracking-wider text-[11px] hover:text-jiggy-tan transition-colors whitespace-normal leading-tight text-right"
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           >
             Daily
@@ -293,7 +293,7 @@ export function PortfolioTanStackTable({ positionsData, logos: initialLogos }: P
         accessorKey: "ytdGain",
         header: ({ column }) => (
           <div
-            className="flex items-center justify-end gap-1 cursor-pointer select-none text-slate-300 font-bold uppercase tracking-wider text-[11px] hover:text-white transition-colors whitespace-normal leading-tight text-right"
+            className="flex items-center justify-end gap-1 cursor-pointer select-none text-slate-400 font-bold uppercase tracking-wider text-[11px] hover:text-jiggy-tan transition-colors whitespace-normal leading-tight text-right"
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           >
             YTD
@@ -327,7 +327,7 @@ export function PortfolioTanStackTable({ positionsData, logos: initialLogos }: P
         },
         header: ({ column }) => (
           <div
-            className="flex items-center justify-end gap-1 cursor-pointer select-none text-slate-300 font-bold uppercase tracking-wider text-[11px] hover:text-white transition-colors whitespace-normal leading-tight text-right"
+            className="flex items-center justify-end gap-1 cursor-pointer select-none text-slate-400 font-bold uppercase tracking-wider text-[11px] hover:text-jiggy-tan transition-colors whitespace-normal leading-tight text-right"
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           >
             200D
@@ -372,7 +372,7 @@ export function PortfolioTanStackTable({ positionsData, logos: initialLogos }: P
           const { isCash, revCagr } = row.original;
           if (isCash) return null;
           return (
-            <div className="text-right font-mono text-[13px] text-slate-300">
+            <div className="text-right font-mono text-[13px] text-slate-400">
               {typeof revCagr === 'number' ? formatPercentage(revCagr) : (revCagr || "-")}
             </div>
           );
@@ -403,7 +403,7 @@ export function PortfolioTanStackTable({ positionsData, logos: initialLogos }: P
           const { isCash, fcfMultiple } = row.original;
           if (isCash) return null;
           return (
-            <div className="text-right font-mono text-[13px] text-slate-300">
+            <div className="text-right font-mono text-[13px] text-slate-400">
               {typeof fcfMultiple === 'number' ? `${fcfMultiple.toFixed(1)}x` : (fcfMultiple || "-")}
             </div>
           );
@@ -434,7 +434,7 @@ export function PortfolioTanStackTable({ positionsData, logos: initialLogos }: P
           const { isCash, peMultiple } = row.original;
           if (isCash) return null;
           return (
-            <div className="text-right font-mono text-[13px] text-slate-300">
+            <div className="text-right font-mono text-[13px] text-slate-400">
               {typeof peMultiple === 'number' ? `${peMultiple.toFixed(1)}x` : (peMultiple || "-")}
             </div>
           );
@@ -451,7 +451,7 @@ export function PortfolioTanStackTable({ positionsData, logos: initialLogos }: P
         },
         header: ({ column }) => (
           <div
-            className="flex items-center justify-end gap-1 cursor-pointer select-none text-slate-300 font-bold uppercase tracking-wider text-[11px] hover:text-white transition-colors whitespace-normal leading-tight text-right"
+            className="flex items-center justify-end gap-1 cursor-pointer select-none text-slate-300 font-bold uppercase tracking-wider text-[11px] hover:text-jiggy-tan transition-colors whitespace-normal leading-tight text-right"
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           >
             P/E/G
@@ -523,7 +523,7 @@ export function PortfolioTanStackTable({ positionsData, logos: initialLogos }: P
                     <TableCell
                       key={cell.id}
                       className={`py-3 ${cell.column.id === 'ticker'
-                        ? 'sticky left-0 bg-terminal-bg z-10 border-r border-jiggy-border min-w-[140px] max-w-[170px] md:min-w-[200px]'
+                        ? 'sticky left-0 bg-jiggy-surface z-10 border-r border-jiggy-tan/50 min-w-[140px] max-w-[170px] md:min-w-[200px]'
                         : ''
                         }`}
                     >

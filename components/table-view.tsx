@@ -324,9 +324,9 @@ export function TableView() {
           <div className="px-6 py-5 bg-jiggy-surface border-b border-jiggy-tan/50 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 sm:gap-0">
             <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as any)} className="w-auto">
               <TabsList className="bg-[#0B0F19]/80 backdrop-blur-md border border-slate-800/60 p-1.5 rounded-2xl shadow-inner">
-                <TabsTrigger value="positions" className="data-[state=active]:bg-emerald-400 data-[state=active]:text-slate-950 text-xs sm:text-sm uppercase tracking-wider font-black px-6 py-2 rounded-xl text-slate-500 hover:text-slate-300 transition-all">Holdings</TabsTrigger>
-                <TabsTrigger value="watchlist" className="data-[state=active]:bg-emerald-400 data-[state=active]:text-slate-950 text-xs sm:text-sm uppercase tracking-wider font-black px-6 py-2 rounded-xl text-slate-500 hover:text-slate-300 transition-all">Watchlist</TabsTrigger>
-                <TabsTrigger value="combined" className="data-[state=active]:bg-emerald-400 data-[state=active]:text-slate-950 text-xs sm:text-sm uppercase tracking-wider font-black px-6 py-2 rounded-xl text-slate-500 hover:text-slate-300 transition-all">Combined</TabsTrigger>
+                <TabsTrigger value="positions" className="data-[state=active]:bg-emerald-400 data-[state=active]:text-slate-950 text-xs sm:text-sm uppercase tracking-wider font-black px-6 py-2 rounded-xl text-slate-500 hover:text-slate-400 transition-all">Holdings</TabsTrigger>
+                <TabsTrigger value="watchlist" className="data-[state=active]:bg-emerald-400 data-[state=active]:text-slate-950 text-xs sm:text-sm uppercase tracking-wider font-black px-6 py-2 rounded-xl text-slate-500 hover:text-slate-400 transition-all">Watchlist</TabsTrigger>
+                <TabsTrigger value="combined" className="data-[state=active]:bg-emerald-400 data-[state=active]:text-slate-950 text-xs sm:text-sm uppercase tracking-wider font-black px-6 py-2 rounded-xl text-slate-500 hover:text-slate-400 transition-all">Combined</TabsTrigger>
               </TabsList>
             </Tabs>
             <div className="text-[10px] font-black tracking-widest uppercase text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-3 py-1.5 rounded-lg shadow-sm">
@@ -442,15 +442,15 @@ function formatCellValue(value: string, columnKey: string, isNumeric: boolean, c
       return <span className={cn("font-mono font-bold text-[13px] tracking-tight", num >= 0 ? "text-jiggy-neon" : "text-rose-400")}>{formatPercentage(num)}</span>;
     }
     if (cat.includes("multiples") || col.includes("p/e") || col.includes("p/fcf") || col.includes("peg")) {
-      return <span className="font-mono text-slate-300 text-[13px] tracking-tight">{num.toFixed(1)}x</span>;
+      return <span className="font-mono text-slate-400 text-[13px] tracking-tight">{num.toFixed(1)}x</span>;
     }
     if (col.includes("market cap") || col.includes("ev")) {
       let normalizedNum = num;
       if (normalizedNum > 10000) normalizedNum = normalizedNum / 1000;
-      return <span className="font-mono text-slate-300 text-[13px] tracking-tight">{formatCurrencyBillions(normalizedNum)}</span>;
+      return <span className="font-mono text-slate-400 text-[13px] tracking-tight">{formatCurrencyBillions(normalizedNum)}</span>;
     }
-    if (col.includes("price")) return <span className="font-mono text-slate-300 text-[13px] tracking-tight">{formatCurrency(num)}</span>;
-    return <span className="font-mono text-slate-300 text-[13px] tracking-tight">{formatNumber(num)}</span>;
+    if (col.includes("price")) return <span className="font-mono text-slate-400 text-[13px] tracking-tight">{formatCurrency(num)}</span>;
+    return <span className="font-mono text-slate-400 text-[13px] tracking-tight">{formatNumber(num)}</span>;
   }
   return <span className="text-slate-400 text-xs text-[13px] tracking-tight">{value}</span>;
 }

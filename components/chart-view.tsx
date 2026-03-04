@@ -189,7 +189,7 @@ export function ChartView() {
   if (error) return <div className="flex items-center justify-center min-h-[400px] text-red-400">Error: {error}</div>;
 
   return (
-    <div className="flex flex-col h-[calc(100vh-[var(--header-height)])] -m-6 sm:-m-8">
+    <div className="flex flex-col h-[calc(100vh-[var(--header-height)])]">
       {/* Top Control Bar - Glassmorphic Toolbar */}
       <div className="shrink-0 bg-[#0B0F19]/90 backdrop-blur-xl border-b border-jiggy-border shadow-2xl z-20">
         <div className="px-6 py-3 flex flex-col md:flex-row items-center justify-between gap-4">

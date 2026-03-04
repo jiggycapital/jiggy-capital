@@ -277,15 +277,15 @@ export function StockScreener({
             return <div className={cn("font-mono font-bold", numVal >= 0 ? "text-jiggy-neon" : "text-rose-400")}>{formatPercentage(numVal)}</div>;
           }
           if (cat.includes("multiples") || key.includes("P/E") || key.includes("P/FCF") || key.includes("PEG")) {
-            return <div className="font-mono text-slate-300">{numVal.toFixed(1)}x</div>;
+            return <div className="font-mono text-slate-400">{numVal.toFixed(1)}x</div>;
           }
           if (key.toLowerCase().includes("market cap") || key.toLowerCase().includes("ev")) {
             let normalizedNum = numVal;
             if (normalizedNum > 10000) normalizedNum = normalizedNum / 1000;
-            return <div className="font-mono text-slate-300">{formatCurrencyBillions(normalizedNum)}</div>;
+            return <div className="font-mono text-slate-400">{formatCurrencyBillions(normalizedNum)}</div>;
           }
-          if (key.toLowerCase().includes("price")) return <div className="font-mono text-slate-300">{formatCurrency(numVal)}</div>;
-          return <div className="font-mono text-slate-300">{val}</div>;
+          if (key.toLowerCase().includes("price")) return <div className="font-mono text-slate-400">{formatCurrency(numVal)}</div>;
+          return <div className="font-mono text-slate-400">{val}</div>;
         }
         return <div className="text-slate-400 text-xs truncate max-w-[120px] font-mono">{val || "-"}</div>;
       },
@@ -353,12 +353,12 @@ export function StockScreener({
           {favorites.length > 0 && (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="outline" className="bg-[#1e293b] border-slate-700 text-slate-300">
+                <Button variant="outline" className="bg-jiggy-surface border-jiggy-border text-slate-400">
                   <Star className="h-4 w-4 mr-2" />
                   My Saved Screens
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent className="bg-jiggy-surface-2 border-jiggy-border text-white w-56 rounded-xl">
+              <DropdownMenuContent className="bg-jiggy-surface-2 border-jiggy-border text-slate-200 w-56 rounded-xl">
                 {favorites.map(f => (
                   <DropdownMenuItem key={f.id} onClick={() => handleApplyScreen(f)} className="flex items-center justify-between cursor-pointer group focus:bg-emerald-500/10 focus:text-emerald-400 rounded-lg">
                     <span>{f.name}</span>
@@ -402,7 +402,7 @@ export function StockScreener({
               <div className="space-y-2">
                 <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest px-1">Sector / Industry</label>
                 <select
-                  className="w-full h-11 bg-terminal-bg border border-slate-800 rounded-xl px-4 text-sm text-slate-300 focus:outline-none focus:border-emerald-500/50 appearance-none cursor-pointer"
+                  className="w-full h-11 bg-terminal-bg border border-jiggy-border rounded-xl px-4 text-sm text-slate-400 focus:outline-none focus:border-emerald-500/50 appearance-none cursor-pointer"
                   value={selectedSector}
                   onChange={(e) => setSelectedSector(e.target.value)}
                 >

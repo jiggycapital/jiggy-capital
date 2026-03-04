@@ -187,8 +187,8 @@ export function NewsFeed({ portfolioData, logos, className }: NewsFeedProps) {
   }, [portfolioData]);
 
   return (
-    <Card className={`bg-jiggy-surface border-jiggy-border overflow-hidden flex flex-col shadow-2xl rounded-2xl ${className || 'h-[750px]'}`}>
-      <CardHeader className="py-4 border-b border-jiggy-border shrink-0 bg-jiggy-surface-2">
+    <Card className={`bg-jiggy-surface border border-jiggy-tan/50 overflow-hidden flex flex-col shadow-2xl rounded-2xl ${className || 'h-[750px]'}`}>
+      <CardHeader className="py-4 border-b border-jiggy-tan/50 shrink-0 bg-jiggy-surface-2">
         <CardTitle className="text-sm font-bold flex items-center justify-between text-slate-100 uppercase tracking-wider">
           <div className="flex items-center gap-2">
             <Newspaper className="w-5 h-5 text-jiggy-gold" />
@@ -217,7 +217,7 @@ export function NewsFeed({ portfolioData, logos, className }: NewsFeedProps) {
             {news.map((item) => (
               <div key={item.id} className="p-4 hover:bg-jiggy-surface-2 transition-all flex gap-4 group relative overflow-hidden">
                 <div className="shrink-0 flex flex-col items-center gap-1.5 relative z-10">
-                  <div className="w-12 h-12 rounded-xl bg-terminal-bg flex items-center justify-center shrink-0 border border-jiggy-border shadow-xl group-hover:border-jiggy-gold/40 transition-all transform group-hover:scale-105">
+                  <div className="w-12 h-12 rounded-xl bg-terminal-bg flex items-center justify-center shrink-0 border border-jiggy-tan/50 shadow-xl group-hover:border-jiggy-gold/40 transition-all transform group-hover:scale-105 logo-glow">
                     {logos[item.ticker] ? (
                       <img src={logos[item.ticker]} alt={item.ticker} className="w-8 h-8 object-contain drop-shadow-sm" />
                     ) : (

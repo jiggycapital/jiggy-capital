@@ -19,6 +19,7 @@ import {
   Mic,
   Eye,
   Newspaper,
+  CandlestickChart,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -47,6 +48,7 @@ export function Sidebar() {
     {
       label: "Research",
       items: [
+        { title: "Trading", href: "/trading", icon: CandlestickChart },
         { title: "Charts", href: "/chart", icon: BarChart3 },
         { title: "Screener", href: "/screener", icon: Filter },
         { title: "Deep Research", href: "/deep-research", icon: Database },

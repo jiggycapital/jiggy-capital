@@ -87,7 +87,7 @@ export function WatchlistTable({ watchlistData, logos }: WatchlistTableProps) {
                     </div>
                   </div>
                 </TableCell>
-                <TableCell className="text-right font-mono text-sm text-slate-300">
+                <TableCell className="text-right font-mono text-sm text-slate-400">
                   {formatCurrency(row.price)}
                 </TableCell>
                 {renderChangeCell(row.change)}

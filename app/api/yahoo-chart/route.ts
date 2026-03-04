@@ -36,22 +36,41 @@ export async function GET(req: NextRequest) {
             return NextResponse.json({ error: "No data returned" }, { status: 404 });
         }
 
-        // Extract just the closing prices for sparklines
-        const closes = result.indicators?.quote?.[0]?.close || [];
-        const timestamps = result.timestamp || [];
+        // Extract OHLCV data
+        const quote = result.indicators?.quote?.[0] || {};
+        const closes = quote.close || [];
+        const opens = quote.open || [];
+        const highs = quote.high || [];
+        const lows = quote.low || [];
+        const volumes = quote.volume || [];
+        const rawTimestamps = result.timestamp || [];
 
-        // Filter out null values
+        // Filter out null values, keeping arrays aligned
         const prices: number[] = [];
+        const openPrices: number[] = [];
+        const highPrices: number[] = [];
+        const lowPrices: number[] = [];
+        const timestamps: number[] = [];
+        const volumeData: number[] = [];
         for (let i = 0; i < closes.length; i++) {
             if (closes[i] !== null && closes[i] !== undefined) {
                 prices.push(closes[i]);
+                openPrices.push(opens[i] ?? closes[i]);
+                highPrices.push(highs[i] ?? closes[i]);
+                lowPrices.push(lows[i] ?? closes[i]);
+                timestamps.push(rawTimestamps[i] || 0);
+                volumeData.push(volumes[i] || 0);
             }
         }
 
         return NextResponse.json({
             symbol: result.meta?.symbol || symbol,
             prices,
+            opens: openPrices,
+            highs: highPrices,
+            lows: lowPrices,
             timestamps,
+            volumes: volumeData,
         });
     } catch (error) {
         console.error("Yahoo Finance proxy error:", error);
