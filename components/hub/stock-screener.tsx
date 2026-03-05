@@ -336,26 +336,27 @@ export function StockScreener({
   };
 
   return (
-    <div className="space-y-8 max-w-[1600px] mx-auto pb-20">
+    <div className="space-y-4 md:space-y-8 max-w-[1600px] mx-auto pb-20 px-1.5 md:px-0">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <div className="p-3.5 rounded-2xl bg-emerald-500/20 border border-emerald-500/30 shadow-sm">
-            <SlidersHorizontal className="h-6 w-6 text-emerald-400" />
+      <div className="flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2 md:gap-4">
+          <div className="p-2 md:p-3.5 rounded-xl md:rounded-2xl bg-emerald-500/20 border border-emerald-500/30 shadow-sm">
+            <SlidersHorizontal className="h-4 w-4 md:h-6 md:w-6 text-emerald-400" />
           </div>
           <div>
-            <h1 className="text-3xl font-black text-slate-100 tracking-tighter italic uppercase">Stock Screener</h1>
-            <p className="text-slate-500 font-bold tracking-widest text-[10px] uppercase mt-1">Custom screens across {tableData.length} global securities</p>
+            <h1 className="text-lg md:text-3xl font-black text-slate-100 tracking-tighter italic uppercase">Screener</h1>
+            <p className="text-slate-500 font-bold tracking-widest text-[9px] md:text-[10px] uppercase mt-0.5 md:mt-1">{tableData.length} securities</p>
           </div>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 md:gap-3">
           {favorites.length > 0 && (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="outline" className="bg-jiggy-surface border-jiggy-border text-slate-400">
-                  <Star className="h-4 w-4 mr-2" />
-                  My Saved Screens
+                <Button variant="outline" size="sm" className="bg-jiggy-surface border-jiggy-border text-slate-400 h-8 md:h-9 px-2 md:px-3 text-[10px] md:text-xs">
+                  <Star className="h-3.5 w-3.5 mr-1 md:mr-2" />
+                  <span className="hidden sm:inline">Saved Screens</span>
+                  <span className="sm:hidden">Saved</span>
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent className="bg-jiggy-surface-2 border-jiggy-border text-slate-200 w-56 rounded-xl">
@@ -368,24 +369,25 @@ export function StockScreener({
               </DropdownMenuContent>
             </DropdownMenu>
           )}
-          <Button onClick={() => setIsSaving(true)} variant="outline" className="bg-terminal-bg border-jiggy-border text-emerald-500 hover:text-emerald-400 hover:bg-emerald-500/10 font-black tracking-widest uppercase text-[10px] rounded-xl">
-            <Star className="h-4 w-4 mr-2" />
-            Save View
+          <Button onClick={() => setIsSaving(true)} variant="outline" size="sm" className="bg-terminal-bg border-jiggy-border text-emerald-500 hover:text-emerald-400 hover:bg-emerald-500/10 font-black tracking-widest uppercase text-[10px] rounded-xl h-8 md:h-9 px-2 md:px-3">
+            <Star className="h-3.5 w-3.5 mr-1 md:mr-2" />
+            <span className="hidden sm:inline">Save View</span>
+            <span className="sm:hidden">Save</span>
           </Button>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-3 md:gap-8">
         {/* Creation perspective - Sidebar-style filters */}
-        <div className="lg:col-span-4 space-y-6">
+        <div className="lg:col-span-4 space-y-3 md:space-y-6">
           {/* STEP 1: Universe */}
-          <div className="space-y-4">
+          <div className="space-y-2 md:space-y-4">
             <div className="flex items-center gap-2">
               <div className="flex items-center justify-center w-6 h-6 rounded-lg bg-emerald-500/20 border border-emerald-500/30 text-[10px] font-black text-emerald-400">1</div>
               <h2 className="text-sm font-black text-slate-200 uppercase tracking-widest">Define your universe</h2>
             </div>
 
-            <div className="bg-jiggy-surface border border-jiggy-border rounded-2xl p-5 space-y-4 shadow-xl">
+            <div className="bg-jiggy-surface border border-jiggy-border rounded-xl md:rounded-2xl p-3 md:p-5 space-y-3 md:space-y-4 shadow-xl">
               <div className="space-y-2">
                 <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest px-1">Ticker Search</label>
                 <div className="relative">
@@ -416,14 +418,14 @@ export function StockScreener({
           </div>
 
           {/* STEP 2: Criteria */}
-          <div className="space-y-4">
+          <div className="space-y-2 md:space-y-4">
             <div className="flex items-center gap-2">
               <div className="flex items-center justify-center w-6 h-6 rounded-lg bg-emerald-500/20 border border-emerald-500/30 text-[10px] font-black text-emerald-400">2</div>
               <h2 className="text-sm font-black text-slate-200 uppercase tracking-widest">Filter Results</h2>
             </div>
 
-            <div className="bg-jiggy-surface border border-jiggy-border rounded-2xl p-2 space-y-1 shadow-xl overflow-hidden">
-              <div className="max-h-[500px] overflow-y-auto p-3 space-y-3 custom-scrollbar">
+            <div className="bg-jiggy-surface border border-jiggy-border rounded-xl md:rounded-2xl p-2 space-y-1 shadow-xl overflow-hidden">
+              <div className="max-h-[400px] md:max-h-[500px] overflow-y-auto p-2 md:p-3 space-y-2 md:space-y-3 custom-scrollbar">
                 {activeFilters.map((filter) => {
                   const isNumeric = rowHasNumericVal(tableData, filter.key);
                   return (
@@ -513,10 +515,10 @@ export function StockScreener({
         </div>
 
         {/* Results Section */}
-        <div className="lg:col-span-8 space-y-4">
-          <div className="flex items-center justify-between px-2">
-            <div className="flex items-center gap-4">
-              <h2 className="text-sm font-black text-slate-400 uppercase tracking-widest italic">Screener Results</h2>
+        <div className="lg:col-span-8 space-y-2 md:space-y-4">
+          <div className="flex items-center justify-between px-1 md:px-2">
+            <div className="flex items-center gap-2 md:gap-4">
+              <h2 className="text-xs md:text-sm font-black text-slate-400 uppercase tracking-widest italic">Results</h2>
               <Badge variant="outline" className="bg-emerald-500/10 border-emerald-500/20 text-emerald-400 font-mono text-[10px]">
                 {filteredData.length} Matches
               </Badge>
@@ -535,7 +537,9 @@ export function StockScreener({
             </Button>
           </div>
 
-          <div className="rounded-2xl border border-jiggy-tan/50 bg-jiggy-surface-2 overflow-hidden shadow-2xl">
+          <div className="rounded-xl md:rounded-2xl border border-jiggy-tan/50 bg-jiggy-surface-2 overflow-hidden shadow-2xl relative">
+            {/* Scroll hint gradient on mobile */}
+            <div className="md:hidden absolute top-0 right-0 bottom-0 w-5 bg-gradient-to-l from-[#2b3a35] to-transparent pointer-events-none z-20" />
             <div className="overflow-x-auto relative">
               <Table>
                 <TableHeader className="bg-jiggy-surface border-b border-jiggy-tan/50 sticky top-0 z-10">

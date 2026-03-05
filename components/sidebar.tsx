@@ -73,26 +73,6 @@ export function Sidebar() {
 
   return (
     <>
-      {/* Mobile Menu Button */}
-      <div className="fixed top-4 left-4 z-50 md:hidden">
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => setIsMobileOpen(!isMobileOpen)}
-          className="bg-jiggy-surface border border-jiggy-border text-slate-100 hover:bg-jiggy-surface-2"
-        >
-          {isMobileOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-        </Button>
-      </div>
-
-      {/* Mobile Overlay */}
-      {isMobileOpen && (
-        <div
-          className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm md:hidden"
-          onClick={() => setIsMobileOpen(false)}
-        />
-      )}
-
       {/* Sidebar */}
       <aside
         className={cn(

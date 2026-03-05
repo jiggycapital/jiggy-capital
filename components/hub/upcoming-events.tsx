@@ -116,11 +116,11 @@ export function UpcomingEvents({ portfolioTickers, logos, irLinks, className }: 
   }, [portfolioTickers, irLinks]);
 
   return (
-    <Card className={`bg-jiggy-surface border border-jiggy-tan/50 overflow-hidden flex flex-col shadow-2xl rounded-2xl ${className || 'h-[750px]'}`}>
-      <CardHeader className="py-4 border-b border-jiggy-tan/50 shrink-0 bg-jiggy-surface-2">
-        <CardTitle className="text-sm font-bold flex items-center justify-between text-slate-100 uppercase tracking-wider">
+    <Card className={`bg-jiggy-surface border border-jiggy-tan/50 overflow-hidden flex flex-col shadow-2xl rounded-xl md:rounded-2xl ${className || 'h-[400px] md:h-[750px]'}`}>
+      <CardHeader className="py-2 md:py-4 border-b border-jiggy-tan/50 shrink-0 bg-jiggy-surface-2 px-3 md:px-6">
+        <CardTitle className="text-xs md:text-sm font-bold flex items-center justify-between text-slate-100 uppercase tracking-wider">
           <div className="flex items-center gap-2">
-            <Calendar className="w-5 h-5 text-jiggy-gold" />
+            <Calendar className="w-4 h-4 md:w-5 md:h-5 text-jiggy-gold" />
             Upcoming Events
           </div>
           <span className="text-[10px] text-slate-600 lowercase font-semibold">updated 24h</span>
@@ -139,31 +139,31 @@ export function UpcomingEvents({ portfolioTickers, logos, irLinks, className }: 
         ) : (
           <div className="divide-y divide-jiggy-border border-t border-jiggy-border overflow-y-auto flex-1 custom-scrollbar">
             {events.map((event, i) => (
-              <div key={`${event.ticker}-${i}`} className="p-4 hover:bg-jiggy-surface-2 transition-all flex items-center justify-between group">
-                <div className="flex items-center gap-4 min-w-0">
+              <div key={`${event.ticker}-${i}`} className="p-2 md:p-4 hover:bg-jiggy-surface-2 active:bg-jiggy-surface-2/50 transition-all flex items-center justify-between group">
+                <div className="flex items-center gap-2 md:gap-4 min-w-0">
                   <div className="relative">
-                    <div className="w-12 h-12 rounded-xl bg-terminal-bg flex items-center justify-center shrink-0 border border-jiggy-tan/50 shadow-inner group-hover:border-jiggy-gold/40 transition-colors logo-glow">
+                    <div className="w-8 h-8 md:w-12 md:h-12 rounded-lg md:rounded-xl bg-terminal-bg flex items-center justify-center shrink-0 border border-jiggy-tan/50 shadow-inner group-hover:border-jiggy-gold/40 transition-colors logo-glow">
                       {logos[event.ticker] ? (
-                        <img src={logos[event.ticker]} alt={event.ticker} className="w-8 h-8 object-contain drop-shadow-sm" />
+                        <img src={logos[event.ticker]} alt={event.ticker} className="w-5 h-5 md:w-8 md:h-8 object-contain drop-shadow-sm" />
                       ) : (
                         <span className="text-[10px] font-bold text-slate-500">{event.ticker}</span>
                       )}
                     </div>
                   </div>
                   <div className="min-w-0">
-                    <div className="flex items-center gap-2 mb-0.5">
-                      <span className="text-sm font-extrabold text-slate-100 group-hover:text-jiggy-gold transition-colors">{event.ticker}</span>
-                      <span className="text-[9px] font-black px-1.5 py-0.5 rounded tracking-tighter uppercase border bg-jiggy-gold/10 text-jiggy-gold border-jiggy-gold/20">
+                    <div className="flex items-center gap-1.5 md:gap-2 mb-0.5">
+                      <span className="text-xs md:text-sm font-extrabold text-slate-100 group-hover:text-jiggy-gold transition-colors">{event.ticker}</span>
+                      <span className="text-[8px] md:text-[9px] font-black px-1 md:px-1.5 py-0.5 rounded tracking-tighter uppercase border bg-jiggy-gold/10 text-jiggy-gold border-jiggy-gold/20">
                         {event.type}
                       </span>
                     </div>
-                    <div className="text-sm text-slate-400 truncate pr-2 font-bold tracking-tight uppercase opacity-70 group-hover:opacity-100">{event.title}</div>
+                    <div className="text-xs md:text-sm text-slate-400 truncate pr-2 font-bold tracking-tight uppercase opacity-70 group-hover:opacity-100">{event.title}</div>
                   </div>
                 </div>
                 <div className="text-right shrink-0">
-                  <div className="bg-terminal-bg px-2.5 py-1.5 rounded-lg border border-jiggy-border shadow-sm group-hover:border-jiggy-gold/30 transition-all">
-                    <div className="text-[12px] font-mono font-bold text-slate-300 flex items-center gap-1.5 justify-end">
-                      <Clock className="w-3.5 h-3.5 text-slate-400" />
+                  <div className="bg-terminal-bg px-1.5 py-1 md:px-2.5 md:py-1.5 rounded-lg border border-jiggy-border shadow-sm group-hover:border-jiggy-gold/30 transition-all">
+                    <div className="text-[10px] md:text-[12px] font-mono font-bold text-slate-300 flex items-center gap-1 md:gap-1.5 justify-end">
+                      <Clock className="w-3 h-3 md:w-3.5 md:h-3.5 text-slate-400" />
                       {new Date(event.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }).toUpperCase()}
                     </div>
                   </div>

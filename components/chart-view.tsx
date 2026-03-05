@@ -189,10 +189,10 @@ export function ChartView() {
   if (error) return <div className="flex items-center justify-center min-h-[400px] text-red-400">Error: {error}</div>;
 
   return (
-    <div className="flex flex-col h-[calc(100vh-[var(--header-height)])]">
+    <div className="flex flex-col h-[calc(100dvh-3rem-5rem)] md:h-[calc(100vh-var(--header-height,0px))]">
       {/* Top Control Bar - Glassmorphic Toolbar */}
       <div className="shrink-0 bg-[#0B0F19]/90 backdrop-blur-xl border-b border-jiggy-border shadow-2xl z-20">
-        <div className="px-6 py-3 flex flex-col md:flex-row items-center justify-between gap-4">
+        <div className="px-3 md:px-6 py-3 flex flex-col md:flex-row items-start md:items-center justify-between gap-3 md:gap-4">
           <div className="flex items-center gap-3">
             <div className="p-2 rounded-xl bg-orange-500/20 border border-orange-500/30">
               <BarChart3 className="h-4 w-4 text-orange-400" />
@@ -275,7 +275,7 @@ export function ChartView() {
       {/* Main Content Area - Full Bleed */}
       <div className="flex-1 overflow-auto flex flex-col bg-jiggy-base">
         {/* Active Metrics Bar */}
-        <div className="px-6 py-4 bg-jiggy-surface-2 border-b border-jiggy-border flex flex-wrap items-center gap-2 min-h-[56px]">
+        <div className="px-2 py-2 md:px-6 md:py-4 bg-jiggy-surface-2 border-b border-jiggy-border flex flex-wrap items-center gap-1.5 md:gap-2 min-h-[40px] md:min-h-[56px]">
           <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest mr-2">Plotting:</span>
           {yAxisColumns.length === 0 ? (
             <span className="text-[10px] font-bold text-slate-600 italic">No metrics selected.</span>
@@ -297,7 +297,7 @@ export function ChartView() {
         </div>
 
         {/* Chart Container */}
-        <div className="p-6 pb-0 flex-1 min-h-[500px]">
+        <div className="p-2 pb-0 md:p-6 md:pb-0 flex-1 min-h-[300px] md:min-h-[500px]">
           {chartData.length > 0 && yAxisColumns.length > 0 ? (
             <ResponsiveContainer width="100%" height="100%" minHeight={400}>
               {chartType === "line" ? (
@@ -333,7 +333,7 @@ export function ChartView() {
 
         {/* Data Summary Table */}
         {chartData.length > 0 && (
-          <div className="border-t-2 border-slate-800/50 bg-jiggy-surface-2 pt-6 pb-20 px-6">
+          <div className="border-t-2 border-slate-800/50 bg-jiggy-surface-2 pt-3 pb-20 px-2 md:pt-6 md:px-6">
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 sm:gap-0 mb-6 max-w-[1400px] mx-auto">
               <div className="flex items-center gap-3">
                 <div className="p-2.5 rounded-xl bg-orange-500/10 border border-orange-500/20 shadow-sm">
@@ -346,7 +346,7 @@ export function ChartView() {
               </div>
             </div>
 
-            <div className="w-full max-w-[1400px] mx-auto overflow-x-auto no-scrollbar rounded-2xl border border-jiggy-tan/50 shadow-2xl">
+            <div className="w-full max-w-[1400px] mx-auto overflow-x-auto no-scrollbar rounded-xl md:rounded-2xl border border-jiggy-tan/50 shadow-2xl">
               <table className="w-full text-left border-collapse">
                 <thead>
                   <tr className="bg-jiggy-surface border-b border-jiggy-tan/50">

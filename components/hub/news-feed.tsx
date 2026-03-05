@@ -187,11 +187,11 @@ export function NewsFeed({ portfolioData, logos, className }: NewsFeedProps) {
   }, [portfolioData]);
 
   return (
-    <Card className={`bg-jiggy-surface border border-jiggy-tan/50 overflow-hidden flex flex-col shadow-2xl rounded-2xl ${className || 'h-[750px]'}`}>
-      <CardHeader className="py-4 border-b border-jiggy-tan/50 shrink-0 bg-jiggy-surface-2">
-        <CardTitle className="text-sm font-bold flex items-center justify-between text-slate-100 uppercase tracking-wider">
+    <Card className={`bg-jiggy-surface border border-jiggy-tan/50 overflow-hidden flex flex-col shadow-2xl rounded-xl md:rounded-2xl ${className || 'h-[400px] md:h-[750px]'}`}>
+      <CardHeader className="py-2 md:py-4 border-b border-jiggy-tan/50 shrink-0 bg-jiggy-surface-2 px-3 md:px-6">
+        <CardTitle className="text-xs md:text-sm font-bold flex items-center justify-between text-slate-100 uppercase tracking-wider">
           <div className="flex items-center gap-2">
-            <Newspaper className="w-5 h-5 text-jiggy-gold" />
+            <Newspaper className="w-4 h-4 md:w-5 md:h-5 text-jiggy-gold" />
             Company News
           </div>
           <div className="flex items-center gap-1.5">
@@ -215,11 +215,11 @@ export function NewsFeed({ portfolioData, logos, className }: NewsFeedProps) {
         ) : (
           <div className="divide-y divide-jiggy-border border-t border-jiggy-border overflow-y-auto flex-1 custom-scrollbar">
             {news.map((item) => (
-              <div key={item.id} className="p-4 hover:bg-jiggy-surface-2 transition-all flex gap-4 group relative overflow-hidden">
-                <div className="shrink-0 flex flex-col items-center gap-1.5 relative z-10">
-                  <div className="w-12 h-12 rounded-xl bg-terminal-bg flex items-center justify-center shrink-0 border border-jiggy-tan/50 shadow-xl group-hover:border-jiggy-gold/40 transition-all transform group-hover:scale-105 logo-glow">
+              <div key={item.id} className="p-2 md:p-4 hover:bg-jiggy-surface-2 transition-all flex gap-2 md:gap-4 group relative overflow-hidden active:bg-jiggy-surface-2/50">
+                <div className="shrink-0 flex flex-col items-center gap-1 md:gap-1.5 relative z-10">
+                  <div className="w-8 h-8 md:w-12 md:h-12 rounded-lg md:rounded-xl bg-terminal-bg flex items-center justify-center shrink-0 border border-jiggy-tan/50 shadow-xl group-hover:border-jiggy-gold/40 transition-all transform group-hover:scale-105 logo-glow">
                     {logos[item.ticker] ? (
-                      <img src={logos[item.ticker]} alt={item.ticker} className="w-8 h-8 object-contain drop-shadow-sm" />
+                      <img src={logos[item.ticker]} alt={item.ticker} className="w-5 h-5 md:w-8 md:h-8 object-contain drop-shadow-sm" />
                     ) : (
                       <span className="text-[10px] font-black text-slate-500">{item.ticker}</span>
                     )}
@@ -238,17 +238,17 @@ export function NewsFeed({ portfolioData, logos, className }: NewsFeedProps) {
                       </span>
                     </div>
                   </div>
-                  <h4 className="text-[15px] font-extrabold text-slate-100 leading-[1.3] mb-1.5 group-hover:text-jiggy-gold transition-colors tracking-tight">
+                  <h4 className="text-xs md:text-[15px] font-extrabold text-slate-100 leading-[1.3] mb-1 md:mb-1.5 group-hover:text-jiggy-gold transition-colors tracking-tight line-clamp-2">
                     {item.headline}
                   </h4>
-                  <p className="text-[13px] text-slate-300 line-clamp-2 mb-2 leading-relaxed font-medium transition-colors">
+                  <p className="text-[11px] md:text-[13px] text-slate-300 line-clamp-2 mb-1 md:mb-2 leading-relaxed font-medium transition-colors hidden md:block">
                     {item.summary}
                   </p>
                   <a
                     href={item.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 text-[10px] font-black text-jiggy-gold hover:text-jiggy-gold-alt transition-all transform group-hover:translate-x-1"
+                    className="inline-flex items-center gap-2 text-[10px] font-black text-jiggy-gold hover:text-jiggy-gold-alt transition-all transform group-hover:translate-x-1 py-1 active:opacity-70"
                   >
                     READ ARTICLE <ExternalLink className="w-3 h-3" />
                   </a>

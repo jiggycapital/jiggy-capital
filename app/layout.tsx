@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Nunito, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { SidebarProvider } from "@/components/sidebar-provider";
@@ -17,9 +17,32 @@ const jetbrainsMono = JetBrains_Mono({
   display: "swap",
 });
 
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+  viewportFit: "cover",
+  themeColor: "#0B0F19",
+};
+
 export const metadata: Metadata = {
   title: "Jiggy Capital - Financial Analysis",
   description: "Professional portfolio and financial analysis dashboard",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: "Jiggy Capital",
+  },
+  other: {
+    "mobile-web-app-capable": "yes",
+  },
+  manifest: "/manifest.json",
+  icons: {
+    apple: [
+      { url: "/apple-touch-icon.png", sizes: "180x180" },
+    ],
+  },
 };
 
 export default function RootLayout({

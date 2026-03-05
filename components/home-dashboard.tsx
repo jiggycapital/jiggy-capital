@@ -393,10 +393,26 @@ export function HomeDashboard() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-[600px]">
-        <div className="text-center">
-          <div className="inline-block animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-emerald-400 mb-4"></div>
-          <div className="text-slate-400 text-lg">Loading dashboard...</div>
+      <div className="space-y-3 px-2 md:px-6 pt-2 animate-fade-in-up">
+        {/* Header skeleton */}
+        <div className="flex items-center gap-3 py-1">
+          <div className="h-6 w-28 shimmer-loading rounded-lg" />
+          <div className="h-5 w-20 shimmer-loading rounded-full" />
+        </div>
+        {/* Metric strip skeleton */}
+        <div className="flex md:grid md:grid-cols-6 gap-2 overflow-hidden">
+          {[...Array(6)].map((_, i) => (
+            <div key={i} className="h-16 md:h-24 w-[100px] md:w-auto shrink-0 md:shrink shimmer-loading rounded-xl" />
+          ))}
+        </div>
+        {/* Pie chart skeleton */}
+        <div className="h-[300px] md:h-[800px] shimmer-loading rounded-2xl" />
+        {/* Table skeleton */}
+        <div className="space-y-1.5">
+          <div className="h-10 shimmer-loading rounded-xl" />
+          {[...Array(6)].map((_, i) => (
+            <div key={i} className="h-14 shimmer-loading rounded-xl" />
+          ))}
         </div>
       </div>
     );
@@ -411,11 +427,11 @@ export function HomeDashboard() {
   }
 
   return (
-    <div className="space-y-4 md:space-y-6 pb-4 md:pb-8 px-4 md:px-6 animate-fade-in-up">
+    <div className="space-y-2 md:space-y-6 pb-4 md:pb-8 px-1.5 md:px-6 animate-fade-in-up">
       {/* Header Bar */}
-      <div className="flex items-center justify-between px-1 py-2 mb-2">
-        <div className="flex items-center gap-4">
-          <h2 className="text-2xl font-extrabold text-slate-100 tracking-tight">
+      <div className="flex items-center justify-between px-1 py-0.5 md:py-2 mb-0 md:mb-2">
+        <div className="flex items-center gap-2 md:gap-4">
+          <h2 className="text-lg md:text-2xl font-extrabold text-slate-100 tracking-tight">
             Dashboard
           </h2>
           <span className="text-[10px] sm:text-xs font-extrabold text-emerald-400 uppercase tracking-widest bg-emerald-500/15 px-3 py-1 rounded-full border border-emerald-500/30 shadow-sm">
@@ -430,7 +446,7 @@ export function HomeDashboard() {
             href="https://twitter.com/jiggycapital"
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-1.5 bg-jiggy-surface hover:bg-[#1DA1F2]/15 text-slate-400 hover:text-[#1DA1F2] px-2.5 py-1.5 rounded-lg border border-jiggy-border hover:border-[#1DA1F2]/30 transition-all text-xs font-bold"
+            className="flex items-center gap-1.5 bg-jiggy-surface hover:bg-[#1DA1F2]/15 text-slate-400 hover:text-[#1DA1F2] px-2 py-1.5 rounded-lg border border-jiggy-border hover:border-[#1DA1F2]/30 transition-all text-xs font-bold"
           >
             <Twitter className="w-3.5 h-3.5 fill-current" />
             <span className="hidden sm:inline">Twitter</span>
@@ -439,7 +455,7 @@ export function HomeDashboard() {
             href="https://jiggy.substack.com"
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-1.5 bg-jiggy-surface hover:bg-orange-500/15 text-slate-400 hover:text-orange-400 px-2.5 py-1.5 rounded-lg border border-jiggy-border hover:border-orange-500/30 transition-all text-xs font-bold"
+            className="flex items-center gap-1.5 bg-jiggy-surface hover:bg-orange-500/15 text-slate-400 hover:text-orange-400 px-2 py-1.5 rounded-lg border border-jiggy-border hover:border-orange-500/30 transition-all text-xs font-bold"
           >
             <img
               src="https://cdn.prod.website-files.com/6088303c28a7c75678aa21d8/611bf5975d252f60f5868aeb_Substack-Startapaidnewsletter.png"
@@ -451,75 +467,54 @@ export function HomeDashboard() {
         </div>
       </div>
 
-      {/* Compact Metric Strip */}
-      <div className="grid grid-cols-3 md:grid-cols-6 gap-3 stagger-children">
-        {/* Daily */}
-        <div className="bg-jiggy-surface border border-jiggy-border rounded-2xl px-5 py-4 hover:scale-105 transition-all card-hover shadow-lg">
-          <div className="text-xs font-extrabold text-slate-300 uppercase tracking-widest mb-2">Daily</div>
-          <div className={`text-3xl font-mono font-black tabular-nums ${(() => {
-            const num = portfolioMetrics.dailyPerformance ? parseNumeric(portfolioMetrics.dailyPerformance.toString().replace(/[+%]/g, '')) : portfolioMetrics.weightedDailyMove;
-            return (num ?? 0) >= 0 ? 'text-emerald-400' : 'text-rose-400';
-          })()}`}>
-            {portfolioMetrics.dailyPerformance || formatPercentage(portfolioMetrics.weightedDailyMove)}
-          </div>
-        </div>
-
-        {/* YTD */}
-        <div className="bg-jiggy-surface border border-jiggy-border rounded-2xl px-5 py-4 hover:scale-105 transition-all card-hover shadow-lg">
-          <div className="text-xs font-extrabold text-slate-300 uppercase tracking-widest mb-2">YTD</div>
-          <div className={`text-3xl font-mono font-black tabular-nums ${(portfolioMetrics.ytdPerformanceNum ?? portfolioMetrics.weightedYtd) >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
-            {portfolioMetrics.ytdPerformance || formatPercentage(portfolioMetrics.weightedYtd)}
-          </div>
-        </div>
-
-        {/* CAGR */}
-        <div className="bg-jiggy-surface border border-jiggy-border rounded-2xl px-5 py-4 hover:scale-105 transition-all card-hover shadow-lg flex flex-col justify-center">
-          <div className="text-xs font-extrabold text-slate-300 uppercase tracking-widest mb-2">CAGR</div>
-          <div className={`text-3xl font-mono font-black tabular-nums ${(() => {
-            const num = portfolioMetrics.lifetimeCagr ? parseNumeric(portfolioMetrics.lifetimeCagr.toString().replace(/[+%]/g, '')) : null;
-            return (num ?? 0) >= 0 ? 'text-emerald-400' : 'text-rose-400';
-          })()}`}>
-            {portfolioMetrics.lifetimeCagr || "0%"}
-          </div>
-          <div className="text-[10px] font-bold text-slate-400 mt-1">Since Jan 2020</div>
-        </div>
-
-        {/* P/FCF */}
-        <div className="bg-jiggy-surface border border-jiggy-border rounded-2xl px-5 py-4 hover:scale-105 transition-all card-hover shadow-lg flex flex-col justify-center">
-          <div className="text-xs font-extrabold text-slate-300 uppercase tracking-widest mb-2">26e P/FCF</div>
-          <div className="text-3xl font-mono font-black text-jiggy-gold tabular-nums">
-            {portfolioMetrics.portfolioMultiples.fcf2026 ? `${portfolioMetrics.portfolioMultiples.fcf2026.toFixed(1)}x` : '—'}
-          </div>
-        </div>
-
-        {/* P/E */}
-        <div className="bg-jiggy-surface border border-jiggy-border rounded-2xl px-5 py-4 hover:scale-105 transition-all card-hover shadow-lg flex flex-col justify-center">
-          <div className="text-xs font-extrabold text-slate-300 uppercase tracking-widest mb-2">26e P/E</div>
-          <div className="text-3xl font-mono font-black text-jiggy-gold tabular-nums">
-            {portfolioMetrics.portfolioMultiples.pe2026 ? `${portfolioMetrics.portfolioMultiples.pe2026.toFixed(1)}x` : '—'}
-          </div>
-        </div>
-
-        {/* PEG */}
-        <div className="bg-jiggy-surface border border-jiggy-border rounded-2xl px-5 py-4 hover:scale-105 transition-all card-hover shadow-lg flex flex-col justify-center">
-          <div className="text-xs font-extrabold text-slate-300 uppercase tracking-widest mb-2">PEG</div>
-          <div className="text-3xl font-mono font-black text-jiggy-gold tabular-nums">
-            {portfolioMetrics.portfolioMultiples.peg ? `${portfolioMetrics.portfolioMultiples.peg.toFixed(2)}x` : '—'}
-          </div>
-        </div>
-      </div>
+      {/* Compact Metric Strip — horizontal scroll on mobile, grid on desktop */}
+      {(() => {
+        const dailyNum = portfolioMetrics.dailyPerformance ? parseNumeric(portfolioMetrics.dailyPerformance.toString().replace(/[+%]/g, '')) : portfolioMetrics.weightedDailyMove;
+        const cagrNum = portfolioMetrics.lifetimeCagr ? parseNumeric(portfolioMetrics.lifetimeCagr.toString().replace(/[+%]/g, '')) : null;
+        const metrics = [
+          { label: "Daily", value: portfolioMetrics.dailyPerformance || formatPercentage(portfolioMetrics.weightedDailyMove), color: (dailyNum ?? 0) >= 0 ? 'text-emerald-400' : 'text-rose-400' },
+          { label: "YTD", value: portfolioMetrics.ytdPerformance || formatPercentage(portfolioMetrics.weightedYtd), color: (portfolioMetrics.ytdPerformanceNum ?? portfolioMetrics.weightedYtd) >= 0 ? 'text-emerald-400' : 'text-rose-400' },
+          { label: "CAGR", value: portfolioMetrics.lifetimeCagr || "0%", color: (cagrNum ?? 0) >= 0 ? 'text-emerald-400' : 'text-rose-400' },
+          { label: "26e P/FCF", value: portfolioMetrics.portfolioMultiples.fcf2026 ? `${portfolioMetrics.portfolioMultiples.fcf2026.toFixed(1)}x` : '—', color: 'text-jiggy-gold' },
+          { label: "26e P/E", value: portfolioMetrics.portfolioMultiples.pe2026 ? `${portfolioMetrics.portfolioMultiples.pe2026.toFixed(1)}x` : '—', color: 'text-jiggy-gold' },
+          { label: "PEG", value: portfolioMetrics.portfolioMultiples.peg ? `${portfolioMetrics.portfolioMultiples.peg.toFixed(2)}x` : '—', color: 'text-jiggy-gold' },
+        ];
+        return (
+          <>
+            {/* Mobile: horizontal scroll strip */}
+            <div className="flex md:hidden gap-2 overflow-x-auto -mx-2 px-2 pb-1 snap-x snap-mandatory stagger-children">
+              {metrics.map((m, i) => (
+                <div key={i} className="bg-jiggy-surface border border-jiggy-border rounded-xl px-3 py-2 shadow-lg shrink-0 snap-start min-w-[100px] card-hover">
+                  <div className="text-[8px] font-extrabold text-slate-300 uppercase tracking-widest mb-0.5">{m.label}</div>
+                  <div className={`text-base font-mono font-black tabular-nums ${m.color}`}>{m.value}</div>
+                </div>
+              ))}
+            </div>
+            {/* Desktop: grid */}
+            <div className="hidden md:grid md:grid-cols-6 gap-3 stagger-children">
+              {metrics.map((m, i) => (
+                <div key={i} className="bg-jiggy-surface border border-jiggy-border rounded-2xl px-5 py-4 hover:scale-105 transition-all card-hover shadow-lg flex flex-col justify-center">
+                  <div className="text-xs font-extrabold text-slate-300 uppercase tracking-widest mb-2">{m.label}</div>
+                  <div className={`text-3xl font-mono font-black tabular-nums ${m.color}`}>{m.value}</div>
+                  {m.label === "CAGR" && <div className="text-[10px] font-bold text-slate-400 mt-1">Since Jan 2020</div>}
+                </div>
+              ))}
+            </div>
+          </>
+        );
+      })()}
 
       {/* Allocation - FIRST Section (Full Width) */}
       <div className="w-full">
         {/* Interactive Pie Chart */}
-        <Card className="bg-jiggy-surface border-jiggy-border shadow-xl rounded-2xl overflow-hidden">
-          <CardHeader className="pb-2 bg-jiggy-surface-2 border-b border-jiggy-border">
-            <CardTitle className="text-xl font-bold text-slate-100 flex items-center gap-2">
+        <Card className="bg-jiggy-surface border-jiggy-border shadow-xl rounded-xl md:rounded-2xl overflow-hidden w-full">
+          <CardHeader className="pb-1 md:pb-2 bg-jiggy-surface-2 border-b border-jiggy-border px-3 md:px-6 py-1.5 md:py-4 hidden md:block">
+            <CardTitle className="text-base md:text-xl font-bold text-slate-100 flex items-center gap-2">
               <PieChartIcon className="h-5 w-5 text-jiggy-gold" />
               {pieChartView === "company" ? "Portfolio Allocation" : "Sector Allocation"}
             </CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="px-0 py-1 md:px-6 md:py-4">
             <InteractivePieChart
               positionsData={positionsData}
               logos={logos}
@@ -533,17 +528,17 @@ export function HomeDashboard() {
       {/* Portfolio Table - Full Width */}
       <div className="w-full">
         <Tabs defaultValue="holdings" className="w-full">
-          <div className="flex items-center mb-6">
-            <TabsList className="bg-[#0B0F19]/80 backdrop-blur-md border border-slate-800/60 p-1.5 rounded-2xl shadow-inner">
+          <div className="flex items-center mb-2 md:mb-6">
+            <TabsList className="bg-[#0B0F19]/80 backdrop-blur-md border border-slate-800/60 p-1 md:p-1.5 rounded-xl md:rounded-2xl shadow-inner">
               <TabsTrigger
                 value="holdings"
-                className="data-[state=active]:bg-emerald-400 data-[state=active]:text-slate-950 data-[state=active]:shadow-lg text-xs sm:text-sm uppercase tracking-wider font-black px-6 sm:px-10 py-2.5 rounded-xl text-slate-500 hover:text-slate-300 transition-all"
+                className="data-[state=active]:bg-emerald-400 data-[state=active]:text-slate-950 data-[state=active]:shadow-lg text-[10px] sm:text-sm uppercase tracking-wider font-black px-4 sm:px-10 py-1.5 sm:py-2.5 rounded-lg md:rounded-xl text-slate-500 hover:text-slate-300 transition-all"
               >
                 My Holdings
               </TabsTrigger>
               <TabsTrigger
                 value="watchlist"
-                className="data-[state=active]:bg-emerald-400 data-[state=active]:text-slate-950 data-[state=active]:shadow-lg text-xs sm:text-sm uppercase tracking-wider font-black px-6 sm:px-10 py-2.5 rounded-xl text-slate-500 hover:text-slate-300 transition-all"
+                className="data-[state=active]:bg-emerald-400 data-[state=active]:text-slate-950 data-[state=active]:shadow-lg text-[10px] sm:text-sm uppercase tracking-wider font-black px-4 sm:px-10 py-1.5 sm:py-2.5 rounded-lg md:rounded-xl text-slate-500 hover:text-slate-300 transition-all"
               >
                 Watchlist
               </TabsTrigger>
@@ -567,30 +562,30 @@ export function HomeDashboard() {
       </div>
 
       {/* Movers and Company News (News/Events) */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6 lg:h-[850px] lg:overflow-hidden">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-2 md:gap-6 h-auto lg:h-[850px] lg:overflow-hidden overflow-x-hidden">
         {/* Left Column: Movers + Events */}
-        <div className="flex flex-col gap-4 md:gap-6 h-full min-h-0">
+        <div className="flex flex-col gap-2 md:gap-6 h-full min-h-0">
           {/* Daily Movers - Compact Horizontal Design */}
-          <Card className="bg-jiggy-surface border-jiggy-border shadow-xl rounded-2xl shrink-0 overflow-hidden">
-            <CardContent className="p-5 space-y-4">
+          <Card className="bg-jiggy-surface border-jiggy-border shadow-xl rounded-xl md:rounded-2xl shrink-0 overflow-hidden">
+            <CardContent className="p-2 md:p-5 space-y-3 md:space-y-4">
               {/* Top Gainers Row */}
               <div className="space-y-2">
                 <div className="flex items-center gap-2">
                   <TrendingUp className="h-4 w-4 text-emerald-400" />
                   <span className="text-xs font-bold text-emerald-400 uppercase tracking-wider">Top Gainers</span>
                 </div>
-                <div className="flex flex-wrap gap-2">
+                <div className="flex gap-2 overflow-x-auto pb-1 -mx-1 px-1">
                   {topGainers.map((item, idx) => (
                     <div
                       key={idx}
-                      className="flex items-center gap-3 px-3 py-2 rounded-xl bg-emerald-500/10 border border-emerald-500/20 hover:bg-emerald-500/20 transition-all cursor-default hover:scale-105"
+                      className="flex items-center gap-2 px-2 py-1.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 hover:bg-emerald-500/20 transition-all cursor-default shrink-0"
                     >
-                      <div className="w-9 h-9 rounded-xl bg-terminal-bg flex items-center justify-center overflow-hidden border border-emerald-500/30 logo-glow">
+                      <div className="w-7 h-7 md:w-9 md:h-9 rounded-lg md:rounded-xl bg-terminal-bg flex items-center justify-center overflow-hidden border border-emerald-500/30 logo-glow">
                         {logos[item.ticker] ? (
                           <img
                             src={logos[item.ticker]}
                             alt=""
-                            className="w-6 h-6 object-contain drop-shadow-sm"
+                            className="w-5 h-5 md:w-6 md:h-6 object-contain drop-shadow-sm"
                             onError={(e) => (e.target as any).style.display = 'none'}
                           />
                         ) : (
@@ -615,18 +610,18 @@ export function HomeDashboard() {
                   <TrendingDown className="h-4 w-4 text-rose-400" />
                   <span className="text-xs font-bold text-rose-400 uppercase tracking-wider">Top Losers</span>
                 </div>
-                <div className="flex flex-wrap gap-2">
+                <div className="flex gap-2 overflow-x-auto pb-1 -mx-1 px-1">
                   {topLosers.map((item, idx) => (
                     <div
                       key={idx}
-                      className="flex items-center gap-3 px-3 py-2 rounded-xl bg-rose-500/10 border border-rose-500/20 hover:bg-rose-500/20 transition-all cursor-default hover:scale-105"
+                      className="flex items-center gap-2 px-2 py-1.5 rounded-xl bg-rose-500/10 border border-rose-500/20 hover:bg-rose-500/20 transition-all cursor-default shrink-0"
                     >
-                      <div className="w-9 h-9 rounded-xl bg-terminal-bg flex items-center justify-center overflow-hidden border border-rose-500/30 logo-glow">
+                      <div className="w-7 h-7 md:w-9 md:h-9 rounded-lg md:rounded-xl bg-terminal-bg flex items-center justify-center overflow-hidden border border-rose-500/30 logo-glow">
                         {logos[item.ticker] ? (
                           <img
                             src={logos[item.ticker]}
                             alt=""
-                            className="w-6 h-6 object-contain drop-shadow-sm"
+                            className="w-5 h-5 md:w-6 md:h-6 object-contain drop-shadow-sm"
                             onError={(e) => (e.target as any).style.display = 'none'}
                           />
                         ) : (
@@ -661,24 +656,24 @@ export function HomeDashboard() {
       </div>
 
       {/* Performance Analytics and Multiples - BOTTOM Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-2 md:gap-6">
         {/* YTD Benchmark Performance */}
         {performanceData?.ytdBenchmarks && performanceData.ytdBenchmarks.length > 0 && (
           <Card className="bg-jiggy-surface border-jiggy-border shadow-xl rounded-2xl overflow-hidden">
             <CardHeader className="pb-3 bg-jiggy-surface-2 border-b border-jiggy-border">
-              <CardTitle className="text-lg font-bold text-slate-100 flex items-center gap-2">
+              <CardTitle className="text-base md:text-lg font-bold text-slate-100 flex items-center gap-2">
                 <Activity className="h-5 w-5 text-jiggy-gold" />
                 Benchmark Comparison
               </CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="px-3 md:px-6">
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 {performanceData.ytdBenchmarks.map((benchmark: { name: string; value: string }, idx: number) => {
                   const num = parseNumeric(benchmark.value.toString().replace(/[+%bp]/g, ''));
                   return (
                     <div key={idx} className="p-4 rounded-xl bg-terminal-bg border border-jiggy-border shadow-inner flex flex-col items-center justify-center gap-1.5">
                       <span className="text-[10px] text-slate-400 uppercase font-extrabold tracking-widest">{benchmark.name}</span>
-                      <span className={`text-2xl font-mono font-black ${num !== null && num >= 0 ? 'text-emerald-400' : 'text-rose-400'
+                      <span className={`text-lg md:text-2xl font-mono font-black ${num !== null && num >= 0 ? 'text-emerald-400' : 'text-rose-400'
                         }`}>
                         {benchmark.value}
                       </span>
@@ -693,28 +688,28 @@ export function HomeDashboard() {
         {/* Portfolio Multiples */}
         <Card className="bg-jiggy-surface border-jiggy-border shadow-xl rounded-2xl overflow-hidden">
           <CardHeader className="pb-3 bg-jiggy-surface-2 border-b border-jiggy-border">
-            <CardTitle className="text-lg font-bold text-slate-100 flex items-center gap-2">
+            <CardTitle className="text-base md:text-lg font-bold text-slate-100 flex items-center gap-2">
               <Target className="h-5 w-5 text-jiggy-gold" />
               Portfolio Multiples
             </CardTitle>
           </CardHeader>
-          <CardContent className="pt-4">
-            <div className="grid grid-cols-3 gap-3">
-              <div className="p-4 rounded-xl bg-terminal-bg border border-jiggy-border shadow-inner flex flex-col items-center justify-center gap-1.5">
+          <CardContent className="pt-3 md:pt-4 px-3 md:px-6">
+            <div className="grid grid-cols-3 gap-2 md:gap-3">
+              <div className="p-3 md:p-4 rounded-xl bg-terminal-bg border border-jiggy-border shadow-inner flex flex-col items-center justify-center gap-1.5">
                 <span className="text-[10px] text-slate-400 uppercase font-extrabold tracking-widest text-center">26e FCF</span>
-                <span className="text-2xl font-mono font-black text-jiggy-gold">
+                <span className="text-lg md:text-2xl font-mono font-black text-jiggy-gold">
                   {portfolioMetrics.portfolioMultiples.fcf2026 ? `${portfolioMetrics.portfolioMultiples.fcf2026.toFixed(1)}x` : '-'}
                 </span>
               </div>
-              <div className="p-4 rounded-xl bg-terminal-bg border border-jiggy-border shadow-inner flex flex-col items-center justify-center gap-1.5">
+              <div className="p-3 md:p-4 rounded-xl bg-terminal-bg border border-jiggy-border shadow-inner flex flex-col items-center justify-center gap-1.5">
                 <span className="text-[10px] text-slate-400 uppercase font-extrabold tracking-widest text-center">26e P/E</span>
-                <span className="text-2xl font-mono font-black text-jiggy-gold">
+                <span className="text-lg md:text-2xl font-mono font-black text-jiggy-gold">
                   {portfolioMetrics.portfolioMultiples.pe2026 ? `${portfolioMetrics.portfolioMultiples.pe2026.toFixed(1)}x` : '-'}
                 </span>
               </div>
-              <div className="p-4 rounded-xl bg-terminal-bg border border-jiggy-border shadow-inner flex flex-col items-center justify-center gap-1.5">
+              <div className="p-3 md:p-4 rounded-xl bg-terminal-bg border border-jiggy-border shadow-inner flex flex-col items-center justify-center gap-1.5">
                 <span className="text-[10px] text-slate-400 uppercase font-extrabold tracking-widest text-center">PEG</span>
-                <span className="text-2xl font-mono font-black text-jiggy-gold">
+                <span className="text-lg md:text-2xl font-mono font-black text-jiggy-gold">
                   {portfolioMetrics.portfolioMultiples.peg ? `${portfolioMetrics.portfolioMultiples.peg.toFixed(2)}x` : '-'}
                 </span>
               </div>

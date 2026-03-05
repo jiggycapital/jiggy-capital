@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import {
   flexRender,
   getCoreRowModel,
@@ -8,6 +8,7 @@ import {
   getSortedRowModel,
   type ColumnDef,
   type SortingState,
+  type VisibilityState,
 } from "@tanstack/react-table";
 import {
   Table,
@@ -43,6 +44,14 @@ interface WatchlistRow {
 }
 
 export function WatchlistTanStackTable({ watchlistData, logos: initialLogos }: WatchlistTanStackTableProps) {
+  const [isMobile, setIsMobile] = useState(false);
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 768);
+    check();
+    window.addEventListener('resize', check);
+    return () => window.removeEventListener('resize', check);
+  }, []);
+
   const tickers = useMemo(() => {
     return watchlistData.map(p => (p.Ticker || p.Symbol || "").toUpperCase()).filter(Boolean);
   }, [watchlistData]);
@@ -322,17 +331,28 @@ export function WatchlistTanStackTable({ watchlistData, logos: initialLogos }: W
     [logos]
   );
 
+  const columnVisibility: VisibilityState = isMobile ? {
+    w1Change: false,
+    ytdChange: false,
+    pe2026: false,
+    fcf2026: false,
+    revCagr: false,
+    peg: false,
+  } : {};
+
   const table = useReactTable({
     data: tableData,
     columns,
-    state: { sorting },
+    state: { sorting, columnVisibility },
     onSortingChange: setSorting,
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
   });
 
   return (
-    <div className="rounded-2xl border border-jiggy-border bg-jiggy-surface shadow-xl overflow-hidden flex flex-col h-full max-h-[750px]">
+    <div className="rounded-2xl border border-jiggy-border bg-jiggy-surface shadow-xl overflow-hidden flex flex-col h-full max-h-[55vh] md:max-h-[750px] relative">
+      {/* Scroll hint gradient on mobile */}
+      <div className="md:hidden absolute top-0 right-0 bottom-0 w-5 bg-gradient-to-l from-[#22352f] to-transparent pointer-events-none z-20" />
       <div className="overflow-auto custom-scrollbar flex-1 relative">
         <Table className="relative">
           <TableHeader className="bg-jiggy-surface-2 sticky top-0 z-20 shadow-md">
@@ -360,7 +380,7 @@ export function WatchlistTanStackTable({ watchlistData, logos: initialLogos }: W
                     <TableCell
                       key={cell.id}
                       className={`py-3 px-2 ${cell.column.id === 'ticker'
-                        ? 'sticky left-0 bg-jiggy-surface z-10 border-r border-jiggy-tan/50 min-w-[140px] max-w-[170px] md:min-w-[200px]'
+                        ? 'sticky left-0 bg-jiggy-surface z-10 border-r border-jiggy-tan/50 shadow-[4px_0_8px_-4px_rgba(0,0,0,0.3)] min-w-[140px] max-w-[170px] md:min-w-[200px]'
                         : ''
                         }`}
                     >

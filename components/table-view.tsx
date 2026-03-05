@@ -259,8 +259,8 @@ export function TableView() {
 
   return (
     <div className="space-y-4">
-      <Card className="bg-jiggy-surface border border-jiggy-tan/50 shadow-2xl rounded-2xl overflow-hidden">
-        <CardHeader className="p-6 border-b border-jiggy-tan/50 bg-jiggy-surface-2">
+      <Card className="bg-jiggy-surface border border-jiggy-tan/50 shadow-2xl rounded-xl md:rounded-2xl overflow-hidden">
+        <CardHeader className="p-3 md:p-6 border-b border-jiggy-tan/50 bg-jiggy-surface-2">
           <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
             <div>
               <CardTitle className="text-slate-100 text-xl font-bold tracking-tight">Data Table</CardTitle>
@@ -320,13 +320,13 @@ export function TableView() {
           </div>
         </CardHeader>
 
-        <CardContent className="p-0">
-          <div className="px-6 py-5 bg-jiggy-surface border-b border-jiggy-tan/50 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 sm:gap-0">
+        <CardContent className="p-0 relative">
+          <div className="px-2 md:px-6 py-2 md:py-5 bg-jiggy-surface border-b border-jiggy-tan/50 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-0">
             <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as any)} className="w-auto">
-              <TabsList className="bg-[#0B0F19]/80 backdrop-blur-md border border-slate-800/60 p-1.5 rounded-2xl shadow-inner">
-                <TabsTrigger value="positions" className="data-[state=active]:bg-emerald-400 data-[state=active]:text-slate-950 text-xs sm:text-sm uppercase tracking-wider font-black px-6 py-2 rounded-xl text-slate-500 hover:text-slate-400 transition-all">Holdings</TabsTrigger>
-                <TabsTrigger value="watchlist" className="data-[state=active]:bg-emerald-400 data-[state=active]:text-slate-950 text-xs sm:text-sm uppercase tracking-wider font-black px-6 py-2 rounded-xl text-slate-500 hover:text-slate-400 transition-all">Watchlist</TabsTrigger>
-                <TabsTrigger value="combined" className="data-[state=active]:bg-emerald-400 data-[state=active]:text-slate-950 text-xs sm:text-sm uppercase tracking-wider font-black px-6 py-2 rounded-xl text-slate-500 hover:text-slate-400 transition-all">Combined</TabsTrigger>
+              <TabsList className="bg-[#0B0F19]/80 backdrop-blur-md border border-slate-800/60 p-1 md:p-1.5 rounded-xl md:rounded-2xl shadow-inner">
+                <TabsTrigger value="positions" className="data-[state=active]:bg-emerald-400 data-[state=active]:text-slate-950 text-[10px] sm:text-sm uppercase tracking-wider font-black px-3 sm:px-6 py-1.5 sm:py-2 rounded-lg md:rounded-xl text-slate-500 hover:text-slate-400 transition-all">Holdings</TabsTrigger>
+                <TabsTrigger value="watchlist" className="data-[state=active]:bg-emerald-400 data-[state=active]:text-slate-950 text-[10px] sm:text-sm uppercase tracking-wider font-black px-3 sm:px-6 py-1.5 sm:py-2 rounded-lg md:rounded-xl text-slate-500 hover:text-slate-400 transition-all">Watchlist</TabsTrigger>
+                <TabsTrigger value="combined" className="data-[state=active]:bg-emerald-400 data-[state=active]:text-slate-950 text-[10px] sm:text-sm uppercase tracking-wider font-black px-3 sm:px-6 py-1.5 sm:py-2 rounded-lg md:rounded-xl text-slate-500 hover:text-slate-400 transition-all">Combined</TabsTrigger>
               </TabsList>
             </Tabs>
             <div className="text-[10px] font-black tracking-widest uppercase text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-3 py-1.5 rounded-lg shadow-sm">
@@ -334,6 +334,8 @@ export function TableView() {
             </div>
           </div>
 
+          {/* Scroll hint gradient on mobile */}
+          <div className="md:hidden absolute top-0 right-0 bottom-0 w-5 bg-gradient-to-l from-[#22352f] to-transparent pointer-events-none z-20" />
           <div className="overflow-x-auto relative min-h-[400px]">
             <Table>
               <TableHeader className="bg-jiggy-surface-2 sticky top-0 z-10 shadow-xl">

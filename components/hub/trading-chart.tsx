@@ -3,13 +3,25 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { TrendingUp, TrendingDown, Loader2, Search, ChevronDown, X } from "lucide-react";
+import { TrendingUp, TrendingDown, Loader2, Search, ChevronDown, X, Briefcase, Eye } from "lucide-react";
 import { fetchSheetData, parseSheetData, fetchLogos } from "@/lib/google-sheets";
 
-// --- Interval & Range Definitions ---
+// --- Types ---
 
 type CandleInterval = "5m" | "60m" | "1d" | "1wk" | "1mo" | "3mo";
 type TimeRange = "1d" | "5d" | "1mo" | "3mo" | "6mo" | "1y" | "5y" | "max";
+
+interface TickerInfo {
+    ticker: string;
+    source: "position" | "watchlist";
+    earningsDate?: string;
+    revenueBeat?: number | null;
+    epsBeat?: number | null;
+    weight?: number;
+    price?: number;
+}
+
+// --- Constants ---
 
 const INTERVALS: { label: string; value: CandleInterval }[] = [
     { label: "5m", value: "5m" },
@@ -62,9 +74,8 @@ const VALID_RANGES: Record<CandleInterval, TimeRange[]> = {
 function computeSMA(prices: number[], period: number): (number | null)[] {
     const result: (number | null)[] = [];
     for (let i = 0; i < prices.length; i++) {
-        if (i < period - 1) {
-            result.push(null);
-        } else {
+        if (i < period - 1) { result.push(null); }
+        else {
             let sum = 0;
             for (let j = i - period + 1; j <= i; j++) sum += prices[j];
             result.push(sum / period);
@@ -78,17 +89,32 @@ function tsToDate(ts: number): string {
     return d.toISOString().split("T")[0];
 }
 
+function parsePercent(val: string | undefined): number | null {
+    if (!val) return null;
+    const cleaned = val.replace('%', '').replace('+', '').trim();
+    const num = parseFloat(cleaned);
+    if (isNaN(num) || num === -100) return null;
+    return num;
+}
+
+function parseNumeric(val: string | undefined): number | null {
+    if (!val) return null;
+    const cleaned = val.replace(/[$,%+]/g, '').trim();
+    const num = parseFloat(cleaned);
+    return isNaN(num) ? null : num;
+}
+
 const chartCache: Record<string, { data: any; ts: number }> = {};
 const CACHE_TTL = 5 * 60 * 1000;
 
-// --- Custom Ticker Picker Component ---
+// --- Grouped Ticker Picker ---
 function TickerPicker({
-    tickers,
+    tickerInfos,
     logos,
     selectedTicker,
     onSelect,
 }: {
-    tickers: string[];
+    tickerInfos: TickerInfo[];
     logos: Record<string, string>;
     selectedTicker: string;
     onSelect: (ticker: string) => void;
@@ -98,7 +124,6 @@ function TickerPicker({
     const dropdownRef = useRef<HTMLDivElement>(null);
     const searchRef = useRef<HTMLInputElement>(null);
 
-    // Close on outside click
     useEffect(() => {
         function handleClick(e: MouseEvent) {
             if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
@@ -110,21 +135,49 @@ function TickerPicker({
         return () => document.removeEventListener("mousedown", handleClick);
     }, [isOpen]);
 
-    // Focus search on open
     useEffect(() => {
         if (isOpen && searchRef.current) searchRef.current.focus();
     }, [isOpen]);
 
-    const filtered = search
-        ? tickers.filter((t) => t.toLowerCase().includes(search.toLowerCase()))
-        : tickers;
+    const positions = tickerInfos.filter(t => t.source === "position");
+    const watchlist = tickerInfos.filter(t => t.source === "watchlist");
+
+    const filterList = (list: TickerInfo[]) =>
+        search ? list.filter(t => t.ticker.toLowerCase().includes(search.toLowerCase())) : list;
+
+    const filteredPositions = filterList(positions);
+    const filteredWatchlist = filterList(watchlist);
+
+    const TickerRow = ({ info }: { info: TickerInfo }) => (
+        <button
+            onClick={() => { onSelect(info.ticker); setIsOpen(false); setSearch(""); }}
+            className={cn(
+                "w-full flex items-center gap-3 px-3 py-2 hover:bg-emerald-500/10 transition-colors text-left",
+                info.ticker === selectedTicker && "bg-emerald-500/5"
+            )}
+        >
+            {logos[info.ticker] ? (
+                <img src={logos[info.ticker]} alt="" className="w-7 h-7 rounded-lg object-contain bg-terminal-bg border border-jiggy-border/50 p-0.5" />
+            ) : (
+                <div className="w-7 h-7 rounded-lg bg-jiggy-surface-2 border border-jiggy-border/50 flex items-center justify-center">
+                    <span className="text-[8px] font-black text-slate-500">{info.ticker.slice(0, 2)}</span>
+                </div>
+            )}
+            <span className={cn(
+                "text-xs font-bold tracking-wide flex-1",
+                info.ticker === selectedTicker ? "text-emerald-400" : "text-slate-300"
+            )}>{info.ticker}</span>
+            {info.ticker === selectedTicker && (
+                <div className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+            )}
+        </button>
+    );
 
     return (
         <div ref={dropdownRef} className="relative">
-            {/* Trigger */}
             <button
                 onClick={() => setIsOpen(!isOpen)}
-                className="flex items-center gap-2.5 h-10 bg-terminal-bg border border-jiggy-border rounded-xl px-3 hover:border-emerald-500/40 transition-all cursor-pointer group"
+                className="flex items-center gap-2.5 h-10 bg-terminal-bg border border-jiggy-border rounded-xl px-3 hover:border-emerald-500/40 transition-all cursor-pointer"
             >
                 {logos[selectedTicker] ? (
                     <img src={logos[selectedTicker]} alt="" className="w-6 h-6 rounded-md object-contain" />
@@ -134,16 +187,11 @@ function TickerPicker({
                     </div>
                 )}
                 <span className="text-sm font-black text-slate-200 tracking-tight">{selectedTicker}</span>
-                <ChevronDown className={cn(
-                    "w-3.5 h-3.5 text-slate-500 transition-transform",
-                    isOpen && "rotate-180"
-                )} />
+                <ChevronDown className={cn("w-3.5 h-3.5 text-slate-500 transition-transform", isOpen && "rotate-180")} />
             </button>
 
-            {/* Dropdown */}
             {isOpen && (
-                <div className="absolute top-full left-0 mt-2 w-72 bg-[#0d1117] border border-jiggy-border rounded-xl shadow-2xl z-50 overflow-hidden backdrop-blur-xl">
-                    {/* Search */}
+                <div className="absolute top-full left-0 mt-2 w-72 max-w-[calc(100vw-2rem)] bg-[#0d1117] border border-jiggy-border rounded-xl shadow-2xl z-50 overflow-hidden backdrop-blur-xl">
                     <div className="p-2 border-b border-jiggy-border">
                         <div className="relative">
                             <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-500" />
@@ -163,46 +211,44 @@ function TickerPicker({
                         </div>
                     </div>
 
-                    {/* List */}
                     <div className="max-h-80 overflow-y-auto overscroll-contain">
-                        {filtered.length === 0 ? (
+                        {/* Positions Section */}
+                        {filteredPositions.length > 0 && (
+                            <>
+                                <div className="sticky top-0 bg-[#0d1117]/95 backdrop-blur-sm px-3 py-1.5 border-b border-jiggy-border/50">
+                                    <div className="flex items-center gap-1.5">
+                                        <Briefcase className="w-3 h-3 text-emerald-400" />
+                                        <span className="text-[9px] font-black text-emerald-400 uppercase tracking-widest">Positions</span>
+                                        <span className="text-[9px] text-slate-600 font-bold ml-auto">{filteredPositions.length}</span>
+                                    </div>
+                                </div>
+                                {filteredPositions.map(info => <TickerRow key={info.ticker} info={info} />)}
+                            </>
+                        )}
+
+                        {/* Watchlist Section */}
+                        {filteredWatchlist.length > 0 && (
+                            <>
+                                <div className="sticky top-0 bg-[#0d1117]/95 backdrop-blur-sm px-3 py-1.5 border-b border-jiggy-border/50">
+                                    <div className="flex items-center gap-1.5">
+                                        <Eye className="w-3 h-3 text-amber-400" />
+                                        <span className="text-[9px] font-black text-amber-400 uppercase tracking-widest">Watchlist</span>
+                                        <span className="text-[9px] text-slate-600 font-bold ml-auto">{filteredWatchlist.length}</span>
+                                    </div>
+                                </div>
+                                {filteredWatchlist.map(info => <TickerRow key={info.ticker} info={info} />)}
+                            </>
+                        )}
+
+                        {filteredPositions.length === 0 && filteredWatchlist.length === 0 && (
                             <div className="px-3 py-4 text-center text-xs text-slate-500">No tickers found</div>
-                        ) : (
-                            filtered.map((t) => (
-                                <button
-                                    key={t}
-                                    onClick={() => {
-                                        onSelect(t);
-                                        setIsOpen(false);
-                                        setSearch("");
-                                    }}
-                                    className={cn(
-                                        "w-full flex items-center gap-3 px-3 py-2 hover:bg-emerald-500/10 transition-colors text-left",
-                                        t === selectedTicker && "bg-emerald-500/5"
-                                    )}
-                                >
-                                    {logos[t] ? (
-                                        <img src={logos[t]} alt="" className="w-7 h-7 rounded-lg object-contain bg-terminal-bg border border-jiggy-border/50 p-0.5" />
-                                    ) : (
-                                        <div className="w-7 h-7 rounded-lg bg-jiggy-surface-2 border border-jiggy-border/50 flex items-center justify-center">
-                                            <span className="text-[8px] font-black text-slate-500">{t.slice(0, 2)}</span>
-                                        </div>
-                                    )}
-                                    <span className={cn(
-                                        "text-xs font-bold tracking-wide",
-                                        t === selectedTicker ? "text-emerald-400" : "text-slate-300"
-                                    )}>{t}</span>
-                                    {t === selectedTicker && (
-                                        <div className="ml-auto w-1.5 h-1.5 rounded-full bg-emerald-400" />
-                                    )}
-                                </button>
-                            ))
                         )}
                     </div>
 
-                    {/* Footer */}
                     <div className="px-3 py-1.5 border-t border-jiggy-border">
-                        <p className="text-[9px] text-slate-600 font-bold">{tickers.length} tickers available</p>
+                        <p className="text-[9px] text-slate-600 font-bold">
+                            {positions.length} positions · {watchlist.length} watchlist
+                        </p>
                     </div>
                 </div>
             )}
@@ -221,8 +267,7 @@ export function TradingChart() {
     const ma200SeriesRef = useRef<any>(null);
 
     const [lcModule, setLcModule] = useState<any>(null);
-
-    const [tickers, setTickers] = useState<string[]>([]);
+    const [tickerInfos, setTickerInfos] = useState<TickerInfo[]>([]);
     const [logos, setLogos] = useState<Record<string, string>>({});
     const [selectedTicker, setSelectedTicker] = useState<string>("");
     const [timeRange, setTimeRange] = useState<TimeRange>("1y");
@@ -234,46 +279,91 @@ export function TradingChart() {
     const [priceChange, setPriceChange] = useState<number>(0);
     const [priceChangePct, setPriceChangePct] = useState<number>(0);
 
+    const selectedInfo = tickerInfos.find(t => t.ticker === selectedTicker);
+
     const handleRangeChange = useCallback((newRange: TimeRange) => {
         setTimeRange(newRange);
-        const validRanges = VALID_RANGES[interval];
-        if (!validRanges.includes(newRange)) {
+        if (!VALID_RANGES[interval].includes(newRange)) {
             setInterval(defaultIntervalForRange(newRange));
         }
     }, [interval]);
 
     const handleIntervalChange = useCallback((newInterval: CandleInterval) => {
         setInterval(newInterval);
-        const validRanges = VALID_RANGES[newInterval];
-        if (!validRanges.includes(timeRange)) {
+        if (!VALID_RANGES[newInterval].includes(timeRange)) {
+            const validRanges = VALID_RANGES[newInterval];
             setTimeRange(validRanges[Math.floor(validRanges.length / 2)]);
         }
     }, [timeRange]);
 
     const validRangesForInterval = VALID_RANGES[interval];
 
-    // Load tickers
+    // Step 1: Load tickers with earnings data + source categorization
     useEffect(() => {
         let cancelled = false;
         async function loadTickers() {
             try {
-                const [positionsRows, watchlistRows] = await Promise.all([
+                const [positionsRows, watchlistRows, portfolioRows] = await Promise.all([
                     fetchSheetData("positions"),
                     fetchSheetData("watchlist"),
+                    fetchSheetData("portfolio"),
                 ]);
                 const positions = parseSheetData(positionsRows);
                 const watchlist = parseSheetData(watchlistRows);
+                const portfolio = parseSheetData(portfolioRows);
 
-                const tickerSet = new Set<string>();
-                [...positions, ...watchlist].forEach((row) => {
-                    const t = (row.ticker || row.Ticker || "").toUpperCase();
-                    if (t && t !== "CASH" && t !== "SUM" && t.length > 0) tickerSet.add(t);
+                // Build portfolio weight map
+                const totalValue = portfolio.reduce((sum, p) => {
+                    return sum + (parseNumeric(p["Market Value"] || p["Value"]) || 0);
+                }, 0);
+                const portfolioMap: Record<string, { weight: number; price: number }> = {};
+                portfolio.forEach(p => {
+                    const t = (p.Ticker || p.Symbol || "").toUpperCase();
+                    if (t && t !== "CASH" && t !== "SUM") {
+                        const mv = parseNumeric(p["Market Value"] || p["Value"]) || 0;
+                        portfolioMap[t] = {
+                            weight: totalValue > 0 ? (mv / totalValue) * 100 : 0,
+                            price: parseNumeric(p.Price) || 0,
+                        };
+                    }
                 });
 
-                const sorted = Array.from(tickerSet).sort();
+                const infos: TickerInfo[] = [];
+                const seen = new Set<string>();
+
+                // Positions first
+                positions.forEach(row => {
+                    const t = (row.ticker || row.Ticker || "").toUpperCase();
+                    if (!t || t === "CASH" || t === "SUM" || seen.has(t)) return;
+                    seen.add(t);
+                    infos.push({
+                        ticker: t,
+                        source: "position",
+                        earningsDate: row["Earnings Date"] || "",
+                        revenueBeat: parsePercent(row["Revenue Beat / Miss %"]),
+                        epsBeat: parsePercent(row["EPS Beat / Miss %"]),
+                        weight: portfolioMap[t]?.weight,
+                        price: portfolioMap[t]?.price,
+                    });
+                });
+
+                // Watchlist
+                watchlist.forEach(row => {
+                    const t = (row.ticker || row.Ticker || "").toUpperCase();
+                    if (!t || t === "CASH" || t === "SUM" || seen.has(t)) return;
+                    seen.add(t);
+                    infos.push({
+                        ticker: t,
+                        source: "watchlist",
+                        earningsDate: row["Earnings Date"] || "",
+                        revenueBeat: parsePercent(row["Revenue Beat / Miss %"]),
+                        epsBeat: parsePercent(row["EPS Beat / Miss %"]),
+                    });
+                });
+
                 if (!cancelled) {
-                    setTickers(sorted);
-                    if (sorted.length > 0) setSelectedTicker(sorted[0]);
+                    setTickerInfos(infos);
+                    if (infos.length > 0) setSelectedTicker(infos[0].ticker);
                 }
 
                 const { logos: logosData } = await fetchLogos();
@@ -288,19 +378,16 @@ export function TradingChart() {
         return () => { cancelled = true; };
     }, []);
 
-    // Load lightweight-charts
+    // Step 2: Load lightweight-charts
     useEffect(() => {
         let cancelled = false;
-        import("lightweight-charts").then((mod) => {
-            if (!cancelled) setLcModule(mod);
-        });
+        import("lightweight-charts").then(mod => { if (!cancelled) setLcModule(mod); });
         return () => { cancelled = true; };
     }, []);
 
-    // Create chart
+    // Step 3: Create chart
     useEffect(() => {
         if (!lcModule || !chartContainerRef.current) return;
-
         const container = chartContainerRef.current;
         const { width, height } = container.getBoundingClientRect();
         const isIntraday = interval === "5m" || interval === "60m";
@@ -323,55 +410,36 @@ export function TradingChart() {
                 vertLine: { color: "rgba(194, 160, 119, 0.3)", width: 1, style: lcModule.LineStyle.Dashed, labelBackgroundColor: "#1a2520" },
                 horzLine: { color: "rgba(194, 160, 119, 0.3)", width: 1, style: lcModule.LineStyle.Dashed, labelBackgroundColor: "#1a2520" },
             },
-            rightPriceScale: {
-                borderColor: "#31403b",
-                scaleMargins: { top: 0.1, bottom: 0.25 },
-            },
-            timeScale: {
-                borderColor: "#31403b",
-                timeVisible: isIntraday,
-                secondsVisible: false,
-            },
+            rightPriceScale: { borderColor: "#31403b", scaleMargins: { top: 0.05, bottom: 0.15 } },
+            timeScale: { borderColor: "#31403b", timeVisible: isIntraday, secondsVisible: false },
             handleScroll: { vertTouchDrag: false },
+            handleScale: { axisPressedMouseMove: false },
         });
 
         chartRef.current = chart;
 
         candleSeriesRef.current = chart.addSeries(lcModule.CandlestickSeries, {
-            upColor: "#22c55e",
-            downColor: "#ef4444",
-            borderUpColor: "#22c55e",
-            borderDownColor: "#ef4444",
-            wickUpColor: "#22c55e",
-            wickDownColor: "#ef4444",
+            upColor: "#22c55e", downColor: "#ef4444",
+            borderUpColor: "#22c55e", borderDownColor: "#ef4444",
+            wickUpColor: "#22c55e", wickDownColor: "#ef4444",
         });
 
-        const volumeSeries = chart.addSeries(lcModule.HistogramSeries, {
-            priceFormat: { type: "volume" },
-            priceScaleId: "volume",
+        volumeSeriesRef.current = chart.addSeries(lcModule.HistogramSeries, {
+            priceFormat: { type: "volume" }, priceScaleId: "volume",
         });
-        chart.priceScale("volume").applyOptions({ scaleMargins: { top: 0.8, bottom: 0 } });
-        volumeSeriesRef.current = volumeSeries;
+        chart.priceScale("volume").applyOptions({ scaleMargins: { top: 0.85, bottom: 0 } });
 
         ma50SeriesRef.current = chart.addSeries(lcModule.LineSeries, {
-            color: "#34d399",
-            lineWidth: 2,
-            lineStyle: lcModule.LineStyle.Dashed,
-            priceLineVisible: false,
-            lastValueVisible: true,
-            crosshairMarkerVisible: false,
+            color: "#34d399", lineWidth: 2, lineStyle: lcModule.LineStyle.Dashed,
+            priceLineVisible: false, lastValueVisible: true, crosshairMarkerVisible: false,
         });
 
         ma200SeriesRef.current = chart.addSeries(lcModule.LineSeries, {
-            color: "#c2a077",
-            lineWidth: 2,
-            lineStyle: lcModule.LineStyle.Dashed,
-            priceLineVisible: false,
-            lastValueVisible: true,
-            crosshairMarkerVisible: false,
+            color: "#c2a077", lineWidth: 2, lineStyle: lcModule.LineStyle.Dashed,
+            priceLineVisible: false, lastValueVisible: true, crosshairMarkerVisible: false,
         });
 
-        const resizeObserver = new ResizeObserver((entries) => {
+        const resizeObserver = new ResizeObserver(entries => {
             if (entries[0]) {
                 const { width: w, height: h } = entries[0].contentRect;
                 if (w > 0 && h > 0) chart.applyOptions({ width: w, height: h });
@@ -390,16 +458,14 @@ export function TradingChart() {
         };
     }, [lcModule, interval]);
 
-    // Load data
+    // Step 4: Load data + add earnings markers
     useEffect(() => {
         if (!selectedTicker || !chartRef.current || !candleSeriesRef.current) return;
-
         let cancelled = false;
 
         async function loadData() {
             setDataLoading(true);
             setError(null);
-
             try {
                 const cacheKey = `${selectedTicker}_${timeRange}_${interval}`;
                 let data = chartCache[cacheKey]?.data;
@@ -429,7 +495,6 @@ export function TradingChart() {
                 for (let i = 0; i < prices.length; i++) {
                     const time = isIntraday ? (timestamps[i] as any) : tsToDate(timestamps[i]);
                     const isUp = prices[i] >= opens[i];
-
                     candleData.push({ time, open: opens[i], high: highs[i], low: lows[i], close: prices[i] });
                     volumeData.push({ time, value: volumes[i], color: isUp ? "rgba(34, 197, 94, 0.2)" : "rgba(239, 68, 68, 0.2)" });
                     if (ma50Full[i] !== null) ma50Data.push({ time, value: ma50Full[i] });
@@ -442,6 +507,20 @@ export function TradingChart() {
                 volumeSeriesRef.current?.setData(volumeData);
                 ma50SeriesRef.current?.setData(ma50Data);
                 ma200SeriesRef.current?.setData(ma200Data);
+
+
+                // --- Add entry price line for owned positions ---
+                const info = tickerInfos.find(t => t.ticker === selectedTicker);
+                if (info?.source === "position" && info.price && info.price > 0) {
+                    candleSeriesRef.current?.createPriceLine({
+                        price: info.price,
+                        color: "#8b5cf6",
+                        lineWidth: 1,
+                        lineStyle: 2, // Dashed
+                        axisLabelVisible: true,
+                        title: "Position",
+                    });
+                }
 
                 chartRef.current?.timeScale().fitContent();
 
@@ -461,101 +540,107 @@ export function TradingChart() {
 
         loadData();
         return () => { cancelled = true; };
-    }, [selectedTicker, timeRange, interval, lcModule]);
+    }, [selectedTicker, timeRange, interval, lcModule, tickerInfos]);
 
     const isUp = priceChange >= 0;
 
     return (
-        <div className="flex flex-col h-[calc(100vh-var(--header-height,0px))]">
+        <div className="flex flex-col h-[calc(100dvh-3rem-5rem)] md:h-[calc(100vh-var(--header-height,0px))]">
             {/* Toolbar */}
             <div className="shrink-0 bg-[#0B0F19]/80 backdrop-blur-xl border-b border-jiggy-border shadow-2xl z-30">
-                <div className="px-4 py-2.5 flex flex-wrap items-center gap-3">
-                    {/* Ticker Picker */}
-                    <TickerPicker
-                        tickers={tickers}
-                        logos={logos}
-                        selectedTicker={selectedTicker}
-                        onSelect={setSelectedTicker}
-                    />
+                <div className="px-2 md:px-4 py-2 md:py-2.5 flex flex-col md:flex-row md:items-center gap-2 md:gap-3">
+                    {/* Row 1: Ticker + Badge + Price */}
+                    <div className="flex items-center gap-2 md:gap-3 flex-wrap">
+                        <TickerPicker
+                            tickerInfos={tickerInfos}
+                            logos={logos}
+                            selectedTicker={selectedTicker}
+                            onSelect={setSelectedTicker}
+                        />
 
-                    {/* Price Display */}
-                    {currentPrice !== null && (
-                        <div className="flex items-center gap-3">
-                            <span className="text-lg font-black text-slate-100 font-mono tabular-nums">
-                                ${currentPrice.toFixed(2)}
-                            </span>
+                        {/* Source Badge */}
+                        {selectedInfo && (
                             <div className={cn(
-                                "flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-bold font-mono",
-                                isUp ? "bg-emerald-500/10 text-emerald-400" : "bg-rose-500/10 text-rose-400"
+                                "flex items-center gap-1 px-2 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest border",
+                                selectedInfo.source === "position"
+                                    ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
+                                    : "bg-amber-500/10 text-amber-400 border-amber-500/20"
                             )}>
-                                {isUp ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
-                                <span>{isUp ? "+" : ""}{priceChange.toFixed(2)}</span>
-                                <span className="text-[10px] opacity-70">({isUp ? "+" : ""}{priceChangePct.toFixed(2)}%)</span>
+                                {selectedInfo.source === "position" ? <Briefcase className="w-3 h-3" /> : <Eye className="w-3 h-3" />}
+                                {selectedInfo.source === "position" ? "Position" : "Watchlist"}
+                                {selectedInfo.weight != null && (
+                                    <span className="ml-1 opacity-70">{selectedInfo.weight.toFixed(1)}%</span>
+                                )}
                             </div>
-                            <span className="text-[9px] text-slate-600 font-bold uppercase tracking-widest">
-                                {RANGE_LABELS[timeRange]} Chg
-                            </span>
-                        </div>
-                    )}
+                        )}
 
-                    {/* Spacer */}
-                    <div className="flex-1" />
-
-                    {/* Candle Interval */}
-                    <div className="flex flex-col gap-1">
-                        <span className="text-[8px] font-bold text-slate-600 uppercase tracking-widest pl-1">Interval</span>
-                        <div className="flex bg-terminal-bg rounded-xl p-0.5 border border-jiggy-border shadow-inner">
-                            {INTERVALS.map((iv) => (
-                                <Button
-                                    key={iv.value}
-                                    variant="ghost"
-                                    size="sm"
-                                    className={cn(
-                                        "px-2.5 py-1 h-7 text-[10px] font-black uppercase tracking-widest transition-all rounded-lg",
-                                        interval === iv.value
-                                            ? "bg-jiggy-gold text-slate-950 shadow-md"
-                                            : "text-slate-500 hover:text-slate-400 hover:bg-jiggy-surface-2"
-                                    )}
-                                    onClick={() => handleIntervalChange(iv.value)}
-                                >
-                                    {iv.label}
-                                </Button>
-                            ))}
-                        </div>
+                        {/* Price Display */}
+                        {currentPrice !== null && (
+                            <div className="flex items-center gap-3">
+                                <span className="text-base md:text-lg font-black text-slate-100 font-mono tabular-nums">
+                                    ${currentPrice.toFixed(2)}
+                                </span>
+                                <div className={cn(
+                                    "flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-bold font-mono",
+                                    isUp ? "bg-emerald-500/10 text-emerald-400" : "bg-rose-500/10 text-rose-400"
+                                )}>
+                                    {isUp ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
+                                    <span>{isUp ? "+" : ""}{priceChange.toFixed(2)}</span>
+                                    <span className="text-[10px] opacity-70">({isUp ? "+" : ""}{priceChangePct.toFixed(2)}%)</span>
+                                </div>
+                                <span className="text-[9px] text-slate-600 font-bold uppercase tracking-widest">
+                                    {RANGE_LABELS[timeRange]} Chg
+                                </span>
+                            </div>
+                        )}
                     </div>
 
-                    {/* Time Range */}
-                    <div className="flex flex-col gap-1">
-                        <span className="text-[8px] font-bold text-slate-600 uppercase tracking-widest pl-1">Range</span>
-                        <div className="flex bg-terminal-bg rounded-xl p-0.5 border border-jiggy-border shadow-inner">
-                            {TIME_RANGES.map((tr) => {
-                                const isValid = validRangesForInterval.includes(tr.value);
-                                return (
-                                    <Button
-                                        key={tr.value}
-                                        variant="ghost"
-                                        size="sm"
-                                        disabled={!isValid}
+                    {/* Row 2: Interval + Range */}
+                    <div className="flex items-center gap-2 md:gap-3 overflow-x-auto snap-x md:overflow-visible md:ml-auto">
+
+                        {/* Candle Interval */}
+                        <div className="flex flex-col gap-1">
+                            <span className="text-[8px] font-bold text-slate-600 uppercase tracking-widest pl-1">Interval</span>
+                            <div className="flex bg-terminal-bg rounded-xl p-0.5 border border-jiggy-border shadow-inner">
+                                {INTERVALS.map(iv => (
+                                    <Button key={iv.value} variant="ghost" size="sm"
                                         className={cn(
-                                            "px-2.5 py-1 h-7 text-[10px] font-black uppercase tracking-widest transition-all rounded-lg",
-                                            timeRange === tr.value
-                                                ? "bg-emerald-400 text-slate-950 shadow-md"
-                                                : isValid
-                                                    ? "text-slate-500 hover:text-slate-400 hover:bg-jiggy-surface-2"
-                                                    : "text-slate-700 opacity-40 cursor-not-allowed"
+                                            "px-1.5 md:px-2.5 py-1 h-7 text-[9px] md:text-[10px] font-black uppercase tracking-widest transition-all rounded-lg",
+                                            interval === iv.value
+                                                ? "bg-jiggy-gold text-slate-950 shadow-md"
+                                                : "text-slate-500 hover:text-slate-400 hover:bg-jiggy-surface-2"
                                         )}
-                                        onClick={() => isValid && handleRangeChange(tr.value)}
-                                    >
-                                        {tr.label}
-                                    </Button>
-                                );
-                            })}
+                                        onClick={() => handleIntervalChange(iv.value)}
+                                    >{iv.label}</Button>
+                                ))}
+                            </div>
                         </div>
-                    </div>
 
-                    {dataLoading && (
-                        <Loader2 className="w-4 h-4 text-emerald-400 animate-spin" />
-                    )}
+                        {/* Time Range */}
+                        <div className="flex flex-col gap-1">
+                            <span className="text-[8px] font-bold text-slate-600 uppercase tracking-widest pl-1">Range</span>
+                            <div className="flex bg-terminal-bg rounded-xl p-0.5 border border-jiggy-border shadow-inner">
+                                {TIME_RANGES.map(tr => {
+                                    const isValid = validRangesForInterval.includes(tr.value);
+                                    return (
+                                        <Button key={tr.value} variant="ghost" size="sm" disabled={!isValid}
+                                            className={cn(
+                                                "px-1.5 md:px-2.5 py-1 h-7 text-[9px] md:text-[10px] font-black uppercase tracking-widest transition-all rounded-lg",
+                                                timeRange === tr.value
+                                                    ? "bg-emerald-400 text-slate-950 shadow-md"
+                                                    : isValid
+                                                        ? "text-slate-500 hover:text-slate-400 hover:bg-jiggy-surface-2"
+                                                        : "text-slate-700 opacity-40 cursor-not-allowed"
+                                            )}
+                                            onClick={() => isValid && handleRangeChange(tr.value)}
+                                        >{tr.label}</Button>
+                                    );
+                                })}
+                            </div>
+                        </div>
+
+                        {dataLoading && <Loader2 className="w-4 h-4 text-emerald-400 animate-spin" />}
+                    </div>
                 </div>
             </div>
 
@@ -563,20 +648,23 @@ export function TradingChart() {
             <div className="flex-1 min-h-0 relative bg-[#0B0F19]/40">
                 {/* Jiggy Capital branding — top left */}
                 <div className="absolute top-4 left-5 flex items-center gap-3 pointer-events-none z-[3] opacity-40">
-                    <img src="/jiggy-icon.png" alt="" className="w-10 h-10 object-contain" />
-                    <span className="text-base font-black text-slate-500 tracking-[0.25em] uppercase">Jiggy Capital</span>
+                    <img src="/jiggy-icon.png" alt="" className="w-7 h-7 md:w-10 md:h-10 object-contain" />
+                    <span className="hidden md:inline text-base font-black text-slate-500 tracking-[0.25em] uppercase">Jiggy Capital</span>
                 </div>
+
+                {/* Company logo watermark */}
                 {logos[selectedTicker] && (
                     <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-[1]">
                         <img
                             src={logos[selectedTicker]}
                             alt=""
-                            className="w-72 h-72 object-contain opacity-[0.07] select-none"
+                            className="w-48 h-48 md:w-72 md:h-72 object-contain opacity-[0.07] select-none"
                             draggable={false}
                             onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
                         />
                     </div>
                 )}
+
                 {(!lcModule || tickersLoading) && (
                     <div className="absolute inset-0 flex items-center justify-center z-20">
                         <div className="flex flex-col items-center gap-3">

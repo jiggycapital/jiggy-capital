@@ -332,8 +332,8 @@ export function EarningsHub() {
 
     if (loading) {
         return (
-            <div className="space-y-6 max-w-[1600px] mx-auto p-6">
-                <div className="flex items-center gap-3 mb-8">
+            <div className="space-y-3 md:space-y-6 max-w-[1600px] mx-auto px-2 md:p-6">
+                <div className="flex items-center gap-3 mb-4 md:mb-8">
                     <div className="p-2.5 rounded-xl bg-gradient-to-br from-emerald-500/20 to-jiggy-gold/20 border border-emerald-500/20">
                         <Mic className="w-6 h-6 text-emerald-400" />
                     </div>
@@ -365,7 +365,7 @@ export function EarningsHub() {
     }
 
     return (
-        <div className="space-y-6 max-w-[1600px] mx-auto p-6 pb-12">
+        <div className="space-y-3 md:space-y-6 max-w-[1600px] mx-auto px-2 md:p-6 pb-12">
             {/* Header */}
             <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center gap-3">
@@ -373,7 +373,7 @@ export function EarningsHub() {
                         <Mic className="w-6 h-6 text-emerald-400" />
                     </div>
                     <div>
-                        <h1 className="text-2xl font-black text-slate-100 tracking-tight">
+                        <h1 className="text-lg md:text-2xl font-black text-slate-100 tracking-tight">
                             Earnings Hub
                         </h1>
                         <p className="text-xs text-slate-500 font-bold uppercase tracking-wider">
@@ -390,10 +390,10 @@ export function EarningsHub() {
             </div>
 
             {/* Reporting This Week Hero */}
-            <Card className="bg-jiggy-surface border-jiggy-border shadow-2xl rounded-2xl overflow-hidden relative">
+            <Card className="bg-jiggy-surface border-jiggy-border shadow-2xl rounded-xl md:rounded-2xl overflow-hidden relative">
                 <div className="absolute -top-32 -right-32 w-64 h-64 bg-emerald-500/10 blur-[100px] rounded-full pointer-events-none" />
-                <CardHeader className="pb-3 relative z-10 border-b border-jiggy-border bg-jiggy-surface-2">
-                    <CardTitle className="text-sm font-black flex items-center justify-between text-slate-100 uppercase tracking-widest">
+                <CardHeader className="pb-2 md:pb-3 px-3 md:px-6 py-2 md:py-4 relative z-10 border-b border-jiggy-border bg-jiggy-surface-2">
+                    <CardTitle className="text-xs md:text-sm font-black flex items-center justify-between text-slate-100 uppercase tracking-widest">
                         <div className="flex items-center gap-2">
                             <Zap className="w-5 h-5 text-jiggy-gold" />
                             Reporting This Week
@@ -403,9 +403,9 @@ export function EarningsHub() {
                         </span>
                     </CardTitle>
                 </CardHeader>
-                <CardContent className="relative z-10">
+                <CardContent className="relative z-10 px-2 md:px-6">
                     {eventsLoading ? (
-                        <div className="flex items-center gap-3 py-4">
+                        <div className="flex items-center gap-3 py-3 md:py-4">
                             <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-emerald-400" />
                             <span className="text-sm text-slate-500">
                                 Loading earnings calendar...
@@ -419,12 +419,12 @@ export function EarningsHub() {
                             </p>
                         </div>
                     ) : (
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2 md:gap-3">
                             {thisWeekEvents.map((event, i) => (
                                 <button
                                     key={`${event.ticker}-${i}`}
                                     onClick={() => setSelectedTicker(event.ticker)}
-                                    className="group flex items-center gap-3 p-3 rounded-2xl bg-jiggy-surface-2/60 border border-jiggy-border hover:border-emerald-500/30 hover:bg-jiggy-surface/60 transition-all cursor-pointer text-left"
+                                    className="group flex items-center gap-2.5 md:gap-3 p-2.5 md:p-3 rounded-xl md:rounded-2xl bg-jiggy-surface-2/60 border border-jiggy-border hover:border-emerald-500/30 hover:bg-jiggy-surface/60 transition-all cursor-pointer text-left active:scale-[0.98] active:opacity-80"
                                 >
                                     <div className="w-10 h-10 rounded-xl bg-jiggy-surface flex items-center justify-center shrink-0 border border-jiggy-border group-hover:border-emerald-500/40 transition-colors shadow-inner logo-glow">
                                         {logos[event.ticker] ? (
@@ -482,27 +482,27 @@ export function EarningsHub() {
 
             {/* Main Content Tabs */}
             <Tabs defaultValue="upcoming" className="w-full">
-                <div className="flex items-center mb-6">
-                    <TabsList className="bg-[#0B0F19]/80 backdrop-blur-md border border-slate-800/60 p-1.5 rounded-2xl shadow-inner">
+                <div className="flex items-center mb-2 md:mb-6">
+                    <TabsList className="bg-[#0B0F19]/80 backdrop-blur-md border border-slate-800/60 p-1 md:p-1.5 rounded-xl md:rounded-2xl shadow-inner">
                         <TabsTrigger
                             value="upcoming"
-                            className="data-[state=active]:bg-emerald-400 data-[state=active]:text-slate-950 data-[state=active]:shadow-lg text-xs sm:text-sm uppercase tracking-wider font-black px-6 sm:px-8 py-2.5 rounded-xl text-slate-500 hover:text-slate-300 transition-all flex items-center gap-2"
+                            className="data-[state=active]:bg-emerald-400 data-[state=active]:text-slate-950 data-[state=active]:shadow-lg text-[10px] sm:text-sm uppercase tracking-wider font-black px-3 sm:px-8 py-1.5 sm:py-2.5 rounded-lg md:rounded-xl text-slate-500 hover:text-slate-300 transition-all flex items-center gap-1.5 md:gap-2"
                         >
-                            <Calendar className="w-4 h-4" />
-                            Upcoming Earnings
+                            <Calendar className="w-3.5 h-3.5 md:w-4 md:h-4" />
+                            <span className="hidden sm:inline">Upcoming</span> Earnings
                         </TabsTrigger>
                         <TabsTrigger
                             value="results"
-                            className="data-[state=active]:bg-emerald-400 data-[state=active]:text-slate-950 data-[state=active]:shadow-lg text-xs sm:text-sm uppercase tracking-wider font-black px-6 sm:px-8 py-2.5 rounded-xl text-slate-500 hover:text-slate-300 transition-all flex items-center gap-2"
+                            className="data-[state=active]:bg-emerald-400 data-[state=active]:text-slate-950 data-[state=active]:shadow-lg text-[10px] sm:text-sm uppercase tracking-wider font-black px-3 sm:px-8 py-1.5 sm:py-2.5 rounded-lg md:rounded-xl text-slate-500 hover:text-slate-300 transition-all flex items-center gap-1.5 md:gap-2"
                         >
-                            <Trophy className="w-4 h-4" />
-                            Recent Results
+                            <Trophy className="w-3.5 h-3.5 md:w-4 md:h-4" />
+                            Results
                         </TabsTrigger>
                     </TabsList>
                 </div>
 
                 <TabsContent value="upcoming" className="mt-0 focus-visible:outline-none">
-                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-3 md:gap-6">
                         {/* Earnings Calendar */}
                         <div className={selectedTicker ? "lg:col-span-5" : "lg:col-span-12"}>
                             <EarningsCalendar

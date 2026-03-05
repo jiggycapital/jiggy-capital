@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import {
   PieChart,
   Pie,
@@ -42,47 +42,33 @@ const renderFiscalLabel = (props: any) => {
   const { cx, cy, midAngle, outerRadius, fill, payload, percent } = props;
   const RADIAN = Math.PI / 180;
 
-  // 1. Calculate Vectors
   const sin = Math.sin(-RADIAN * midAngle);
   const cos = Math.cos(-RADIAN * midAngle);
 
-  // START: Edge of the slice
   const sx = cx + outerRadius * cos;
   const sy = cy + outerRadius * sin;
 
-  // ELBOW: Push out 50px
-  const mx = cx + (outerRadius + 50) * cos;
-  const my = cy + (outerRadius + 50) * sin;
+  const mx = cx + (outerRadius + 30) * cos;
+  const my = cy + (outerRadius + 30) * sin;
 
-  // END: The end of the visible line
   const isRightSide = cos >= 0;
-  const ex = mx + (isRightSide ? 1 : -1) * 40;
+  const ex = mx + (isRightSide ? 1 : -1) * 25;
   const ey = my;
 
-  // 2. Calculate Content Positions (The "Gap" Logic)
-  const logoWidth = 36;
-  const gap = 12; // Space between elements
+  const logoWidth = 28;
+  const gap = 8;
 
-  // LOGO POSITION:
-  // If Right: Start after line end + gap
-  // If Left: Start before line end - gap - logoWidth
   const logoX = isRightSide ? (ex + gap) : (ex - gap - logoWidth);
-  const logoY = ey - 18; // Vertically centered (half of height 36)
+  const logoY = ey - 18;
 
-  // TEXT POSITION:
-  // If Right: Start after Logo + gap
-  // If Left: Start before Logo - gap
   const textX = isRightSide ? (logoX + logoWidth + gap) : (logoX - gap);
-
-  // Anchor text based on side
   const textAnchor = isRightSide ? 'start' : 'end';
 
-  // Filter tiny slices
   if (percent < 0.02) return null;
+  if (cx < 350) return null;
 
   return (
     <g>
-      {/* Connector Line */}
       <path
         d={`M${sx},${sy}L${mx},${my}L${ex},${ey}`}
         stroke={fill}
@@ -90,8 +76,6 @@ const renderFiscalLabel = (props: any) => {
         fill="none"
         opacity={0.6}
       />
-
-      {/* LOGO */}
       {payload.image ? (
         <image
           href={payload.image}
@@ -112,22 +96,19 @@ const renderFiscalLabel = (props: any) => {
           />
         )
       )}
-
       {payload.isOther && (
         <g transform={`translate(${logoX}, ${logoY})`}>
           <circle cx={18} cy={18} r={18} fill="rgba(255,255,255,0.1)" />
           <text x={18} y={18} dy={6} textAnchor="middle" fill="#FFF" fontSize={22} fontWeight="bold">+</text>
         </g>
       )}
-
-      {/* TEXT GROUP */}
       <g>
         <text
           x={textX}
           y={ey}
           textAnchor={textAnchor}
           fill="#FFF"
-          fontSize={14}
+          fontSize={11}
           fontWeight="900"
           dominantBaseline="middle"
           className="tracking-tight"
@@ -163,7 +144,6 @@ const renderActiveShape = (props: any) => {
         strokeWidth={6}
         cornerRadius={12}
       />
-      {/* Ensure label remains visible and on top during hover */}
       {renderFiscalLabel(props)}
     </g>
   );
@@ -175,7 +155,7 @@ interface ChartDataItem {
   value: number;
   ticker: string | null;
   logo: string | null;
-  image: string | null; // Added image field
+  image: string | null;
   isOther?: boolean;
   midAngle?: number;
   labelPos?: {
@@ -190,6 +170,29 @@ interface ChartDataItem {
 
 export function InteractivePieChart({ positionsData, logos, view, onViewChange }: InteractivePieChartProps) {
   const [activeIndex, setActiveIndex] = useState<number | undefined>(undefined);
+  const [isMobile, setIsMobile] = useState(false);
+  const [containerWidth, setContainerWidth] = useState(0);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  // Measure container width directly — bypasses ResponsiveContainer bugs
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    const observer = new ResizeObserver(entries => {
+      for (const entry of entries) {
+        setContainerWidth(Math.floor(entry.contentRect.width));
+      }
+    });
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
 
   const chartData = useMemo(() => {
     const totalValue = positionsData
@@ -212,7 +215,7 @@ export function InteractivePieChart({ positionsData, logos, view, onViewChange }
               value: weight,
               ticker,
               logo: logoUrl,
-              image: logoUrl, // Added image field as requested
+              image: logoUrl,
             } as ChartDataItem;
           }
           return null;
@@ -236,14 +239,12 @@ export function InteractivePieChart({ positionsData, logos, view, onViewChange }
           ticker: null,
           logo: null,
           image: null,
-          isOther: sector === "Other" // Mark "Other" sector
+          isOther: sector === "Other"
         } as ChartDataItem));
     }
 
-    // Sort descending by value
     const sortedData = data.sort((a, b) => b.value - a.value);
 
-    // --- GROUP SMALL HOLDINGS INTO "OTHER" (Only for company view) ---
     let combinedData: ChartDataItem[] = [];
     if (view === "company") {
       const threshold = 2.5;
@@ -266,7 +267,6 @@ export function InteractivePieChart({ positionsData, logos, view, onViewChange }
       combinedData = [...sortedData];
     }
 
-    // Sort to maintain descending order, but force "Other" to the very end
     const finalData = combinedData.sort((a, b) => {
       if (a.isOther) return 1;
       if (b.isOther) return -1;
@@ -287,13 +287,13 @@ export function InteractivePieChart({ positionsData, logos, view, onViewChange }
   return (
     <div className="relative w-full">
       {/* Toggle Buttons */}
-      <div className="flex gap-3 mb-4 justify-center relative z-20">
+      <div className="flex gap-2 md:gap-3 mb-2 md:mb-4 justify-center relative z-20">
         <Button
           variant={view === "company" ? "default" : "outline"}
           size="sm"
           onClick={() => onViewChange("company")}
           className={cn(
-            "relative px-6 rounded-xl font-extrabold shadow-md",
+            "relative px-4 md:px-6 rounded-xl font-extrabold shadow-md text-xs md:text-sm h-8 md:h-9",
             view === "company" ? "bg-jiggy-gold hover:bg-jiggy-gold-alt text-slate-900 border-none" : "border-jiggy-border bg-jiggy-surface-2 text-slate-400 hover:text-jiggy-tan"
           )}
         >
@@ -304,7 +304,7 @@ export function InteractivePieChart({ positionsData, logos, view, onViewChange }
           size="sm"
           onClick={() => onViewChange("sector")}
           className={cn(
-            "relative px-6 rounded-xl font-extrabold shadow-md",
+            "relative px-4 md:px-6 rounded-xl font-extrabold shadow-md text-xs md:text-sm h-8 md:h-9",
             view === "sector" ? "bg-jiggy-gold hover:bg-jiggy-gold-alt text-slate-900 border-none" : "border-jiggy-border bg-jiggy-surface-2 text-slate-400 hover:text-jiggy-tan"
           )}
         >
@@ -313,10 +313,13 @@ export function InteractivePieChart({ positionsData, logos, view, onViewChange }
       </div>
 
       {/* Chart Container */}
-      <div className="w-full h-[500px] md:h-[800px] flex items-center justify-center min-h-0 min-w-0 outline-none select-none touch-none relative z-10" style={{ WebkitTapHighlightColor: 'transparent' }}>
-        <ResponsiveContainer width="100%" height="100%" minHeight={0}>
+      <div ref={containerRef} className="w-full h-[220px] md:h-[800px] outline-none select-none relative z-10 overflow-hidden" style={{ WebkitTapHighlightColor: 'transparent' }}>
+        {isMobile && containerWidth > 0 ? (
+          /* Mobile: render PieChart directly with measured pixel dimensions — bypasses ResponsiveContainer */
           <PieChart
-            margin={{ top: 0, left: 50, right: 50, bottom: 0 }}
+            width={containerWidth}
+            height={220}
+            margin={{ top: 5, left: 5, right: 5, bottom: 5 }}
             style={{ outline: 'none' }}
             tabIndex={-1}
           >
@@ -327,17 +330,17 @@ export function InteractivePieChart({ positionsData, logos, view, onViewChange }
                 data: chartData,
                 cx: "50%",
                 cy: "50%",
-                innerRadius: "45%",
-                outerRadius: "70%",
+                innerRadius: 55,
+                outerRadius: 95,
                 fill: "#8884d8",
                 dataKey: "value",
                 onMouseEnter: onPieEnter,
                 onMouseLeave: onPieLeave,
                 stroke: "#22352f",
-                strokeWidth: 6,
+                strokeWidth: 3,
                 paddingAngle: 0,
-                cornerRadius: 12,
-                label: renderFiscalLabel,
+                cornerRadius: 6,
+                label: false,
                 labelLine: false,
                 animationBegin: 0,
                 animationDuration: 400,
@@ -351,13 +354,77 @@ export function InteractivePieChart({ positionsData, logos, view, onViewChange }
                 <Cell
                   key={`cell-${index}`}
                   fill={COLORS[index % COLORS.length]}
-                  className="transition-all duration-200 cursor-pointer outline-none border-none focus:ring-0 focus:outline-none active:outline-none"
+                  className="outline-none"
                   style={{ outline: 'none' }}
                 />
               ))}
             </Pie>
           </PieChart>
-        </ResponsiveContainer>
+        ) : !isMobile ? (
+          /* Desktop: use ResponsiveContainer normally */
+          <ResponsiveContainer width="100%" height="100%">
+            <PieChart
+              margin={{ top: 0, left: 10, right: 10, bottom: 0 }}
+              style={{ outline: 'none' }}
+              tabIndex={-1}
+            >
+              <Pie
+                {...({
+                  activeIndex,
+                  activeShape: renderActiveShape,
+                  data: chartData,
+                  cx: "50%",
+                  cy: "50%",
+                  innerRadius: "45%",
+                  outerRadius: "70%",
+                  fill: "#8884d8",
+                  dataKey: "value",
+                  onMouseEnter: onPieEnter,
+                  onMouseLeave: onPieLeave,
+                  stroke: "#22352f",
+                  strokeWidth: 6,
+                  paddingAngle: 0,
+                  cornerRadius: 12,
+                  label: renderFiscalLabel,
+                  labelLine: false,
+                  animationBegin: 0,
+                  animationDuration: 400,
+                  startAngle: 90,
+                  endAngle: -270,
+                  isAnimationActive: false,
+                  tabIndex: -1
+                } as any)}
+              >
+                {chartData.map((entry, index) => (
+                  <Cell
+                    key={`cell-${index}`}
+                    fill={COLORS[index % COLORS.length]}
+                    className="transition-all duration-200 cursor-pointer outline-none"
+                    style={{ outline: 'none' }}
+                  />
+                ))}
+              </Pie>
+            </PieChart>
+          </ResponsiveContainer>
+        ) : null}
+      </div>
+
+      {/* Mobile Legend — compact grid, no clipping */}
+      <div className="grid grid-cols-2 gap-x-4 gap-y-1 px-1 mt-1 md:hidden">
+        {chartData.slice(0, 12).map((entry, index) => (
+          <div key={entry.id} className="flex items-center gap-1.5 min-w-0 overflow-hidden">
+            <div
+              className="w-2 h-2 rounded-full shrink-0"
+              style={{ backgroundColor: COLORS[index % COLORS.length] }}
+            />
+            <span className="text-[10px] font-bold text-slate-300 truncate flex-1 min-w-0">
+              {entry.ticker || entry.label}
+            </span>
+            <span className="text-[9px] font-mono text-slate-500 shrink-0 tabular-nums">
+              {entry.value.toFixed(0)}%
+            </span>
+          </div>
+        ))}
       </div>
     </div>
   );
